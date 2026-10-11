@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Partner home</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="driver.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="mapgl.local.js"></script>
+<script src="kit.js"></script>
+<script src="routes.js"></script>
+<script src="driver.js"></script>
+<style>
+  /* Partner home: the fleet home's frame, with the wallet where the fleet shows today's earnings and no car picker.
+     Numbers: Eco Partner tier, fee 15 %; today 7 rides 9 800 ֏ → fee 1 470 ֏; one day of fees ≈ 2 300 ֏, warnBelow 2 500 ֏. */
+  .sheet { padding-bottom: 34px; }
+  .fab.lg { width: 48px; height: 48px; }
+  .logo { position: absolute; z-index: 20; top: 75px; left: 50%; transform: translateX(-50%); width: 100px; height: 18px; }
+  :root[data-state="normal"] #map > div, :root[data-state="blocked"] #map > div { filter: grayscale(1) opacity(.7); }
+
+  .top { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
+  .line { display: flex; align-items: center; gap: var(--s2); font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; }
+  .line svg { width: 16px; height: 16px; }
+  .line.warn { color: var(--warn); }
+  .wait .bars { display: inline-flex; gap: 3px; }
+  .wait .bars i { width: 4px; height: 4px; border-radius: 2px; background: var(--ok-dot); }
+  .wait .bars i:nth-child(2) { opacity: .6; } .wait .bars i:nth-child(3) { opacity: .3; }
+  /* Own car: an image chip, not a picker. No chevron: nothing to choose. */
+  .mycar { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 6px 0 4px; border-radius: 10px; background: var(--surface-2); flex: none; }
+  .mycar img { width: 54px; height: 30px; }
+
+  .wal { display: flex; align-items: flex-end; justify-content: space-between; margin: var(--s4) 0 var(--s3); text-decoration: none; }
+  .wal .lbl { display: flex; align-items: center; gap: 6px; }
+  .wal .lbl svg { width: 16px; height: 16px; color: var(--ink-2); }
+  .wal .p-hero { margin-top: 2px; }
+  .wal .fee { text-align: right; padding-bottom: 6px; }
+  .wal .fee b { display: block; font: var(--t-headline); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .p-run { margin-top: var(--s1); }
+
+  .pre { display: flex; align-items: center; gap: var(--s3); height: 64px; width: 100%; text-align: left; text-decoration: none; margin-top: var(--s3);
+    border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); }
+  .pre .ic { width: 40px; height: 40px; border-radius: var(--r-pill); background: var(--brand-soft); color: var(--brand-ink); display: grid; place-items: center; flex: none; }
+  .pre .ic svg { width: 20px; height: 20px; }
+  .pre .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .pre .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .pre .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .pre .n { min-width: 28px; height: 28px; padding: 0 8px; border-radius: var(--r-pill); background: var(--ink); color: var(--surface);
+    font: 600 14px/28px var(--font); text-align: center; font-variant-numeric: tabular-nums; }
+  .pre .chev { color: var(--ink-3); width: 20px; height: 20px; }
+
+  .go { margin-top: var(--s4); }
+  .drive { height: var(--h-go-x); border-radius: 20px; margin-top: var(--s4); background: var(--surface-2); color: var(--ink);
+    font: var(--t-act); display: flex; align-items: center; justify-content: center; gap: var(--s2); width: 100%; }
+  .drive svg { width: 24px; height: 24px; }
+
+  /* Low balance: the notice carries its own small action, so the at-speed button stays the only big one */
+  .notice { margin-top: var(--s3); align-items: center; }
+  .notice .tx { flex: 1; min-width: 0; }
+  .notice .tx span { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .notice .act { height: 44px; padding: 0 14px; border-radius: var(--r-pill); background: var(--surface); color: var(--ink); font: var(--t-secondary-strong);
+    display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex: none; box-shadow: var(--e1); text-decoration: none; }
+  .notice .act svg { width: 16px; height: 16px; margin: 0; color: var(--ink); }
+
+  /* Below zero: the runway is empty and the shortfall is drawn left of zero */
+  .neg { display: flex; align-items: center; gap: 6px; margin-top: var(--s1); }
+  .neg .debt { width: 18%; height: 10px; border-radius: 5px; background: var(--warn); flex: none; }
+  .neg .zero { width: 2px; height: 18px; border-radius: 1px; background: var(--ink); flex: none; }
+  .neg-l { justify-content: flex-start; }
+  .neg .rest { flex: 1; height: 10px; border-radius: 5px; background: var(--surface-3); }
+
+  /* Ride still running while the balance dipped: the rule is "the current ride always finishes" */
+  .ride { display: flex; align-items: center; gap: var(--s3); padding: var(--s4); border-radius: var(--r-card); background: var(--surface-2); text-decoration: none; margin-top: var(--s3); }
+  .ride .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .ride .ey { font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .ride .ey i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok-dot); display: block; }
+  .ride .t1 { font: var(--t-title); color: var(--ink); white-space: nowrap; }
+  .ride .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ride .eta { font: var(--t-hero); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ride .eta small { font: 600 18px/1 var(--font); color: var(--ink-2); margin-left: 4px; }
+  .cbal { display: flex; align-items: center; justify-content: space-between; height: 48px; margin-top: var(--s2); }
+  .cbal .v { font: var(--t-headline); color: var(--warn); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  .connlost { position: absolute; z-index: 25; top: 116px; left: 12px; right: 12px; height: 48px; border-radius: var(--r-card); background: var(--danger-soft);
+    box-shadow: var(--e2); display: flex; align-items: center; gap: 10px; padding: 0 14px; font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; }
+  .connlost svg { width: 18px; height: 18px; color: var(--danger); flex: none; }
+  .connlost .tm { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+</style>
+</head>
+<body>
+<main class="screen" id="s">
+  <div class="map" id="map" aria-label="Քարտեզ"></div>
+
+  <div class="spill off" role="status" data-s="normal blocked"><span class="dot"></span>Գծից դուրս</div>
+  <div class="spill" role="status" data-s="online low"><span class="dot"></span>Գծում</div>
+  <div class="spill" role="status" data-s="finish"><span class="dot"></span>Պատվերով</div>
+  <div class="spill lost" role="status" data-s="offline"><span class="dot"></span>Կապ չկա</div>
+  <button class="fab lg" style="top:60px;right:16px" aria-label="Հաշիվ"><i data-lucide="user-round"></i></button>
+  <img class="logo" src="assets/eco/logo-wide.png" alt="Eco Taxi" width="100" height="18" data-s="online low">
+  <div class="connlost" role="alert" data-s="offline"><i data-lucide="wifi-off"></i>Վերականգնվում է<span class="tm">0:48</span></div>
+  <button class="fab lg" id="recentre" style="right:16px" aria-label="Կենտրոնացնել ինձ վրա"><i data-lucide="locate-fixed"></i></button>
+
+  <section class="sheet" id="sheet">
+    <div class="grabber"></div>
+    <div class="top">
+      <div class="line" data-s="normal"><i data-lucide="moon"></i>Պատվերներ չեն գալիս</div>
+      <div class="line wait" data-s="online low"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>Սպասում ենք պատվերի</div>
+      <div class="line" data-s="finish"><i data-lucide="navigation"></i>Ընթացիկ պատվեր</div>
+      <div class="line warn" data-s="blocked"><i data-lucide="lock"></i>Նոր պատվերներ՝ ոչ</div>
+      <div class="line" data-s="offline"><i data-lucide="history"></i>09:40-ի դրությամբ</div>
+      <span class="mycar" aria-label="Tesla Model 3, 34 XL 518, ձեր մեքենան"><img class="carimg" src="assets/eco/cars/partner.webp" alt=""><span class="plate">34 XL 518</span></span>
+    </div>
+
+    <!-- Wallet leads: balance hero + today's fees. Tapping it opens the wallet. -->
+    <a class="wal" href="driver-partner-wallet.html" data-not="finish" aria-label="Դրամապանակ">
+      <div>
+        <div class="p-lbl lbl"><i data-lucide="wallet"></i>Դրամապանակ</div>
+        <div class="p-hero" data-s="normal online offline">18 450<small>֏</small></div>
+        <div class="p-hero warn" data-s="low">1 850<small>֏</small></div>
+        <div class="p-hero warn" data-s="blocked">−320<small>֏</small></div>
+      </div>
+      <div class="fee"><span class="p-lbl">Այսօր՝ վճար</span><b>−1 470 ֏</b></div>
+    </a>
+
+    <div data-s="normal online offline" role="img" aria-label="Մոտ 8 օրվա վճար">
+      <div class="p-run"><i style="width:57%"></i><b style="left:7%"></b></div>
+      <div class="p-run-l"><span><b>≈ 8 օր</b> վճարների համար</span><span>7 պատվեր · 9 800 ֏</span></div>
+    </div>
+    <div data-s="low" role="img" aria-label="Մոտ 1 օրվա վճար">
+      <div class="p-run warn"><i style="width:6%"></i><b style="left:7%"></b></div>
+      <div class="p-run-l"><span><b>≈ 1 օր</b> վճարների համար</span><span>7 պատվեր · 9 800 ֏</span></div>
+    </div>
+    <div data-s="blocked" role="img" aria-label="Պակաս է 320 ֏">
+      <div class="neg"><span class="debt"></span><span class="zero"></span><span class="rest"></span></div>
+      <div class="p-run-l neg-l"><span style="width:calc(18% + 6px)"><b>−320 ֏</b></span><span>0 ֏</span></div>
+    </div>
+
+    <div class="notice warn" data-s="low"><i data-lucide="battery-low"></i><div class="tx"><b>Մնացել է ≈ 1 օր</b><span>0 ֏-ից ցածր՝ կանգ</span></div>
+      <a class="act" href="driver-partner-wallet.html?state=topup"><i data-lucide="plus"></i>Լիցքավորել</a></div>
+    <div class="notice warn" data-s="blocked"><i data-lucide="wallet"></i><div class="tx"><b>Լիցքավորեք գիծ դուրս գալու համար</b><span>Նվազագույնը՝ 320 ֏</span></div></div>
+
+    <!-- finish: balance went below 0 during the ride; the ride finishes, new offers stop after it -->
+    <a class="ride" href="driver-ride.html?state=inprogress" data-s="finish" aria-label="Վերադառնալ պատվերին, Կոմիտասի պող. 49">
+      <span class="txt"><span class="ey"><i></i>Ընթացքում</span><span class="t1">Կոմիտասի պող. 49</span><span class="t2">2,1 կմ · կանխիկ</span></span>
+      <span class="eta">4<small>րոպե</small></span>
+    </a>
+    <div class="cbal" data-s="finish"><span class="p-lbl">Դրամապանակ</span><span class="v">−45 ֏</span></div>
+    <div class="notice" data-s="finish" style="margin-top:0"><i data-lucide="flag"></i><div class="tx"><b>Պատվերը կավարտեք</b><span>Հաջորդը՝ լիցքավորումից հետո</span></div></div>
+
+    <a class="pre" href="driver-preorders.html" data-s="normal online offline" aria-label="Նախապես ամրագրված, 1">
+      <span class="ic"><i data-lucide="calendar-clock"></i></span>
+      <span class="txt"><span class="t1">Նախապես ամրագրված</span><span class="t2">Վաղը, 07:40 · Զվարթնոց</span></span>
+      <span class="n">1</span><i class="chev" data-lucide="chevron-right"></i>
+    </a>
+
+    <button class="go x" data-s="normal"><i data-lucide="power"></i>Գծում լինել</button>
+    <button class="drive" data-s="online low"><i data-lucide="power"></i>Դուրս գալ գծից</button>
+    <a class="go x" href="driver-partner-wallet.html?state=topup" data-s="blocked"><i data-lucide="wallet"></i>Լիցքավորել</a>
+    <a class="go x" href="driver-ride.html?state=inprogress" data-s="finish"><i data-lucide="navigation"></i>Վերադառնալ պատվերին</a>
+    <button class="go x" data-s="offline" aria-disabled="true"><i data-lucide="wifi-off"></i>Կապ է պետք</button>
+  </section>
+</main>
+<script src="audit.js"></script>
+<script>
+  statusBar(document.getElementById('s'))
+  const st = D.init([
+    ['normal', 'Off the line · one tap on'], ['online', 'Online · waiting'], ['low', 'Low balance (warning)'],
+    ['blocked', 'Blocked below 0 · top up'], ['finish', 'Below 0 mid-ride · finishes'], ['offline', 'No connection (cached)'],
+  ])
+  D.partnerNav()
+  icons()
+  const sheetH = document.getElementById('sheet').offsetHeight
+  document.getElementById('recentre').style.bottom = (sheetH + 12) + 'px'
+  const me = [40.1823, 44.5072]
+  const box = (p, d) => [[p[0] - d, p[1] - d * 1.35], [p[0] + d, p[1] + d * 1.35]]
+  const A = ROUTES.pickupToDrop.pts
+  const fit = st === 'finish' ? A.slice(60) : box(me, .0034)
+  const map = makeMap(document.getElementById('map'), { sheetH, badge: { bottom: (sheetH + 22) + 'px', left: '16px' }, fit,
+    padTL: [40, st === 'offline' ? 180 : 120], padBR: [40, sheetH + 20] })
+  const meCar = (deg, c) => `<div class="me">${carTop(deg, c || 'var(--brand)', 'rgb(255 255 255 / .75)')}</div>`
+  if (st === 'finish') {
+    drawRoute(map, A.slice(60), { weight: 5 })
+    htmlMarker(map, A[A.length - 1], '<div class="pin b"></div>', [18, 18])
+    htmlMarker(map, A[60], meCar(-60), [64, 64])
+  } else {
+    htmlMarker(map, me, meCar(-38, st === 'normal' || st === 'blocked' || st === 'offline' ? 'var(--ink-3)' : null), [64, 64])
+  }
+</script>
+</body>
+</html>

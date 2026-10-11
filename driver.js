@@ -68,3 +68,14 @@
     },
   }
 })()
+
+/* Partner («Գործընկեր») screens, 2026-10-11: appended to the switcher by pages that call D.partnerNav(). */
+window.D && (window.D.partnerNav = function () {
+  const sw = document.querySelector('.dswitch'); if (!sw) return
+  const here = location.pathname.split('/').pop().replace('.html', '')
+  const P = [['driver-partner-onboarding', 'Onboarding'], ['driver-partner-home', 'Home'], ['driver-partner-wallet', 'Wallet'], ['driver-partner-car', 'My car'], ['driver-types', 'Fleet vs Partner']]
+  const box = document.createElement('div')
+  box.className = 'p-nav'
+  box.innerHTML = '<h2>Partner</h2>' + P.map(([f, l]) => '<a href="' + f + '.html?theme=' + window.THEME + '"' + (f === here ? ' aria-current="true"' : '') + '>' + l + '</a>').join('')
+  sw.appendChild(box)
+})

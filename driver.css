@@ -164,3 +164,53 @@
 /* Dimmed scrim behind a modal sheet over a live screen */
 .scrim { position: absolute; inset: 0; z-index: 26; background: rgb(0 0 0 / .42); }
 .sheet.top { z-index: 27; }
+
+/* ── Partner («Գործընկեր») additions, 2026-10-11. Prefixed p- so no existing page picks them up. ──
+   One app, two driver types: the look is shared, only content differs (owner decision). */
+:root { --h-go-x: 76px; --p-plus: #0B7A3F; }                 /* 76: the at-speed floor for this round (brief) */
+:root[data-theme="dark"] { --p-plus: var(--ok); }
+:root[data-sun] { --p-plus: #0A6B39; }
+.go.x { height: var(--h-go-x); }
+.go[aria-disabled="true"] { background: var(--surface-2); color: var(--ink-3); box-shadow: inset 0 0 0 1.5px var(--hairline); }
+
+/* Tag: icon + word, never colour alone */
+.p-tag { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: var(--r-pill); font: var(--t-caption);
+  color: var(--ink); background: var(--surface-2); white-space: nowrap; flex: none; font-variant-numeric: tabular-nums; }
+.p-tag svg { width: 14px; height: 14px; }
+.p-tag.warn { background: var(--warn-soft); } .p-tag.warn svg { color: var(--warn); }
+.p-tag.ok { background: var(--ok-soft); } .p-tag.ok svg { color: var(--ok); }
+.p-tag.danger { background: var(--danger-soft); } .p-tag.danger svg { color: var(--danger); }
+.p-tag.brand { background: var(--brand-soft); color: var(--ink); } .p-tag.brand svg { color: var(--brand-ink); }
+/* «առաջարկ» (proposal): a line that is off until the accountant decides. Dashed = not real yet. */
+.p-prop { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: var(--r-pill); font: var(--t-caption);
+  color: var(--ink-2); box-shadow: inset 0 0 0 1.5px var(--ink-3); background: transparent; white-space: nowrap; flex: none; }
+/* Placeholder for content the office has not supplied (bank details, address) */
+.p-ph { display: inline-block; padding: 0 6px; border-radius: 6px; border: 1.5px dashed var(--ink-3); color: var(--ink-2); font: var(--t-secondary-strong); line-height: 20px; white-space: nowrap; }
+
+/* Wallet hero number + runway bar (balance measured in days of fees) */
+.p-hero { font: var(--t-hero); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -.5px; }
+.p-hero small { font: 600 22px/1 var(--font); color: var(--ink-2); margin-left: 4px; letter-spacing: 0; }
+.p-hero.warn { color: var(--warn); }
+.p-lbl { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.p-run { position: relative; height: 10px; border-radius: 5px; background: var(--surface-3); }
+.p-run > i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; background: var(--brand); }
+.p-run.warn > i { background: var(--warn); }
+.p-run > b { position: absolute; top: -4px; bottom: -4px; width: 2px; border-radius: 1px; background: var(--ink); }  /* warn threshold tick */
+.p-run-l { display: flex; justify-content: space-between; margin-top: 6px; font: var(--t-caption); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.p-run-l b { color: var(--ink); font-weight: 600; }
+
+/* Ledger line */
+.p-led { display: flex; align-items: center; gap: var(--s3); min-height: 60px; width: 100%; text-align: left; }
+.group .p-led + .p-led { border-top: 1px solid var(--hairline); }
+.p-led .ic { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2); color: var(--ink); display: grid; place-items: center; flex: none; }
+.p-led .ic svg { width: 18px; height: 18px; }
+.p-led .ic.in { background: var(--ok-soft); color: var(--ok); }
+.p-led .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.p-led .t1 { font: var(--t-body); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.p-led .t2 { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 6px; }
+.p-led .amt { font: var(--t-body-strong); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; flex: none; }
+.p-led .amt.plus { color: var(--p-plus); }
+.p-led .chev { width: 18px; height: 18px; color: var(--ink-3); flex: none; margin-left: -6px; }
+
+/* Partner screens in the state switcher */
+.dswitch .p-nav a { padding-left: 18px; }

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Partner onboarding</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="driver.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="kit.js"></script>
+<script src="driver.js"></script>
+<style>
+  /* First login of an office-created partner (ADR-V2): car pending → calm wait; then the approved moment.
+     The office took the first top-up in cash when it created the account, so the wallet is not empty on day one. */
+  .on-ground { background: var(--surface) !important; box-shadow: var(--e1); }
+  .content { top: 70px; }
+  .center { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .halo { position: relative; width: 208px; height: 208px; border-radius: 50%; display: grid; place-items: center; margin: var(--s4) 0 var(--s4); background: var(--surface); box-shadow: var(--e1); }
+  .halo::before { content: ''; position: absolute; inset: 10px; border-radius: 50%; border: 2px dashed var(--surface-3); }
+  .halo img { position: relative; width: 168px; height: 78px; margin-top: 18px; }
+  .halo .badge { position: absolute; right: 8px; bottom: 14px; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; box-shadow: 0 0 0 4px var(--ground); }
+  .halo .badge svg { width: 26px; height: 26px; stroke-width: 2; }
+  .halo .badge.wait { background: var(--surface-2); color: var(--ink); }
+  .halo .badge.ok { background: var(--ok); color: #fff; }
+  :root[data-theme="dark"] .halo .badge.ok { color: #0E0E0F; }
+  :root[data-state="approved"] .halo::before { border: 3px solid var(--ok); }
+  .h1 { font: var(--t-large); color: var(--ink); white-space: nowrap; }
+  .sub { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+  .steps { padding: var(--s4); margin-top: var(--s5); }
+  .tli { display: flex; gap: var(--s3); position: relative; padding-bottom: var(--s4); align-items: center; }
+  .tli:last-child { padding-bottom: 0; }
+  .tli::before { content: ''; position: absolute; left: 11px; top: 26px; height: calc(100% - 26px); width: 2px; background: var(--surface-3); }
+  .tli.done::before { background: var(--ok); }
+  .tli:last-child::before { display: none; }
+  .tli .d { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--surface-2); color: var(--ink-3); }
+  .tli .d svg { width: 14px; height: 14px; stroke-width: 2.5; }
+  .tli.done .d { background: var(--ok); color: #fff; }
+  :root[data-theme="dark"] .tli.done .d { color: #0E0E0F; }
+  .tli.now .d { background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink); }
+  .tli.now .d::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
+  .tli .t1 { font: var(--t-body); color: var(--ink); white-space: nowrap; }
+  .tli.now .t1 { font-weight: 600; }
+  .tli .t1.dim { color: var(--ink-2); }
+  .tli .end { margin-left: auto; }
+
+  .idrow .p-tag:not(.brand) { background: var(--surface); box-shadow: var(--e1); }  /* surface-2 on ground is 1.01:1 */
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); margin-top: var(--s4); width: 100%; }
+  .fact { background: var(--surface); border-radius: var(--r-card); box-shadow: var(--e1); padding: var(--s3) var(--s4); text-align: left; display: flex; flex-direction: column; gap: 2px; }
+  .fact .l { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .fact .l svg { width: 14px; height: 14px; }
+  .fact b { font: var(--t-headline); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .idrow { display: flex; gap: var(--s2); align-items: center; justify-content: center; margin-top: var(--s3); }
+  .foot { margin-top: auto; }
+</style>
+</head>
+<body>
+<main class="screen page" id="s">
+  <div class="content">
+    <!-- ── pending ── -->
+    <section class="center" data-s="pending">
+      <div class="halo"><img class="carimg" src="assets/eco/cars/partner.webp" alt="Tesla Model 3"><span class="badge wait"><i data-lucide="hourglass"></i></span></div>
+      <div class="h1">Մեքենան ստուգվում է</div>
+      <div class="sub">Սովորաբար՝ 1 աշխատանքային օր</div>
+    </section>
+    <div class="card steps" data-s="pending" role="list" aria-label="Հաջորդ քայլերը">
+      <div class="tli done" role="listitem"><span class="d"><i data-lucide="check"></i></span><span class="t1">Հաշիվը բացված է</span></div>
+      <div class="tli done" role="listitem"><span class="d"><i data-lucide="check"></i></span><span class="t1">Փաստաթղթերն ուղարկված են</span></div>
+      <div class="tli now" role="listitem"><span class="d"></span><span class="t1">Գրասենյակը ստուգում է</span><span class="end p-tag"><i data-lucide="clock"></i>այսօր</span></div>
+      <div class="tli" role="listitem"><span class="d"><i data-lucide="power"></i></span><span class="t1 dim">Գծում լինել</span></div>
+    </div>
+    <div class="facts" data-s="pending">
+      <div class="fact"><span class="l"><i data-lucide="percent"></i>Վճար</span><b>15% · Eco Partner</b></div>
+      <div class="fact"><span class="l"><i data-lucide="wallet"></i>Դրամապանակ</span><b>10 000 ֏</b></div>
+    </div>
+
+    <!-- ── approved ── -->
+    <section class="center" data-s="approved">
+      <div class="halo"><img class="carimg" src="assets/eco/cars/partner.webp" alt="Tesla Model 3"><span class="badge ok"><i data-lucide="check"></i></span></div>
+      <div class="h1">Հաստատված է</div>
+      <div class="idrow"><span class="plate">34 XL 518</span><span class="p-tag brand"><i data-lucide="car-front"></i>Eco Partner</span><span class="p-tag"><i data-lucide="handshake"></i>Գործընկեր</span></div>
+      <div class="facts">
+        <div class="fact"><span class="l"><i data-lucide="percent"></i>Վճար</span><b>15% պատվերից</b></div>
+        <div class="fact"><span class="l"><i data-lucide="wallet"></i>Դրամապանակ</span><b>10 000 ֏</b></div>
+      </div>
+    </section>
+
+    <div class="foot">
+      <button class="btn btn-quiet on-ground lg" data-s="pending"><i data-lucide="phone"></i>Զանգել գրասենյակ</button>
+      <button class="go x" data-s="approved"><i data-lucide="power"></i>Գծում լինել</button>
+      <button class="btn-text" data-s="approved"><i data-lucide="file-text"></i>Պայմաններ</button>
+    </div>
+  </div>
+</main>
+<script src="audit.js"></script>
+<script>
+  statusBar(document.getElementById('s'))
+  D.init([['pending', 'Car pending · calm wait'], ['approved', 'Approved moment']])
+  D.partnerNav()
+  icons()
+  D.noMap()
+</script>
+</body>
+</html>

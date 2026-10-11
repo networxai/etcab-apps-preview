@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Partner car</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="driver.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="kit.js"></script>
+<script src="driver.js"></script>
+<style>
+  /* My car (ADR-V1): the partner's own car. The office sets the tier at approval; the partner never picks it.
+     A car whose required document expires is suspended at the business-day boundary. Parked page: 52 / 48. */
+  .on-ground { background: var(--surface) !important; box-shadow: var(--e1); }
+  .hero-car { padding: var(--s4); margin-top: var(--s2); }
+  .stage { position: relative; height: 124px; display: grid; place-items: end center; }
+  .stage::before { content: ''; position: absolute; left: 12%; right: 12%; bottom: 6px; height: 18px; border-radius: 50%; background: radial-gradient(closest-side, var(--car-ground), transparent); }
+  .stage img { position: relative; width: 264px; height: 118px; }
+  :root[data-state="rejected"] .stage img, :root[data-state="pending"] .stage img { filter: grayscale(.85) opacity(.75) drop-shadow(0 3px 3px var(--car-ground)); }
+  .stage .st { position: absolute; top: 0; left: 0; }
+  .id { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); margin-top: var(--s3); }
+  .id .t1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .id .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .id .plate { height: 34px; line-height: 34px; font-size: 17px; padding: 0 10px; }
+  .chips { display: flex; gap: var(--s2); margin-top: var(--s3); align-items: center; }
+  .note { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; display: flex; align-items: center; gap: 6px; margin-top: var(--s2); }
+  .note svg { width: 14px; height: 14px; }
+
+  /* Approval track: three dots, the current one ringed */
+  .track { padding: var(--s4); margin-top: var(--s3); }
+  .track .dots { display: grid; grid-template-columns: 24px 1fr 24px 1fr 24px; align-items: center; }
+  .track .d { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); color: var(--ink-3); }
+  .track .d svg { width: 14px; height: 14px; stroke-width: 2.5; }
+  .track .d.done { background: var(--ok); color: #fff; }
+  :root[data-theme="dark"] .track .d.done { color: #0E0E0F; }
+  .track .d.now { background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink); }
+  .track .d.now::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
+  .track .bar { height: 2px; background: var(--surface-3); margin: 0 6px; }
+  .track .bar.done { background: var(--ok); }
+  .track .lb { display: grid; grid-template-columns: 1fr 1fr 1fr; margin-top: var(--s2); }
+  .track .lb span { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; }
+  .track .lb span:nth-child(2) { text-align: center; color: var(--ink); font-weight: 600; }
+  .track .lb span:last-child { text-align: right; }
+  .track .eta { font: var(--t-secondary); color: var(--ink-2); margin-top: var(--s3); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .track .eta svg { width: 16px; height: 16px; }
+
+  .fix { margin-top: var(--s3); padding: var(--s4); display: flex; flex-direction: column; gap: var(--s3); }
+  .fix .h { display: flex; align-items: center; gap: var(--s3); }
+  .fix .h .ic { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+  .fix .h .ic svg { width: 20px; height: 20px; }
+  .fix .h .ic.danger { background: var(--danger-soft); color: var(--danger); }
+  .fix .h .ic.warn { background: var(--warn-soft); color: var(--warn); }
+  .fix .t1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .fix .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  .doc { display: flex; align-items: center; gap: var(--s3); min-height: 60px; }
+  .group .doc + .doc { border-top: 1px solid var(--hairline); }
+  .doc .ic { width: 40px; height: 40px; border-radius: 10px; background: var(--surface-2); color: var(--ink); display: grid; place-items: center; flex: none; }
+  .doc .ic svg { width: 20px; height: 20px; }
+  .doc .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .doc .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .doc .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .p-tag.solo { width: 28px; padding: 0; justify-content: center; }
+</style>
+</head>
+<body>
+<main class="screen page" id="s">
+  <div class="appbar"><button class="iconbtn" aria-label="Ետ"><i data-lucide="arrow-left"></i></button><span class="sp"></span>
+    <button class="iconbtn" aria-label="Զանգել գրասենյակ"><i data-lucide="phone"></i></button></div>
+
+  <div class="content">
+    <div class="ptitle">Իմ մեքենան</div>
+
+    <div class="card hero-car">
+      <div class="stage">
+        <img class="carimg" src="assets/eco/cars/partner.webp" alt="Tesla Model 3, սպիտակ">
+        <span class="st">
+          <span class="p-tag ok" data-s="approved expiring"><i data-lucide="badge-check"></i>Հաստատված</span>
+          <span class="p-tag" data-s="pending"><i data-lucide="clock"></i>Ստուգվում է</span>
+          <span class="p-tag danger" data-s="rejected"><i data-lucide="octagon-x"></i>Մերժված</span>
+        </span>
+      </div>
+      <div class="id">
+        <div><div class="t1">Tesla Model 3</div><div class="t2">Սպիտակ · 2021</div></div>
+        <span class="plate">34 XL 518</span>
+      </div>
+      <div class="chips">
+        <span class="p-tag brand" data-not="pending rejected"><i data-lucide="car-front"></i>Eco Partner</span>
+        <span class="p-tag" data-s="pending rejected"><i data-lucide="car-front"></i>Դաս՝ —</span>
+        <span class="p-tag"><i data-lucide="handshake"></i>Գործընկեր</span>
+      </div>
+      <div class="note" data-not="rejected expiring"><i data-lucide="building-2"></i>Դասը սահմանում է գրասենյակը</div>
+    </div>
+
+    <!-- pending: where it is, how long -->
+    <div class="card track" data-s="pending" role="img" aria-label="Ուղարկված, ստուգում, հաստատում">
+      <div class="dots"><span class="d done"><i data-lucide="check"></i></span><span class="bar done"></span><span class="d now"></span><span class="bar"></span><span class="d"><i data-lucide="flag"></i></span></div>
+      <div class="lb"><span>Ուղարկված</span><span>Ստուգում</span><span>Հաստատում</span></div>
+      <div class="eta"><i data-lucide="clock"></i>Սովորաբար՝ 1 աշխատանքային օր</div>
+    </div>
+
+    <!-- rejected: the reason, and the one fix -->
+    <div class="card fix" data-s="rejected">
+      <div class="h"><span class="ic danger"><i data-lucide="image-off"></i></span><div><div class="t1">Լուսանկարն անընթեռնելի է</div><div class="t2">Տեխզննում · 10.10, 11:20</div></div></div>
+      <button class="btn btn-brand"><i data-lucide="camera"></i>Նորից լուսանկարել</button>
+    </div>
+
+    <!-- expiring -->
+    <div class="card fix" data-s="expiring">
+      <div class="h"><span class="ic warn"><i data-lucide="shield-alert"></i></span><div><div class="t1">Ապահովագրություն՝ 6 օր</div><div class="t2">15.10-ից հետո՝ առանց պատվերի</div></div></div>
+      <button class="btn btn-brand"><i data-lucide="camera"></i>Թարմացնել</button>
+    </div>
+
+    <div class="sect">Փաստաթղթեր</div>
+    <div class="group">
+      <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="txt"><span class="t1">Հաշվառման վկայական</span><span class="t2">Տեխանձնագիր</span></span>
+        <span class="p-tag ok solo" role="img" aria-label="Վավեր" data-not="pending"><i data-lucide="check"></i></span><span class="p-tag solo" role="img" aria-label="Ստուգվում է" data-s="pending"><i data-lucide="clock"></i></span></div>
+      <div class="doc"><span class="ic"><i data-lucide="shield"></i></span><span class="txt"><span class="t1">Ապահովագրություն</span><span class="t2" data-not="expiring">մինչև 14.04.2027</span><span class="t2" data-s="expiring">մինչև 15.10.2026</span></span>
+        <span class="p-tag ok solo" role="img" aria-label="Վավեր" data-s="approved rejected"><i data-lucide="check"></i></span><span class="p-tag warn" data-s="expiring"><i data-lucide="clock"></i>6 օր</span><span class="p-tag solo" role="img" aria-label="Ստուգվում է" data-s="pending"><i data-lucide="clock"></i></span></div>
+      <div class="doc"><span class="ic"><i data-lucide="wrench"></i></span><span class="txt"><span class="t1">Տեխզննում</span><span class="t2">մինչև 22.06.2027</span></span>
+        <span class="p-tag ok solo" role="img" aria-label="Վավեր" data-s="approved expiring"><i data-lucide="check"></i></span><span class="p-tag danger" data-s="rejected"><i data-lucide="x"></i>Նորից</span><span class="p-tag solo" role="img" aria-label="Ստուգվում է" data-s="pending"><i data-lucide="clock"></i></span></div>
+    </div>
+  </div>
+</main>
+<script src="audit.js"></script>
+<script>
+  statusBar(document.getElementById('s'))
+  D.init([['approved', 'Approved'], ['pending', 'Pending approval'], ['rejected', 'Rejected · reason · re-shoot'], ['expiring', 'Document expiring']])
+  D.partnerNav()
+  icons()
+  D.noMap()
+</script>
+</body>
+</html>
