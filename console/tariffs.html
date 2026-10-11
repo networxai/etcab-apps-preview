@@ -107,7 +107,7 @@
     uploading: (t) => ({ slot: `<span class="prog"><i></i></span>`, cls: 'busy', acts: `<div class="row-flex"><button class="btn secondary s" disabled aria-disabled="true" style="opacity:.55"><i data-lucide="loader"></i>Վերբեռնվում է…</button></div><span class="note num">van.webp · 62%</span>` }),
     refused: (t) => ({ slot: `<span class="src">Ներկառուցված</span>`, cls: 'err', acts: `<button class="btn secondary s focus-ring" aria-describedby="err-vip" aria-label="Վերբեռնել նկար ${t.name}"><i data-lucide="upload"></i>Վերբեռնել նկար</button><span class="fe" id="err-vip"><i data-lucide="circle-alert"></i>Նկարը 1 ՄԲ-ից մեծ է։</span>` }),
   }
-  const tariffName = { city: 'Eco City · օրական', partner: 'Eco Partner', kids: 'Eco Kids', business: 'Eco Business', van: 'Eco Van', vip: 'Eco Vip' }
+  const tariffName = { city: 'Eco City · օրական', partner: 'Eco Comfort', kids: 'Eco Kids', business: 'Eco Business', van: 'Eco Van', vip: 'Eco Vip' }
   document.getElementById('tiers').innerHTML = TIERS.map((t) => {
     const p = pic[t.pic](t)
     return `<div class="tier"><i data-lucide="grip-vertical" class="grip"></i>

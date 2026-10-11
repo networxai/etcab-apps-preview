@@ -98,7 +98,7 @@
 <body>
 <script>
   /* Tenant "eco" tariffs, fixed_upfront, Republic Sq → Cascade = 2.1 km, 4 min (NOTES.md). */
-  const TIERS = [['city', 'Eco City', 3, 4, 800], ['partner', 'Eco Partner', 4, 4, 1000], ['kids', 'Eco Kids', 7, 4, 1200],
+  const TIERS = [['city', 'Eco City', 3, 4, 800], ['partner', 'Eco Comfort', 4, 4, 1000], ['kids', 'Eco Kids', 7, 4, 1200],
     ['business', 'Eco Business', 6, 4, 1400], ['van', 'Eco Van', 9, 7, 1600], ['vip', 'Eco Vip', 11, 4, 2100]]
   const tiers = () => `<div class="tiers" role="radiogroup" aria-label="Դաս">${TIERS.map(([k, n, eta, seats, p], i) =>
     `<button class="tier ${i ? '' : 'on'}" role="radio" aria-checked="${!i}" ${i >= 2 ? 'data-peek' : ''}>

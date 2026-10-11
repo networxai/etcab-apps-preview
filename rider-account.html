@@ -91,7 +91,7 @@
 <body>
 <script>
   const A = R.amd
-  const DEBT = 1300 /* Oct 7, Eco Partner, Komitas → Mashtots: 700 + 473 + 98 = 1 271 → 1 300, left unpaid */
+  const DEBT = 1300 /* Oct 7, Eco Comfort, Komitas → Mashtots: 700 + 473 + 98 = 1 271 → 1 300, left unpaid */
   const r = (ic, t1, end = '', o = {}) => `<${o.btn === false ? 'div' : 'button'} class="row btnrow ${o.cls || ''}"><span class="ic">${R.i(ic)}</span>
       <span class="txt"><span class="t1">${t1}</span>${o.t2 ? `<span class="t2 ${o.t2c || ''}">${o.t2}</span>` : ''}</span>${end}${o.chev === false ? '' : `<i class="chev" data-lucide="chevron-right"></i>`}</${o.btn === false ? 'div' : 'button'}>`
   const grp = (rows) => `<div class="group">${rows.join('<div class="divider"></div>')}</div>`

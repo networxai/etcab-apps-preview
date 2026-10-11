@@ -7,7 +7,7 @@
   /* ── Eco tiers, verbatim and in sort order (apps v2 NOTES §Tariffs). fixed_upfront, rounded to 100 ֏. ── */
   window.TIERS = [
     { id: 'city', name: 'Eco City', car: 'ID.3', seats: 4, base: 600, km: 90, min: 12, floor: 700, cls: 'Էկոնոմ', blurb: 'Մինչև 4 ուղևոր', pic: 'uploaded' },
-    { id: 'partner', name: 'Eco Partner', car: 'Model 3', seats: 4, base: 700, km: 110, min: 14, floor: 900, cls: 'Կոմֆորտ', blurb: 'Tesla Model 3', pic: 'uploaded' },
+    { id: 'partner', name: 'Eco Comfort', car: 'Model 3', seats: 4, base: 700, km: 110, min: 14, floor: 900, cls: 'Կոմֆորտ', blurb: 'Tesla Model 3', pic: 'uploaded' },
     { id: 'kids', name: 'Eco Kids', car: 'ID.3 + մանկական նստոց', seats: 3, base: 900, km: 130, min: 18, floor: 1200, cls: 'Մանկական', blurb: 'Մանկական նստոցով', pic: 'uploaded' },
     { id: 'business', name: 'Eco Business', car: 'ID.4', seats: 4, base: 1000, km: 150, min: 20, floor: 1400, cls: 'Բիզնես', blurb: 'Ընդարձակ սրահ', pic: 'icon' },
     { id: 'van', name: 'Eco Van', car: 'MPV', seats: 7, base: 1200, km: 170, min: 22, floor: 1600, cls: 'Միկրոավտոբուս', blurb: 'Մինչև 7 ուղևոր', pic: 'uploading' },
