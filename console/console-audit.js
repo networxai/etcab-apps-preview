@@ -89,7 +89,11 @@ window.audit = function () {
           const cutX = r.left < pr.left - .5 || r.right > pr.right + .5
           const scroller = cutX ? /auto|scroll/.test(pc.overflowX) : /auto|scroll/.test(pc.overflowY)
           if (scroller) { scrolled.push(name(el)); inScroller = true; break }
-          if ((ell || pc.textOverflow === 'ellipsis') && truncOK(el)) break
+          /* An ancestor's ellipsis only renders for inline content; a flex/block child is silently cut. */
+          let inlineChain = true
+          for (let e = el; e && e !== p; e = e.parentElement) if (e !== el && getComputedStyle(e).display !== 'inline') inlineChain = false
+          if (getComputedStyle(el).display !== 'inline' && el !== p) inlineChain = inlineChain && false
+          if ((ell || (pc.textOverflow === 'ellipsis' && inlineChain)) && truncOK(el)) break
           clips.push(`cut by ${p.className}: ${name(el)}`)
         }
       }

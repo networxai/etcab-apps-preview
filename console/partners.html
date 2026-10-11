@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Partners</title>
+<link rel="stylesheet" href="console.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+<style>
+  /* Two layouts of one screen. Overview: list + 420 panel. Wallet: the list narrows to name + balance and the
+     panel takes the room, because the top-up form and the ledger are worked side by side. Never a modal. */
+  .content { grid-template-columns: minmax(0, 1fr) 420px; }
+  .wide .content { grid-template-columns: 300px minmax(0, 1fr); }
+  @media (max-width: 1400px) { .content { grid-template-columns: minmax(0, 1fr) 356px; } col.c-car { width: 92px !important; } .wide .content { grid-template-columns: 248px minmax(0, 1fr); } .wgrid { grid-template-columns: 312px minmax(0, 1fr) !important; } .sums .kpi .v { font-size: 15px; } .shift { grid-template-columns: 120px minmax(0, 1fr) !important; } }
+  .pt td { height: 52px; }
+  .carcell .t { display: flex; flex-direction: column; min-width: 0; }
+  .wide .hide-w { display: none; }
+  .mini { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 48px; padding: 6px 12px 6px var(--inset); border-bottom: 1px solid var(--line-soft); }
+  .mini.on { background: var(--surface-alt); box-shadow: inset 3px 0 0 var(--brand-vivid); }
+  .mini .nm { font: var(--c-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bigbal { font: var(--c-kpi); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .bigbal.neg { color: var(--danger-c); }
+  .code { display: inline-flex; align-items: center; gap: 6px; }
+  .kv2 { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font: var(--c-body); margin-top: 8px; }
+  .kv2 dt { color: var(--ink-muted); white-space: nowrap; } .kv2 dd { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  /* Wallet tab */
+  .wgrid { display: grid; grid-template-columns: 332px minmax(0, 1fr); gap: 12px; padding: 12px var(--inset) var(--inset); min-height: 0; flex: 1; }
+  .topup { border-radius: var(--r-card); background: var(--surface-alt); padding: 12px; display: flex; flex-direction: column; gap: 12px; align-self: start; }
+  .topup h3 { font: var(--c-head); display: flex; align-items: center; gap: 8px; }
+  .topup .seg { width: 100%; } .topup .seg button { flex: 1; justify-content: center; }
+  .quick { display: flex; gap: 4px; margin-top: 6px; } .quick .chip { height: 24px; font: var(--c-small); padding: 0 8px; }
+  .after { display: flex; align-items: center; justify-content: space-between; font: var(--c-body); padding-top: 10px; border-top: 1px solid var(--line-soft); }
+  .after b { font: 600 15px/20px var(--font); font-variant-numeric: tabular-nums; }
+  .topup .btns { display: flex; justify-content: flex-end; gap: 6px; }
+  .ledger { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+  .sums { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-radius: var(--r-card); box-shadow: inset 0 0 0 1px var(--line-soft); margin-bottom: 8px; flex: none; }
+  .sums .kpi { padding: 8px 12px; border-right: 1px solid var(--line-soft); } .sums .kpi:last-child { border-right: 0; }
+  .sums .kpi .v { font: 600 17px/24px var(--font); }
+  .ltool { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex: none; }
+  .lg td { height: 44px; }
+  .lg .what { display: flex; flex-direction: column; min-width: 0; }
+  .lg .what b { font: var(--c-strong); overflow: hidden; text-overflow: ellipsis; }
+  .lg td.desc { white-space: normal; padding-top: 6px; padding-bottom: 6px; }
+  .lg .what span { font: var(--c-small); color: var(--ink-muted); }
+  .lg .what b { white-space: nowrap; }
+  .lg .kind { display: inline-flex; align-items: center; gap: 6px; font: var(--c-label); color: var(--ink-muted); }
+  .lg .kind svg { width: 14px; height: 14px; }
+  .lg .plus { color: var(--ok-text); font-weight: 600; }
+  .lg .neg { color: var(--danger-c); font-weight: 600; }
+  .lg tr.rev td { color: var(--ink-faint); } .lg tr.rev .what b { text-decoration: line-through; }
+</style>
+</head>
+<body>
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <span class="crumb">Գործընկերներ <i data-lucide="chevron-right"></i></span><h1>Գործընկեր վարորդներ</h1>
+      <span class="crumb num hide-w">12 · առցանց 6</span>
+      <div class="live"></div>
+    </header>
+    <div class="content">
+      <section class="card" aria-label="Գործընկերների ցանկ" id="list"></section>
+      <aside class="card dp" aria-label="Գործընկեր" id="dp"></aside>
+    </div>
+  </div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search)
+  const tab = q.get('tab') || 'overview', sel = +(q.get('p') ?? 2), wide = tab === 'wallet'
+  if (wide) document.getElementById('screen').classList.add('wide')
+  shell('partners')
+  const P = PARTNERS, p = P[sel], T = tierById(p.tier)
+  const docPill = (d) => d === 'ok' ? '' : d === 'warn' ? '<span class="pill warn"><i data-lucide="clock"></i>9 օր</span>' : '<span class="pill bad"><i data-lucide="circle-alert"></i>Ժամկետանց</span>'
+
+  /* ── List ── */
+  const filters = `<div class="filters">
+      <div class="input" style="width:${wide ? '100%' : '240px'}"><i data-lucide="search"></i><span class="val ph">Անուն, հեռախոս, P-կոդ</span><span class="kbd">/</span></div>
+      ${wide ? '' : '<span style="flex:1"></span><button class="btn secondary s"><i data-lucide="plus"></i>Նոր գործընկեր</button>'}</div>
+    ${wide ? '' : `<div class="filters" style="padding-top:6px;padding-bottom:6px">
+      <span class="chip on">Բոլորը <span class="c num">12</span></span><span class="chip">Արգելափակված <span class="c num">2</span></span>
+      <span class="chip">Քիչ մնացորդ <span class="c num">4</span></span><span class="chip">Հաստատման սպասող <span class="c num">3</span></span>
+      <span class="chip">Լրացող փաստաթուղթ <span class="c num">3</span></span></div>`}`
+  const rows = wide
+    ? P.map((x, i) => `<div class="mini${i === sel ? ' on' : ''}"><span class="av">${x.ini}</span><span class="nm">${x.name}</span>${balCell(x.bal)}</div>`).join('')
+    : `<table class="tbl pt"><colgroup><col><col class="c-car" style="width:100px"><col style="width:124px"><col style="width:124px"><col style="width:120px"><col style="width:120px"></colgroup>
+      <thead><tr><th>Գործընկեր</th><th>Մեքենա</th><th>Հաստատում</th><th>Փաստաթղթեր</th><th>Հերթապահ.</th><th class="r">Մնացորդ</th></tr></thead><tbody>${P.map((x, i) => {
+        const [at, aw, ai] = APPR[x.appr], [st, sw] = DSTATE[x.state]
+        return `<tr class="${i === sel ? 'on' : ''}"><td><span class="who"><span class="av">${x.ini}</span><span class="nm"><b>${x.name}</b><span>${x.phone}</span></span></span></td>
+          <td><span class="plate">${x.plate}</span></td>
+          <td><span class="pill ${at}"><i data-lucide="${ai}"></i>${aw}</span></td><td>${docPill(x.docs) || '<span class="pill ok"><i data-lucide="circle-check"></i>Կարգին</span>'}</td><td><span class="pill ${st}"><i class="d"></i>${sw}</span></td><td class="r">${balCell(x.bal)}</td></tr>`
+      }).join('')}</tbody></table>`
+  document.getElementById('list').innerHTML = filters + `<div class="scroll-y grow" data-truncate>${rows}</div>`
+
+  /* ── Detail ── */
+  const [at, aw, ai] = APPR[p.appr], [st, sw] = DSTATE[p.state]
+  const balTxt = (p.bal < 0 ? '−' : '') + amd(Math.abs(p.bal))
+  const tabs = [['overview', 'Ընդհանուր'], ['wallet', 'Դրամապանակ'], ['car', 'Մեքենա'], ['docs', 'Փաստաթղթեր'], ['rides', 'Պատվերներ'], ['rating', '4,8']]
+  const head = `
+    <div class="head"><span class="av l">${p.ini}</span>
+      <div style="min-width:0"><h2>${p.name}</h2>
+        <div class="meta"><span class="mono muted" style="font-size:12px">+374 ${p.phone.slice(1)}</span><span class="typ partner"><i data-lucide="handshake"></i>Գործընկեր</span><span class="pill ${st}"><i class="d"></i>${sw}</span></div></div>
+      <button class="btn ghost icon s" aria-label="Փակել (Esc)"><i data-lucide="x"></i></button></div>
+    <div class="tabsl" role="tablist">${tabs.map(([k, l]) => `<a href="?theme=${THEME}&p=${sel}&tab=${k}" role="tab" aria-selected="${k === tab}" class="${k === tab ? 'on' : ''}" ${k === 'rating' ? 'aria-label="Գնահատական 4,8"' : ''}>${k === 'rating' ? '<i data-lucide="star"></i>' : ''}${l}</a>`).join('')}</div>`
+
+  const overview = `
+    ${p.bal < 0 ? `<div style="margin:12px var(--inset) 0"><div class="notice amber"><i data-lucide="lock"></i><span>Արգելափակված է պատվերներից՝ <span class="num">10.10, 18:40</span>-ից։ Ընթացիկ պատվերն ավարտվել է։ Բացելու համար լիցքավորեք առնվազն <b class="num">${amd(-p.bal)}</b>։</span></div></div>` : ''}
+    <div class="blk">
+      <h3><i data-lucide="wallet"></i>Դրամապանակ<span class="end code"><span class="faint" style="font-weight:400">Վճարման կոդ</span><span class="tag">${p.code}</span><button class="btn ghost icon s" aria-label="Պատճենել կոդը"><i data-lucide="copy"></i></button></span></h3>
+      <div class="bigbal${p.bal < 0 ? ' neg' : ''}" style="margin-top:4px">${balTxt}</div>
+      <div class="faint" style="font:var(--c-small)">Արգելափակում՝ 0 ֏-ից ցածր · զգուշացում՝ 3 000 ֏-ից ցածր (~1 օրվա վճար)</div>
+      <div style="display:flex;gap:6px;margin-top:12px"><a class="btn primary" href="?theme=${THEME}&p=${sel}&tab=wallet" style="text-decoration:none">Գրանցել լիցքավորում</a><a class="btn secondary" href="?theme=${THEME}&p=${sel}&tab=wallet" style="text-decoration:none">Գրանցամատյան</a></div>
+    </div>
+    <div class="blk">
+      <h3><i data-lucide="car"></i>Մեքենա<span class="end pill ${at}" style="height:20px"><i data-lucide="${ai}"></i>${aw}</span></h3>
+      <div class="shift"><span class="car" style="width:100%;height:76px">${carImg(p.tier, T.name)}</span>
+        <dl class="facts"><dt>Համարանիշ</dt><dd><span class="plate">${p.plate}</span></dd><dt>Մոդել</dt><dd>${p.model.split(' · ')[0]}</dd><dt>Դաս · փաթեթ</dt><dd>${T.cls}</dd><dt></dt><dd>${T.name}</dd><dt>Հաստատել է</dt><dd>Սարգիս Ա.</dd></dl></div>
+    </div>
+    <div class="blk">
+      <h3><i data-lucide="percent"></i>Վճարի պլան<span class="end"><a class="btn ghost s" href="feeplans.html?theme=${THEME}">Գործընկեր ստանդարտ</a></span></h3>
+      <dl class="kv2"><dt>${T.name}</dt><dd><b>15%</b> պատվերի գնից</dd><dt>Հարկային տողեր</dt><dd class="faint">անջատված</dd><dt>Այսօր</dt><dd>3 պատվեր · վճար <b>1 110 ֏</b></dd></dl>
+    </div>
+    <div class="blk" style="margin-bottom:12px">
+      <h3><i data-lucide="file-text"></i>Փաստաթղթեր<span class="end pill warn" style="height:20px"><i data-lucide="clock"></i>1 լրանում է</span></h3>
+      <div class="docs" data-truncate>
+        <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>Վարորդական վկայական</b><span>licence.pdf</span></span><span class="pill ok">Մինչև <span class="num">14.04.2028</span></span><span></span></div>
+        <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>ԱՊՊԱ ապահովագրություն</b><span>osago.pdf</span></span><span class="pill warn">Մինչև <span class="num">20.10.2026</span></span><span></span></div>
+        <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>Տեխանձնագիր</b><span>tech-passport.pdf</span></span><span class="pill">ժամկետ չունի</span><span></span></div>
+      </div>
+    </div>`
+
+  /* Ledger, newest first; running balance; ride fees at 15% of the fare (Eco Partner, standard plan). */
+  const L = [
+    ['10.10 19:02', 'fee', 'Վճար · #R-20288', 'Eco Partner · 15% × 2 400 ֏', '—', -360, -1200],
+    ['10.10 18:40', 'fee', 'Վճար · #R-20281', '15% × 1 900 ֏ · մնացորդը անցավ 0-ից՝ արգելափակվեց', '—', -285, -840],
+    ['10.10 17:55', 'fee', 'Վճար · #R-20270', '15% × 3 100 ֏', '—', -465, -555],
+    ['09.10', 'fees', 'Վճարներ · 12 պատվեր', 'բացել պատվերները', '—', -2980, -90],
+    ['08.10 12:14', 'adj', 'Ճշգրտում', 'Պատճառ՝ «#R-20190 վեճ, ուղևորը չներկայացավ»', 'Սարգիս Ա.', 500, 2890],
+    ['08.10', 'fees', 'Վճարներ · 14 պատվեր', 'բացել պատվերները', '—', -3610, 2390],
+    ['05.10 10:31', 'rev', 'Հետարկում', 'ՔԳ-000398 · պատճառ՝ «Կրկնակի գրանցում»', 'Սարգիս Ա.', -5000, 6000],
+    ['05.10 10:02', 'cash', 'Կանխիկ լիցքավորում', 'Անդորրագիր ՔԳ-000398', 'Մարիամ Հ.', 5000, 11000, 'rev'],
+    ['04.10', 'fees', 'Վճարներ · 02–04.10 · 38 պատվեր', 'բացել պատվերները', '—', -14000, 6000],
+    ['02.10 09:40', 'bank', 'Փոխանցում', 'Ameriabank · հղում P-0041', 'Անի Դ.', 20000, 20000],
+  ]
+  const KIND = { fee: ['receipt', 'Վճար'], fees: ['receipt', 'Վճարներ'], adj: ['sliders-horizontal', 'Ճշգրտում'], rev: ['undo-2', 'Հետարկում'], cash: ['banknote', 'Կանխիկ'], bank: ['landmark', 'Փոխանցում'] }
+  const sgn = (v) => (v < 0 ? '−' : '+') + amd(Math.abs(v))
+  const wallet = `
+    <div class="wgrid">
+      <section class="topup" aria-label="Գրանցել լիցքավորում">
+        <h3><i data-lucide="wallet"></i>Գրանցել լիցքավորում</h3>
+        <div class="seg" role="radiogroup" aria-label="Եղանակ"><button class="on" role="radio" aria-checked="true"><i data-lucide="banknote"></i>Կանխիկ</button><button role="radio" aria-checked="false"><i data-lucide="landmark"></i>Բանկային փոխանցում</button></div>
+        <div><label class="label">Գումար</label><div class="input l focus"><span class="val mono" style="font-size:15px">10 000</span><span class="faint">֏</span></div>
+          <div class="quick"><span class="chip">5 000</span><span class="chip on">10 000</span><span class="chip">20 000</span><span class="chip">50 000</span></div></div>
+        <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label class="label">Անդորրագիր №</label><div class="input"><span class="val mono">ՔԳ-000413</span><i data-lucide="lock" title="ինքնաշխատ"></i></div></div>
+          <div><label class="label">Ստացել է</label><div class="input"><span class="val">Անի Դ.</span></div></div>
+        </div>
+        <div><label class="label">Նշում <span class="faint" style="font-weight:400">· ոչ պարտադիր</span></label><div class="input"><span class="val ph">օր. Հանձնեց կինը</span></div></div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap"><span class="check on"><i class="b"></i>SMS անդորրագիր՝ <span class="mono">${p.phone}</span></span><span class="check on"><i class="b"></i>Տպել</span></div>
+        <div class="after"><span class="muted">Նոր մնացորդ</span><b>8 800 ֏</b></div>
+        <div class="notice neutral" style="margin-top:-4px"><i data-lucide="lock-open"></i><span>Արգելափակումը կհանվի անմիջապես։</span></div>
+        <div class="btns"><a class="btn ghost" href="?theme=${THEME}&p=${sel}&tab=overview" style="text-decoration:none">Չեղարկել</a><button class="btn primary">Գրանցել 10 000 ֏ <span class="kbd">↵</span></button></div>
+      </section>
+      <section class="ledger" aria-label="Գրանցամատյան">
+        <div class="sums">
+          <div class="kpi"><span class="k">Մնացորդ</span><span class="v" style="color:var(--danger-c)">−1 200 ֏</span></div>
+          <div class="kpi"><span class="k">Լիցքավորումներ</span><span class="v">20 000 ֏</span></div>
+          <div class="kpi"><span class="k">Վճարներ</span><span class="v">−21 700 ֏</span></div>
+          <div class="kpi"><span class="k">Ճշգրտումներ</span><span class="v">+500 ֏</span></div>
+        </div>
+        <div class="ltool"><div class="seg"><button class="on">Հոկտեմբեր</button><button>Սեպտեմբեր</button></div><span style="flex:1"></span>
+          <button class="btn secondary s"><i data-lucide="sliders-horizontal"></i>Ճշգրտում</button><button class="btn secondary s"><i data-lucide="download"></i>Քաղվածք<i data-lucide="chevron-down"></i></button></div>
+        <div class="scroll-y grow">
+          <table class="tbl lg"><colgroup><col style="width:72px"><col><col style="width:80px"><col style="width:84px"><col style="width:88px"></colgroup>
+            <thead><tr><th>Օր</th><th>Գործողություն</th><th>Ով</th><th class="r">Գումար</th><th class="r">Մնացորդ</th></tr></thead>
+            <tbody>${L.map(([d, k, w, s2, who, v, b, cls]) => `<tr class="${cls || ''}"><td><span class="what"><span class="mono" style="font-size:12px;color:var(--ink)">${d.split(' ')[0]}</span><span class="mono">${d.split(' ')[1] || ''}</span></span></td>
+              <td class="desc"><span class="what"><b><i data-lucide="${KIND[k][0]}" style="width:14px;height:14px;vertical-align:-2px;margin-right:6px;color:var(--ink-faint)"></i>${w}</b><span>${s2}</span></span></td><td>${who}</td><td class="r mono ${v > 0 ? 'plus' : ''}">${sgn(v)}</td><td class="r mono ${b < 0 ? 'neg' : ''}">${(b < 0 ? '−' : '') + amd(Math.abs(b))}</td></tr>`).join('')}
+              <tr><td class="mono">01.10</td><td colspan="3" class="faint">Մնացորդ ամսվա սկզբին</td><td class="r mono">0 ֏</td></tr></tbody></table>
+        </div>
+      </section>
+    </div>`
+  document.getElementById('dp').innerHTML = wide ? head + wallet : `<div class="scroll-y grow">${head}${overview}</div>`
+  if (wide) { const dp = document.getElementById('dp'); dp.style.display = 'flex'; dp.style.flexDirection = 'column' }
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

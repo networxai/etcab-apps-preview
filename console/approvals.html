@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Approvals</title>
+<link rel="stylesheet" href="console.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+<style>
+  .content { grid-template-columns: 340px minmax(0, 1fr); }
+  @media (max-width: 1400px) { .content { grid-template-columns: 300px minmax(0, 1fr); } .docgrid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
+  .qi { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 4px 12px; padding: 12px var(--inset); border-bottom: 1px solid var(--line-soft); align-items: center; }
+  .qi.on { background: var(--surface-alt); box-shadow: inset 3px 0 0 var(--brand-vivid); }
+  .qi .car { grid-row: 1 / 3; width: 64px; height: 34px; }
+  .qi b { font: var(--c-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qi .s { font: var(--c-small); color: var(--ink-muted); display: flex; gap: 6px; align-items: center; white-space: nowrap; overflow: hidden; }
+  .qi .r2 { grid-column: 1 / 3; display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 4px; font: var(--c-small); color: var(--ink-faint); white-space: nowrap; }
+  .ah { display: grid; grid-template-columns: 200px minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 16px var(--inset); border-bottom: 1px solid var(--line-soft); flex: none; }
+  .ah .car { width: 200px; height: 96px; }
+  .ah h2 { font: var(--c-title); white-space: nowrap; }
+  .ah .meta { display: flex; gap: 6px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
+  .ah dl { display: grid; grid-template-columns: auto auto auto auto; gap: 4px 12px; margin-top: 10px; font: var(--c-body); }
+  .ah dt { color: var(--ink-muted); white-space: nowrap; } .ah dd { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .sect { padding: 12px var(--inset); border-bottom: 1px solid var(--line-soft); }
+  .sect h3 { font: var(--c-head); display: flex; align-items: center; gap: 8px; margin-bottom: 10px; white-space: nowrap; }
+  .sect h3 .sub { font: var(--c-small); color: var(--ink-faint); font-weight: 400; }
+  .docgrid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+  .dt { border-radius: var(--r-ctl); background: var(--surface-alt); overflow: hidden; display: flex; flex-direction: column; }
+  .dt .pv { height: 92px; position: relative; display: grid; place-items: center; background: var(--surface-3); }
+  .dt .pv .paper { width: 64px; height: 78px; border-radius: 3px; background: var(--surface); box-shadow: var(--e1); padding: 8px 7px; display: flex; flex-direction: column; gap: 5px; }
+  .dt .pv .paper i { display: block; height: 3px; border-radius: 2px; background: var(--line-control); opacity: .55; }
+  .dt .pv .car { width: 88%; height: 70px; }
+  .dt .pv .tag2 { position: absolute; left: 6px; top: 6px; height: 18px; padding: 0 5px; border-radius: 4px; background: var(--surface); font: 500 11px/18px var(--font); color: var(--ink-muted); box-shadow: var(--e1); white-space: nowrap; }
+  .dt .cap { padding: 6px 8px 8px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .dt .cap b { font: var(--c-label); min-height: 32px; }
+  .classes { display: flex; gap: 6px; flex-wrap: wrap; }
+  .classes .chip.on { background: var(--ink); color: var(--surface); }
+  .result { display: flex; align-items: center; gap: 12px; margin-top: 10px; padding: 8px 12px; border-radius: var(--r-ctl); background: var(--surface-alt); font: var(--c-body); color: var(--ink-muted); }
+  .result .car { width: 72px; height: 36px; }
+  .result b { color: var(--ink); }
+  .decide { margin-top: auto; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; align-items: end; padding: 12px var(--inset); border-top: 1px solid var(--line-soft); flex: none; }
+  .decide .acts { display: flex; gap: 6px; }
+</style>
+</head>
+<body>
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <span class="crumb">Գործընկերներ <i data-lucide="chevron-right"></i></span><h1>Հաստատումներ</h1>
+      <div class="live"></div>
+    </header>
+    <div class="content">
+      <section class="card" aria-label="Սպասող հայտեր">
+        <div class="card-h" style="padding:0 12px"><div class="seg"><button class="on">Մեքենաներ <span class="c num">3</span></button><button>Գործընկերներ <span class="c num">1</span></button></div>
+          </div>
+        <div class="scroll-y grow" id="queue2" data-truncate></div>
+      </section>
+      <section class="card" aria-label="Մեքենայի հաստատում" id="detail"></section>
+    </div>
+  </div>
+</div>
+<script>
+  shell('approvals')
+  const Q = [
+    [PARTNERS[8], 'երեկ, 16:20', 5, 'Tesla Model Y'],
+    [PARTNERS[7], '10.10, 11:05', 6, 'Mercedes V'],
+    [PARTNERS[11], '10.10, 09:42', 4, 'Skoda Enyaq'],
+  ]
+  document.getElementById('queue2').innerHTML = Q.map(([p, when, docs, m], i) => `<div class="qi${i === 0 ? ' on' : ''}" tabindex="0">
+      <span class="car">${carImg(p.tier)}</span><b>${p.model.split(' · ').slice(0, 2).join(' · ')}</b><span class="s"><span class="plate" style="height:20px">${p.plate}</span><span class="trunc">${p.name}</span></span>
+      <span class="r2"><span>${when}</span><span class="pill ${docs < 6 ? 'warn' : 'ok'}" style="height:20px">${docs}/6 փաստաթուղթ</span></span></div>`).join('')
+  const p = PARTNERS[8]
+  const docs = [
+    ['paper', 'Տեխանձնագիր · առջև', 'tp-front.jpg', 'ok'], ['paper', 'Տեխանձնագիր · հետև', 'tp-back.jpg', 'ok'], ['paper', 'ԱՊՊԱ · 14.03.2027', 'osago.pdf', 'ok'],
+    ['car', 'Լուսանկար · առջևից', 'front.jpg', 'ok'], ['car', 'Լուսանկար · կողքից', 'side.jpg', 'ok'], ['none', 'Լուսանկար · սրահ', 'չի վերբեռնվել', 'miss'],
+  ]
+  document.getElementById('detail').innerHTML = `
+    <div class="ah"><span class="car">${carImg('partner', 'Tesla Model Y')}</span>
+      <div style="min-width:0"><h2>Tesla Model Y · <span class="plate" style="vertical-align:3px">${p.plate}</span></h2>
+        <div class="meta"><span class="pill warn"><i data-lucide="clock"></i>Սպասում է հաստատման</span><span class="typ partner"><i data-lucide="handshake"></i>${p.name}</span><span class="faint" style="font:var(--c-small)">ներկայացվել է երեկ, 16:20</span></div>
+        <dl><dt>Տարի</dt><dd>2023</dd><dt>Գույն</dt><dd>մոխրագույն</dd><dt>Նստատեղ</dt><dd>4 + վարորդ</dd><dt>VIN</dt><dd class="mono">•••• 4821</dd></dl></div>
+      <a class="btn ghost s" href="partners.html?theme=${THEME}&p=8">Գործընկերի էջը <i data-lucide="arrow-right"></i></a></div>
+    <div class="scroll-y grow">
+      <div class="sect"><h3>Փաստաթղթեր <span class="sub">5 / 6 · սեղմեք՝ ամբողջ չափով</span></h3>
+        <div class="docgrid">${docs.map(([k, t, f, st]) => `<div class="dt"><div class="pv">${k === 'paper' ? '<span class="paper"><i style="width:60%"></i><i></i><i></i><i style="width:80%"></i><i></i><i style="width:40%"></i></span>' : k === 'car' ? `<span class="car">${carImg('partner')}</span><span class="tag2">օրինակ</span>` : '<i data-lucide="image-off" style="color:var(--ink-faint)"></i>'}</div>
+          <div class="cap"><b>${t}</b>${st === 'ok' ? '<span class="check on" style="font-size:12px"><i class="b"></i>Ստուգված</span>' : '<span class="pill warn" style="height:20px;align-self:flex-start">Պակասում է</span>'}</div></div>`).join('')}</div>
+      </div>
+      <div class="sect" style="border:0"><h3>Դաս <span class="sub">սահմանում է օպերատորը հաստատելիս, ոչ թե գործընկերը</span></h3>
+        <div class="classes" role="radiogroup" aria-label="Մեքենայի դաս">${TIERS.map((t) => `<span class="chip${t.id === 'partner' ? ' on' : ''}" role="radio" aria-checked="${t.id === 'partner'}">${t.cls}</span>`).join('')}</div>
+        <div class="result"><span class="car">${carImg('partner')}</span><span>Կստանա պատվերներ՝ <b>Eco Partner</b> փաթեթով · վճար՝ <b>15%</b> (Գործընկեր ստանդարտ)</span></div>
+      </div>
+    </div>
+    <div class="decide">
+      <div><label class="label">Մերժման պատճառ <span class="faint" style="font-weight:400">· պարտադիր, կուղարկվի գործընկերոջը</span></label>
+        <div class="input"><span class="val ph">օր. Սրահի լուսանկարը չկա</span></div></div>
+      <div class="acts"><button class="btn danger" aria-disabled="true" title="Նախ գրեք պատճառը" style="opacity:.55">Մերժել</button><button class="btn secondary">Խնդրել լրացնել</button><button class="btn primary">Հաստատել՝ Կոմֆորտ <span class="kbd">↵</span></button></div>
+    </div>`
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

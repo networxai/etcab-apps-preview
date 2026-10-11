@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Partner fee plans</title>
+<link rel="stylesheet" href="console.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+<style>
+  .content { grid-template-columns: 264px minmax(0, 1fr) 340px; }
+  @media (max-width: 1400px) { .content { grid-template-columns: 232px minmax(0, 1fr) 300px; } .fp .car { display: none; } col.w1 { width: 88px !important; } col.w2 { width: 104px !important; } col.w3 { width: 80px !important; } col.w4 { width: 96px !important; } }
+  .col { display: flex; flex-direction: column; gap: var(--gap); min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+  .col > .card { flex: none; overflow: visible; }
+  .plan { display: flex; flex-direction: column; gap: 2px; padding: 10px var(--inset); border-bottom: 1px solid var(--line-soft); }
+  .plan.on { background: var(--surface-alt); box-shadow: inset 3px 0 0 var(--brand-vivid); }
+  .plan b { font: var(--c-strong); white-space: nowrap; display: flex; align-items: center; gap: 4px 6px; flex-wrap: wrap; }
+  .plan span { font: var(--c-small); color: var(--ink-muted); white-space: nowrap; }
+  .ph2 { display: flex; align-items: center; gap: 10px; padding: 14px var(--inset); border-bottom: 1px solid var(--line-soft); flex-wrap: wrap; }
+  .ph2 h2 { font: var(--c-title); white-space: nowrap; }
+  .fp td { height: 48px; }
+  .fp .tc { display: flex; align-items: center; gap: 10px; }
+  .fp .tc b { font: var(--c-strong); white-space: nowrap; }
+  .pct { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; width: 76px; height: 30px; padding: 0 8px; border-radius: var(--r-ctl); box-shadow: inset 0 0 0 1px var(--line-control); background: var(--surface); font: 500 13px/18px var(--mono); }
+  .pct span { color: var(--ink-faint); font-family: var(--font); }
+  .fp .r { text-align: right; }
+  .rules { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 16px; align-items: center; padding: var(--inset); font: var(--c-body); }
+  .rules dt { color: var(--ink-muted); white-space: nowrap; }
+  .rules dd { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .rules .input { width: 120px; }
+  .tax { padding: 12px var(--inset); border-bottom: 1px solid var(--line-soft); display: flex; flex-direction: column; gap: 8px; }
+  .tax .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .tax .top b { font: var(--c-strong); }
+  .tax .d { font: var(--c-small); color: var(--ink-muted); }
+  .tax .f { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .tax .f .input { background: var(--surface-alt); box-shadow: inset 0 0 0 1px var(--line-soft); }
+  .hist { padding: 4px var(--inset) 12px; display: grid; gap: 6px; font: var(--c-body); }
+  .hist div { display: flex; justify-content: space-between; gap: 8px; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <span class="crumb">Գործընկերներ <i data-lucide="chevron-right"></i></span><h1>Վճարի պլաններ</h1>
+      <div class="live"></div>
+    </header>
+    <div class="content">
+      <section class="card" aria-label="Պլաններ">
+        <div class="card-h"><h2>Պլաններ</h2><span class="end"><button class="btn secondary s icon" aria-label="Նոր պլան"><i data-lucide="plus"></i></button></span></div>
+        <div class="plan on"><b>Գործընկեր ստանդարտ <span class="pill brand" style="height:20px">Լռելյայն</span></b><span>9 գործընկեր · 15–20%</span></div>
+        <div class="plan"><b>Մեկնարկային 12%</b><span>2 գործընկեր · մինչև 31.10</span></div>
+        <div class="plan"><b>VIP սեփականատեր</b><span>1 գործընկեր · անհատական</span></div>
+        <div style="margin-top:auto;padding:12px var(--inset)"><div class="notice neutral"><i data-lucide="info"></i><span>Պարկի վարորդների պլանները՝ Ֆինանսներ → Վարորդների հաշիվներ։</span></div></div>
+      </section>
+
+      <div class="col">
+        <section class="card" aria-label="Գործընկեր ստանդարտ">
+          <div class="ph2"><h2>Գործընկեր ստանդարտ</h2><span class="pill brand">Լռելյայն</span><span class="faint" style="font:var(--c-small)">գործում է <span class="num">01.10.2026</span>-ից</span>
+            <span style="flex:1"></span><button class="btn ghost s">Կրկնօրինակել</button><button class="btn primary s">Պահպանել՝ 15.10-ից</button></div>
+          <table class="tbl fp"><colgroup><col><col class="w1" style="width:96px"><col class="w2" style="width:112px"><col class="w3" style="width:88px"><col class="w4" style="width:104px"></colgroup>
+            <thead><tr><th>Փաթեթ</th><th class="r">Վճար</th><th class="r">Օրինակ՝ 2,1 կմ</th><th class="r">Մեզ</th><th class="r">Գործընկերին</th></tr></thead>
+            <tbody id="rows"></tbody></table>
+          <div style="padding:10px var(--inset);font:var(--c-small);color:var(--ink-faint)">Վճարը հաշվարկվում է ավարտված պատվերի գնից և գանձվում դրամապանակից։ Կանխիկ պատվերի գումարը գործընկերի մոտ է, ուստի գանձվում է միայն վճարը։</div>
+        </section>
+        <section class="card" aria-label="Մնացորդի կանոններ">
+          <div class="card-h"><h2>Մնացորդի կանոններ</h2><span class="sub">բոլոր գործընկերների համար</span></div>
+          <dl class="rules">
+            <dt>Արգելափակել պատվերներից</dt><dd><span class="input"><span class="val mono">0</span><span class="faint">֏</span></span><span class="faint">-ից ցածր · ընթացիկ պատվերն ավարտվում է</span></dd>
+            <dt>Զգուշացնել</dt><dd><span class="input"><span class="val mono">3 000</span><span class="faint">֏</span></span><span class="faint">-ից ցածր · ~1 օրվա միջին վճար (2 870 ֏)</span></dd>
+            <dt>Ստուգվում է</dt><dd>առցանց անցնելիս · հերթափոխ բացելիս · նախապատվեր սկսելիս · առաքման ժամանակ</dd>
+          </dl>
+        </section>
+      </div>
+
+      <aside class="col">
+        <section class="card" aria-label="Հարկային տողեր">
+          <div class="card-h"><h2>Հարկային տողեր</h2><span class="end pill">Անջատված</span></div>
+          <div class="tax"><div class="top"><b>Հարկ վճարի վրա</b><span class="switch" role="switch" aria-checked="false"><i class="t"></i>Անջ.</span></div>
+            <span class="d">ԱԱՀ կամ շրջանառության հարկ մեր վճարի վրա, առանձին տողով</span>
+            <div class="f"><div><label class="label">Եղանակ</label><div class="input"><span class="val ph">ներառված / ավելացված</span></div></div><div><label class="label">Դրույք</label><div class="input"><span class="val ph">—</span><span class="faint">%</span></div></div></div></div>
+          <div class="tax" style="border:0"><div class="top"><b>Տուրքի պահում</b><span class="switch" role="switch" aria-checked="false"><i class="t"></i>Անջ.</span></div>
+            <span class="d">Ուղևորափոխադրման տուրքը պահել գործընկերոջ փոխարեն</span>
+            <div class="f"><div><label class="label">Կանխիկ</label><div class="input"><span class="val ph">—</span><span class="faint">%</span></div></div><div><label class="label">Անկանխիկ</label><div class="input"><span class="val ph">—</span><span class="faint">%</span></div></div></div></div>
+          <div style="padding:0 var(--inset) var(--inset)"><div class="notice amber"><i data-lucide="scale"></i><span>Անջատված է մինչև հաշվապահի որոշումը։ Դրույքները լրացնում է ադմինը, ուժի մեջ մտնելու ամսաթվով, աուդիտով։</span></div></div>
+        </section>
+        <section class="card" aria-label="Պատմություն">
+          <div class="card-h"><h2>Տարբերակներ</h2></div>
+          <div class="hist"><div><span>15.10-ից <span class="faint">· սևագիր</span></span><span class="pill warn" style="height:20px">Չպահպանված</span></div><div><span class="num">01.10.2026</span><span class="faint">Սարգիս Ա.</span></div><div><span class="num">12.09.2026</span><span class="faint">Սարգիս Ա.</span></div></div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>
+<script>
+  shell('feeplans')
+  const pct = { city: 15, partner: 15, kids: 16, business: 18, van: 18, vip: 20 }
+  document.getElementById('rows').innerHTML = TIERS.map((t) => {
+    const f = fare(t, 2.1, 4), fee = Math.round(f * pct[t.id] / 100)
+    return `<tr><td><span class="tc"><span class="car s">${carImg(t.id)}</span><b>${t.name}</b></span></td><td class="r"><span class="pct">${pct[t.id]}<span>%</span></span></td>
+      <td class="r mono">${amd(f)}</td><td class="r mono">${amd(fee)}</td><td class="r mono">${amd(f - fee)}</td></tr>`
+  }).join('')
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

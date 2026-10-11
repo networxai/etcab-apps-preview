@@ -19,17 +19,21 @@
   window.carImg = (id, alt) => `<img src="${A}cars/${id}.webp" alt="${alt || ''}" decoding="async">`
   window.tierById = (id) => TIERS.find((t) => t.id === id)
 
-  /* ── Navigation (strings from lib/i18n.ts hy). "Պատվերներ" is the one new route (rides list). ── */
-  /* IA follows docs/superpowers/design/2026-10-11-console-gaps.md §3: Requests inbox, Money group, Rider app group.
-     Items marked * in NOTES are gap screens not designed in this phase. */
+  /* ── Navigation (strings from lib/i18n.ts hy where a key exists).
+     IA: 2026-10-11-console-gaps.md §3 + owner 2026-10-11 «partners must have a different management section».
+     Drivers = fleet drivers only; Partners is its own group. The rider-app item formerly «Գործընկերներ» (businesses
+     on the rider home) is renamed «Բիզնես գործընկերներ» so the word means one thing in this nav.
+     Groups marked fold:true render collapsed unless they hold the active page (keeps the nav inside 900px). ── */
   const NAV = [
     { items: [['overview', 'layout-dashboard', 'Ընդհանուր'], ['dispatch', 'activity', 'Դիսպետչեր', '2', true], ['rides', 'list', 'Պատվերներ'], ['requests', 'inbox', 'Հարցումներ', '4', true]] },
-    { group: 'Ավտոպարկ', items: [['drivers', 'users', 'Վարորդներ', '42'], ['vehicles', 'car', 'Մեքենաներ', '40'], ['tariffs', 'tag', 'Սակագներ'], ['zones', 'map', 'Գոտիներ']] },
-    { group: 'Ֆինանսներ', items: [['settlement', 'wallet', 'Վարորդների հաշիվներ'], ['billing', 'receipt', 'Վճարային պլաններ'], ['customers', 'user-check', 'Հաճախորդներ'], ['companies', 'building-2', 'Կազմակերպություններ'], ['fiscal', 'scroll-text', 'Ֆիսկալ հերթ'], ['reports', 'chart-column', 'Հաշվետվություններ']] },
-    { group: 'Ուղևորի հավելված', items: [['promotions', 'megaphone', 'Ակցիաներ'], ['partners', 'handshake', 'Գործընկերներ'], ['apptexts', 'smartphone', 'Տեքստեր և կապ']] },
-    { group: 'Կառավարում', items: [['operators', 'user-cog', 'Օպերատորներ'], ['integrations', 'plug', 'Ինտեգրումներ'], ['audit', 'history', 'Աուդիտ'], ['settings', 'settings', 'Կարգավորումներ']] },
+    { group: 'Ավտոպարկ', items: [['drivers', 'users', 'Վարորդներ', '30'], ['vehicles', 'car', 'Մեքենաներ', '28'], ['tariffs', 'tag', 'Սակագներ'], ['zones', 'map', 'Գոտիներ']] },
+    { group: 'Գործընկերներ', items: [['partners', 'handshake', 'Գործընկերներ', '12'], ['approvals', 'badge-check', 'Հաստատումներ', '3', true], ['topups', 'wallet', 'Լիցքավորումներ'], ['feeplans', 'percent', 'Վճարի պլաններ']] },
+    { group: 'Ֆինանսներ', items: [['settlement', 'receipt', 'Վարորդների հաշիվներ'], ['customers', 'user-check', 'Հաճախորդներ'], ['companies', 'building-2', 'Կազմակերպություններ'], ['fiscal', 'scroll-text', 'Ֆիսկալ հերթ'], ['reports', 'chart-column', 'Հաշվետվություններ']] },
+    { group: 'Ուղևորի հավելված', fold: true, items: [['promotions', 'megaphone', 'Ակցիաներ'], ['bizpartners', 'store', 'Բիզնես գործընկերներ'], ['apptexts', 'smartphone', 'Տեքստեր և կապ']] },
+    { group: 'Կառավարում', fold: true, items: [['operators', 'user-cog', 'Օպերատորներ'], ['integrations', 'plug', 'Ինտեգրումներ'], ['audit', 'history', 'Աուդիտ'], ['settings', 'settings', 'Կարգավորումներ']] },
   ]
-  const href = (id) => (['overview', 'dispatch', 'rides', 'drivers', 'tariffs'].includes(id) ? `${id}.html?theme=${THEME}` : '#')
+  const PAGES = ['overview', 'dispatch', 'rides', 'drivers', 'tariffs', 'partners', 'approvals', 'topups', 'feeplans']
+  const href = (id) => (PAGES.includes(id) ? `${id}.html?theme=${THEME}` : '#')
 
   window.shell = function (active) {
     const screen = document.getElementById('screen')
@@ -43,9 +47,13 @@
          <div class="search"><i data-lucide="search"></i><span class="grow">Որոնել…</span><span class="kbd">⌘K</span></div>`
     h += '<div class="scroll">'
     NAV.forEach((g, gi) => {
-      if (rail) { if (gi) h += '<div class="sep"></div>' } else if (g.group) h += `<div class="group">${g.group}</div>`
+      const folded = !rail && g.fold && !g.items.some(([id]) => id === active)
+      if (rail) { if (gi) h += '<div class="sep"></div>' } else if (g.group) h += folded
+        ? `<button class="group fold" aria-expanded="false">${g.group}<i data-lucide="chevron-right"></i></button>`
+        : `<div class="group">${g.group}</div>`
+      if (folded) return
       g.items.forEach(([id, icon, label, n, alarm]) => {
-        h += `<a href="${href(id)}" class="${id === active ? 'on' : ''}" ${rail ? `aria-label="${label}" title="${label}"` : ''}><i data-lucide="${icon}"></i>${rail ? '' : `<span>${label}</span>`}${n ? `<span class="n${alarm ? ' alarm' : ''} num"${alarm ? ` aria-label="${n} խնդիր"` : ''}>${n}</span>` : ''}</a>`
+        h += `<a href="${href(id)}" class="${id === active ? 'on' : ''}" ${rail ? `aria-label="${label}" title="${label}"` : ''}><i data-lucide="${icon}"></i>${rail ? '' : `<span>${label}</span>`}${n ? `<span class="n${alarm ? ' alarm' : ''} num"${alarm ? ` aria-label="${n} սպասում է"` : ''}>${n}</span>` : ''}</a>`
       })
     })
     h += '</div>'
@@ -95,6 +103,30 @@
     type: [3, 4, 8, 9, 11].includes(i) ? 'partner' : 'fleet',
     wallet: { 3: 18400, 4: 2600, 8: -1200, 9: 41000, 11: 7300 }[i] }))
   window.DTYPE = { fleet: ['Պարկի', 'Պարկի վարորդ', 'car'], partner: ['Գործընկեր', 'Գործընկեր վարորդ', 'handshake'] }
+  /* ── Partners (owner 2026-10-11): own car, prepaid wallet, blocked below 0, warned below ~1 day of fees (3 000 ֏).
+     code = the personal payment reference for bank transfers. car: [tier render, model, plate, approval]. ── */
+  window.WARN_BELOW = 3000
+  window.PARTNERS = [
+    ['Գագիկ Ավետիսյան', 'ԳԱ', '055 20-44-19', 'P-0034', 18400, 'ride', ['partner', 'Tesla Model 3 · 2022 · սպիտակ', '34 LS 108', 'approved'], 'ok'],
+    ['Նարեկ Հովհաննիսյան', 'ՆՀ', '098 23-55-90', 'P-0035', 2600, 'free', ['business', 'VW ID.4 · 2023 · սպիտակ', '07 AB 913', 'approved'], 'ok'],
+    ['Կարեն Մելքոնյան', 'ԿՄ', '077 50-12-12', 'P-0041', -1200, 'off', ['partner', 'Tesla Model 3 · 2021 · սպիտակ', '44 KM 771', 'approved'], 'warn'],
+    ['Դավիթ Կարապետյան', 'ԴԿ', '041 33-90-15', 'P-0042', 41000, 'ride', ['vip', 'VW ID.6 · 2024 · սպիտակ', '09 DK 118', 'approved'], 'ok'],
+    ['Էդգար Պողոսյան', 'ԷՊ', '095 14-28-63', 'P-0043', 7300, 'free', ['city', 'VW ID.3 · 2022 · սպիտակ', '27 EP 336', 'approved'], 'ok'],
+    ['Մարինե Գևորգյան', 'ՄԳ', '093 71-40-05', 'P-0047', 950, 'free', ['city', 'VW ID.3 · 2021 · արծաթ', '16 MG 205', 'approved'], 'ok'],
+    ['Արթուր Սիմոնյան', 'ԱՍ', '094 88-12-30', 'P-0048', 12800, 'away', ['business', 'VW ID.4 · 2022 · սև', '88 AS 012', 'approved'], 'ok'],
+    ['Լևոն Թադևոսյան', 'ԼԹ', '099 05-61-77', 'P-0050', 0, 'off', ['van', 'Mercedes V · 2020 · սև', '50 LT 650', 'pending'], 'ok'],
+    ['Սամվել Հարությունյան', 'ՍՀ', '077 33-08-91', 'P-0051', 5400, 'off', ['partner', 'Tesla Model Y · 2023 · մոխրագույն', '11 SH 511', 'pending'], 'warn'],
+    ['Գոռ Մարտիրոսյան', 'ԳՄ', '096 20-17-44', 'P-0052', 21900, 'free', ['partner', 'Tesla Model 3 · 2023 · կապույտ', '42 GM 420', 'approved'], 'ok'],
+    ['Անահիտ Վարդանյան', 'ԱՎ', '091 64-93-12', 'P-0053', -3400, 'off', ['kids', 'VW ID.3 · 2022 · սպիտակ', '31 AV 310', 'suspended'], 'bad'],
+    ['Ռաֆայել Ղուկասյան', 'ՌՂ', '055 47-02-86', 'P-0054', 0, 'off', ['business', 'Skoda Enyaq · 2024 · կանաչ', '73 RG 730', 'pending'], 'ok'],
+  ].map(([name, ini, phone, code, bal, state, [tier, model, plate, appr], docs]) => ({ name, ini, phone, code, bal, state, tier, model, plate, appr, docs }))
+  window.APPR = { approved: ['ok', 'Հաստատված', 'badge-check'], pending: ['warn', 'Սպասում է', 'clock'], rejected: ['bad', 'Մերժված', 'x'], suspended: ['bad', 'Կասեցված', 'pause'] }
+  window.balTone = (b) => (b < 0 ? ['bad', 'Արգելափակված', 'lock'] : b < WARN_BELOW ? ['warn', 'Քիչ է', 'triangle-alert'] : null)
+  /* Balance cell: amount + marker. Low/blocked carry an icon and a word, never colour alone. */
+  window.balCell = (b) => {
+    const t = balTone(b), txt = amd(Math.abs(b)).replace(/^/, b < 0 ? '−' : '')
+    return t ? `<span class="pill ${t[0]} bal"><i data-lucide="${t[2]}"></i><span class="mono">${txt}</span></span>` : `<span class="mono">${txt}</span>`
+  }
   window.DSTATE = {
     free: ['ok', 'Ազատ'], ride: ['', 'Պատվերով'], away: ['warn', 'Դադարի մեջ'], lost: ['bad', 'Լռում է'], off: ['', 'Անջատված'],
   }

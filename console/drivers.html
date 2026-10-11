@@ -12,52 +12,7 @@
 <style>
   .content { grid-template-columns: minmax(0, 1fr) 420px; }
   @media (max-width: 1400px) { .content { grid-template-columns: minmax(0, 1fr) 384px; } .carcell .car { display: none; } col.c-car { width: 100px !important; } col.c-doc { width: 120px !important; } col.c-typ { width: 116px !important; } .tabsl { gap: 10px; } .shift { grid-template-columns: 128px minmax(0, 1fr) !important; } }
-  .dp .scroll-y { overflow-x: hidden; }
-  .filters { display: flex; align-items: center; gap: 6px; padding: 8px var(--inset); border-bottom: 1px solid var(--line-soft); flex: none; overflow: hidden; }
-  .seg { display: flex; gap: 2px; padding: 3px; border-radius: var(--r-ctl); background: var(--surface-alt); }
-  .seg button { height: 26px; padding: 0 10px; border-radius: 6px; font: var(--c-strong); color: var(--ink-muted); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
-  .seg button.on { background: var(--surface); color: var(--ink); box-shadow: var(--e1); }
-  .seg .c { font: var(--c-small); color: var(--ink-faint); }
   .dt td { height: 52px; }
-  .who { display: flex; align-items: center; gap: 10px; min-width: 0; }
-  .who .nm { display: flex; flex-direction: column; min-width: 0; }
-  .who .nm b { font: var(--c-strong); overflow: hidden; text-overflow: ellipsis; }
-  .who .nm span { font: 400 12px/16px var(--mono); color: var(--ink-muted); }
-  .typ { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 6px; border-radius: var(--r-tag); font: var(--c-label); white-space: nowrap; }
-  .typ svg { width: 12px; height: 12px; }
-  .typ.fleet { background: var(--surface-alt); color: var(--ink-muted); box-shadow: inset 0 0 0 1px var(--line-soft); }
-  .typ.partner { background: var(--brand-tint); color: var(--brand-text); }
-  .carcell { display: flex; align-items: center; gap: 8px; }
-  .neg { color: var(--danger-c); font-weight: 600; }
-
-  .dp .head { padding: 14px var(--inset) 0; display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 12px; align-items: start; flex: none; }
-  .dp .head h2 { font: var(--c-title); white-space: nowrap; }
-  .dp .head .meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
-  .dp .acts { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px var(--inset) 0; flex: none; }
-  .tabsl { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 0 var(--inset); border-bottom: 1px solid var(--line-soft); margin-top: 12px; flex: none; }
-  .tabsl button { height: 40px; font: var(--c-strong); color: var(--ink-muted); display: flex; align-items: center; gap: 6px; white-space: nowrap; box-shadow: inset 0 -2px 0 transparent; }
-  .tabsl button.on { color: var(--ink); box-shadow: inset 0 -2px 0 var(--ink); }
-  .tabsl .c { font: var(--c-small); color: var(--ink-faint); }
-  .blk { margin: 12px var(--inset) 0; border-radius: var(--r-card); background: var(--surface-alt); padding: 12px; }
-  .blk h3 { font: var(--c-label); color: var(--ink-muted); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-  .blk h3 .end { margin-left: auto; }
-  .wallet .bal { font: var(--c-kpi); font-variant-numeric: tabular-nums; margin: 4px 0 2px; white-space: nowrap; }
-  .wallet .bal small { font: 500 15px/20px var(--font); color: var(--ink-faint); }
-  .wallet .rows { display: grid; grid-template-columns: 1fr auto; row-gap: 4px; font: var(--c-body); margin: 8px 0 12px; }
-  .wallet .rows dt { color: var(--ink-muted); } .wallet .rows dd { text-align: right; font-variant-numeric: tabular-nums; }
-  .wallet .btns { display: flex; gap: 6px; }
-  .shift { display: grid; grid-template-columns: 156px minmax(0, 1fr); gap: 12px; align-items: center; margin-top: 8px; }
-  .shift .facts { display: grid; grid-template-columns: auto auto; gap: 4px 12px; font: var(--c-body); align-content: center; }
-  .shift .facts dt { color: var(--ink-muted); white-space: nowrap; } .shift .facts dd { font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .docs { margin-top: 6px; }
-  .doc { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; height: 44px; border-bottom: 1px solid var(--line-soft); }
-  .doc:last-child { border-bottom: 0; }
-  .doc .ic { width: 28px; height: 28px; border-radius: 6px; background: var(--surface); display: grid; place-items: center; color: var(--ink-muted); box-shadow: inset 0 0 0 1px var(--line-soft); }
-  .doc .t { display: flex; flex-direction: column; min-width: 0; }
-  .doc .t b { font: var(--c-strong); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .doc .t span { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .dropz { display: flex; align-items: center; justify-content: center; gap: 6px; height: 36px; margin-top: 8px; border-radius: var(--r-ctl); box-shadow: inset 0 0 0 1px var(--line-control); font: var(--c-body); color: var(--ink-muted); background: var(--surface); }
-  .dropz u { color: var(--brand-text); text-decoration: none; font-weight: 500; }
 </style>
 </head>
 <body>
@@ -65,28 +20,28 @@
   <div class="main">
     <header class="bar">
       <h1>Վարորդներ</h1>
-      <span class="crumb num">42 · հերթափոխում 12</span>
+      <span class="crumb num">Պարկի վարորդներ · 30 · հերթափոխում 7 · գործընկերները՝ <a href="partners.html" style="color:var(--brand-text)">առանձին բաժնում</a></span>
       <div class="live"></div>
     </header>
     <div class="content">
       <section class="card" aria-label="Վարորդների ցանկ">
         <div class="filters">
-          <div class="seg" role="tablist" aria-label="Վարորդի տեսակ"><button class="on">Բոլորը <span class="c num">42</span></button><button><i data-lucide="car"></i>Պարկի <span class="c num">30</span></button><button><i data-lucide="handshake"></i>Գործընկեր <span class="c num">12</span></button></div>
+          <div class="seg" role="tablist" aria-label="Հերթապահություն"><button class="on">Բոլորը <span class="c num">30</span></button><button>Հերթափոխում <span class="c num">7</span></button><button>Անջատված <span class="c num">23</span></button></div>
           <div class="input" style="width:236px"><i data-lucide="search"></i><span class="val ph">օր. 11 AA 111</span><span class="kbd">/</span></div>
           <span style="flex:1"></span>
           <button class="btn secondary s"><i data-lucide="plus"></i>Նոր վարորդ</button>
         </div>
         <div class="filters" style="padding-top:6px;padding-bottom:6px">
-          <span class="chip">Հերթափոխում <span class="c num">12</span></span>
           <span class="chip">Փաստաթուղթը լրանում է <span class="c num">3</span></span>
           <span class="chip">Արգելափակված <span class="c num">1</span></span>
           <span class="chip">Ջնջման հայտ <span class="c num">1</span></span>
-          <span class="chip">Ավելին <i data-lucide="chevron-down"></i></span>
+          <span class="chip">Առանց մեքենայի <span class="c num">2</span></span>
+
         </div>
         <div class="scroll-y grow">
           <table class="tbl dt">
-            <colgroup><col><col class="c-typ" style="width:112px"><col class="c-car" style="width:140px"><col style="width:124px"><col class="c-doc" style="width:120px"><col style="width:108px"></colgroup>
-            <thead><tr><th>Վարորդ</th><th>Տեսակ</th><th>Մեքենա</th><th>Հերթապահություն</th><th>Փաստաթղթեր</th><th class="r">Դրամապանակ</th></tr></thead>
+            <colgroup><col><col class="c-car" style="width:150px"><col style="width:132px"><col class="c-doc" style="width:124px"><col style="width:112px"></colgroup>
+            <thead><tr><th>Վարորդ</th><th>Պարկի մեքենա</th><th>Հերթապահություն</th><th>Փաստաթղթեր</th><th class="r">Այսօր պարկին</th></tr></thead>
             <tbody id="rows"></tbody>
           </table>
         </div>
@@ -97,38 +52,34 @@
 </div>
 <script>
   shell('drivers')
-  const sel = +(new URLSearchParams(location.search).get('d') ?? 3)
-  const docState = [['ok', 0], ['ok', 0], ['warn', 1], ['ok', 0], ['ok', 0], ['bad', 1], ['ok', 0], ['ok', 0], ['warn', 1], ['ok', 0], ['ok', 0], ['ok', 0]]
-  document.getElementById('rows').innerHTML = DRIVERS.map((d, i) => {
+  /* Fleet drivers only (owner 2026-10-11): partners have their own section. Fleet drivers drive our cars, so
+     the car column is the shift car, and money is settlement by billing plan, not a wallet. */
+  const EXTRA = [['Մհեր Աբգարյան', 'ՄԱ', '093 15-77-02', '19 MA 190', 'city', 'off'], ['Սոնա Խաչատրյան', 'ՍԽ', '077 62-11-48', '20 SK 202', 'kids', 'off'],
+    ['Վարդան Մանուկյան', 'ՎՄ', '094 30-25-66', '05 VM 050', 'business', 'off'], ['Հովիկ Զաքարյան', 'ՀԶ', '098 41-09-37', '64 HZ 640', 'van', 'off'], ['Աշոտ Բաղդասարյան', 'ԱԲ', '055 76-48-21', '38 AB 381', 'city', 'off']]
+  const FLEET = DRIVERS.filter((d) => d.type === 'fleet').concat(EXTRA.map(([name, ini, phone, plate, tier, state]) => ({ name, ini, phone, plate, tier, state, type: 'fleet' })))
+  const sel = +(new URLSearchParams(location.search).get('d') ?? 0)
+  const docState = ['ok', 'ok', 'warn', 'bad', 'ok', 'ok', 'ok', 'ok', 'ok', 'warn', 'ok', 'ok']
+  const today = [2964, 3420, 1860, 0, 2280, 3110, 0, 0, 0, 0, 0, 0]
+  document.getElementById('rows').innerHTML = FLEET.map((d, i) => {
     const [tone, word] = DSTATE[d.state]
-    const [tt, tw, ti] = DTYPE[d.type]
-    const [ds] = docState[i]
+    const ds = docState[i]
     const doc = ds === 'ok' ? '<span class="pill ok"><i data-lucide="circle-check"></i>Կարգին</span>' : ds === 'warn' ? '<span class="pill warn"><i data-lucide="clock"></i>9 օր</span>' : '<span class="pill bad"><i data-lucide="circle-alert"></i>Ժամկետանց</span>'
-    const w = d.type === 'partner' ? `<span class="${d.wallet < 0 ? 'neg' : ''}">${amd(d.wallet).replace('-', '−')}</span>` : '<span class="faint">—</span>'
     return `<tr class="${i === sel ? 'on' : ''}"><td><span class="who"><span class="av">${d.ini}</span><span class="nm"><b>${d.name}</b><span>${d.phone}</span></span></span></td>
-      <td><span class="typ ${d.type}"><i data-lucide="${ti}"></i>${tt}</span></td>
-      <td><span class="carcell"><span class="car xs">${carImg(d.tier)}</span><span class="plate">${d.plate}</span></span></td>
-      <td><span class="pill ${tone}"><i class="d"></i>${word}</span></td><td>${doc}</td><td class="r mono">${w}</td></tr>`
+      <td>${d.state === 'off' ? '<span class="faint">—</span>' : `<span class="carcell"><span class="car xs">${carImg(d.tier)}</span><span class="plate">${d.plate}</span></span>`}</td>
+      <td><span class="pill ${tone}"><i class="d"></i>${word}</span></td><td>${doc}</td><td class="r mono">${today[i] ? amd(today[i]) : '<span class="faint">—</span>'}</td></tr>`
   }).join('')
 
-  const d = DRIVERS[sel], T = tierById(d.tier), partner = d.type === 'partner'
+  const d = FLEET[sel], T = tierById(d.tier), partner = false
   const [tone, word] = DSTATE[d.state]
   const [, tw, ti] = DTYPE[d.type]
-  const wallet = partner ? `
-    <div class="blk wallet">
-      <h3><i data-lucide="wallet"></i>Դրամապանակ<span class="end pill ok" style="height:20px"><i class="d"></i>Ակտիվ</span></h3>
-      <div class="bal num">${amd(d.wallet)}</div>
-      <div class="faint" style="font:var(--c-small)">Վերջին լիցքավորումը՝ <span class="num">08.10 · 20 000 ֏</span> · կանխիկ</div>
-      <dl class="rows"><dt>Հավելվածի վճար այսօր</dt><dd>−1 140 ֏</dd><dt>Հարկեր այսօր</dt><dd>−380 ֏</dd><dt>Արգելափակվում է</dt><dd>0 ֏-ից ցածր</dd></dl>
-      <div class="btns"><button class="btn primary">Գրանցել լիցքավորում</button><button class="btn secondary">Ճշգրտում</button></div>
-    </div>` : `
-    <div class="blk"><h3><i data-lucide="receipt"></i>Հաշվարկ<span class="end faint" style="font-weight:400">Պարկի վարորդ</span></h3>
-      <div style="font:var(--c-body);color:var(--ink-muted);margin-top:6px">Դրամապանակ չունի. հաշվարկը՝ «Ստանդարտ 20%» վճարային պլանով։ Այսօր պարկին՝ <b class="num" style="color:var(--ink)">2 964 ֏</b></div></div>`
+  const wallet = `
+    <div class="blk"><h3><i data-lucide="receipt"></i>Հաշվարկ<span class="end faint" style="font-weight:400">«Պարկի ստանդարտ 20%»</span></h3>
+      <div style="font:var(--c-body);color:var(--ink-muted);margin-top:6px">Վարորդը հանձնում է կանխիկը հերթափոխի վերջում։ Այսօր պարկին՝ <b class="num" style="color:var(--ink)">2 964 ֏</b> · մնացորդ՝ <b class="num" style="color:var(--ink)">0 ֏</b></div></div>`
   document.getElementById('dp').innerHTML = `
     <div class="scroll-y grow">
       <div class="head"><span class="av l">${d.ini}</span>
         <div style="min-width:0"><h2>${d.name}</h2>
-          <div class="meta"><span class="mono muted" style="font-size:12px">+374 ${d.phone.slice(1)}</span><span class="typ ${d.type}"><i data-lucide="${ti}"></i>${tw}</span><span class="pill ${tone}"><i class="d"></i>${word}</span></div></div>
+          <div class="meta"><span class="mono muted" style="font-size:12px">+374 ${d.phone.slice(1)}</span><span class="pill ${tone}"><i class="d"></i>${word}</span></div></div>
         <button class="btn ghost icon s" aria-label="Փակել (Esc)"><i data-lucide="x"></i></button></div>
       <div class="acts"><button class="btn secondary s"><i data-lucide="key-round"></i>Մուտքի կոդ</button><button class="btn secondary s icon" aria-label="Զանգել"><i data-lucide="phone"></i></button><span style="flex:1"></span><button class="btn danger s"><i data-lucide="power"></i>Ավարտել հերթապահությունը</button></div>
       <div class="tabsl" role="tablist"><button class="on">Ընդհանուր</button><button>Պատվերներ</button><button>Գումար</button><button>Փաստաթղթեր <span class="c num">4</span></button><button aria-label="Գնահատական 4,9"><i data-lucide="star"></i><span class="num">4,9</span></button></div>
