@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tariffs and tiers</title>
+<link rel="stylesheet" href="console.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+<style>
+  .content { grid-template-columns: minmax(0, 1fr) 348px; }
+  .col { display: flex; flex-direction: column; gap: var(--gap); min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+  .col > .card { flex: none; overflow: visible; }
+  .tier { display: grid; grid-template-columns: 16px 124px minmax(0, 1fr) 132px 236px; gap: 12px; align-items: center; min-height: 80px; padding: 8px var(--inset) 8px 10px; border-bottom: 1px solid var(--line-soft); }
+  .tier:last-child { border-bottom: 0; }
+  .tier .grip { color: var(--ink-faint); }
+  .slot { position: relative; width: 124px; height: 64px; border-radius: var(--r-ctl); background: var(--surface-alt); display: grid; place-items: center; }
+  .slot .car { width: 108px; height: 56px; }
+  .slot .src { position: absolute; left: 4px; top: 4px; height: 18px; padding: 0 5px; border-radius: 4px; background: var(--surface); box-shadow: var(--e1); font: 500 11px/18px var(--font); color: var(--ink-muted); white-space: nowrap; }
+  .slot.busy .car { opacity: .35; }
+  .slot .prog { position: absolute; left: 10px; right: 10px; bottom: 8px; height: 4px; border-radius: 2px; background: var(--surface-3); overflow: hidden; }
+  .slot .prog i { display: block; height: 100%; width: 62%; background: var(--brand-fill); }
+  .slot.err { box-shadow: inset 0 0 0 1px var(--danger-c); }
+  .tier .nm { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .tier .nm b { font: var(--c-head); white-space: nowrap; }
+  .tier .nm span { font: var(--c-small); color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tier .nm .tag { text-overflow: clip; overflow: visible; }
+  .tier .tar { display: flex; flex-direction: column; gap: 2px; min-width: 0; font: var(--c-small); color: var(--ink-faint); white-space: nowrap; }
+  .tier .tar b { font: var(--c-strong); color: var(--ink); }
+  .tier .pic { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .tier .pic .row-flex { gap: 4px; }
+  .tier .pic .note { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; }
+  .tier .pic .fe { font: var(--c-label); color: var(--danger-c); white-space: nowrap; display: flex; gap: 4px; align-items: center; }
+  .tier .pic .fe svg { width: 14px; height: 14px; }
+  .btn.focus-ring { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+  .hint { display: flex; align-items: center; gap: 8px; padding: 10px var(--inset); border-top: 1px solid var(--line-soft); font: var(--c-small); color: var(--ink-faint); }
+  .mx td, .mx th { text-align: right; }
+  .mx td:first-child, .mx th:first-child, .mx td:nth-child(2), .mx th:nth-child(2) { text-align: left; }
+  .mx td { font: 400 13px/18px var(--mono); }
+  .mx td:first-child, .mx td:nth-child(2) { font: var(--c-body); }
+  .mx .tc { display: flex; align-items: center; gap: 8px; }
+  .mx .tc b { font: var(--c-strong); }
+  .mx .ex { font-weight: 600; color: var(--ink); }
+  /* Rider preview: the same card the rider app draws (apps v2 rider-tiers, owner rule: horizontal snap row with a peek) */
+  .pv { background: var(--ground); border-radius: var(--r-card); margin: var(--inset); padding: 12px 0 12px 12px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--line-soft); }
+  .pv .rowc { display: flex; gap: 8px; }
+  .rc { position: relative; flex: none; width: 132px; padding: 12px; border-radius: var(--r-card); background: var(--surface-2); display: flex; flex-direction: column; }
+  .rc.on { background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink); }
+  .rc .car { width: 108px; height: 56px; margin-bottom: 8px; }
+  .rc b { font: 600 17px/24px var(--font); white-space: nowrap; }
+  .rc .m { font: var(--c-body); color: var(--ink-2); display: flex; gap: 8px; white-space: nowrap; }
+  .rc .p { font: 600 17px/24px var(--font); margin-top: 8px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .rc .tick { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; }
+  .rc .tick svg { width: 13px; height: 13px; stroke-width: 2.25; }
+  .pvl { font: var(--c-label); color: var(--ink-faint); padding: 0 var(--inset); }
+  .where { padding: 0 var(--inset) var(--inset); display: grid; gap: 8px; }
+  .where div { display: flex; align-items: center; gap: 10px; font: var(--c-body); color: var(--ink-muted); }
+  .where .car { width: 56px; height: 30px; }
+</style>
+</head>
+<body>
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <span class="crumb">Ավտոպարկ <i data-lucide="chevron-right"></i></span><h1>Սակագներ</h1>
+      <div class="live"></div>
+    </header>
+    <div class="content">
+      <div class="col">
+        <section class="card" aria-label="Փաթեթներ">
+          <div class="card-h"><h2>Փաթեթներ</h2><span class="sub">Հերթականությունը՝ ինչպես ուղևորը տեսնում է · Alt+↑ / Alt+↓</span>
+            <span class="end"><button class="btn secondary s"><i data-lucide="plus"></i>Ավելացնել փաթեթ</button></span></div>
+          <div id="tiers" data-truncate></div>
+          <div class="hint"><i data-lucide="image-up"></i>PNG, WebP կամ JPEG · մինչև 1 ՄԲ · թափանցիկ ֆոն, ¾ առջևից։ Առանց նկարի հավելվածը ցույց է տալիս ներկառուցված պատկերը, հետո՝ ուրվագիծը։</div>
+        </section>
+        <section class="card" aria-label="Գործող սակագներ">
+          <div class="card-h"><h2>Գործող սակագներ</h2><span class="sub">Նախապես հայտարարված գին · կլորացում 100 ֏</span>
+            <span class="end"><button class="btn secondary s"><i data-lucide="plus"></i>Նոր սակագին <span class="kbd">N</span></button></span></div>
+          <table class="tbl mx">
+            <colgroup><col style="width:168px"><col><col style="width:84px"><col style="width:84px"><col style="width:84px"><col style="width:96px"><col style="width:132px"></colgroup>
+            <thead><tr><th>Փաթեթ</th><th>Սակագին</th><th>Բազային</th><th>Կմ</th><th>Րոպե</th><th>Նվազագույն</th><th>2,1 կմ · 4 ր</th></tr></thead>
+            <tbody id="mx"></tbody>
+          </table>
+        </section>
+      </div>
+      <aside class="card" aria-label="Նախադիտում">
+        <div class="card-h"><h2>Ինչպես է տեսնում ուղևորը</h2></div>
+        <div class="pv" data-peek><div class="rowc" id="pv"></div></div>
+        <div class="pvl">Նույն նկարը նաև այստեղ</div>
+        <div class="where" style="margin-top:8px">
+          <div><span class="car s" id="w1"></span>Դիսպետչերի ընտրիչ՝ նոր պատվեր</div>
+          <div><span class="car s" id="w2"></span>Վարորդի հավելված՝ հերթափոխի մեքենա</div>
+          <div><span class="car s" id="w3"></span>Պատվերի և վարորդի քարտեր</div>
+        </div>
+        <div style="margin:auto var(--inset) var(--inset)"><div class="notice neutral"><i data-lucide="info"></i><span>Նկարը փոխվում է անմիջապես. ուղևորները նորը կտեսնեն հաջորդ բացման ժամանակ։</span></div></div>
+      </aside>
+    </div>
+  </div>
+</div>
+<script>
+  shell('tariffs')
+  const pic = {
+    uploaded: (t) => ({ slot: `<span class="src">Վերբեռնված</span>`, cls: '', acts: `<div class="row-flex"><button class="btn secondary s" aria-label="Փոխարինել նկարը ${t.name}"><i data-lucide="upload"></i>Փոխարինել</button><button class="btn ghost s" aria-label="Հեռացնել նկարը ${t.name}"><i data-lucide="trash-2"></i>Հեռացնել</button></div><span class="note num">webp · 38 ԿԲ · 09.10</span>` }),
+    icon: (t) => ({ slot: `<span class="src">Ներկառուցված</span>`, cls: '', acts: `<button class="btn secondary s" aria-label="Վերբեռնել նկար ${t.name}"><i data-lucide="upload"></i>Վերբեռնել նկար</button><span class="note">հիմա՝ հավելվածի պատկերը</span>` }),
+    uploading: (t) => ({ slot: `<span class="prog"><i></i></span>`, cls: 'busy', acts: `<div class="row-flex"><button class="btn secondary s" disabled aria-disabled="true" style="opacity:.55"><i data-lucide="loader"></i>Վերբեռնվում է…</button></div><span class="note num">van.webp · 62%</span>` }),
+    refused: (t) => ({ slot: `<span class="src">Ներկառուցված</span>`, cls: 'err', acts: `<button class="btn secondary s focus-ring" aria-describedby="err-vip" aria-label="Վերբեռնել նկար ${t.name}"><i data-lucide="upload"></i>Վերբեռնել նկար</button><span class="fe" id="err-vip"><i data-lucide="circle-alert"></i>Նկարը 1 ՄԲ-ից մեծ է։</span>` }),
+  }
+  const tariffName = { city: 'Eco City · օրական', partner: 'Eco Partner', kids: 'Eco Kids', business: 'Eco Business', van: 'Eco Van', vip: 'Eco Vip' }
+  document.getElementById('tiers').innerHTML = TIERS.map((t) => {
+    const p = pic[t.pic](t)
+    return `<div class="tier"><i data-lucide="grip-vertical" class="grip"></i>
+      <span class="slot ${p.cls}"><span class="car">${carImg(t.id, t.name)}</span>${p.slot}</span>
+      <span class="nm"><b>${t.name}</b><span>${t.blurb} · ${t.seats} տեղ</span><span><span class="tag" style="height:20px;font-family:var(--font)">${t.cls}</span></span></span>
+      <span class="tar">Գործող սակագին<b>${tariffName[t.id]}</b><span class="num">09.10-ից</span></span>
+      <span class="pic">${p.acts}</span></div>`
+  }).join('')
+  document.getElementById('mx').innerHTML = TIERS.map((t) => `<tr><td><span class="tc"><span class="car xs">${carImg(t.id)}</span><b>${t.name}</b></span></td><td class="trunc">${tariffName[t.id]}</td>
+    <td>${nf(t.base)}</td><td>${t.km}</td><td>${t.min}</td><td>${nf(t.floor)}</td><td class="ex">${amd(fare(t, 2.1, 4))}</td></tr>`).join('')
+  const eta = [3, 4, 7, 6, 9, 8]
+  document.getElementById('pv').innerHTML = TIERS.map((t, i) => `<div class="rc${i === 4 ? ' on' : ''}" ${i > 1 ? 'data-peek' : ''}><span class="car">${carImg(t.id)}</span>${i === 4 ? '<span class="tick"><i data-lucide="leaf"></i></span>' : ''}<b>${t.name}</b><span class="m"><span class="num">${eta[i]} րոպե</span><span class="num">${t.seats}</span></span><span class="p">${amd(fare(t, 2.1, 4))}</span></div>`).slice(3).join('')
+  ;['w1', 'w2', 'w3'].forEach((id) => { document.getElementById(id).innerHTML = carImg('van') })
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

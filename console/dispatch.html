@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dispatch</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="console.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../mapgl.local.js"></script>
+<script src="../kit.js"></script>
+<script src="../routes.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+<style>
+  .content { grid-template-columns: 452px minmax(340px, 380px) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) 100px; }
+  .q { grid-row: 1 / 3; }
+  .strip { grid-column: 2 / 4; }
+
+  /* Queue */
+  .tabs { display: flex; gap: 2px; padding: 3px; border-radius: var(--r-ctl); background: var(--surface-alt); }
+  .tabs button { height: 26px; padding: 0 10px; border-radius: 6px; font: var(--c-strong); color: var(--ink-muted); display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+  .tabs button.on { background: var(--surface); color: var(--ink); box-shadow: var(--e1); }
+  .tabs .c { font: var(--c-small); color: var(--ink-faint); }
+  .lane-h { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 8px; height: 28px; padding: 0 12px 0 14px; background: var(--surface); border-bottom: 1px solid var(--line-soft); font: 600 12px/16px var(--font); color: var(--lane); white-space: nowrap; }
+  .lane-h .c { color: var(--ink-faint); font-weight: 500; }
+  .lane-h svg { width: 14px; height: 14px; }
+  .lane-h .end { margin-left: auto; font: var(--c-small); color: var(--ink-faint); }
+  .r { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 2px; padding: 8px 12px 8px 16px; border-bottom: 1px solid var(--line-soft); }
+  .r::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--lane); }
+  .r:hover, .r.sel { background: var(--surface-alt); }
+  .r.sel { box-shadow: inset 0 0 0 1px var(--line-strong); }
+  .r .a { font: var(--c-row); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .r .age { font: 500 14px/20px var(--mono); font-variant-numeric: tabular-nums; text-align: right; width: 56px; }
+  .r .age.late { color: var(--lane-problems); font-weight: 600; }
+  .r .m { display: flex; align-items: center; gap: 8px; min-width: 0; font: var(--c-small); color: var(--ink-muted); height: 24px; }
+  .r .m .ph { font: 400 12px/16px var(--mono); width: 92px; flex: none; color: var(--ink-muted); }
+  .r .m .why { color: var(--lane-problems); font-weight: 500; }
+  .r .acts { display: flex; gap: 4px; justify-content: flex-end; align-items: center; height: 24px; }
+  .btn.xs { height: 24px; padding: 0 8px; font: var(--c-label); gap: 6px; }
+  .btn.xs .kbd { height: 16px; min-width: 16px; font-size: 11px; }
+  .btn.xs.icon { width: 24px; padding: 0; }
+  .r.p { grid-template-areas: 'a age' 'm m' 'acts acts'; }
+  .r.p .a { grid-area: a; } .r.p .age { grid-area: age; } .r.p .m { grid-area: m; } .r.p .acts { grid-area: acts; justify-content: flex-start; height: 28px; align-items: flex-end; }
+  .sla { position: absolute; left: 3px; bottom: -1px; height: 2px; background: var(--lane); }
+  .claimed { display: inline-flex; align-items: center; gap: 4px; color: var(--ink-faint); white-space: nowrap; }
+  .legend { display: flex; align-items: center; gap: 12px; height: 32px; padding: 0 12px; border-top: 1px solid var(--line-soft); font: var(--c-small); color: var(--ink-faint); flex: none; white-space: nowrap; }
+  .legend span { display: inline-flex; gap: 4px; align-items: center; }
+
+  /* Intake */
+  .in .card-b { display: flex; flex-direction: column; gap: 12px; padding: 12px var(--inset); }
+  .pinrow { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 8px; align-items: center; }
+  .pin { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font: 600 11px/1 var(--font); background: var(--ink); color: var(--surface); }
+  .pin.b { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .cust { border-radius: var(--r-ctl); background: var(--surface-alt); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+  .cust .t { display: flex; align-items: center; gap: 8px; font: var(--c-strong); white-space: nowrap; }
+  .cust .t .faint { font: var(--c-small); }
+  .cust .rec { display: flex; gap: 4px; flex-wrap: wrap; }
+  .cust .rec .chip { height: 24px; font: var(--c-small); padding: 0 8px; }
+  .pop { position: absolute; left: 28px; right: 0; top: 40px; z-index: 10; background: var(--surface); border-radius: var(--r-ctl); box-shadow: var(--e2), 0 0 0 1px var(--line-soft); padding: 4px; }
+  .pop div { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border-radius: 6px; font: var(--c-body); white-space: nowrap; }
+  .pop div.on { background: var(--surface-alt); }
+  .pop .faint { font: var(--c-small); }
+  .tiers { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .tierb { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 6px; border-radius: var(--r-ctl); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-soft); text-align: left; }
+  .tierb .n { font: var(--c-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tierb .p { font: 500 12px/16px var(--font); color: var(--ink-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .tierb.on { box-shadow: inset 0 0 0 2px var(--ink); }
+  .tierb.any { grid-template-columns: 40px minmax(0, 1fr); }
+  .tierb .anyic { width: 40px; display: grid; place-items: center; color: var(--ink-faint); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .actbar { margin-top: auto; display: flex; align-items: center; gap: 8px; padding: 10px var(--inset); border-top: 1px solid var(--line-soft); flex: none; }
+  .actbar .sum { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .actbar .sum b { font: 600 15px/20px var(--font); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .actbar .sum span { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; }
+
+  /* Map overlays */
+  .mk-pin { display: flex; align-items: center; gap: 4px; transform: translate(-12px, -12px); }
+  .mk-pin i { width: 24px; height: 24px; border-radius: 50%; background: var(--lane); display: grid; place-items: center; box-shadow: 0 0 0 2px var(--surface), var(--e1); flex: none; }
+  .mk-pin i::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--surface); }
+  .mk-pin b { height: 20px; padding: 0 6px; border-radius: 6px; background: var(--surface); box-shadow: var(--e1); font: 600 12px/20px var(--mono); color: var(--ink); white-space: nowrap; }
+  .mk-ab { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font: 700 12px/1 var(--font); background: var(--ink); color: var(--surface); box-shadow: 0 0 0 2px var(--surface), var(--e2); }
+  .mk-ab.b { background: var(--surface); color: var(--ink); box-shadow: 0 0 0 2px var(--ink), var(--e2); }
+  .mk-car { display: grid; place-items: center; width: 40px; height: 40px; }
+  .mk-car.free::before { content: ''; position: absolute; width: 40px; height: 40px; border-radius: 50%; background: var(--brand-soft); }
+  .mapkey { top: 12px; left: 12px; padding: 4px; }
+  .mapkey span { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; font: var(--c-label); white-space: nowrap; color: var(--ink); }
+  .mapkey i { width: 8px; height: 8px; border-radius: 50%; }
+  .maplayers { bottom: 12px; left: 12px; padding: 3px; }
+  .maplayers button { height: 26px; padding: 0 10px; border-radius: var(--r-pill); font: var(--c-label); white-space: nowrap; color: var(--ink-muted); }
+  .maplayers button.on { background: var(--ink); color: var(--surface); }
+
+  /* Driver strip */
+  .strip { flex-direction: row; align-items: stretch; }
+  .strip .lead { width: 196px; flex: none; padding: 12px var(--inset); border-right: 1px solid var(--line-soft); display: flex; flex-direction: column; justify-content: space-between; }
+  .strip .lead b { font: var(--c-head); white-space: nowrap; }
+  .strip .lead .cnt { display: grid; grid-template-columns: auto auto; gap: 2px 10px; font: var(--c-small); color: var(--ink-muted); white-space: nowrap; }
+  .strip .lead .cnt span { display: inline-flex; align-items: center; gap: 6px; }
+  .strip .lead .cnt i { width: 6px; height: 6px; border-radius: 50%; }
+  .strip .list { flex: 1; min-width: 0; display: flex; gap: 8px; padding: 10px; overflow-x: auto; scrollbar-width: none; }
+  .dc { flex: none; width: 196px; border-radius: var(--r-ctl); background: var(--surface-alt); padding: 8px 10px; display: grid; grid-template-columns: 56px minmax(0, 1fr); grid-template-rows: auto auto auto; column-gap: 10px; row-gap: 2px; align-items: center; }
+  .dc .car { grid-row: 1 / 3; }
+  .dc .nm { font: var(--c-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dc .pl { display: flex; gap: 6px; align-items: center; }
+  .dc .st { grid-column: 1 / 3; display: flex; align-items: center; justify-content: space-between; gap: 6px; font: var(--c-small); color: var(--ink-muted); white-space: nowrap; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="screen rail" id="screen">
+  <div class="main">
+    <header class="bar">
+      <h1>Դիսպետչեր</h1>
+      <span class="crumb"><i data-lucide="clock"></i><span class="num">14:26</span> · Երևան</span>
+      <div class="live"></div>
+    </header>
+    <div class="content">
+      <!-- QUEUE: the centrepiece. No pagination: one scrolling list, lanes sticky. -->
+      <section class="card q" aria-label="Հերթ">
+        <div class="card-h" style="padding:0 12px">
+          <div class="tabs" role="tablist"><button class="on" role="tab">Հիմա <span class="c num">12</span></button><button role="tab">Պլանավորված <span class="c num">3</span></button></div>
+          <div class="end"><span class="chip" style="height:26px">Իմերը <span class="c num">1</span></span><button class="btn ghost icon s" aria-label="Որոնել հերթում (/)"><i data-lucide="search"></i></button></div>
+        </div>
+        <div class="scroll-y grow" id="queue" data-truncate></div>
+        <div class="legend"><span><span class="kbd">F2</span>հեռախոս</span><span><span class="kbd">T</span>վերցնել</span><span><span class="kbd">A</span>նշանակել</span><span><span class="kbd">/</span>որոնում</span><span style="margin-left:auto"><span class="kbd">↵</span>ստեղծել</span></div>
+      </section>
+
+      <!-- INTAKE: keyboard-only, phone + pickup are the only required fields (§9.1, §9.8). -->
+      <section class="card in" aria-label="Պատվերի ընդունում">
+        <div class="card-h"><h2>Նոր պատվեր</h2><span class="kbd">F2</span><span class="end"><span class="pill"><i data-lucide="phone"></i><span class="num">00:14</span></span></span></div>
+        <div class="card-b scroll-y grow">
+          <div>
+            <label class="label">Հեռախոս</label>
+            <div class="input l"><i data-lucide="phone"></i><span class="val mono">091 23-45-67</span></div>
+          </div>
+          <div class="cust">
+            <div class="t"><span>Անի Պետրոսյան</span><span class="faint num">· 14 պատվեր · վերջինը՝ երեկ</span></div>
+            <div class="rec"><span class="chip">Կոմիտաս 12</span><span class="chip">Վազգեն Սարգսյան 10</span><span class="chip">Զվարթնոց</span></div>
+          </div>
+          <div>
+            <label class="label">Որտեղից</label>
+            <div class="pinrow"><span class="pin">Ա</span><div class="input l"><span class="val">Կոմիտաս պողոտա 12, Արաբկիր</span><i data-lucide="circle-check" style="color:var(--ok)"></i></div></div>
+          </div>
+          <div style="position:relative">
+            <label class="label">Ուր <span class="faint" style="font-weight:400">· ոչ պարտադիր</span></label>
+            <div class="pinrow"><span class="pin b">Բ</span><div class="input l focus"><span class="val">Հալաբյան 4<span style="border-left:1.5px solid var(--ink);margin-left:1px"></span></span><span class="kbd">↑↓</span></div></div>
+            <div class="pop" data-overlay role="listbox" aria-label="Հասցեների առաջարկներ" style="top:62px">
+              <div class="on"><i data-lucide="map-pin"></i><span>Հալաբյան 41</span><span class="faint">· Աջափնյակ</span></div>
+              <div><i data-lucide="map-pin"></i><span>Հալաբյան 46</span><span class="faint">· Աջափնյակ</span></div>
+            </div>
+          </div>
+          <div>
+            <label class="label">Ծառայություն <span class="faint" style="font-weight:400">· 1–7</span></label>
+            <div class="tiers" id="tiers" data-truncate></div>
+          </div>
+          <div class="two">
+            <div><label class="label">Երբ</label><div class="input"><i data-lucide="clock"></i><span class="val">Հիմա</span><i data-lucide="chevron-down"></i></div></div>
+            <div><label class="label">Վճարում</label><div class="input"><i data-lucide="banknote"></i><span class="val">Կանխիկ</span><i data-lucide="chevron-down"></i></div></div>
+          </div>
+          <div><label class="label">Նշումներ</label><div class="input"><span class="val ph">օր. Զանգել հասնելիս</span></div></div>
+        </div>
+        <div class="actbar">
+          <div class="sum"><b>1 100 ֏</b><span class="num">Eco City · 4,3 կմ · 6 ր</span></div>
+          <button class="btn ghost icon" aria-label="Մաքրել դաշտերը (Esc)"><i data-lucide="eraser"></i></button>
+          <button class="btn primary l">Ստեղծել պատվեր <span class="kbd">↵</span></button>
+        </div>
+      </section>
+
+      <!-- MAP: 2GIS MapGL -->
+      <section class="card" aria-label="Քարտեզ">
+        <div class="maphost"><div id="map"></div>
+          <div class="mapctl float mapkey" data-overlay><span><i style="background:var(--brand)"></i>Ազատ <b class="num">6</b></span><span><i style="background:var(--ink)"></i>Պատվերով <b class="num">4</b></span><span><i style="background:var(--lane-problems)"></i>Խնդիր <b class="num">2</b></span></div>
+          <div class="mapctl float maplayers" data-overlay><button class="on">Վարորդներ</button><button>Գոտիներ</button></div>
+        </div>
+      </section>
+
+      <!-- DRIVER STRIP: free first, longest idle first -->
+      <section class="card strip" aria-label="Վարորդներ հերթափոխում">
+        <div class="lead">
+          <b>Հերթափոխում <span class="num faint">12</span></b>
+          <div class="cnt">
+            <span><i style="background:var(--ok-dot)"></i>Ազատ <b class="num">6</b></span><span><i style="background:var(--ink)"></i>Պատվեր <b class="num">4</b></span>
+            <span><i style="background:var(--warn)"></i>Դադար <b class="num">1</b></span><span><i style="background:var(--danger)"></i>Լռում <b class="num">1</b></span>
+          </div>
+        </div>
+        <div class="list" id="strip" data-truncate data-peek></div>
+      </section>
+    </div>
+  </div>
+</div>
+<script>
+  shell('dispatch')
+  const lanes = [
+    { k: 'problems', ic: 'circle-alert', name: 'Խնդիրներ', end: 'պահանջում են մարդ', rows: [
+      { a: 'Տիգրան Մեծի 67', ph: '099 11-22-33', why: 'Վարորդը չի գտնում ուղևորին', age: '07:34', late: 1, acts: 'assign-force', sel: 1 },
+      { a: 'Ծովակալ Իսակովի պողոտա 24', ph: '011 00-08-02', why: 'Վարորդ չկա · 2 ալիք', age: '33:01', late: 1, acts: 'search-assign', pre: 'Պլան. 15:45' },
+    ] },
+    { k: 'unassigned', ic: 'circle-dashed', name: 'Չնշանակված', end: 'SLA 3 ր', rows: [
+      { a: 'Կոմիտաս 12', ph: '091 23-45-67', d: 'Զվարթնոց օդանավակայան', age: '02:42', sla: .9, acts: 'take' },
+      { a: 'Մաշտոցի պող. 37, «Երևան Մոլ» մուտք 2', ph: '093 11-80-02', d: 'Դավթաշեն 3-րդ թաղ.', age: '01:06', sla: .37, acts: 'release' },
+      { a: 'Աբովյան 4', ph: '077 50-12-12', d: 'Արաբկիր, Կոմիտաս 49', age: '00:42', sla: .23, claimed: 'Մարիամ Հ.' },
+    ] },
+    { k: 'searching', ic: 'loader', name: 'Որոնում', end: '', rows: [
+      { a: 'Սայաթ-Նովա 19', ph: '094 77-31-08', d: 'Կասկադ', age: '00:23', info: 'ալիք 1 · 3 հարցված' },
+      { a: 'Բաղրամյան 24', ph: '077 41-22-08', d: 'Զվարթնոց օդանավակայան', age: '00:51', info: 'ալիք 2 · 5 հարցված' },
+    ] },
+    { k: 'active', ic: 'circle-check', name: 'Ընթացիկ', end: '', rows: [
+      { a: 'Թումանյան 21', ph: '098 23-55-90', st: 'Ճանապարհին', drv: 'Սուրեն Մ.', pl: '22 OU 447', age: '04 ր' },
+      { a: 'Հյուսիսային պող. 1', ph: '055 20-44-19', st: 'Տեղում', drv: 'Գագիկ Ա.', pl: '34 LS 108', age: '01:12' },
+      { a: 'Վազգեն Սարգսյան 10', ph: '091 08-76-30', st: 'Ուղևորի հետ', drv: 'Արամ Պ.', pl: '01 ET 001', age: '12:31' },
+      { a: 'Արշակունյաց 2', ph: '096 14-02-71', st: 'Ուղևորի հետ', drv: 'Արմեն Գ.', pl: '35 OS 512', age: '08:05' },
+      { a: 'Հալաբյան 41', ph: '041 33-21-90', st: 'Ճանապարհին', drv: 'Դավիթ Կ.', pl: '09 DK 118', age: '06 ր' },
+    ] },
+  ]
+  const acts = {
+    take: '<button class="btn secondary xs">Վերցնել <span class="kbd">T</span></button>',
+    release: '<span class="pill brand" style="height:20px">Իմը</span><button class="btn ghost xs">Վերադարձնել</button>',
+    'assign-force': '<button class="btn secondary xs">Նշանակել <span class="kbd">A</span></button><button class="btn secondary xs">Ուղարկել որոնման</button><button class="btn secondary xs">Փոխել վիճակը…</button><button class="btn ghost xs icon" aria-label="Զանգել ուղևորին"><i data-lucide="phone"></i></button>',
+    'search-assign': '<button class="btn secondary xs">Նշանակել <span class="kbd">A</span></button><button class="btn secondary xs">Ուղարկել որոնման</button><button class="btn secondary xs">Փոխել վիճակը…</button><button class="btn ghost xs icon" aria-label="Զանգել ուղևորին"><i data-lucide="phone"></i></button>',
+  }
+  let h = ''
+  for (const L of lanes) {
+    h += `<div class="l-${L.k}"><div class="lane-h"><i data-lucide="${L.ic}"></i>${L.name} <span class="c num">${L.rows.length}</span><span class="end">${L.end}</span></div>`
+    for (const r of L.rows) {
+      const meta = r.why ? `<span class="why trunc">${r.why}</span>${r.pre ? `<span class="tag" style="height:20px">${r.pre}</span>` : ''}`
+        : r.st ? `<span class="trunc">${r.st} · ${r.drv}</span><span class="plate" style="height:20px">${r.pl}</span>`
+        : `<span class="trunc">${r.d}</span>${r.info ? `<span class="faint" style="white-space:nowrap">· ${r.info}</span>` : ''}`
+      const right = r.acts ? acts[r.acts] : r.claimed ? `<span class="claimed"><i data-lucide="user-check"></i>${r.claimed}</span>` : ''
+      h += `<div class="r${r.sel ? ' sel' : ''}${r.why ? ' p' : ''}" tabindex="0"><span class="a">${r.a}</span><span class="age${r.late ? ' late' : ''}">${r.age}</span>
+        <span class="m"><span class="ph">${r.ph}</span>${meta}</span><span class="acts">${right}</span>${r.sla ? `<span class="sla" style="width:calc(${r.sla} * (100% - 3px))"></span>` : ''}</div>`
+    }
+    h += '</div>'
+  }
+  document.getElementById('queue').innerHTML = h
+
+  /* Tier picker: real cars, prices for the typed route (4.3 km, 6 min; pickup → Komitas route geometry). */
+  let t = `<button class="tierb any"><span class="anyic"><i data-lucide="locate-fixed"></i></span><span class="n">Մոտակա ազատը</span></button>`
+  TIERS.forEach((x, i) => { t += `<button class="tierb${i === 0 ? ' on' : ''}" aria-label="${x.name}, ${i + 2}"><span class="car xs">${carImg(x.id)}</span><span class="n">${x.name.replace('Eco ', '')}</span><span class="p">${amd(fare(x, 4.3, 6))}</span></button>` })
+  document.getElementById('tiers').innerHTML = t
+
+  /* Driver strip */
+  const order = { free: 0, away: 2, lost: 3, ride: 1 }
+  const idle = ['14 ր', '9 ր', '6 ր', '4 ր', '2 ր', '1 ր']
+  let fi = 0
+  document.getElementById('strip').innerHTML = DRIVERS.slice().sort((a, b) => order[a.state] - order[b.state]).map((d, i) => {
+    const [tone, word] = DSTATE[d.state]
+    const tail = d.state === 'free' ? `ազատ ${idle[fi++]}` : d.state === 'ride' ? '→ Կոմիտաս 12' : d.state === 'lost' ? 'դիրքը՝ 03:40 առաջ' : 'դադար 7 ր'
+    return `<div class="dc"${i > 3 ? ' data-peek' : ''}><span class="car s">${carImg(d.tier)}</span><span class="nm">${d.name.split(" ")[0]} ${d.name.split(" ")[1][0]}.</span><span class="pl"><span class="plate">${d.plate}</span></span>
+      <span class="st"><span class="pill ${tone}" style="height:20px"><i class="d"></i>${word}</span><span class="trunc">${tail}</span></span></div>`
+  }).join('')
+  icons()
+
+  /* Map: cars, queue pins with ages, and the order being typed (A → B on real street geometry). */
+  const map = makeMap(document.getElementById('map'), { fit: [[40.170, 44.493], [40.208, 44.528]], padTL: [40, 56], padBR: [40, 24], badge: { bottom: '12px', right: '12px' } })
+  DRIVERS.forEach((d, i) => {
+    const fill = d.state === 'free' ? 'var(--brand)' : d.state === 'ride' ? 'var(--car-top)' : 'var(--ink-faint)'
+    htmlMarker(map, d.ll, `<div class="mk-car ${d.state}">${carTop((i * 47) % 360, fill)}</div>`, [40, 40])
+  })
+  drawRoute(map, ROUTES.pickupToDrop.pts, { weight: 5 })
+  const P = ROUTES.pickupToDrop.pts
+  htmlMarker(map, P[0], '<div class="mk-ab">Ա</div>', [24, 24])
+  htmlMarker(map, P[P.length - 1], '<div class="mk-ab b">Բ</div>', [24, 24])
+  htmlMarker(map, [40.1990, 44.5205], '<div class="mk-pin l-problems" style="transform:none"><i></i><b>07:34</b></div>', [90, 24], [12, 12])
+  htmlMarker(map, [40.1735, 44.5005], '<div class="mk-pin l-unassigned" style="transform:none"><i></i><b>01:06</b></div>', [90, 24], [12, 12])
+  htmlMarker(map, [40.1800, 44.5185], '<div class="mk-pin l-unassigned" style="transform:none"><i></i><b>00:42</b></div>', [90, 24], [12, 12])
+</script>
+</body>
+</html>
