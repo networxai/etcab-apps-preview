@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Rider ride</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="rider.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="mapgl.local.js"></script>
+<script src="kit.js"></script>
+<script src="routes.js"></script>
+<script src="audit.js"></script>
+<script src="rider.js"></script>
+<style>
+  /* Assigned → arriving → arrived → riding. The plate is the identity riders check first (research §3.2). */
+  .eta { font: var(--t-hero); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; letter-spacing: -.4px; }
+  .status { font: var(--t-body); color: var(--ink-2); white-space: nowrap; margin-top: 2px; }
+  .status b { font: var(--t-body-strong); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .head2 { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s3); }
+  .live { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: var(--r-pill); background: var(--surface-2);
+    font: var(--t-caption); color: var(--ink); white-space: nowrap; margin-bottom: 10px; }
+  .live i.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok-dot); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok-dot) 22%, transparent); }
+
+  .ident { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); margin-top: var(--s4); padding: var(--s3) var(--s4);
+    border-radius: var(--r-card); background: var(--surface-2); }
+  .ident .who { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; }
+  .ident .model { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .ident .carart { margin-right: -4px; }
+  .drv { display: flex; align-items: center; gap: var(--s3); min-height: 64px; }
+  .drv .nm { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .drv .n1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .drv .n2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+  .drv .n2 svg { width: 14px; height: 14px; color: var(--ink); fill: currentColor; }
+  .sheet .acts { margin-top: var(--s2); }
+  .act { width: 84px; }
+  .act.on .o { background: var(--ink); color: var(--surface); }
+
+  /* arrived: the plate is the hero */
+  .arr-title { font: var(--t-title); color: var(--ink); }
+  .wait { display: inline-flex; align-items: center; gap: 6px; font: var(--t-secondary-strong); color: var(--ink-2); margin-top: var(--s1); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .wait svg { width: 16px; height: 16px; }
+  .bigid { display: flex; align-items: center; justify-content: space-between; margin-top: var(--s4); padding: var(--s4); border-radius: var(--r-card); background: var(--surface-2); }
+  .bigid .who { display: flex; flex-direction: column; gap: var(--s2); }
+
+  /* riding */
+  .trip { display: flex; align-items: center; gap: var(--s3); margin-top: var(--s4); padding: var(--s3) var(--s4); border-radius: var(--r-card); background: var(--surface-2); }
+  .trip .to { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .trip .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .trip .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .sq { width: 12px; height: 12px; border-radius: 3px; background: var(--ink); flex: none; }
+  .mini { display: flex; align-items: center; gap: var(--s3); min-height: 56px; }
+  .mini .nm { flex: 1; font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+
+  /* modals */
+  .reasons { margin: 0 0 var(--s4); }
+  .reasons .divider { margin-left: 34px; }
+  .msgfield { display: flex; align-items: center; gap: var(--s2); height: 52px; padding: 0 6px 0 var(--s4); border-radius: var(--r-control); background: var(--surface-2); margin-top: var(--s4); }
+  .msgfield .ph { flex: 1; font: var(--t-body); color: var(--ink-3); white-space: nowrap; }
+  .send { width: 40px; height: 40px; border-radius: 50%; background: var(--brand); color: var(--on-brand); display: grid; place-items: center; flex: none; }
+  .send svg { width: 18px; height: 18px; }
+  .sharecard { display: flex; gap: var(--s3); align-items: center; padding: var(--s3); border-radius: var(--r-card); background: var(--surface-2); }
+  .sharecard .trace { background: var(--surface); }
+  .sharecard .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .sharecard .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .sharecard .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .sharecard .url { font: var(--t-secondary-strong); color: var(--brand-ink); white-space: nowrap; }
+  .modal .btns { margin-top: var(--s4); }
+  .modal .chips { margin-top: var(--s1); }
+  .screen .toast { top: 62px; }
+</style>
+</head>
+<body>
+<script>
+  const P = ROUTES.driverToPickup.pts, T = ROUTES.pickupToDrop.pts
+  const PICK = T[0], DROP = T[T.length - 1]
+  /* heading in degrees clockwise from north, between two [lat,lng] points */
+  const brg = (a, b) => Math.atan2((b[1] - a[1]) * Math.cos(a[0] * Math.PI / 180), b[0] - a[0]) * 180 / Math.PI
+  const at = (pts, f) => { const i = Math.min(pts.length - 2, Math.floor(f * (pts.length - 1))); return { i, ll: pts[i], deg: brg(pts[i], pts[i + 1]) } }
+  const star = R.i('star')
+
+  const identity = () => `<div class="ident"><div class="who">${R.plate('01 ET 001', true)}<span class="model">Volkswagen ID.3 · սպիտակ</span></div>${R.car('city', 120, 60, 'Volkswagen ID.3')}</div>`
+  const driver = () => `<div class="drv">${R.avatar()}<span class="nm"><span class="n1">Արամ</span><span class="n2">${star}4.9 · 1 240 ուղևորություն</span></span></div>`
+  const acts = (list) => `<div class="acts">${list.map(([ic, l, c]) => `<button class="act ${c || ''}" aria-label="${l}"><span class="o">${R.i(ic)}</span><span class="l">${l}</span></button>`).join('')}</div>`
+  const A_WAIT = [['phone', 'Զանգել'], ['message-circle', 'Գրել'], ['share-2', 'Կիսվել'], ['x', 'Չեղարկել', 'danger']]
+
+  const approachSheet = (eta, status, clock) => `<div class="map" id="map" aria-label="Քարտեզ"></div>
+    <button class="fab" style="top:62px;left:16px" aria-label="Հետ">${R.i('chevron-down')}</button>
+    <section class="sheet r" id="sheet"><div class="grabber"></div>
+      <div class="head2"><div><div class="eta">${eta}</div><div class="status">${status} · <b>${clock}</b></div></div></div>
+      ${identity()}${driver()}${acts(A_WAIT)}</section>`
+
+  /* Approach map: the driver's dotted line to the pickup, our car on it, the pickup pin. frac = how far along the car is. */
+  const approachMap = (frac) => (s) => {
+    const k = at(P, frac), rest = P.slice(k.i)
+    const m = R.map(s, { fit: rest.length > 6 ? rest : R.bbox(PICK, .0022, .003), padTL: [64, 132], padBR: [64, s.querySelector('#sheet').offsetHeight + 56] })
+    drawRoute(m, rest, { dash: true, color: cssVar('--approach'), weight: 4 })
+    htmlMarker(m, PICK, '<div class="pin-a"></div>', [18, 18])
+    htmlMarker(m, PICK, `<div class="maptag plain" data-overlay style="position:absolute;right:16px;top:-18px">Մաշտոցի պող. 37</div>`, [0, 0], [0, 0])
+    htmlMarker(m, k.ll, carTop(k.deg), [18, 34])
+    return m
+  }
+  const modal = (title, body, base = 'assigned') => ({ html: () => `<div class="map" id="map" aria-label="Քարտեզ"></div><div class="scrim"></div>
+      <section class="sheet r modal" id="sheet" role="dialog" aria-label="${title}"><div class="grabber"></div>
+      <div class="mhead"><h2 class="h-title">${title}</h2><button class="xbtn" aria-label="Փակել">${R.i('x')}</button></div>${body}</section>`,
+    map: approachMap(.35) })
+
+  const reasons = ['Վարորդը շատ երկար է գալիս', 'Փոխեցի ծրագրերս', 'Սխալ հասցե եմ նշել', 'Վարորդը խնդրեց չեղարկել', 'Այլ պատճառ']
+
+  Rider.page({
+    title: 'Rider · On the way and in the ride',
+    sub: 'Live 2GIS map; ETA is the one hero number; the plate chip carries the identity. Same ride as the driver offer: Eco City, Mashtots → Komitas, 1 100 ֏',
+    states: [
+      { id: 'assigned', group: 'Before pickup', label: 'Assigned', note: 'ETA hero, plate first, then car, then driver. Cancel is visible, not buried',
+        html: () => approachSheet('4 րոպե', 'Մեքենան ճանապարհին է', '9:45'), map: approachMap(0) },
+      { id: 'arriving', group: 'Before pickup', label: 'Arriving', note: 'One minute out: the same card, the car at the corner',
+        html: () => approachSheet('1 րոպե', 'Մեքենան մոտենում է', '9:42'), map: approachMap(.8) },
+      { id: 'arrived', group: 'Before pickup', label: 'Arrived', note: 'The plate grows; free waiting counts down. Haptic + push on entry',
+        html: () => `<div class="map" id="map" aria-label="Քարտեզ"></div>
+          <button class="fab" style="top:62px;left:16px" aria-label="Հետ">${R.i('chevron-down')}</button>
+          <section class="sheet r" id="sheet"><div class="grabber"></div>
+            <h2 class="arr-title">Մեքենան սպասում է</h2>
+            <div class="wait">${R.i('timer')}Անվճար սպասում · 2:41</div>
+            <div class="bigid"><div class="who">${R.plate('01 ET 001', true)}<span class="model" style="font:var(--t-secondary);color:var(--ink-2)">Սպիտակ Volkswagen ID.3</span></div>${R.car('city', 132, 66, 'Volkswagen ID.3')}</div>
+            ${driver()}${acts(A_WAIT)}</section>`,
+        map: (s) => {
+          const m = R.map(s, { fit: R.bbox(PICK, .0016, .0022), padTL: [48, 120], padBR: [48, s.querySelector('#sheet').offsetHeight + 40] })
+          htmlMarker(m, PICK, '<div class="puck"></div>', [22, 22])
+          const k = at(P, .97); htmlMarker(m, [PICK[0] - .00018, PICK[1] - .00028], carTop(k.deg), [18, 34])
+        } },
+      { id: 'riding', group: 'In the ride', label: 'Riding', note: 'Cancel is gone; share and help stay one tap away',
+        html: () => `<div class="map" id="map" aria-label="Քարտեզ"></div>
+          <button class="fab" style="top:62px;left:16px" aria-label="Հետ">${R.i('chevron-down')}</button>
+          <button class="fab" style="top:62px;right:16px" aria-label="Անվտանգություն">${R.i('shield')}</button>
+          <section class="sheet r" id="sheet"><div class="grabber"></div>
+            <div class="head2"><div><div class="eta">4 րոպե</div><div class="status">Ճանապարհին · ժամանում <b>9:53</b></div></div></div>
+            <div class="trip"><span class="sq"></span><span class="to"><span class="t1">Կոմիտասի պող. 22</span><span class="t2">2.8 կմ մնաց</span></span></div>
+            <div class="mini">${R.car('city', 64, 32, '')}${R.plate('01 ET 001')}<span class="nm">Արամ</span></div>
+            ${acts([['share-2', 'Կիսվել', 'on'], ['phone', 'Զանգել'], ['message-circle', 'Գրել'], ['life-buoy', 'Օգնություն']])}</section>`,
+        map: (s) => {
+          const k = at(T, .35), rest = T.slice(k.i)
+          const m = R.map(s, { fit: rest, padTL: [56, 156], padBR: [56, s.querySelector('#sheet').offsetHeight + 56] })
+          drawRoute(m, rest, { weight: 5 })
+          htmlMarker(m, DROP, '<div class="pin-b"></div>', [18, 18])
+          htmlMarker(m, DROP, `<div class="maptag" data-overlay style="position:absolute;left:0;top:-22px;transform:translate(-50%,-100%)"><b>9:53</b>Կոմիտաս</div>`, [0, 0], [0, 0])
+          htmlMarker(m, k.ll, carTop(k.deg), [18, 34])
+        } },
+
+      { id: 'offline', group: 'In the ride', label: 'Offline', note: 'The network drops mid-ride: the banner says so, the car is drawn grey at its last known spot, and the card stays. A network error never wipes an active ride',
+        html: () => `<div class="map" id="map" aria-label="Քարտեզ"></div>
+          ${R.banner({ t1: 'Կապ չկա', t2: 'Մեքենայի դիրքը՝ 9:48-ի դրությամբ' })}
+          <button class="fab" style="top:118px;left:16px" aria-label="Հետ">${R.i('chevron-down')}</button>
+          <button class="fab" style="top:118px;right:16px" aria-label="Անվտանգություն">${R.i('shield')}</button>
+          <section class="sheet r" id="sheet"><div class="grabber"></div>
+            <div class="head2"><div><div class="eta">≈ 4 րոպե</div><div class="status">Ճանապարհին · ժամանում <b>9:53</b></div></div></div>
+            <div class="trip"><span class="sq"></span><span class="to"><span class="t1">Կոմիտասի պող. 22</span><span class="t2">2.8 կմ մնաց</span></span></div>
+            <div class="mini">${R.car('city', 64, 32, '')}${R.plate('01 ET 001')}<span class="nm">Արամ</span></div>
+            ${acts([['share-2', 'Կիսվել', 'on'], ['phone', 'Զանգել'], ['message-circle', 'Գրել'], ['life-buoy', 'Օգնություն']])}</section>`,
+        map: (s) => {
+          const k = at(T, .35), rest = T.slice(k.i)
+          const m = R.map(s, { fit: rest, padTL: [56, 196], padBR: [56, s.querySelector('#sheet').offsetHeight + 56] })
+          drawRoute(m, rest, { weight: 5 })
+          htmlMarker(m, DROP, '<div class="pin-b"></div>', [18, 18])
+          htmlMarker(m, k.ll, `<div style="filter:grayscale(1);opacity:.55">${carTop(k.deg)}</div>`, [18, 34])
+        } },
+
+      { id: 'cancel-reasons', group: 'Sheets', label: 'Cancel: reason', note: 'Reason first, then the red action. «No, wait» is as easy to hit',
+        ...modal('Ինչո՞ւ եք չեղարկում', `<div class="reasons" role="radiogroup">${reasons.map((r, i) =>
+          `${i ? '<div class="divider"></div>' : ''}<button class="choice" role="radio" aria-checked="${i === 0}"><span class="radio"></span><span class="t">${r}</span></button>`).join('')}</div>
+          <div class="btns"><button class="btn btn-danger">Չեղարկել պատվերը</button><button class="btn btn-quiet">Ոչ, սպասել</button></div>`) },
+      { id: 'message', group: 'Sheets', label: 'Message', note: 'One-tap messages; typing is the fallback',
+        ...modal('Գրել վարորդին', `<div class="chips">${['Դուրս եմ գալիս', 'Սպասեք, խնդրում եմ', 'Մուտքի մոտ եմ', 'Զանգեք ինձ'].map((c, i) =>
+          `<button class="chip tog" aria-pressed="${i === 0}">${c}</button>`).join('')}</div>
+          <div class="msgfield"><span class="ph">Հաղորդագրություն</span><button class="send" aria-label="Ուղարկել">${R.i('arrow-up')}</button></div>`) },
+      { id: 'share', group: 'Sheets', label: 'Share', note: 'A live link: whoever opens it sees the car and the ETA, nothing else',
+        html: () => modal('Կիսվել ուղևորությամբ', `<div class="sharecard">${R.trace('pickupToDrop', 72, 72, { pad: 10, grid: false })}
+            <span class="tx"><span class="t1">Արամ · 01 ET 001</span><span class="t2">Ժամանում 9:53</span><span class="url">ecotaxi.am/r/7KQ2X</span></span></div>
+          <div class="btns"><button class="btn btn-quiet">${R.i('copy')}Պատճենել հղումը</button><button class="btn btn-quiet">${R.i('share')}Ուղարկել</button></div>`).html()
+          + `<div class="toast" role="status">${R.i('check')}Հղումը պատճենված է</div>`,
+        map: approachMap(.35) },
+    ],
+  })
+</script>
+</body>
+</html>

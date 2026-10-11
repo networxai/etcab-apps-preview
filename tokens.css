@@ -1,0 +1,133 @@
+/* ETCAB apps v2 tokens — the one system all four hero screens are drawn from.
+   Units: px at 1x (= pt on iOS, dp on Android). Every value here is checked in NOTES.md.
+   Theme switch: data-theme="dark" on <html>. Light is :root. */
+
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ── Type: Google Sans, one family for hy + ru + en, tabular figures on. ── */
+  --font: 'Google Sans', 'Noto Sans Armenian', system-ui, sans-serif;
+  --t-hero: 700 40px/48px var(--font);      /* the one number per screen; 48 not 44: Google Sans ascent+descent is 47px at 40 */
+  --t-large: 600 28px/36px var(--font);     /* page title (rider + driver parked pages) */
+  --t-title: 600 22px/28px var(--font);     /* sheet / screen title */
+  --t-headline: 600 17px/24px var(--font);  /* row title, button label */
+  --t-body: 400 16px/22px var(--font);
+  --t-body-strong: 500 16px/22px var(--font);
+  --t-secondary: 400 13px/18px var(--font);
+  --t-secondary-strong: 500 13px/18px var(--font);
+  --t-caption: 500 12px/16px var(--font);
+
+  /* ── Space: 4-pt steps, screen margin 16. ── */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s8: 32px;
+  --margin: 16px;
+
+  /* ── Radius ── */
+  --r-card: 12px;       /* cards, tier rows, ad cards */
+  --r-control: 14px;    /* 52px rider buttons, search field */
+  --r-sheet: 24px;      /* bottom sheets */
+  --r-pill: 999px;      /* only real pills: chips, status, dots */
+
+  /* ── Sizes ── */
+  --h-button: 52px;     /* rider primary */
+  --h-drive: 64px;      /* driver at-speed primary (one per screen) */
+  --h-slide: 72px;      /* driver slide-to-accept track */
+  --h-row: 56px;
+  --tap: 44px;          /* floating map controls, min target */
+
+  /* ── Elevation: soft, layered; never border + shadow. ── */
+  --e1: 0 1px 2px rgb(0 0 0 / .06), 0 2px 8px rgb(0 0 0 / .06);
+  --e2: 0 1px 2px rgb(0 0 0 / .06), 0 8px 24px rgb(0 0 0 / .10);
+  --e-sheet: 0 -1px 0 rgb(0 0 0 / .03), 0 -8px 32px rgb(0 0 0 / .10);
+
+  /* ── Colour, light ── */
+  --ground: #F4F4F2;        /* screen behind non-map content */
+  --surface: #FFFFFF;       /* sheet, card, floating control */
+  --surface-2: #F3F3F1;     /* inset: search field, selected-free rows */
+  --surface-3: #EAEAE7;     /* pressed / track */
+  --raised: #FFFFFF;        /* a control lifted off an inset field */
+  --ink: #111113;           /* 18.9:1 on surface */
+  --ink-2: #5E5E63;         /* secondary, 6.45:1 on surface */
+  --ink-3: #6B6B70;         /* tertiary, 5.30:1 surface, 4.77:1 surface-2 */
+  --hairline: rgb(17 17 19 / .08);
+  --line: rgb(17 17 19 / .16);    /* a control's edge on --ground, where its fill alone would vanish */
+
+  /* Brand: Eco Taxi (tenant config EXPO_PUBLIC_BRAND_COLOR=#2f7d0a; logo gradient #43A70A → #7CC90C). */
+  --brand: #2F7D0A;         /* primary fill — white on it 5.17:1 */
+  --on-brand: #FFFFFF;
+  --brand-ink: #2F7D0A;     /* brand as text — 5.17:1 on surface, 4.66:1 on surface-2 */
+  --brand-vivid: #43A70A;   /* logo-start green: ring, leaf, accents only (3.10:1 on white, graphics) */
+  --brand-soft: rgb(67 167 10 / .12);
+  --lime: #9BCD50;          /* livery stripe, sampled from city.webp — decoration only, never text on white (1.87:1) */
+  --ring: #43A70A;          /* countdown ring on light: lime is 1.87:1 on white, under the 3:1 non-text floor; #43A70A is 3.10 */
+
+  /* Status: each colour is a claim. */
+  --ok: #0B7A41;            /* online, money in — 5.42:1 on white, 4.88 on surface-2 (was #0F8A4A, 4.42: failed) */
+  --ok-dot: #16A34A;
+  --ok-soft: #E7F3ED;       /* soft status grounds are flat hex, never color-mix(): text sits on them */
+  --warn-soft: #F6EAE1;
+  --danger-soft: #FAE9E9;
+  --warn: #B45309;
+  --danger: #C81E1E;
+
+  /* Map overlays */
+  --route: #2F7D0A;         /* 4.7:1 on the light basemap */
+  --route-casing: #FFFFFF;
+  --approach: #111113;
+  --car-top: #FFFFFF;
+  --car-top-glass: #2A2D33;
+
+  /* Car renders: soft ground shadow so white cars sit on the card */
+  --car-ground: rgb(0 0 0 / .16);
+
+  /* Photo scrim (partner cards) */
+  --scrim: linear-gradient(180deg, rgb(0 0 0 / 0) 30%, rgb(0 0 0 / .55) 62%, rgb(0 0 0 / .78) 100%);
+
+  --map-filter: saturate(.85) contrast(.9) brightness(1.04);
+  --map-fade: #F4F4F2;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --ground: #0E0E0F;
+  --surface: #161618;
+  --surface-2: #1F1F22;
+  --surface-3: #2A2A2E;
+  --raised: #2E2E33;
+  --ink: #F2F2F3;           /* 16.2:1 on surface */
+  --ink-2: #A1A1A6;         /* 7.0:1 on surface */
+  --ink-3: #8E8E93;         /* 5.5:1 surface, 5.0:1 surface-2 */
+  --hairline: rgb(255 255 255 / .08);
+  --line: rgb(255 255 255 / .14);
+
+  --brand: #2F7D0A;         /* same fill: white label keeps 5.17:1 */
+  --on-brand: #FFFFFF;
+  --brand-ink: #7CC90C;     /* logo-end green as text on dark — 8.79:1 on surface */
+  --brand-vivid: #6CC417;   /* 8.21:1 on surface */
+  --brand-soft: rgb(124 201 12 / .14);
+  --lime: #9BCD50;          /* 9.67:1 on surface */
+  --ring: #9BCD50;
+
+  --ok: #3DD68C;
+  --ok-dot: #3DD68C;
+  --ok-soft: #1A2924;
+  --warn-soft: #31291E;
+  --danger-soft: #2C1F20;
+  --warn: #F5B14C;
+  --danger: #F26B6B;
+
+  --route: #9BCD50;         /* livery lime on the dark map */
+  --route-casing: #0E0E0F;
+  --approach: #F2F2F3;
+  --car-top: #E9E9EA;
+  --car-top-glass: #3A3D44;
+
+  --car-ground: rgb(0 0 0 / .55);
+
+  --e1: 0 1px 2px rgb(0 0 0 / .4), 0 2px 8px rgb(0 0 0 / .3);
+  --e2: 0 1px 2px rgb(0 0 0 / .5), 0 8px 24px rgb(0 0 0 / .45);
+  --e-sheet: 0 -1px 0 rgb(255 255 255 / .06), 0 -8px 32px rgb(0 0 0 / .5);
+
+  --map-filter: brightness(.7) contrast(1.06);
+  --map-fade: #232423;
+  color-scheme: dark;
+}

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Rider account</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="rider.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="mapgl.local.js"></script>
+<script src="kit.js"></script>
+<script src="routes.js"></script>
+<script src="audit.js"></script>
+<script src="rider.js"></script>
+<style>
+  /* Account: iOS inset-grouped list on the ground. Delete is a visible row, never buried (store rule and §9.8's spirit). */
+  .prof { display: flex; align-items: center; gap: var(--s4); padding: var(--s2) var(--margin) var(--s2); }
+  .prof .avatar.lg { background: var(--brand-soft); color: var(--ink); }
+  .prof .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .prof .nm { font: var(--t-title); color: var(--ink); white-space: nowrap; }
+  .prof .ph { font: var(--t-secondary); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; margin-top: 2px; }
+  .prof .edit { width: var(--tap); height: var(--tap); border-radius: var(--r-pill); background: var(--surface); box-shadow: var(--e1); display: grid; place-items: center; color: var(--ink); flex: none; }
+  .prof .edit svg { width: 18px; height: 18px; }
+  .gap { height: var(--s5); }
+  .row .val { font-variant-numeric: tabular-nums; }
+  .row .t2.warn { color: var(--warn); }
+  .count { min-width: 24px; height: 24px; padding: 0 7px; border-radius: var(--r-pill); background: var(--ink); color: var(--surface); font: 600 13px/24px var(--font); text-align: center; font-variant-numeric: tabular-nums; flex: none; }
+  .group .row.btnrow { width: 100%; text-align: left; }
+
+  /* Field (same as login) */
+  .form { padding: 0 var(--margin); }
+  .field { margin-top: var(--s5); display: flex; align-items: center; height: 60px; border-radius: var(--r-control); background: var(--surface-2); padding: 0 var(--s4); }
+  .field.focus { box-shadow: inset 0 0 0 2px var(--ink); }
+  .num { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .num .lbl { font: var(--t-caption); color: var(--ink-2); }
+  .num .v { font: 500 18px/24px var(--font); color: var(--ink); white-space: nowrap; display: flex; align-items: center; }
+  .caret { display: inline-block; width: 2px; height: 22px; background: var(--brand-ink); margin-left: 1px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .form .btn { margin-top: var(--s4); }
+
+  /* Places */
+  .rm { width: var(--tap); height: var(--tap); margin-right: -10px; border-radius: var(--r-pill); display: grid; place-items: center; color: var(--ink-2); flex: none; }
+  .rm svg { width: 20px; height: 20px; }
+  .row.add .ic { background: var(--brand-soft); color: var(--brand-ink); }
+  .row.add .t1 { color: var(--brand-ink); }
+  .page .toast { bottom: 50px; padding-right: 6px; }
+  .toast .undo { height: 32px; padding: 0 12px; border-radius: var(--r-pill); background: rgb(127 127 127 / .28); color: var(--surface); font: var(--t-secondary-strong); margin-left: var(--s2); }
+
+  /* Wallet */
+  .bal { margin: var(--s4) var(--margin) 0; background: var(--surface); border-radius: var(--r-card); padding: var(--s5) var(--s4) var(--s4); }
+  .bal .k { display: flex; align-items: center; gap: 6px; font: var(--t-secondary-strong); color: var(--warn); }
+  .bal .k svg { width: 16px; height: 16px; }
+  .bal .k.ok { color: var(--ink); }
+  .bal .k.ok svg { color: var(--ok); }
+  .bal .hero { font: var(--t-hero); color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -.5px; margin-top: var(--s1); white-space: nowrap; }
+  .bal .from { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; margin-top: var(--s1); }
+  .bal .note { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid var(--hairline); display: flex; gap: var(--s3); align-items: flex-start; }
+  .bal .note svg { width: 20px; height: 20px; color: var(--ink-2); flex: none; margin-top: 1px; }
+  .bal .note .n1 { font: var(--t-body-strong); color: var(--ink); }
+  .bal .note .n2 { font: var(--t-secondary); color: var(--ink-2); }
+  .soon { height: 24px; padding: 0 8px; border-radius: var(--r-pill); background: var(--surface-2); font: var(--t-caption); line-height: 24px; color: var(--ink-2); white-space: nowrap; flex: none; }
+  .row.off .t1 { color: var(--ink-2); }
+  .row.off .ic { color: var(--ink-3); }
+  .def { display: inline-flex; align-items: center; gap: 4px; font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; flex: none; }
+  .def svg { width: 16px; height: 16px; color: var(--ok); }
+  .cash { color: var(--ok); }
+
+  /* Sheets */
+  .sheet.modal .lede { font: var(--t-body); color: var(--ink-2); margin: 0 0 var(--s4); }
+  .choice .sub { display: block; font: var(--t-secondary); color: var(--ink-2); }
+  .choice .tw { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .choice .tw .t { flex: none; }
+  .choice .lang { font: var(--t-secondary-strong); color: var(--ink-3); width: 28px; flex: none; }
+  .sheet.modal .btns { margin-top: var(--s4); }
+  .loss { display: flex; flex-direction: column; gap: var(--s1); margin-bottom: var(--s2); }
+  .loss div { display: flex; align-items: center; gap: var(--s3); min-height: 36px; font: var(--t-body); color: var(--ink); }
+  .loss svg { width: 20px; height: 20px; color: var(--ink-2); flex: none; }
+  .badge { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; margin-bottom: var(--s3); }
+  .badge svg { width: 26px; height: 26px; }
+  .badge.warn { background: color-mix(in srgb, var(--warn) 14%, transparent); color: var(--warn); }
+  .reason { background: var(--surface-2); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: flex; align-items: center; gap: var(--s3); }
+  .reason .txt { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .reason .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .reason .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .reason svg { width: 20px; height: 20px; color: var(--warn); flex: none; }
+</style>
+</head>
+<body>
+<script>
+  const A = R.amd
+  const DEBT = 1300 /* Oct 7, Eco Partner, Komitas → Mashtots: 700 + 473 + 98 = 1 271 → 1 300, left unpaid */
+  const r = (ic, t1, end = '', o = {}) => `<${o.btn === false ? 'div' : 'button'} class="row btnrow ${o.cls || ''}"><span class="ic">${R.i(ic)}</span>
+      <span class="txt"><span class="t1">${t1}</span>${o.t2 ? `<span class="t2 ${o.t2c || ''}">${o.t2}</span>` : ''}</span>${end}${o.chev === false ? '' : `<i class="chev" data-lucide="chevron-right"></i>`}</${o.btn === false ? 'div' : 'button'}>`
+  const grp = (rows) => `<div class="group">${rows.join('<div class="divider"></div>')}</div>`
+  const back = (t = '') => `<nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl">${t}</span><span class="navend"></span></nav>`
+
+  const main = (debt = true) => `<div class="page">${back()}
+    <div class="prof"><span class="avatar lg ini" aria-hidden="true">Ա</span><span class="txt"><span class="nm">Անի Հակոբյան</span><span class="ph">+374 77 123 456</span></span>
+      <button class="edit" aria-label="Խմբագրել անունը">${R.i('pencil')}</button></div>
+    <div class="gap"></div>
+    ${grp([
+      r('history', 'Ուղևորություններ'),
+      r('calendar-clock', 'Նախնական պատվերներ', '<span class="count">1</span>'),
+      r('map-pin', 'Հասցեներ', '<span class="val">3</span>'),
+      r('wallet', 'Հաշվեկշիռ', `<span class="val">${debt ? A(DEBT) : A(0)}</span>`, debt ? { t2: 'Չմարված պարտք', t2c: 'warn' } : {}),
+    ])}
+    <div class="gap"></div>
+    ${grp([r('languages', 'Լեզու', '<span class="val">Հայերեն</span>'), r('sun-moon', 'Թեմա', '<span class="val">Ավտոմատ</span>')])}
+    <div class="gap"></div>
+    ${grp([r('log-out', 'Դուրս գալ', '', { chev: false }), r('trash-2', 'Ջնջել հաշիվը', '', { chev: false, cls: 'danger' })])}
+  </div>`
+  /* A modal over the account list: the list stays as context, inert under the scrim. */
+  const over = (sheet) => `<div data-overlay aria-hidden="true" inert style="position:absolute;inset:0">${main()}</div><div class="scrim"></div>
+    <section class="sheet modal r" role="dialog" aria-modal="true">${sheet}</section>`
+  const mhead = (t) => `<div class="grabber"></div><div class="mhead"><span class="h-title">${t}</span><button class="xbtn" aria-label="Փակել">${R.i('x')}</button></div>`
+  const choice = (t, on, sub, lang) => `<button class="choice" role="radio" aria-checked="${on}">${lang ? `<span class="lang">${lang}</span>` : ''}<span class="tw"><span class="t">${t}</span>${sub ? `<span class="sub">${sub}</span>` : ''}</span><span class="radio"></span></button>`
+
+  const places = (all) => `<div class="page">${back()}<h1 class="large">Հասցեներ</h1><div class="gap"></div>
+    ${grp([
+      r('house', 'Տուն', `<button class="rm" aria-label="Հեռացնել Տուն">${R.i('circle-minus')}</button>`, { t2: 'Կոմիտասի պող. 22', chev: false, btn: false }),
+      r('briefcase', 'Աշխատանք', `<button class="rm" aria-label="Հեռացնել Աշխատանք">${R.i('circle-minus')}</button>`, { t2: 'Հյուսիսային պող. 1', chev: false, btn: false }),
+      ...(all ? [r('heart', 'Մայրիկի մոտ', `<button class="rm" aria-label="Հեռացնել Մայրիկի մոտ">${R.i('circle-minus')}</button>`, { t2: 'Դավթաշեն, 3-րդ թաղ. 14', chev: false, btn: false })] : []),
+      r('plus', 'Ավելացնել հասցե', '', { chev: false, cls: 'add' }),
+    ])}
+    ${all ? '' : `<div class="toast" role="status">${R.i('check')}Հասցեն հեռացվեց<button class="undo">Հետարկել</button></div>`}</div>`
+
+  const wallet = (debt) => `<div class="page">${back()}<h1 class="large">Հաշվեկշիռ</h1>
+    <div class="bal">${debt
+      ? `<div class="k">${R.i('circle-alert')}Չմարված պարտք</div><div class="hero">${A(DEBT)}</div><div class="from">7 հոկտեմբերի ուղևորությունից</div>
+         <div class="note">${R.i('banknote')}<span><span class="n1" style="display:block">Վճարեք կանխիկ հաջորդ վարորդին</span><span class="n2">Վճարումը դեռ հասանելի չէ հավելվածում</span></span></div>`
+      : `<div class="k ok">${R.i('circle-check')}Պարտք չկա</div><div class="hero">${A(0)}</div><div class="from">Բոլոր ուղևորությունները վճարված են</div>`}</div>
+    <div class="sect">Վճարման եղանակ</div>
+    ${grp([
+      r('banknote', 'Կանխիկ', `<span class="def">${R.i('check')}Հիմնական</span>`, { chev: false, btn: false, cls: 'cash' }),
+      r('credit-card', 'Քարտ', '<span class="soon">Շուտով</span>', { chev: false, btn: false, cls: 'off', t2: 'Քարտով վճարումը կավելանա' }),
+    ])}</div>`
+
+  Rider.page({
+    title: 'Rider · Account',
+    sub: 'Profile, saved places, balance with an honest “card payments coming”, language, theme, sign out and deletion — all one tap from the list',
+    states: [
+      { id: 'main', group: 'Account', label: 'Account', note: 'Delete is a visible row. Debt is a word plus colour, never colour alone', html: () => main() },
+      { id: 'name', group: 'Account', label: 'Edit name', note: 'One field; the driver greets the rider by it',
+        html: () => `<div class="page on-surface">${back('Անուն')}<div class="form">
+          <div class="field focus"><span class="num"><span class="lbl">Անուն</span><span class="v">Անի Հակոբյան<span class="caret"></span></span></span></div>
+          <button class="btn btn-brand">Պահպանել</button></div>${R.keyboard()}</div>` },
+      { id: 'places', group: 'Places', label: 'Saved places', note: 'Remove is visible on every row (44pt), not a hidden swipe', html: () => places(true) },
+      { id: 'place-removed', group: 'Places', label: 'Removed + undo', note: 'No confirm dialog: the undo is the safety net', html: () => places(false) },
+      { id: 'wallet', group: 'Balance', label: 'Debt', note: 'account.debtNote said plainly; card is shown as coming, not hidden', html: () => wallet(true) },
+      { id: 'wallet-clear', group: 'Balance', label: 'Clear', html: () => wallet(false) },
+      { id: 'language', group: 'Settings', label: 'Language', note: 'Each language named in its own script; applies on tap',
+        html: () => over(`${mhead('Լեզու')}${choice('Հայերեն', true, '', 'HY')}${choice('Русский', false, '', 'RU')}${choice('English', false, '', 'EN')}`) },
+      { id: 'theme', group: 'Settings', label: 'Theme', note: 'Follows the phone by default (rider research §5.5)',
+        html: () => over(`${mhead('Թեմա')}${choice('Ավտոմատ', true, 'Ինչպես հեռախոսում')}${choice('Լուսավոր', false)}${choice('Մութ', false)}`) },
+      { id: 'signout', group: 'Leave', label: 'Sign out',
+        html: () => over(`${mhead('Դուրս գա՞լ')}<p class="lede">Հաջորդ անգամ մուտք կգործեք կոդով</p>
+          <div class="btns"><button class="btn btn-danger">Դուրս գալ</button><button class="btn btn-quiet">Չեղարկել</button></div>`) },
+      { id: 'delete', group: 'Leave', label: 'Delete account', note: 'account.deleteConfirm, and what goes with it',
+        html: () => over(`${mhead('Ջնջե՞լ հաշիվը')}<p class="lede">Այս գործողությունը անշրջելի է</p>
+          <div class="loss"><div>${R.i('user-round')}Անունը և հեռախոսահամարը</div><div>${R.i('map-pin')}Պահպանված հասցեները</div><div>${R.i('history')}Ուղևորությունների պատմությունը</div></div>
+          <div class="btns"><button class="btn btn-danger">${R.i('trash-2')}Ջնջել հաշիվը</button><button class="btn btn-quiet">Չեղարկել</button></div>`) },
+      { id: 'delete-blocked', group: 'Leave', label: 'Delete blocked', note: 'account.deleteBlocked, with the reason and the way to clear it',
+        html: () => over(`<div class="grabber"></div><div class="badge warn">${R.i('triangle-alert')}</div>
+          <div class="mhead"><span class="h-title">Հաշիվը հնարավոր չէ ջնջել հիմա</span></div>
+          <div class="reason">${R.i('wallet')}<span class="txt"><span class="t1">Չմարված պարտք</span><span class="t2">${A(DEBT)} · 7 հոկտեմբերի</span></span></div>
+          <div class="btns"><button class="btn btn-brand">Դիտել հաշվեկշիռը</button><button class="btn btn-quiet">Փակել</button></div>`) },
+    ],
+  })
+</script>
+</body>
+</html>

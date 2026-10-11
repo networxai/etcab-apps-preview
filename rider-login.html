@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Rider login</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="rider.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="mapgl.local.js"></script>
+<script src="kit.js"></script>
+<script src="routes.js"></script>
+<script src="audit.js"></script>
+<script src="rider.js"></script>
+<style>
+  /* Phone → code → name. The keypad is drawn: every layout here is judged with the keyboard up. */
+  .hero { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--s5); }
+  .hero .logo { width: 132px; height: 24px; }
+  .hero .carart { width: 236px; height: 112px; }
+  .form { flex: none; padding: 0 var(--margin) var(--s4); margin-bottom: 255px; }
+  .form .large, .form .lead { padding-left: 0; padding-right: 0; }
+  .field { margin-top: var(--s5); display: flex; align-items: center; height: 60px; border-radius: var(--r-control); background: var(--surface-2); padding: 0 var(--s4) 0 var(--s2); }
+  .field.err { box-shadow: inset 0 0 0 2px var(--danger); }
+  .field.focus { box-shadow: inset 0 0 0 2px var(--ink); }
+  .cc { display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 var(--s2); border-radius: 10px; font: var(--t-body-strong); color: var(--ink); flex: none; }
+  .cc svg { width: 16px; height: 16px; color: var(--ink-3); }
+  .flag { width: 22px; height: 15px; border-radius: 3px; background: linear-gradient(#D90012 33.3%, #0033A0 33.3% 66.6%, #F2A800 66.6%); box-shadow: inset 0 0 0 .5px rgb(0 0 0 / .15); flex: none; }
+  .sep { width: 1px; height: 28px; background: var(--hairline); margin: 0 var(--s3) 0 var(--s1); flex: none; }
+  .num { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .num .lbl { font: var(--t-caption); color: var(--ink-2); }
+  .num .v { font: 500 18px/24px var(--font); color: var(--ink); letter-spacing: .4px; font-variant-numeric: tabular-nums; white-space: nowrap; display: flex; align-items: center; }
+  .num .v.ph { color: var(--ink-3); font-weight: 400; }
+  .caret { display: inline-block; width: 2px; height: 22px; background: var(--brand-ink); margin-left: 1px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .clear { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-3); flex: none; }
+  .clear svg { width: 18px; height: 18px; }
+  .form .btn { margin-top: var(--s4); }
+  .form .inline-note { margin-top: var(--s2); }
+
+  .who { font: var(--t-body); color: var(--ink-2); margin-top: var(--s1); display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--s2); }
+  .who b { font: var(--t-body-strong); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .link { font: var(--t-body-strong); color: var(--brand-ink); height: 44px; display: inline-flex; align-items: center; white-space: nowrap; }
+  .otp { display: flex; gap: var(--s2); margin-top: var(--s5); }
+  .otp .gap { width: var(--s2); }
+  .otp .d { width: 48px; height: 58px; border-radius: var(--r-card); background: var(--surface-2); display: grid; place-items: center;
+    font: 600 24px/30px var(--font); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .otp .d.focus { box-shadow: inset 0 0 0 2px var(--ink); }
+  .otp.err .d { box-shadow: inset 0 0 0 2px var(--danger); color: var(--danger); }
+  .otp.busy .d { color: var(--ink-3); }
+  .resend { margin-top: var(--s3); display: flex; align-items: center; gap: var(--s4); min-height: 44px; }
+  .resend .wait { font: var(--t-secondary); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .busyline { margin-top: var(--s3); display: flex; align-items: center; gap: var(--s2); min-height: 44px; font: var(--t-secondary-strong); color: var(--ink-2); }
+  .busyline .spin { width: 16px; height: 16px; border-width: 2px; }
+  .btn .spin { width: 18px; height: 18px; }
+  .page .toast { top: 110px; }
+</style>
+</head>
+<body>
+<script>
+  const PH = '77 123 456'
+  const hero = () => `<div class="hero"><img class="logo" src="assets/eco/logo-wide.png" alt="Eco Taxi" width="132" height="24">${R.car('city', 236, 112, '')}</div>`
+  const field = ({ v, ph, cls = '', clear }) => `<div class="field ${cls}">
+      <button class="cc" aria-label="Երկրի կոդ +374"><span class="flag" aria-hidden="true"></span>+374${R.i('chevron-down')}</button><span class="sep"></span>
+      <span class="num"><span class="lbl">Հեռախոսահամար</span><span class="v ${ph ? 'ph' : ''}">${v}${cls.includes('focus') ? '<span class="caret"></span>' : ''}</span></span>
+      ${clear ? `<button class="clear" aria-label="Մաքրել">${R.i('circle-x')}</button>` : ''}</div>`
+  const phonePage = ({ v = PH, ph, fcls = 'focus', clear = true, btn = '<button class="btn btn-brand">Ուղարկել կոդը</button>', note = '', extra = '' }) =>
+    `<div class="page on-surface">${hero()}<div class="form">
+      <h1 class="large">Մուտք</h1>
+      ${field({ v, ph, cls: fcls, clear })}${note}${btn}</div>${R.keypad()}</div>${extra}`
+
+  const boxes = (ds, cls = '', focusAt = -1) => `<div class="otp ${cls}" role="group" aria-label="Վեցանիշ կոդ">${[0, 1, 2, 3, 4, 5].map((i) =>
+    `${i === 3 ? '<span class="gap"></span>' : ''}<span class="d ${i === focusAt ? 'focus' : ''}">${ds[i] || (i === focusAt ? '<span class="caret"></span>' : '')}</span>`).join('')}</div>`
+  const codePage = (body, extra = '') => `<div class="page on-surface">
+      <nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl"></span><span class="navend"></span></nav>
+      <div class="form" style="margin-top:var(--s2)"><h1 class="large">Կոդը</h1>
+        <div class="who">Կոդն ուղարկվել է <b>+374 ${PH}</b></div>
+        ${body}</div>${R.keypad()}</div>${extra}`
+
+  Rider.page({
+    title: 'Rider · Login',
+    sub: 'Phone, then a six-digit code, then a name on the first sign-in. +374 by default, a picker for tourists. The keyboard is drawn up',
+    states: [
+      { id: 'phone-empty', group: 'Phone', label: 'Empty', note: 'Order disabled until the number is complete',
+        html: () => phonePage({ v: 'XX XXX XXX', ph: true, clear: false, btn: '<button class="btn" disabled>Ուղարկել կոդը</button>' }) },
+      { id: 'phone', group: 'Phone', label: 'Filled', note: 'Grouped as it is spoken: 77 123 456',
+        html: () => phonePage({}) },
+      { id: 'sending', group: 'Phone', label: 'Sending', note: 'Spinner in the button; the field stays readable',
+        html: () => phonePage({ fcls: '', clear: false, btn: '<button class="btn btn-brand" aria-busy="true"><span class="spin"></span>Ուղարկում ենք</button>' }) },
+      { id: 'phone-error', group: 'Phone', label: 'Bad number', note: 'Refusal focuses the field; message under it, not a toast',
+        html: () => phonePage({ v: '77 123 45', fcls: 'err', note: `<div class="inline-note err">${R.i('circle-alert')}<span>Համարը թերի է</span></div>` }) },
+      { id: 'offline', group: 'Phone', label: 'Offline', note: 'Banner, not a dead button: the number is kept',
+        html: () => phonePage({ fcls: '', clear: false, btn: '<button class="btn" disabled>Ուղարկել կոդը</button>',
+          extra: R.banner({ t1: 'Կապ չկա', t2: 'Ստուգեք ինտերնետը', action: 'Կրկնել' }) }) },
+
+      { id: 'code', group: 'Code', label: 'Typing', note: 'Auto-read on Android, oneTimeCode on iOS; submits on the sixth digit',
+        html: () => codePage(`${boxes('482', '', 3)}<div class="resend"><span class="wait">Կրկին ուղարկել՝ 0:42</span></div>`) },
+      { id: 'verifying', group: 'Code', label: 'Checking',
+        html: () => codePage(`${boxes('482917', 'busy')}<div class="busyline"><span class="spin"></span>Ստուգում ենք</div>`) },
+      { id: 'code-error', group: 'Code', label: 'Wrong code', note: 'Red ring and a word; attempts left so the rider is not surprised by a lock',
+        html: () => codePage(`${boxes('482971', 'err')}<div class="inline-note err" style="margin-top:var(--s3)">${R.i('circle-alert')}<span>Կոդը սխալ է · մնաց 2 փորձ</span></div>
+          <div class="resend"><button class="link">Փոխել համարը</button></div>`) },
+      { id: 'resend', group: 'Code', label: 'Resend', note: 'Timer done: resend, or have the code read out by a call (SMS fails for some foreign numbers)',
+        html: () => codePage(`${boxes('', '', 0)}<div class="resend"><button class="link">Կրկին ուղարկել</button><button class="link" style="color:var(--ink)">${''}Ստանալ զանգով</button></div>`,
+          '<div class="toast" role="status" style="top:62px">' + R.i('check') + 'Կոդն ուղարկվեց</div>') },
+
+      { id: 'name', group: 'First sign-in', label: 'Name', note: 'Only on the first sign-in; the driver greets the rider by it',
+        html: () => `<div class="page on-surface">
+          <nav class="nav"><span class="navend"></span><span class="navttl"></span><button class="navbtn" aria-label="Բաց թողնել" style="width:auto;padding:0 8px;font:var(--t-body-strong);color:var(--ink-2)">Հետո</button></nav>
+          <div class="form" style="margin-top:var(--s2);margin-bottom:0"><h1 class="large">Ինչպե՞ս դիմենք ձեզ</h1>
+          <div class="field focus" style="padding-left:var(--s4)"><span class="num"><span class="lbl">Անուն</span><span class="v">Անի<span class="caret"></span></span></span></div>
+          <button class="btn btn-brand">Շարունակել</button></div>${R.keyboard()}</div>` },
+    ],
+  })
+</script>
+</body>
+</html>

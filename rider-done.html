@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Rider trip complete</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="rider.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="mapgl.local.js"></script>
+<script src="kit.js"></script>
+<script src="routes.js"></script>
+<script src="audit.js"></script>
+<script src="rider.js"></script>
+<style>
+  /* Fare first, then the stars. Dismissable at every step: rating never blocks the next booking. */
+  .body { flex: 1; min-height: 0; padding: 0 var(--margin); display: flex; flex-direction: column; }
+  .trip { display: flex; gap: var(--s4); align-items: center; margin-top: var(--s1); }
+  .trip .trace { flex: none; }
+  .stops { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s3); position: relative; }
+  .stops::before { content: ''; position: absolute; left: 7.25px; top: 17px; bottom: 30px; width: 1.5px; background: var(--ink-3); }
+  .st { display: flex; gap: var(--s3); align-items: flex-start; }
+  .st .m { width: 16px; height: 22px; display: grid; place-items: center; flex: none; }
+  .st .dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 3px var(--ink); }
+  .st .sq { width: 10px; height: 10px; border-radius: 2px; background: var(--ink); }
+  .st .tx { display: flex; flex-direction: column; min-width: 0; }
+  .st .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .st .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .fare { display: flex; align-items: center; justify-content: space-between; margin-top: var(--s5); }
+  .fare .n { font: var(--t-hero); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; letter-spacing: -.4px; }
+  .paid { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: var(--r-pill); background: var(--surface-2);
+    font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; }
+  .paid svg { width: 16px; height: 16px; color: var(--ok); }
+  .bd { margin-top: var(--s3); border-radius: var(--r-card); background: var(--surface-2); padding: var(--s1) var(--s4); }
+  .bd .l { display: flex; justify-content: space-between; align-items: center; min-height: 34px; font: var(--t-body); color: var(--ink-2); white-space: nowrap; }
+  .bd .l span:last-child { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .bd .l.tot { border-top: 1px solid var(--hairline); margin-top: var(--s1); min-height: 40px; }
+  .bd .l.tot span { font: var(--t-body-strong); color: var(--ink); }
+  .bdrow { display: flex; align-items: center; justify-content: space-between; min-height: 44px; margin-top: var(--s2); font: var(--t-body); color: var(--ink-2); width: 100%; white-space: nowrap; }
+  .bdrow svg { width: 20px; height: 20px; color: var(--ink-3); }
+  .who { display: flex; align-items: center; gap: var(--s3); margin-top: var(--s5); }
+  .who .nm { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .who .n1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .who .n2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ask { font: var(--t-body-strong); color: var(--ink); margin-top: var(--s4); text-align: center; }
+  .stars { display: flex; justify-content: center; gap: var(--s1); margin-top: var(--s2); }
+  .stars button { width: 52px; height: 52px; display: grid; place-items: center; color: var(--ink-3); }
+  .stars button svg { width: 36px; height: 36px; stroke-width: 1.5; }
+  .stars button.on { color: var(--ink); }
+  .stars button.on svg { fill: currentColor; }
+  .q { font: var(--t-secondary-strong); color: var(--ink-2); margin: var(--s4) 0 var(--s2); }
+  .chips { justify-content: center; }
+  .foot { flex: none; padding: var(--s3) var(--margin) 34px; display: flex; flex-direction: column; gap: var(--s2); }
+  .btn-text { height: 44px; font: var(--t-body-strong); color: var(--ink-2); }
+
+  .thanks { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: var(--s3); }
+  .thanks .ok { width: 72px; height: 72px; border-radius: 50%; background: var(--brand-soft); color: var(--brand-ink); display: grid; place-items: center; }
+  .thanks .ok svg { width: 34px; height: 34px; stroke-width: 2; }
+  .thanks .large { padding: 0; }
+  .thanks .sum { font: var(--t-body); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+</style>
+</head>
+<body>
+<script>
+  const S = R.i('star')
+  const nav = `<nav class="nav"><span class="navend"></span><span class="navttl">Ուղևորությունն ավարտված է</span><button class="navbtn" aria-label="Փակել">${R.i('x')}</button></nav>`
+  const tripHead = () => `<div class="trip">${R.trace('pickupToDrop', 96, 96, { pad: 14, sw: 3.5, r: 4.5, grid: false })}
+    <div class="stops"><div class="st"><span class="m"><span class="dot"></span></span><span class="tx"><span class="t1">Մաշտոցի պող. 37</span><span class="t2">9:47</span></span></div>
+      <div class="st"><span class="m"><span class="sq"></span></span><span class="tx"><span class="t1">Կոմիտասի պող. 22</span><span class="t2">9:53 · 4.3 կմ · 6 րոպե</span></span></div></div></div>
+    <div class="fare"><span class="n">${R.amd(1100)}</span><span class="paid">${R.i('banknote')}Կանխիկ</span></div>`
+  /* Eco City, fixed_upfront: 600 + 90·4.3 + 12·6 = 1 059 → rounded to 100 ֏ */
+  const breakdown = () => `<div class="bd" aria-label="Վճարի մանրամասները">
+    <div class="l"><span>Նստավարձ</span><span>${R.amd(600)}</span></div>
+    <div class="l"><span>Ճանապարհ · 4.3 կմ</span><span>${R.amd(387)}</span></div>
+    <div class="l"><span>Ժամանակ · 6 րոպե</span><span>${R.amd(72)}</span></div>
+    <div class="l"><span>Կլորացում</span><span>+${R.amd(41)}</span></div>
+    <div class="l tot"><span>Ընդամենը</span><span>${R.amd(1100)}</span></div></div>`
+  const collapsed = `<button class="bdrow"><span>Վճարի մանրամասները</span>${R.i('chevron-down')}</button>`
+  const who = `<div class="who">${R.avatar()}<span class="nm"><span class="n1">Արամ</span><span class="n2">Volkswagen ID.3 · 01 ET 001</span></span></div>`
+  const stars = (n) => `<div class="stars" role="radiogroup" aria-label="Գնահատեք վարորդին">${[1, 2, 3, 4, 5].map((i) =>
+    `<button class="${i <= n ? 'on' : ''}" role="radio" aria-checked="${i === n}" aria-label="${i} աստղ">${S}</button>`).join('')}</div>`
+  const chips = (list, on) => `<div class="chips">${list.map((c, i) => `<button class="chip tog" aria-pressed="${on.includes(i)}">${c}</button>`).join('')}</div>`
+  const page = (body, foot) => `<div class="page on-surface">${nav}<div class="body">${body}</div><div class="foot">${foot}</div></div>`
+
+  Rider.page({
+    title: 'Rider · Trip complete',
+    sub: 'The fare is the hero, broken down from the real Eco City tariff. Stars, then compliments or a reason. Close is always there',
+    states: [
+      { id: 'rate', label: 'Fare + rate', note: 'Base 600 + 4.3 km × 90 + 6 min × 12 = 1 059, rounded to 1 100 ֏ (fixed upfront)',
+        html: () => page(`${tripHead()}${breakdown()}${who}<div class="ask">Գնահատեք վարորդին</div>${stars(0)}`,
+          '<button class="btn-text">Բաց թողնել</button>') },
+      { id: 'rated', label: 'Five stars', note: 'Compliments are optional; two picked',
+        html: () => page(`${tripHead()}${collapsed}${who}${stars(5)}<div class="q" style="text-align:center">Ի՞նչը դուր եկավ</div>
+          ${chips(['Մաքուր մեքենա', 'Զգույշ վարում', 'Հաճելի զրույց', 'Ճշտապահ', 'Լավ երաժշտություն'], [0, 1])}`,
+          '<button class="btn btn-brand">Ուղարկել</button>') },
+      { id: 'low', label: 'Low rating', note: 'Under five: what went wrong, one tap each. Goes to the dispatcher, not only to a score',
+        html: () => page(`${tripHead()}${collapsed}${who}${stars(3)}<div class="q" style="text-align:center">Ի՞նչը չստացվեց</div>
+          ${chips(['Ուշացավ', 'Անզգույշ վարում', 'Մեքենան մաքուր չէր', 'Երկար երթուղի', 'Անհարմար զրույց'], [1])}`,
+          '<button class="btn btn-brand">Ուղարկել</button>') },
+      { id: 'thanks', label: 'Thanks', note: 'Calm close; the next ride is one tap',
+        html: () => page(`<div class="thanks"><span class="ok">${R.i('check')}</span><h1 class="large">Շնորհակալություն</h1>
+          <span class="sum">${R.amd(1100)} · Կանխիկ · Արամ</span></div>`,
+          `<button class="btn btn-brand">Պատվիրել մեքենա</button><button class="btn btn-quiet">${R.i('receipt')}Ստացական</button>`) },
+    ],
+  })
+</script>
+</body>
+</html>

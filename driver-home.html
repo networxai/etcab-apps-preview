@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Driver home</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="mapgl.local.js"></script>
+<script src="kit.js"></script>
+<style>
+  .sheet { padding-bottom: 34px; }
+  .fab.lg { width: 48px; height: 48px; }
+  .status { position: absolute; z-index: 20; top: 60px; left: 16px; height: 48px; padding: 0 18px 0 14px; border-radius: var(--r-pill);
+    background: var(--surface); box-shadow: var(--e2); display: inline-flex; align-items: center; gap: 10px;
+    font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .status .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--ok-dot); box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok-dot) 22%, transparent); }
+
+  .wait { display: flex; align-items: center; gap: var(--s2); font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; }
+  .wait .bars { display: inline-flex; gap: 3px; }
+  .wait .bars i { width: 4px; height: 4px; border-radius: 2px; background: var(--ok-dot); }
+  .wait .bars i:nth-child(2) { opacity: .6; } .wait .bars i:nth-child(3) { opacity: .3; }
+
+  .logo { position: absolute; z-index: 20; top: 75px; left: 50%; transform: translateX(-50%); width: 100px; height: 18px; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
+  .mycar { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 6px 0 4px; border-radius: 10px; background: var(--surface-2); flex: none; }
+  .mycar img { width: 52px; height: 30px; object-fit: contain; filter: drop-shadow(0 2px 2px var(--car-ground)); }
+  .plate { height: 28px; padding: 0 8px; border-radius: 6px; background: #fff; color: #111113; box-shadow: inset 0 0 0 1.5px #111113;
+    font: 600 14px/28px var(--font); letter-spacing: .4px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .earn { display: flex; align-items: flex-end; justify-content: space-between; margin: var(--s4) 0 var(--s4); }
+  .earn .lbl { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .earn .hero { font: var(--t-hero); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -.5px; margin-top: 2px; }
+  .earn .hero small { font: 600 22px/1 var(--font); color: var(--ink-2); margin-left: 4px; letter-spacing: 0; }
+  .earn .side { display: flex; align-items: center; gap: var(--s2); padding-bottom: 4px; }
+  .earn .count { font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .eye { width: 44px; height: 44px; border-radius: var(--r-pill); background: var(--surface-2); display: grid; place-items: center; color: var(--ink); }
+  .eye svg { width: 20px; height: 20px; }
+
+  .pre { display: flex; align-items: center; gap: var(--s3); height: 64px; width: 100%; text-align: left;
+    border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); }
+  .pre .ic { width: 40px; height: 40px; border-radius: var(--r-pill); background: var(--brand-soft); color: var(--brand-ink); display: grid; place-items: center; flex: none; }
+  .pre .ic svg { width: 20px; height: 20px; }
+  .pre .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .pre .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .pre .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .pre .n { min-width: 28px; height: 28px; padding: 0 8px; border-radius: var(--r-pill); background: var(--ink); color: var(--surface);
+    font: 600 14px/28px var(--font); text-align: center; font-variant-numeric: tabular-nums; }
+  .pre .chev { color: var(--ink-3); width: 20px; height: 20px; }
+
+  .drive { height: var(--h-drive); border-radius: 16px; margin-top: var(--s4); background: var(--surface-2); color: var(--ink);
+    font: var(--t-headline); display: flex; align-items: center; justify-content: center; gap: var(--s2); width: 100%; }
+  .drive svg { width: 22px; height: 22px; }
+
+  .me { position: relative; width: 64px; height: 64px; display: grid; place-items: center; }
+  .me::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--brand-soft); }
+  .me::after { content: ''; position: absolute; inset: 20px; border-radius: 50%; background: var(--brand); opacity: .18; }
+  .me svg { position: relative; z-index: 1; transform-origin: center; scale: 1.3; }
+</style>
+</head>
+<body>
+<main class="screen" id="s">
+  <div class="map" id="map" aria-label="Քարտեզ"></div>
+
+  <div class="status" role="status"><span class="dot"></span>Գծում</div>
+  <button class="fab lg" style="top:60px;right:16px" aria-label="Հաշիվ"><i data-lucide="user-round"></i></button>
+  <img class="logo" src="assets/eco/logo-wide.png" alt="Eco Taxi" width="100" height="18">
+  <button class="fab lg" id="recentre" style="right:16px" aria-label="Կենտրոնացնել ինձ վրա"><i data-lucide="locate-fixed"></i></button>
+
+  <section class="sheet" id="sheet">
+    <div class="grabber"></div>
+    <div class="top"><div class="wait"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>Սպասում ենք պատվերի</div>
+      <span class="mycar" aria-label="Volkswagen ID.3, 01 ET 001"><img src="assets/eco/cars/city.webp" alt=""><span class="plate">01 ET 001</span></span></div>
+
+    <div class="earn">
+      <div><div class="lbl">Այսօր</div><div class="hero">9 800<small>֏</small></div></div>
+      <div class="side"><span class="count">7 պատվեր</span><button class="eye" aria-label="Թաքցնել գումարը"><i data-lucide="eye"></i></button></div>
+    </div>
+
+    <button class="pre" aria-label="Նախապես ամրագրված, 2" onclick="location.href='driver-preorders.html?theme='+THEME">
+      <span class="ic"><i data-lucide="calendar-clock"></i></span>
+      <span class="txt"><span class="t1">Նախապես ամրագրված</span><span class="t2">Վաղը, 07:40 · Զվարթնոց</span></span>
+      <span class="n">2</span><i class="chev" data-lucide="chevron-right"></i>
+    </button>
+
+    <button class="drive"><i data-lucide="power"></i>Դուրս գալ գծից</button>
+  </section>
+</main>
+<script src="audit.js"></script>
+<script>
+  statusBar(document.getElementById('s'))
+  icons()
+  const sheetH = document.getElementById('sheet').offsetHeight
+  document.getElementById('recentre').style.bottom = (sheetH + 12) + 'px'
+  const me = [40.1823, 44.5072]
+  const map = makeMap(document.getElementById('map'), { sheetH, badge: { bottom: (sheetH + 22) + 'px', left: '16px' }, fit: [[me[0] - .0034, me[1] - .0046], [me[0] + .0034, me[1] + .0046]], padTL: [0, 100], padBR: [0, sheetH - 10] })
+  htmlMarker(map, me, `<div class="me">${carTop(-38, 'var(--brand)', 'rgb(255 255 255 / .75)')}</div>`, [64, 64])
+</script>
+</body>
+</html>

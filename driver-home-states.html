@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Driver home states</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="driver.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="mapgl.local.js"></script>
+<script src="kit.js"></script>
+<script src="routes.js"></script>
+<script src="driver.js"></script>
+<style>
+  .sheet { padding-bottom: 34px; }
+  .fab.lg { width: 48px; height: 48px; }
+  .logo { position: absolute; z-index: 20; top: 75px; left: 50%; transform: translateX(-50%); width: 100px; height: 18px; }
+  /* Off the line: the map steps back, so nobody reads it as "working". */
+  :root[data-state="offline"] #map > div, :root[data-state="blocked"] #map > div { filter: grayscale(1) opacity(.7); }
+
+  .top { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
+  .line { display: flex; align-items: center; gap: var(--s2); font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; }
+  .line svg { width: 16px; height: 16px; }
+  .line.warn { color: var(--warn); }
+  .mycar { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 6px 0 4px; border-radius: 10px; background: var(--surface-2); flex: none; }
+  .mycar img { width: 52px; height: 30px; }
+
+  .earn { display: flex; align-items: flex-end; justify-content: space-between; margin: var(--s4) 0; }
+  .earn .lbl { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .hero { font: var(--t-hero); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -.5px; margin-top: 2px; }
+  .hero small { font: 600 22px/1 var(--font); color: var(--ink-2); margin-left: 4px; letter-spacing: 0; }
+  .earn .side { display: flex; align-items: center; gap: var(--s2); padding-bottom: 4px; }
+  .earn .count { font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .eye { width: 44px; height: 44px; border-radius: var(--r-pill); background: var(--surface-2); display: grid; place-items: center; color: var(--ink); }
+  .eye svg { width: 20px; height: 20px; }
+
+  /* Compact today line (when something else owns the hero) */
+  .today { display: flex; align-items: center; justify-content: space-between; height: 48px; margin-top: var(--s2); }
+  .today .l { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .today .v { font: var(--t-headline); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  .pre { display: flex; align-items: center; gap: var(--s3); height: 64px; width: 100%; text-align: left; text-decoration: none;
+    border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); }
+  .pre .ic { width: 40px; height: 40px; border-radius: var(--r-pill); background: var(--brand-soft); color: var(--brand-ink); display: grid; place-items: center; flex: none; }
+  .pre .ic svg { width: 20px; height: 20px; }
+  .pre .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .pre .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .pre .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .pre .n { min-width: 28px; height: 28px; padding: 0 8px; border-radius: var(--r-pill); background: var(--ink); color: var(--surface);
+    font: 600 14px/28px var(--font); text-align: center; font-variant-numeric: tabular-nums; }
+  .pre .chev { color: var(--ink-3); width: 20px; height: 20px; }
+
+  .drive { height: var(--h-drive); border-radius: 16px; margin-top: var(--s4); background: var(--surface-2); color: var(--ink);
+    font: var(--t-headline); display: flex; align-items: center; justify-content: center; gap: var(--s2); width: 100%; }
+  .drive svg { width: 22px; height: 22px; }
+  .go { margin-top: var(--s4); text-decoration: none; }
+
+  /* Active ride card: the way back into the ride */
+  .ride { display: flex; align-items: center; gap: var(--s3); padding: var(--s4); border-radius: var(--r-card); background: var(--surface-2);
+    text-decoration: none; margin-top: var(--s3); }
+  .ride .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .ride .ey { font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .ride .ey i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok-dot); display: block; }
+  .ride .t1 { font: var(--t-title); color: var(--ink); white-space: nowrap; }
+  .ride .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ride .hero { text-align: right; }
+  .ride .hero small { font-size: 18px; }
+
+  /* Practice ride: a hatched badge so it never reads as live work */
+  .demo-card { display: flex; gap: var(--s3); align-items: center; padding: var(--s4); border-radius: var(--r-card); margin-top: var(--s3);
+    background: var(--surface); border: 1.5px dashed var(--ink-3); }
+  .demo-card .ic { width: 44px; height: 44px; border-radius: 50%; background: var(--ink); color: var(--surface); display: grid; place-items: center; flex: none; }
+  .demo-card .ic svg { width: 22px; height: 22px; }
+  .demo-card .t1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .demo-card .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .demo-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: var(--s4); }
+  .demo-steps i { height: 6px; border-radius: 3px; background: var(--surface-3); }
+  .demo-steps i.on { background: var(--ink); }
+  .demo-lbl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 6px; font: var(--t-caption); color: var(--ink-2); white-space: nowrap; }
+
+  /* Connection lost: red strip under the status bar, with the reconnect timer */
+  .connlost { position: absolute; z-index: 25; top: 116px; left: 12px; right: 12px; height: 48px; border-radius: var(--r-card); background: var(--danger-soft);
+    box-shadow: var(--e2); display: flex; align-items: center; gap: 10px; padding: 0 14px; font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; }
+  .connlost svg { width: 18px; height: 18px; color: var(--danger); flex: none; }
+  .connlost .tm { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+  .spin { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--surface-3); border-top: 2px solid var(--ink-2); flex: none; }
+
+  /* Debt block */
+  .owed { display: flex; align-items: flex-end; justify-content: space-between; margin: var(--s4) 0 var(--s2); }
+  .owed .hero { color: var(--warn); }
+  .owed .lim { font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; padding-bottom: 6px; }
+  .meter { height: 6px; border-radius: 3px; background: var(--surface-3); position: relative; }
+  .meter i { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; border-radius: 3px; background: var(--warn); }
+  .meter b { position: absolute; top: -4px; bottom: -4px; width: 2px; left: 96%; background: var(--ink); border-radius: 1px; }
+  .notice { margin-top: var(--s4); }
+  .notice .s { white-space: nowrap; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<main class="screen" id="s">
+  <div class="map" id="map" aria-label="Քարտեզ"></div>
+
+  <div class="spill away" role="status" data-s="away"><span class="dot"></span>Բացակա</div>
+  <div class="spill off" role="status" data-s="offline blocked"><span class="dot"></span>Գծից դուրս</div>
+  <div class="spill lost" role="status" data-s="lost"><span class="dot"></span>Կապ չկա</div><!-- design-head: the pill never says Գծում while the link is down (§10.2, research move 6) -->
+  <div class="spill" role="status" data-s="active"><span class="dot"></span>Պատվերով</div>
+  <div class="spill demo" role="status" data-s="demo"><span class="dot"></span>Փորձնական</div>
+  <button class="fab lg" style="top:60px;right:16px" aria-label="Հաշիվ"><i data-lucide="user-round"></i></button>
+  <img class="logo" src="assets/eco/logo-wide.png" alt="Eco Taxi" width="100" height="18" data-s="lost">
+
+  <div class="connlost" role="alert" data-s="lost"><i data-lucide="wifi-off"></i>Վերականգնվում է<span class="tm">0:48</span></div>
+
+  <button class="fab lg" id="recentre" style="right:16px" aria-label="Կենտրոնացնել ինձ վրա"><i data-lucide="locate-fixed"></i></button>
+
+  <section class="sheet" id="sheet">
+    <div class="grabber"></div>
+    <div class="top">
+      <div class="line warn" data-s="away"><i data-lucide="bell-off"></i>Պատվերներ չեն գալիս</div>
+      <div class="line" data-s="offline"><i data-lucide="moon"></i>Պատվերներ չեն գալիս</div>
+      <div class="line" data-s="lost"><span class="spin" aria-hidden="true"></span>Վերջին կապը՝ 09:40</div>
+      <div class="line" data-s="active"><i data-lucide="navigation"></i>Ընթացիկ պատվեր</div>
+      <div class="line" data-s="demo"><i data-lucide="graduation-cap"></i>Ուսուցում</div>
+      <div class="line warn" data-s="blocked"><i data-lucide="lock"></i>Արգելափակված է</div>
+      <span class="mycar" aria-label="Volkswagen ID.3, 01 ET 001"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="plate">01 ET 001</span></span>
+    </div>
+
+    <!-- earnings hero: away, offline, lost -->
+    <div class="earn" data-s="away lost">
+      <div><div class="lbl">Այսօր</div><div class="hero">9 800<small>֏</small></div></div>
+      <div class="side"><span class="count">7 պատվեր</span><button class="eye" aria-label="Թաքցնել գումարը"><i data-lucide="eye"></i></button></div>
+    </div>
+
+    <!-- away: why, in one line -->
+    <div class="notice warn" data-s="away" style="margin:0 0 var(--s4)"><i data-lucide="phone-missed"></i><div><b>Բաց եք թողել 2 պատվեր</b>Սեղմե՛ք՝ վերադառնալու համար</div></div>
+
+    <!-- active ride -->
+    <a class="ride" href="driver-ride.html?state=enroute" data-s="active" aria-label="Վերադառնալ պատվերին, Մաշտոցի պող. 40">
+      <span class="txt"><span class="ey"><i></i>Ճանապարհին</span><span class="t1">Մաշտոցի պող. 40</span><span class="t2">Անի · 1,4 կմ</span></span>
+      <span class="hero">4<small>րոպե</small></span>
+    </a>
+
+    <!-- demo -->
+    <div class="demo-card" data-s="demo"><span class="ic"><i data-lucide="graduation-cap"></i></span><div><div class="t1">Փորձնական պատվեր</div><div class="t2">Իրական ուղևոր չկա · գումար չկա</div></div></div>
+    <div data-s="demo"><div class="demo-steps" aria-label="Քայլ 2՝ 4-ից"><i class="on"></i><i class="on"></i><i></i><i></i></div>
+      <div class="demo-lbl"><span>Ընդունել</span><span>Տեղում եմ</span><span>Սկսել</span><span>Ավարտել</span></div></div>
+
+    <!-- blocked: debt over the threshold (money spec §5.2) -->
+    <div data-s="blocked">
+      <div class="owed"><div><div class="lbl" style="font:var(--t-secondary);color:var(--ink-2)">Դուք պարտք եք</div><div class="hero">5 200<small>֏</small></div></div><span class="lim">սահմանը՝ 5 000 ֏</span></div>
+      <div class="meter" aria-hidden="true"><i></i><b></b></div>
+      <div class="notice warn"><i data-lucide="banknote"></i><div><b>Կանխիկ պատվերները դադարեցվել են</b><span class="s">Մարե՛ք 200 ֏՝ գիծ վերադառնալու համար</span></div></div>
+    </div>
+
+    <div class="today" data-s="offline active demo">
+      <span class="l">Այսօր · 7 պատվեր</span><span class="v">9 800 ֏</span>
+    </div>
+
+    <a class="pre" href="driver-preorders.html" data-not="demo blocked" aria-label="Նախապես ամրագրված, 2">
+      <span class="ic"><i data-lucide="calendar-clock"></i></span>
+      <span class="txt"><span class="t1">Նախապես ամրագրված</span><span class="t2">Վաղը, 07:40 · Զվարթնոց</span></span>
+      <span class="n">2</span><i class="chev" data-lucide="chevron-right"></i>
+    </a>
+
+    <button class="go" data-s="away"><i data-lucide="power"></i>Վերադառնալ գիծ</button>
+    <button class="go" data-s="offline"><i data-lucide="power"></i>Անցնել գիծ</button>
+    <button class="drive" data-s="lost"><i data-lucide="power"></i>Դուրս գալ գծից</button>
+    <a class="go" href="driver-ride.html?state=enroute" data-s="active"><i data-lucide="navigation"></i>Վերադառնալ պատվերին</a>
+    <button class="go ink" data-s="demo"><i data-lucide="flag"></i>Ավարտել փորձը</button>
+    <a class="go" href="driver-earnings.html?state=blocked" data-s="blocked"><i data-lucide="wallet"></i>Տեսնել հաշվեկշիռը</a>
+  </section>
+</main>
+<script src="audit.js"></script>
+<script>
+  statusBar(document.getElementById('s'))
+  const st = D.init([
+    ['away', 'Away (auto, missed offers)'], ['offline', 'Offline (off the line)'], ['lost', 'Connection lost'],
+    ['active', 'Active ride card'], ['demo', 'Practice ride running'], ['blocked', 'Blocked (debt over limit)'],
+  ])
+  icons()
+  const sheetH = document.getElementById('sheet').offsetHeight
+  document.getElementById('recentre').style.bottom = (sheetH + 12) + 'px'
+  const me = [40.1823, 44.5072]
+  const A = ROUTES.driverToPickup.pts
+  const box = (p, d) => [[p[0] - d, p[1] - d * 1.35], [p[0] + d, p[1] + d * 1.35]]
+  const fit = st === 'active' ? A : st === 'demo' ? A : box(me, .0034)
+  const map = makeMap(document.getElementById('map'), { sheetH, badge: { bottom: (sheetH + 22) + 'px', left: '16px' }, fit,
+    padTL: [40, st === 'lost' ? 180 : 120], padBR: [40, sheetH + 20] })
+  const meCar = (deg) => `<div class="me">${carTop(deg, 'var(--brand)', 'rgb(255 255 255 / .75)')}</div>`
+  if (st === 'active' || st === 'demo') {
+    drawRoute(map, A.slice(12), { weight: 5, color: st === 'demo' ? cssVar('--ink-2') : undefined })
+    htmlMarker(map, A[A.length - 1], '<div class="pin a"></div>', [18, 18])
+    htmlMarker(map, A[12], meCar(40), [64, 64])
+  } else {
+    htmlMarker(map, me, st === 'offline' || st === 'blocked' ? `<div class="me">${carTop(-38, 'var(--ink-3)', 'rgb(255 255 255 / .75)')}</div>` : meCar(-38), [64, 64])
+  }
+</script>
+</body>
+</html>

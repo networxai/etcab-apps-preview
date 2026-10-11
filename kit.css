@@ -1,0 +1,69 @@
+/* Shared components for the four hero screens. Layout values come only from tokens.css. */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--ground); }
+body {
+  font: var(--t-body); color: var(--ink);
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+.screen { position: relative; width: 390px; height: 844px; overflow: hidden; background: var(--ground); }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+svg.lucide, i[data-lucide] { flex: none; }
+
+/* ── Status bar (iOS 59pt safe area at top, 34pt at bottom) ── */
+.statusbar { position: absolute; inset: 0 0 auto 0; height: 54px; z-index: 30; display: flex; align-items: center;
+  justify-content: space-between; padding: 14px 30px 0 44px; font: 600 16px/20px var(--font); color: var(--ink); pointer-events: none; }
+.statusbar .sys { display: flex; gap: 6px; align-items: center; }
+.statusbar svg { display: block; }
+.homebar { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); width: 134px; height: 5px;
+  border-radius: 3px; background: var(--ink); z-index: 40; }
+
+/* ── Map ── */
+/* Scoped to the map host itself: a bare .map class once turned a list row into a full-screen layer. */
+:where(#map, .map-host) { position: absolute; inset: 0; background: var(--surface-2); z-index: 0; }
+:where(#map, .map-host) .leaflet-tile-pane { filter: var(--map-filter); }
+/* soft fade under the status bar: the clock never sits on a street label */
+:where(#map, .map-host)::after { content: ''; position: absolute; inset: 0 0 auto 0; height: 120px; z-index: 500; pointer-events: none;
+  background: linear-gradient(180deg, var(--map-fade) 0%, color-mix(in srgb, var(--map-fade) 70%, transparent) 40%, transparent 100%); }
+.leaflet-container { background: var(--surface-2) !important; font: inherit; }
+.marker-reset { background: none !important; border: 0 !important; }
+
+/* ── Floating map controls ── */
+.fab { position: absolute; z-index: 20; width: var(--tap); height: var(--tap); border-radius: var(--r-pill);
+  background: var(--surface); box-shadow: var(--e2); display: grid; place-items: center; color: var(--ink); }
+.fab svg { width: 20px; height: 20px; stroke-width: 1.75; }
+
+/* ── Bottom sheet ── */
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 10; background: var(--surface);
+  border-radius: var(--r-sheet) var(--r-sheet) 0 0; box-shadow: var(--e-sheet);
+  padding: 8px var(--margin) 42px; }
+.grabber { width: 36px; height: 5px; border-radius: 3px; background: var(--surface-3); margin: 0 auto 12px; }
+
+/* ── Rows ── */
+.row { display: flex; align-items: center; gap: var(--s3); min-height: var(--h-row); }
+.row .ic { width: 40px; height: 40px; border-radius: var(--r-pill); background: var(--surface-2); display: grid; place-items: center; flex: none; color: var(--ink); }
+.row .ic svg { width: 20px; height: 20px; stroke-width: 1.75; }
+.row .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.row .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+.row .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+.row .end { font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; flex: none; }
+.divider { height: 1px; background: var(--hairline); margin-left: 52px; }
+
+/* ── Buttons ── */
+.btn { height: var(--h-button); border-radius: var(--r-control); display: flex; align-items: center; justify-content: center;
+  gap: var(--s2); font: var(--t-headline); width: 100%; }
+.btn-brand { background: var(--brand); color: var(--on-brand); }
+.btn-quiet { background: var(--surface-2); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); } /* the edge keeps it visible on --ground */
+.on-ground.btn-quiet, .on-ground .btn-quiet, .on-ground.chip, .on-ground .chip { background: var(--surface); box-shadow: var(--e1); }
+.btn svg { width: 20px; height: 20px; stroke-width: 1.75; }
+
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: var(--r-pill);
+  background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; }
+.chip svg { width: 16px; height: 16px; stroke-width: 1.75; }
+
+.mono { font-variant-numeric: tabular-nums; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* Shown only when the 2GIS map could not be used (no key, refused key, CDN down). */
+.map-badge { position: absolute; z-index: 20; height: 24px; padding: 0 10px; border-radius: var(--r-pill); background: var(--surface);
+  box-shadow: var(--e1); font: var(--t-caption); line-height: 24px; color: var(--ink-2); white-space: nowrap; }

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Rider history</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="rider.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="mapgl.local.js"></script>
+<script src="kit.js"></script>
+<script src="routes.js"></script>
+<script src="audit.js"></script>
+<script src="rider.js"></script>
+<style>
+  /* History: destination is the row title, when + tier under it, fare in a tabular column on the right. */
+  .hrow { display: flex; align-items: center; gap: var(--s3); min-height: 72px; width: 100%; text-align: left; }
+  .hrow .trace { flex: none; border-radius: 10px; }
+  .hrow .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .hrow .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .hrow .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .hrow .fare { flex: none; font: var(--t-body-strong); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+  .hrow .st { flex: none; display: inline-flex; align-items: center; gap: 4px; font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; }
+  .hrow .st svg { width: 14px; height: 14px; }
+  .group .divider.h { margin-left: 60px; }
+
+  .upcoming { width: calc(100% - 2 * var(--margin)); text-align: left; margin: 0 var(--margin); background: var(--surface); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: flex; align-items: center; gap: var(--s3); }
+  .upcoming .cal { width: 48px; height: 48px; border-radius: 10px; background: var(--brand-soft); color: var(--brand-ink); display: grid; place-items: center; flex: none; }
+  .upcoming .cal svg { width: 22px; height: 22px; }
+  .upcoming .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .upcoming .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .upcoming .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .upcoming .fare { font: var(--t-body-strong); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .skrow { display: flex; align-items: center; gap: var(--s3); min-height: 72px; }
+  .skrow .sk.th { width: 48px; height: 48px; border-radius: 10px; flex: none; }
+  .skrow .lines { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+
+  .empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--s4); padding: 0 var(--s8) 80px; text-align: center; }
+  .empty .halo { width: 220px; height: 220px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; box-shadow: var(--e1); }
+  .empty .carart { width: 184px; height: 88px; }
+  .empty p { font: var(--t-body); color: var(--ink-2); }
+  .page .foot { flex: none; padding: 0 var(--margin) 42px; }
+
+  /* Receipt: the map on top, the receipt as a sheet. */
+  #sheet { padding: var(--s5) var(--margin) 34px; }
+  .rhead { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s3); }
+  .rhead .when { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .rhead .tier { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .hero { font: var(--t-hero); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; letter-spacing: -.5px; }
+  .stops { margin-top: var(--s4); position: relative; }
+  .stop { display: flex; align-items: center; gap: var(--s3); min-height: 36px; }
+  .stop .g { width: 18px; display: grid; place-items: center; flex: none; }
+  .stop .g i { display: block; width: 10px; height: 10px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 3px var(--surface-3); }
+  .stop.b .g i { border-radius: 2px; }
+  .stop .a { flex: 1; font: var(--t-body); color: var(--ink); white-space: nowrap; }
+  .stop .tm { font: var(--t-secondary); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .stops::before { content: ''; position: absolute; left: 8.5px; top: 22px; bottom: 22px; width: 1px; background: var(--ink-3); opacity: .5; }
+  .hr { height: 1px; background: var(--hairline); margin: var(--s3) 0; }
+  .drv { display: flex; align-items: center; gap: var(--s3); }
+  .drv .avatar { width: 40px; height: 40px; }
+  .drv .avatar svg { width: 20px; height: 20px; }
+  .drv .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .drv .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .drv .t1 span { font: var(--t-secondary); color: var(--ink-2); display: inline-flex; align-items: center; gap: 2px; }
+  .drv .t1 svg { width: 13px; height: 13px; fill: currentColor; }
+  .drv .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .lines { display: flex; flex-direction: column; }
+  .ln { display: flex; justify-content: space-between; align-items: center; min-height: 26px; font: var(--t-secondary); color: var(--ink-2); }
+  .ln span { white-space: nowrap; }
+  .ln b { font: var(--t-secondary-strong); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ln.tot { margin-top: var(--s1); min-height: 30px; font: var(--t-body-strong); color: var(--ink); }
+  .ln.tot b { font: var(--t-body-strong); }
+  .ln .pay { display: inline-flex; align-items: center; gap: 6px; }
+  .ln .pay svg { width: 16px; height: 16px; color: var(--ok); }
+  #sheet .btns { margin-top: var(--s4); }
+  .cx { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: var(--r-pill); background: var(--surface-2);
+    font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; }
+  .cx svg { width: 14px; height: 14px; }
+  .why { margin-top: var(--s3); background: var(--surface-2); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: flex; flex-direction: column; gap: 2px; }
+  .why .k { font: var(--t-caption); color: var(--ink-2); }
+  .why .v { font: var(--t-body); color: var(--ink); white-space: nowrap; }
+</style>
+</head>
+<body>
+<script>
+  const A = R.amd
+  /* Eco tariffs, fixed_upfront, rounded to 100 ֏ (NOTES.md):
+     City   600 + 90/km + 12/min  · Partner 700 + 110/km + 14/min
+     Mashtots 37 → Komitas 22  City    4.3 km 6 min: 600 + 387 + 72 = 1 059 → 1 100
+     Republic Sq → Cascade     City    2.1 km 4 min: 600 + 189 + 48 =   837 →   800
+     Komitas 22 → Mashtots 37  Partner 4.3 km 7 min: 700 + 473 + 98 = 1 271 → 1 300
+     Tumanyan → Opera          City    1.4 km 3 min: 600 + 126 + 36 =   762 →   800
+     Komitas 22 → Zvartnots    City   12.6 km 17 min: 600 + 1 134 + 204 = 1 938 → ≈ 1 900 (estimate, scheduled) */
+  const rides = [
+    ['pickupToDrop', 'Կոմիտասի պող. 22', 'Այսօր, 09:41', 'Eco City', A(1100)],
+    ['republicToCascade', 'Կասկադ', 'Երեկ, 19:12', 'Eco City', A(800)],
+    ['pickupToDrop', 'Մաշտոցի պող. 37', '7 հոկտ., 18:20', 'Eco Partner', A(1300)],
+    ['driverToPickup', 'Օպերա', '5 հոկտ., 13:05', 'Eco City', null],
+    ['driverToPickup', 'Օպերա', '2 հոկտ., 10:15', 'Eco City', A(800)],
+  ]
+  const row = ([k, to, when, tier, fare]) => `<button class="hrow">${R.trace(k, 48, 48, { pad: 8, r: 3, sw: 2.5, grid: false })}
+      <span class="txt"><span class="t1">${to}</span><span class="t2">${when} · ${tier}</span></span>
+      ${fare ? `<span class="fare">${fare}</span>` : `<span class="st">${R.i('circle-slash')}Չեղարկված</span>`}</button>`
+  const group = (list) => `<div class="group">${list.map((r, i) => (i ? '<div class="divider h"></div>' : '') + row(r)).join('')}</div>`
+  const head = () => `<nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl"></span><span class="navend"></span></nav><h1 class="large">Ուղևորություններ</h1>`
+  const upcoming = () => `<div class="sect">Նախնական պատվեր</div><button class="upcoming"><span class="cal">${R.i('calendar-clock')}</span>
+      <span class="txt"><span class="t1">Վաղը, 08:30</span><span class="t2">Զվարթնոց օդանավակայան</span></span><span class="fare">≈${R.NB}${A(1900)}</span></button>`
+
+  /* Receipt sheet (pickup → Komitas, the same ride the driver was offered: 1 100 ֏). */
+  const stops = (a, ta, b, tb) => `<div class="stops"><div class="stop"><span class="g"><i></i></span><span class="a">${a}</span><span class="tm">${ta}</span></div>
+      <div class="stop b"><span class="g"><i></i></span><span class="a">${b}</span><span class="tm">${tb}</span></div></div>`
+  const nav = () => `<button class="fab" style="top:62px;left:16px" aria-label="Հետ">${R.i('arrow-left')}</button>`
+  const mapFor = (key, o = {}) => (s) => {
+    const pts = ROUTES[key].pts
+    const sheetH = s.querySelector('#sheet').offsetHeight
+    const m = R.map(s, { fit: pts, padTL: [56, 96], padBR: [56, sheetH + 40] })
+    drawRoute(m, pts, o.dash ? { dash: true, color: cssVar('--ink-3'), weight: 4 } : { weight: 5 })
+    htmlMarker(m, pts[0], '<div class="pin-a"></div>', [18, 18])
+    htmlMarker(m, pts[pts.length - 1], '<div class="pin-b"></div>', [18, 18])
+  }
+
+  Rider.page({
+    title: 'Rider · Ride history',
+    sub: 'A list with the real route of each ride as its thumbnail, and a receipt built from the tariff components',
+    states: [
+      { id: 'list', label: 'List', note: 'Upcoming pre-order first; then by month. Cancelled says so in words, not by colour',
+        html: () => `<div class="page">${head()}<div class="scroll">${upcoming()}<div class="sect">Հոկտեմբեր</div>${group(rides.slice(0, 5))}</div></div>` },
+      { id: 'loading', label: 'Loading', note: 'Skeleton rows in the real row geometry, so nothing jumps when data lands',
+        html: () => `<div class="page">${head()}<div class="scroll"><div class="sect">Հոկտեմբեր</div><div class="group" aria-busy="true">${[0, 1, 2, 3, 4].map((i) =>
+          `${i ? '<div class="divider h"></div>' : ''}<div class="skrow"><span class="sk th"></span><span class="lines"><span class="sk" style="width:${[62, 44, 70, 52, 58][i]}%;height:14px"></span><span class="sk" style="width:${[46, 38, 50, 42, 40][i]}%;height:12px"></span></span><span class="sk" style="width:56px;height:14px"></span></div>`).join('')}</div></div></div>` },
+      { id: 'empty', label: 'Empty', note: 'One line (hub.noRecent) and the way out',
+        html: () => `<div class="page">${head()}<div class="empty"><div class="halo">${R.car('city', 184, 88, '')}</div><p>Ձեր վերջին ուղևորությունները կերևան այստեղ</p></div>
+          <div class="foot"><button class="btn btn-brand">Պատվիրել</button></div></div>` },
+      { id: 'detail', label: 'Receipt', note: 'Fare = base + km + min, rounded to 100 ֏; book again is the one primary',
+        html: () => `<div class="map" id="map" aria-label="Երթուղի"></div>${nav()}
+          <section class="sheet" id="sheet">
+            <div class="rhead"><div><div class="when">Այսօր, 09:35 · 4.3 կմ · 6 րոպե</div><div class="tier">Eco City</div></div><div class="hero">${A(1100)}</div></div>
+            ${stops('Մաշտոցի պող. 37', '09:35', 'Կոմիտասի պող. 22', '09:41')}
+            <div class="hr"></div>
+            <div class="drv">${R.avatar()}<span class="txt"><span class="t1">Արամ <span>${R.i('star')}4.9</span></span><span class="t2">VW ID.3 · սպիտակ</span></span>${R.plate('01 ET 001')}</div>
+            <div class="hr"></div>
+            <div class="lines">
+              <div class="ln"><span>Նստավարձ</span><b>${A(600)}</b></div>
+              <div class="ln"><span>4.3 կմ × 90</span><b>${A(387)}</b></div>
+              <div class="ln"><span>6 րոպե × 12</span><b>${A(72)}</b></div>
+              <div class="ln"><span>Կլորացում</span><b>+${A(41)}</b></div>
+              <div class="ln tot"><span class="pay">${R.i('banknote')}Կանխիկ</span><b>${A(1100)}</b></div>
+            </div>
+            <div class="btns"><button class="btn btn-brand">${R.i('rotate-ccw')}Կրկին պատվիրել</button><button class="btn btn-quiet">Հաղորդել խնդրի մասին</button></div>
+          </section>`,
+        map: mapFor('pickupToDrop') },
+      { id: 'detail-cancelled', label: 'Cancelled', note: 'No fare was charged, and the reason the rider gave',
+        html: () => `<div class="map" id="map" aria-label="Երթուղի"></div>${nav()}
+          <section class="sheet" id="sheet">
+            <div class="rhead"><div><div class="when">5 հոկտ., 13:05</div><div class="tier">Eco City</div></div><span class="cx">${R.i('circle-slash')}Չեղարկված</span></div>
+            ${stops('Թումանյան 8', '13:05', 'Օպերա', '—')}
+            <div class="why"><span class="k">Պատճառ</span><span class="v">Փոխեցի ծրագրերը</span></div>
+            <div class="lines" style="margin-top:var(--s3)"><div class="ln tot"><span>Վճար չի գանձվել</span><b>${A(0)}</b></div></div>
+            <div class="btns"><button class="btn btn-brand">${R.i('rotate-ccw')}Կրկին պատվիրել</button></div>
+          </section>`,
+        map: mapFor('driverToPickup', { dash: true }) },
+    ],
+  })
+</script>
+</body>
+</html>

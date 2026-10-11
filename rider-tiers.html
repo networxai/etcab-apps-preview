@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Rider tiers</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="mapgl.local.js"></script>
+<script src="kit.js"></script>
+<script src="routes.js"></script>
+<style>
+  .sheet { padding-bottom: 34px; }
+  /* Owner, 2026-10-09: tiers scroll HORIZONTALLY. Snap row of cards, the next one peeking at the edge. */
+  .tiers { display: flex; gap: var(--s2); overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 var(--margin);
+    margin: 0 calc(-1 * var(--margin)); padding: 2px var(--margin) 2px; scrollbar-width: none; }
+  .tiers::-webkit-scrollbar { display: none; }
+  .tier { position: relative; flex: none; width: 132px; scroll-snap-align: start; display: flex; flex-direction: column; align-items: flex-start;
+    padding: var(--s3) var(--s3) var(--s3); border-radius: var(--r-card); background: var(--surface-2); text-align: left; }
+  .tier.on { background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink); }
+  .tier .art { position: relative; width: 108px; height: 56px; margin: 0 0 var(--s2); display: flex; align-items: flex-end; justify-content: center; }
+  .tier .art::before { content: ''; position: absolute; left: 10%; right: 10%; bottom: -2px; height: 8px; border-radius: 50%;
+    background: radial-gradient(closest-side, var(--car-ground), transparent); }
+  .tier .art img { position: relative; max-width: 108px; max-height: 54px; width: auto; height: auto; object-fit: contain; } /* common baseline: bottom-aligned */
+  .tier .name { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .tier .meta { display: flex; align-items: center; gap: var(--s2); font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; margin-top: 2px; }
+  .tier .meta span { display: inline-flex; align-items: center; gap: 4px; }
+  .tier .meta svg { width: 14px; height: 14px; }
+  .tier .price { font: var(--t-headline); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; margin-top: var(--s2); }
+  .tier .tick { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; z-index: 1; }
+  .tier .tick svg { width: 13px; height: 13px; stroke-width: 2.25; } /* the leaf: Eco's one signature detail */
+  .pay { display: flex; align-items: center; gap: var(--s2); margin: var(--s3) 0 var(--s3); }
+  .grabber { margin-bottom: var(--s4); }
+  .pay .method { flex: 1; display: flex; align-items: center; gap: var(--s3); height: 48px; padding: 0 var(--s3); border-radius: var(--r-card); text-align: left; }
+  .pay .method svg { width: 20px; height: 20px; }
+  .pay .method .lbl { flex: 1; font: var(--t-body-strong); white-space: nowrap; }
+  .pay .method .chev { color: var(--ink-3); }
+  .pay .note { width: 48px; height: 48px; border-radius: var(--r-pill); background: var(--surface-2); display: grid; place-items: center; }
+  .pay .note svg { width: 20px; height: 20px; }
+  .cash { width: 32px; height: 32px; border-radius: 8px; background: var(--surface-2); display: grid; place-items: center; color: var(--ok); }
+
+  .pin-a { width: 18px; height: 18px; border-radius: 50%; background: var(--approach); box-shadow: 0 0 0 4px var(--surface), 0 2px 6px rgb(0 0 0 / .3); display: grid; place-items: center; }
+  .pin-a::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--surface); }
+  .pin-b { width: 18px; height: 18px; border-radius: 4px; background: var(--approach); box-shadow: 0 0 0 4px var(--surface), 0 2px 6px rgb(0 0 0 / .3); display: grid; place-items: center; }
+  .pin-b::after { content: ''; width: 6px; height: 6px; border-radius: 1px; background: var(--surface); }
+  .tag { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px 0 6px; border-radius: 10px; background: var(--surface);
+    box-shadow: var(--e2); white-space: nowrap; font: var(--t-secondary-strong); color: var(--ink); }
+  .tag b { display: inline-flex; align-items: center; height: 26px; padding: 0 8px; border-radius: 7px;
+    background: var(--ink); color: var(--surface); font: 600 13px/26px var(--font); font-variant-numeric: tabular-nums; }
+  .tag.plain { padding: 0 12px; }
+</style>
+</head>
+<body>
+<main class="screen" id="s">
+  <div class="map" id="map" aria-label="Քարտեզ"></div>
+  <button class="fab" style="top:62px;left:16px" aria-label="Հետ"><i data-lucide="arrow-left"></i></button>
+
+  <section class="sheet" id="sheet">
+    <div class="grabber"></div>
+    <div class="tiers" role="radiogroup" aria-label="Դաս" id="tiers"></div>
+    <div class="pay">
+      <button class="method" aria-label="Վճարում՝ Կանխիկ"><span class="cash"><i data-lucide="banknote"></i></span><span class="lbl">Կանխիկ</span><i class="chev" data-lucide="chevron-right"></i></button>
+      <button class="note" aria-label="Նշում վարորդին"><i data-lucide="message-square-text"></i></button>
+    </div>
+    <button class="btn btn-brand">Պատվիրել</button>
+  </section>
+</main>
+<script src="audit.js"></script>
+<script>
+  const NB = ' '
+  /* Tenant "eco" tariffs, fixed_upfront, Republic Sq → Cascade = 2.1 km, 4 min (see NOTES). */
+  const tiers = [
+    ['city', 'Eco City', 3, 4, `800${NB}֏`, true],
+    ['partner', 'Eco Partner', 4, 4, `1${NB}000${NB}֏`, false],
+    ['kids', 'Eco Kids', 7, 4, `1${NB}200${NB}֏`, false],
+    ['business', 'Eco Business', 6, 4, `1${NB}400${NB}֏`, false],
+    ['van', 'Eco Van', 9, 7, `1${NB}600${NB}֏`, false],
+    ['vip', 'Eco Vip', 11, 4, `2${NB}100${NB}֏`, false],
+  ]
+  document.getElementById('tiers').innerHTML = tiers.map(([k, n, eta, seats, price, on], i) =>
+    `<button class="tier ${on ? 'on' : ''}" role="radio" aria-checked="${on}" ${i >= 2 ? 'data-peek' : ''}>
+      ${on ? '<span class="tick" aria-hidden="true"><i data-lucide="leaf"></i></span>' : ''}
+      <span class="art">${carImg(k)}</span>
+      <span class="name">${n}</span>
+      <span class="meta"><span><i data-lucide="clock-3"></i>${eta} րոպե</span><span><i data-lucide="user-round"></i>${seats}</span></span>
+      <span class="price">${price}</span></button>`).join('')
+  statusBar(document.getElementById('s'))
+  icons()
+  const sheetH = document.getElementById('sheet').offsetHeight
+  const R = ROUTES.republicToCascade.pts
+  const map = makeMap(document.getElementById('map'), { sheetH, fit: R, padTL: [48, 132], padBR: [48, sheetH + 44] })
+  drawRoute(map, R, { weight: 5 })
+  const a = R[0], b = R[R.length - 1]
+  htmlMarker(map, a, '<div class="pin-a"></div>', [18, 18])
+  htmlMarker(map, b, '<div class="pin-b"></div>', [18, 18])
+  htmlMarker(map, a, `<div class="tag plain" style="position:absolute;right:20px;top:-18px">Հանրապետության հր.</div>`, [0, 0], [0, 0])
+  htmlMarker(map, b, `<div class="tag" style="position:absolute;left:0;top:-22px;transform:translate(-50%,-100%)"><b>4 րոպե</b>Կասկադ</div>`, [0, 0], [0, 0])
+</script>
+</body>
+</html>

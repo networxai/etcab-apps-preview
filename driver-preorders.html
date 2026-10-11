@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Driver pre-orders</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="driver.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="mapgl.local.js"></script>
+<script src="kit.js"></script>
+<script src="routes.js"></script>
+<script src="driver.js"></script>
+<style>
+  /* ── List: one card per pre-order. Ring = time you stay free (live offers stop at T−30, §8 commitmentLeadMin). ── */
+  .list { display: flex; flex-direction: column; }
+  .list .sect { margin: var(--s5) 0 var(--s2); justify-content: space-between; }
+  .list .sect:first-child { margin-top: var(--s4); }
+  .pcard { display: flex; gap: var(--s3); padding: var(--s3); width: 100%; text-align: left; }
+  .pc-l { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .pc-top { display: flex; align-items: center; gap: var(--s3); }
+  .pc-time { font: var(--t-title); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pc-hold { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .pc-ad { display: flex; align-items: center; gap: var(--s2); font: var(--t-secondary); color: var(--ink); white-space: nowrap; margin-top: 6px; }
+  .pc-ad:first-of-type { margin-top: var(--s3); }
+  .pc-ad .d { width: 7px; height: 7px; background: var(--ink); flex: none; }
+  .pc-ad .d.a { border-radius: 50%; } .pc-ad .d.b { border-radius: 2px; }
+  .pc-bot { display: flex; align-items: center; justify-content: space-between; margin-top: var(--s2); }
+  .pc-bot img { width: 54px; height: 28px; }
+  .fare { font: var(--t-headline); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pc-map { width: 128px; flex: none; align-self: stretch; min-height: 128px; }
+  .sketch { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .stale { display: flex; align-items: center; gap: 6px; }
+  .stale svg { width: 14px; height: 14px; color: var(--ink-2); }
+  [data-state="offline"] .appbar { top: 102px; }
+  [data-state="offline"] .content { top: 158px; }
+
+  /* ── Details / can't-make: route map on top, sheet with the timeline ── */
+  .sheet { padding-bottom: 34px; }
+  .back { position: absolute; z-index: 20; top: 60px; left: 16px; }
+  .dhead { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s3); }
+  .eyebrow { font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .eyebrow svg { width: 16px; height: 16px; color: var(--brand-ink); }
+  .hero { font: var(--t-hero); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; letter-spacing: -.5px; }
+  .dfare { font: var(--t-title); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; padding-bottom: 6px; }
+  .dstops { margin-top: var(--s4); }
+  .tl { position: relative; margin-top: var(--s5); display: flex; flex-direction: column; }
+  .tl::before { content: ''; position: absolute; left: 5px; top: 14px; bottom: 14px; width: 2px; background: var(--surface-3); border-radius: 1px; }
+  .tli { display: flex; align-items: center; gap: var(--s4); height: 30px; }
+  .tli .k { width: 12px; height: 12px; border-radius: 50%; flex: none; position: relative; z-index: 1; background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink-3), 0 0 0 3px var(--surface); }
+  .tli.done .k { background: var(--ok); box-shadow: 0 0 0 3px var(--surface); }
+  .tli.next .k { background: var(--ink); box-shadow: 0 0 0 3px var(--surface); }
+  .tli .l { flex: 1; font: var(--t-secondary); color: var(--ink); white-space: nowrap; }
+  .tli .w { font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ask-cap { font: var(--t-caption); color: var(--ink-2); text-align: center; margin-top: 6px; white-space: nowrap; }
+
+  /* ── Reminder heads-up over home (T−25) ── */
+  .headsup { position: absolute; z-index: 25; top: 56px; left: 12px; right: 12px; border-radius: 20px; background: var(--surface); box-shadow: var(--e2);
+    padding: var(--s4); display: flex; flex-direction: column; gap: var(--s3); }
+  .hu-top { display: flex; align-items: center; gap: var(--s3); }
+  .hu-top .txt { flex: 1; min-width: 0; }
+  .hu-app { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .hu-app img { width: 14px; height: 14px; border-radius: 4px; }
+  .hu-t { font: var(--t-headline); color: var(--ink); white-space: nowrap; margin-top: 2px; }
+  .hu-s { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .hu-car { width: 64px; height: 34px; }
+  .hwait { font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; display: flex; align-items: center; gap: var(--s2); }
+  .hwait svg { width: 16px; height: 16px; color: var(--warn); }
+  .htop { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
+  .mycar { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 6px 0 4px; border-radius: 10px; background: var(--surface-2); flex: none; }
+  .mycar img { width: 52px; height: 30px; }
+  .pre { display: flex; align-items: center; gap: var(--s3); height: 64px; width: 100%; text-align: left; margin-top: var(--s3);
+    border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); }
+  .pre .ic { width: 40px; height: 40px; border-radius: var(--r-pill); background: var(--brand-soft); color: var(--brand-ink); display: grid; place-items: center; flex: none; }
+  .pre .ic svg { width: 20px; height: 20px; }
+  .pre .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .pre .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .pre .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .pre .chev { color: var(--ink-3); width: 20px; height: 20px; }
+  .drive { height: var(--h-drive); border-radius: 16px; margin-top: var(--s4); background: var(--surface-2); color: var(--ink);
+    font: var(--t-headline); display: flex; align-items: center; justify-content: center; gap: var(--s2); width: 100%; }
+  .drive svg { width: 22px; height: 22px; }
+
+  /* ── Activated ── */
+  .tag { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: var(--r-pill); background: var(--brand-soft);
+    color: var(--brand-ink); font: var(--t-caption); white-space: nowrap; }
+  .tag svg { width: 14px; height: 14px; }
+  .addr { font: var(--t-title); color: var(--ink); white-space: nowrap; margin-top: var(--s2); }
+  .meta { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; margin-top: 2px; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 6px; }
+  .meta svg { width: 14px; height: 14px; color: var(--ok); }
+  .ahead { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s3); }
+  .big { font: var(--t-hero); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -.5px; text-align: right; }
+  .big small { font: 600 18px/1 var(--font); color: var(--ink-2); margin-left: 4px; letter-spacing: 0; }
+
+  /* ── Empty / error ── */
+  .center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: var(--s4); padding-bottom: 80px; }
+  .art { position: relative; width: 168px; height: 168px; }
+  .art .disc { position: absolute; inset: 0; border-radius: 50%; background: var(--surface); box-shadow: var(--e1); }
+  .art .cal { position: absolute; inset: 44px; border-radius: 20px; background: var(--surface-2); display: grid; place-items: center; color: var(--ink-2); }
+  .art .cal svg { width: 40px; height: 40px; stroke-width: 1.5; }
+  .art .leaf { position: absolute; right: 30px; top: 30px; width: 28px; height: 28px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; }
+  .art .leaf svg { width: 16px; height: 16px; stroke-width: 2; }
+  .art .dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--surface-3); }
+  .center .t1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .center .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .err .ico { width: 64px; height: 64px; border-radius: 50%; background: var(--danger-soft); color: var(--danger); display: grid; place-items: center; }
+  .err .ico svg { width: 28px; height: 28px; }
+  .err .foot { width: 100%; margin-top: var(--s4); }
+  .err .btn-quiet { background: var(--surface); box-shadow: var(--e1); } /* surface-2 vanishes on the parked ground */
+</style>
+</head>
+<body>
+<main class="screen" id="s">
+
+  <!-- ═════════ LIST / OFFLINE / EMPTY / ERROR: parked page ═════════ -->
+  <div class="offstrip" role="status" data-s="offline"><i data-lucide="cloud-off"></i>կապ չկա — ցուցադրվում է պահված ցուցակը</div>
+  <div class="appbar" data-s="list offline empty error"><button class="iconbtn" aria-label="Ետ"><i data-lucide="arrow-left"></i></button></div>
+  <section class="content" data-s="list offline empty error">
+    <div class="ptitle">Նախապես ամրագրված</div>
+    <div class="psub" data-s="list">3 պատվեր · բոլորը՝ Eco City</div>
+    <div class="psub stale" data-s="offline"><i data-lucide="history"></i>թարմացվել է 07:02</div>
+
+    <div class="list" data-s="list offline">
+      <div class="sect"><span>Այսօր</span><span class="n">1</span></div>
+      <button class="card pcard" aria-label="Այսօր 18:30, Կասկադ — Ծիծեռնակաբերդ, 1 000 դրամ">
+        <span class="pc-l">
+          <span class="pc-top"><span data-ring="8|ժամ|.65"></span><span><span class="pc-time" style="display:block">18:30</span><span class="pc-hold" style="display:block">ազատ՝ մինչև 18:00</span></span></span>
+          <span class="pc-ad"><span class="d a"></span>Կասկադ</span>
+          <span class="pc-ad"><span class="d b"></span>Ծիծեռնակաբերդ</span>
+          <span class="pc-bot"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="fare">1 000 ֏</span></span>
+        </span>
+        <span class="minimap pc-map" data-route="tsi" aria-hidden="true"></span>
+      </button>
+
+      <div class="sect"><span>Վաղը</span><span class="n">1</span></div>
+      <button class="card pcard" aria-label="Վաղը 07:40, Բաղրամյան 24 — Զվարթնոց, 2 000 դրամ">
+        <span class="pc-l">
+          <span class="pc-top"><span data-ring="21|ժամ|.12"></span><span><span class="pc-time" style="display:block">07:40</span><span class="pc-hold" style="display:block">ազատ՝ մինչև 07:10</span></span></span>
+          <span class="pc-ad"><span class="d a"></span>Բաղրամյան պող. 24</span>
+          <span class="pc-ad"><span class="d b"></span>Զվարթնոց</span>
+          <span class="pc-bot"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="fare">2 000 ֏</span></span>
+        </span>
+        <span class="minimap pc-map" data-route="air" aria-hidden="true"></span>
+      </button>
+
+      <div class="sect"><span>Ավելի ուշ</span><span class="n">1</span></div>
+      <button class="card pcard" aria-label="Ուրբաթ, 11 հոկտեմբերի 09:15, Կոմիտաս 49 — Հանրապետության հրապարակ, 1 200 դրամ">
+        <span class="pc-l">
+          <span class="pc-top"><span data-ring="2|օր|.02"></span><span><span class="pc-time" style="display:block">09:15</span><span class="pc-hold" style="display:block">ուրբ · 11 հոկտ.</span></span></span>
+          <span class="pc-ad"><span class="d a"></span>Կոմիտասի պող. 49</span>
+          <span class="pc-ad"><span class="d b"></span>Հանրապետության հր.</span>
+          <span class="pc-bot"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="fare">1 200 ֏</span></span>
+        </span>
+        <span class="minimap pc-map" data-route="kom" aria-hidden="true"></span>
+      </button>
+    </div>
+
+    <div class="center" data-s="empty">
+      <div class="art" aria-hidden="true"><span class="disc"></span><span class="cal"><i data-lucide="calendar-days"></i></span><span class="leaf"><i data-lucide="check"></i></span>
+        <span class="dot" style="left:10px;top:60px"></span><span class="dot" style="right:4px;bottom:46px;width:6px;height:6px"></span><span class="dot" style="left:46px;bottom:6px;width:5px;height:5px"></span></div>
+      <div class="t1">Նախապես ամրագրված պատվեր չկա</div>
+    </div>
+
+    <div class="center err" data-s="error">
+      <span class="ico"><i data-lucide="triangle-alert"></i></span>
+      <div><div class="t1">Չհաջողվեց բեռնել</div><div class="t2">Պատվերները պահպանված են</div></div>
+      <div class="foot"><button class="btn btn-quiet"><i data-lucide="rotate-cw"></i>Կրկին փորձել</button><button class="btn-text"><i data-lucide="headset"></i>Զանգել դիսպետչերին</button></div>
+    </div>
+  </section>
+
+  <!-- ═════════ MAP STATES ═════════ -->
+  <div class="map" id="map" aria-label="Քարտեզ" data-s="details cantmake reminder activated"></div>
+  <button class="iconbtn back" aria-label="Ետ" data-s="details cantmake"><i data-lucide="arrow-left"></i></button>
+
+  <!-- details + can't-make -->
+  <section class="sheet" data-s="details cantmake" data-sheet>
+    <div class="grabber"></div>
+    <div class="dhead">
+      <div><div class="eyebrow"><i data-lucide="calendar-clock"></i>Վաղը · Զվարթնոց</div><div class="hero">07:40</div></div>
+      <div class="dfare">2 000 ֏</div>
+    </div>
+    <div class="stops dstops">
+      <div class="stop"><span class="m a"></span><div><div class="t1">Բաղրամյան պող. 24</div><div class="t2">Արմեն · Կանխիկ</div></div></div>
+      <div class="stop"><span class="m b"></span><div><div class="t1">Զվարթնոց</div><div class="t2">13,1 կմ · 19 րոպե</div></div></div>
+    </div>
+    <div class="tl">
+      <div class="tli done"><span class="k"></span><span class="l">Նշանակեց դիսպետչերը</span><span class="w">այսօր 08:52</span></div>
+      <div class="tli next"><span class="k"></span><span class="l">Նոր պատվերներ չեն գա</span><span class="w">07:10</span></div>
+      <div class="tli"><span class="k"></span><span class="l">Պատվերն ակտիվանում է</span><span class="w">07:25</span></div>
+      <div class="tli"><span class="k"></span><span class="l">Նստեցում</span><span class="w">07:40</span></div>
+    </div>
+    <div class="tools">
+      <button class="tool"><span class="b"><i data-lucide="phone"></i></span>Ուղևոր</button>
+      <button class="tool"><span class="b"><i data-lucide="headset"></i></span>Դիսպետչեր</button>
+      <button class="tool"><span class="b"><i data-lucide="navigation"></i></span>Երթուղի</button>
+    </div>
+    <div data-s="details"><button class="btn btn-line"><i data-lucide="clock-alert"></i>Չեմ հասցնի</button><div class="ask-cap">Կխնդրենք դիսպետչերին · որոշումը նրանն է</div></div>
+    <div class="notice warn" data-s="cantmake" role="status"><i data-lucide="hourglass"></i><div><b>Սպասում է դիսպետչերի որոշմանը</b>Պատվերը ձերն է, մինչև նա չազատի</div></div>
+  </section>
+
+  <!-- reminder: heads-up at T−25 over the home screen -->
+  <div class="spill" data-s="reminder" role="status" style="top:auto" id="pill"><span class="dot"></span>Գծում</div>
+  <div class="headsup" data-s="reminder" role="alert">
+    <div class="hu-top">
+      <span data-ring="25|րոպե|.83"></span>
+      <div class="txt"><div class="hu-app"><img src="assets/eco/mark.png" alt="">Eco Taxi · հիմա</div><div class="hu-t">25 րոպեից՝ Զվարթնոց</div><div class="hu-s">Բաղրամյան պող. 24 · 07:40</div></div>
+      <img class="carimg hu-car" src="assets/eco/cars/city.webp" alt="">
+    </div>
+    <button class="btn btn-brand">Բացել</button>
+  </div>
+  <section class="sheet" data-s="reminder" data-sheet>
+    <div class="grabber"></div>
+    <div class="htop"><div class="hwait"><i data-lucide="pause"></i>Պատվերներ չեն գա</div>
+      <span class="mycar" aria-label="Volkswagen ID.3, 01 ET 001"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="plate">01 ET 001</span></span></div>
+    <button class="pre" aria-label="Նախապես ամրագրված, 2">
+      <span class="ic"><i data-lucide="calendar-clock"></i></span>
+      <span class="txt"><span class="t1">Նախապես ամրագրված</span><span class="t2">07:40 · Զվարթնոց</span></span>
+      <i class="chev" data-lucide="chevron-right"></i>
+    </button>
+    <button class="drive"><i data-lucide="power"></i>Դուրս գալ գծից</button>
+  </section>
+
+  <!-- activated: the pre-order is now the live ride -->
+  <section class="sheet" data-s="activated" data-sheet role="alertdialog" aria-label="Նախապես ամրագրվածը սկսվեց">
+    <div class="grabber"></div>
+    <span class="tag"><i data-lucide="calendar-check"></i>Նախապես ամրագրվածը սկսվեց</span>
+    <div class="ahead">
+      <div><div class="addr">Բաղրամյան պող. 24</div><div class="meta">Արմեն · Eco City · <i data-lucide="banknote"></i>Կանխիկ</div></div>
+      <div class="big">07:40</div>
+    </div>
+    <div class="tools">
+      <button class="tool"><span class="b"><i data-lucide="phone"></i></span>Զանգել</button>
+      <button class="tool"><span class="b"><i data-lucide="navigation"></i></span>Երթուղի</button>
+      <button class="tool"><span class="b"><i data-lucide="ellipsis"></i></span>Ավելին</button>
+    </div>
+    <button class="go">Ճանապարհին եմ</button>
+  </section>
+</main>
+<script src="audit.js"></script>
+<script>
+  const st = D.init([
+    ['list', 'My pre-orders'], ['details', 'Details sheet'], ['cantmake', '«Չեմ հասցնի» requested'], ['reminder', 'Reminder (T−25)'],
+    ['activated', 'Activated → live ride'], ['empty', 'Empty'], ['offline', 'Offline (cached)'], ['error', 'Error'],
+  ])
+  statusBar(document.getElementById('s'), { reminder: '07:15', activated: '07:25' }[st])
+  document.querySelectorAll('[data-ring]').forEach((el) => {
+    const [v, u, f] = el.dataset.ring.split('|')
+    const big = el.closest('.headsup')
+    el.outerHTML = D.ring(big ? 52 : 48, 4, +f, `<span class="v">${v}</span><span class="u">${u}</span>`)
+  })
+  icons()
+
+  /* Offline: no tiles — the card keeps a drawn sketch of the cached route instead of a blank map. */
+  const sketch = (el, pts) => {
+    const w = el.clientWidth, h = el.clientHeight, pad = 18
+    const la = pts.map((p) => p[0]), lo = pts.map((p) => p[1])
+    const k = Math.cos(40.18 * Math.PI / 180)
+    const sx = (Math.max(...lo) - Math.min(...lo)) * k, sy = Math.max(...la) - Math.min(...la)
+    const s = Math.min((w - 2 * pad) / sx, (h - 2 * pad) / sy)
+    const ox = (w - sx * s) / 2, oy = (h - sy * s) / 2
+    const xy = (p) => [ox + (p[1] - Math.min(...lo)) * k * s, oy + (Math.max(...la) - p[0]) * s]
+    const d = pts.map((p, i) => (i ? 'L' : 'M') + xy(p).map((n) => n.toFixed(1)).join(' ')).join('')
+    const [ax, ay] = xy(pts[0]), [bx, by] = xy(pts[pts.length - 1])
+    el.innerHTML = `<svg class="sketch" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${d}" fill="none" stroke="var(--ink-3)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 6"/>
+      <circle cx="${ax}" cy="${ay}" r="6" fill="var(--ink)" stroke="var(--surface)" stroke-width="3"/><rect x="${bx - 6}" y="${by - 6}" width="12" height="12" rx="3" fill="var(--ink)" stroke="var(--surface)" stroke-width="3"/></svg>`
+  }
+
+  if (st === 'list') document.querySelectorAll('.pc-map').forEach((el) => D.mini(el, DROUTES[el.dataset.route].pts, { padTL: [18, 18], padBR: [18, 36] }) /* bottom pad keeps the route clear of the 2GIS logo */)
+  else if (st === 'offline') { document.querySelectorAll('.pc-map').forEach((el) => sketch(el, DROUTES[el.dataset.route].pts)); D.noMap() }
+  else if (st === 'empty' || st === 'error') D.noMap()
+  else {
+    const sheet = document.querySelector('.sheet:not([hidden])')
+    const sheetH = sheet.offsetHeight
+    const AIR = DROUTES.air.pts
+    if (st === 'reminder') {
+      const me = [40.1823, 44.5072]
+      document.getElementById('pill').style.bottom = (sheetH + 12) + 'px'
+      const map = makeMap(document.getElementById('map'), { sheetH, badge: { bottom: (sheetH + 70) + 'px', left: '16px' }, fit: [[me[0] - .0034, me[1] - .0046], [me[0] + .0034, me[1] + .0046]], padTL: [0, 260], padBR: [0, sheetH - 10] })
+      htmlMarker(map, me, `<div class="me">${carTop(-38, 'var(--brand)', 'rgb(255 255 255 / .75)')}</div>`, [64, 64])
+    } else {
+      const CAR = [AIR[0][0] + .0042, AIR[0][1] + .0058]
+      const fit = st === 'activated' ? [CAR, ...AIR.slice(0, 7)] : AIR
+      const map = makeMap(document.getElementById('map'), { sheetH, badge: { top: '116px', left: '16px' }, fit, padTL: [48, st === 'activated' ? 100 : 110], padBR: [48, sheetH + 40] })
+      drawRoute(map, AIR, { weight: 5 })
+      htmlMarker(map, AIR[0], '<div class="pin a"></div>', [18, 18])
+      htmlMarker(map, AIR[AIR.length - 1], '<div class="pin b"></div>', [18, 18])
+      if (st === 'activated') htmlMarker(map, CAR, `<div class="me">${carTop(-140, 'var(--brand)', 'rgb(255 255 255 / .75)')}</div>`, [64, 64])
+    }
+  }
+</script>
+</body>
+</html>

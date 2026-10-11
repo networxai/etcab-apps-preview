@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Driver shift</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="driver.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="kit.js"></script>
+<script src="driver.js"></script>
+<style>
+  /* Cash/card split: validated with the dataviz validator (light #2F7D0A/#4F8FD8, dark #4E9A12/#4A86D0 — all checks pass;
+     dark tritan ΔE 5.0, so both segments are also direct-labelled and separated by a 2px gap). */
+  :root { --c-cash: #2F7D0A; --c-card: #4F8FD8; }
+  :root[data-theme="dark"] { --c-cash: #4E9A12; --c-card: #4A86D0; }
+
+  .cars { display: flex; flex-direction: column; gap: var(--s2); margin-top: var(--s5); }
+  .car { display: flex; align-items: center; gap: var(--s3); height: 92px; padding: 0 var(--s4) 0 var(--s2); width: 100%; text-align: left;
+    background: var(--surface); border-radius: var(--r-card); box-shadow: var(--e1); }
+  .car.sel { box-shadow: var(--e1), inset 0 0 0 2px var(--ink); }
+  .car .art { width: 116px; height: 64px; display: flex; align-items: flex-end; justify-content: center; flex: none; position: relative; }
+  .car .art::after { content: ''; position: absolute; bottom: 0; left: 14px; right: 14px; height: 8px; border-radius: 50%; background: radial-gradient(closest-side, var(--car-ground), transparent); }
+  .car .art img { max-width: 112px; max-height: 58px; object-fit: contain; position: relative; z-index: 1; }
+  .car.busy .art img { opacity: .4; }
+  .car .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+  .car .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .car .meta { display: flex; align-items: center; gap: var(--s2); }
+  .car .tier { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; }
+  .car .rd { width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--ink-3); flex: none; display: grid; place-items: center; }
+  .car.sel .rd { background: var(--brand); box-shadow: none; color: #fff; }
+  .car .rd svg { width: 16px; height: 16px; stroke-width: 2.5; }
+  .busychip { height: 24px; padding: 0 8px; border-radius: var(--r-pill); background: var(--warn-soft); color: var(--ink); font: var(--t-caption); line-height: 24px; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+  .busychip::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--warn); }
+
+  /* Empty */
+  .bay { position: relative; width: 240px; height: 150px; margin: 176px auto var(--s6); border-radius: 16px; display: grid; place-items: end center; padding-bottom: 18px; }
+  .bay svg.lines { position: absolute; inset: 0; }
+  .bay img { width: 180px; opacity: .22; position: relative; filter: grayscale(1); }
+  .ctr { text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .ctr .ttl { font: var(--t-large); color: var(--ink); white-space: nowrap; }
+  .ctr .sub { font: var(--t-body); color: var(--ink-2); white-space: nowrap; margin-top: var(--s2); }
+
+  /* Operator-opened */
+  .opcar { display: flex; flex-direction: column; align-items: center; margin-top: var(--s5); position: relative; }
+  .opcar img { width: 280px; height: 160px; object-fit: contain; position: relative; z-index: 1; }
+  .opcar::after { content: ''; position: absolute; top: 146px; left: 50%; width: 230px; height: 18px; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(closest-side, var(--car-ground), transparent); }
+  .opcar .plate { margin-top: var(--s3); height: 36px; line-height: 36px; font-size: 18px; padding: 0 12px; border-radius: 8px; }
+  .opcar .model { font: var(--t-secondary); color: var(--ink-2); margin-top: var(--s2); white-space: nowrap; }
+  .opnote { display: flex; align-items: center; gap: var(--s3); margin-top: var(--s6); padding: var(--s4); }
+  .opnote .ic { width: 44px; height: 44px; border-radius: 50%; background: var(--brand-soft); color: var(--brand-ink); display: grid; place-items: center; flex: none; }
+  .opnote .ic svg { width: 22px; height: 22px; }
+  .opnote .t1 { font: var(--t-body-strong); color: var(--ink); }
+  .opnote .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  /* End-of-shift summary */
+  .sum { margin-top: var(--s4); padding: var(--s4); }
+  .sum .lbl { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .sum .hero { font: var(--t-hero); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -.5px; }
+  .sum .hero small { font: 600 22px/1 var(--font); color: var(--ink-2); margin-left: 4px; letter-spacing: 0; }
+  .stats { display: flex; margin-top: var(--s3); padding-top: var(--s3); border-top: 1px solid var(--hairline); }
+  .stats div { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .stats div + div { padding-left: var(--s3); border-left: 1px solid var(--hairline); }
+  .stats b { font: var(--t-headline); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .stats span { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; }
+  .split { display: flex; gap: 2px; height: 10px; margin-top: var(--s4); }
+  .split i { display: block; border-radius: 4px; }
+  .split .cash { background: var(--c-cash); flex: 63; } .split .cardp { background: var(--c-card); flex: 35; }
+  .legend { display: flex; justify-content: space-between; margin-top: var(--s2); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .legend b { font-weight: 600; color: var(--ink); }
+  .legend .sw { width: 10px; height: 10px; border-radius: 3px; }
+
+  .chart { margin-top: var(--s3); padding: var(--s4) var(--s4) var(--s3); }
+  .chart .hd { display: flex; justify-content: space-between; font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; }
+  .bars { display: flex; align-items: flex-end; gap: 10px; height: 92px; margin-top: var(--s3); border-bottom: 1px solid var(--hairline); }
+  .bars .b { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; }
+  .bars .b i { display: block; width: 100%; border-radius: 4px 4px 0 0; background: var(--ink-3); min-height: 2px; opacity: .55; }
+  .bars .b.top i { background: var(--ink); opacity: 1; }
+  .bars .b em { font: var(--t-caption); font-style: normal; color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .hrs { display: flex; gap: 10px; margin-top: 6px; }
+  .hrs span { flex: 1; text-align: center; font: var(--t-caption); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+  .ret { display: flex; align-items: center; gap: var(--s3); margin-top: var(--s3); }
+  .ret img { width: 64px; height: 36px; object-fit: contain; filter: drop-shadow(0 2px 2px var(--car-ground)); }
+  .ret .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .page .btn-quiet { background: var(--surface); box-shadow: var(--e1); }  /* surface-2 on --ground is 1.0:1 — the button vanished */
+</style>
+</head>
+<body>
+<main class="screen page" id="s">
+  <div class="appbar" data-not="empty">
+    <button class="iconbtn" aria-label="Ետ"><i data-lucide="arrow-left"></i></button>
+  </div>
+
+  <!-- ── choose / taken ── -->
+  <div class="content" data-s="choose taken">
+    <div class="ptitle">Ընտրե՛ք մեքենան</div>
+    <div class="psub" data-s="choose">4 ազատ մեքենա</div>
+    <div class="notice warn" data-s="taken" role="status" style="margin-top:var(--s3)"><i data-lucide="car-front"></i><div><b>01 ET 001-ն արդեն հերթապահում է</b>Ընտրե՛ք այլ մեքենա</div></div>
+    <div class="cars" role="radiogroup" aria-label="Մեքենա" style="margin-top:var(--s4)">
+      <button class="car" role="radio" id="car1" aria-checked="true"><span class="art"><img src="assets/eco/cars/city.webp" alt=""></span>
+        <span class="txt"><span class="t1">Volkswagen ID.3</span><span class="meta"><span class="plate">01 ET 001</span><span class="tier" data-s="choose">Eco City</span><span class="busychip" data-s="taken">Զբաղված</span></span></span><span class="rd"><i data-lucide="check"></i></span></button>
+      <button class="car" role="radio" aria-checked="false"><span class="art"><img src="assets/eco/cars/partner.webp" alt=""></span>
+        <span class="txt"><span class="t1">Tesla Model 3</span><span class="meta"><span class="plate">01 ET 014</span><span class="tier">Eco Partner</span></span></span><span class="rd"></span></button>
+      <button class="car" role="radio" aria-checked="false"><span class="art"><img src="assets/eco/cars/business.webp" alt=""></span>
+        <span class="txt"><span class="t1">Volkswagen ID.4</span><span class="meta"><span class="plate">01 ET 007</span><span class="tier">Eco Business</span></span></span><span class="rd"></span></button>
+      <button class="car" role="radio" aria-checked="false"><span class="art"><img src="assets/eco/cars/van.webp" alt=""></span>
+        <span class="txt"><span class="t1">Մինիվեն</span><span class="meta"><span class="plate">01 ET 021</span><span class="tier">Eco Van</span></span></span><span class="rd"></span></button>
+    </div>
+    <div class="grow"></div>
+    <div class="foot" data-s="choose"><button class="btn btn-brand">Սկսել հերթապահությունը</button></div>
+    <div class="foot" data-s="taken"><button class="btn btn-quiet"><i data-lucide="phone"></i>Զանգել դիսպետչերին</button></div>
+  </div>
+
+  <!-- ── empty ── -->
+  <div class="content" data-s="empty" style="top:54px">
+    <div class="bay" aria-hidden="true">
+      <svg class="lines" viewBox="0 0 240 150" width="240" height="150" fill="none">
+        <path d="M8 4 V146 H232 V4" stroke="var(--ink-3)" stroke-width="3" stroke-dasharray="10 8" stroke-linecap="round"/>
+      </svg>
+      <img src="assets/eco/cars/city.webp" alt="">
+    </div>
+    <div class="ctr"><div class="ttl">Ազատ մեքենա չկա</div><div class="sub">Բոլոր մեքենաները զբաղված են</div></div>
+    <div class="grow"></div>
+    <div class="foot"><button class="btn btn-brand"><i data-lucide="phone"></i>Զանգել դիսպետչերին</button><button class="btn-text"><i data-lucide="rotate-cw"></i>Թարմացնել</button></div>
+  </div>
+
+  <!-- ── operator opened the shift for you ── -->
+  <div class="content" data-s="operator">
+    <div class="ptitle">Հերթապահություն</div>
+    <div class="psub">սկսված է · 09:12</div>
+    <div class="opcar"><img src="assets/eco/cars/city.webp" alt="Volkswagen ID.3"><span class="plate">01 ET 001</span><span class="model">Volkswagen ID.3 · Eco City</span></div>
+    <div class="card opnote"><span class="ic"><i data-lucide="headset"></i></span><div class="t1">Հերթապահությունը սկսել է դիսպետչերը</div></div>
+    <div class="grow"></div>
+    <div class="foot"><button class="btn btn-brand">Հասկացա</button><button class="btn-text">Սխալ մեքենա է</button></div>
+  </div>
+
+  <!-- ── end of shift ── -->
+  <div class="content" data-s="end">
+    <div class="ptitle">Այսօրվա արդյունք</div>
+    <div class="psub">09:12–17:24</div>
+    <div class="card sum">
+      <div class="lbl">Վաստակ</div>
+      <div class="hero">9 800<small>֏</small></div>
+      <div class="split" role="img" aria-label="Կանխիկ 6 300 ֏, քարտ 3 500 ֏"><i class="cash"></i><i class="cardp"></i></div>
+      <div class="legend"><span><i class="sw" style="background:var(--c-cash)"></i>Կանխիկ <b>6 300 ֏</b></span><span><i class="sw" style="background:var(--c-card)"></i>Քարտ <b>3 500 ֏</b></span></div>
+      <div class="stats"><div><b>7</b><span>պատվեր</span></div><div><b>8 ժ 12 ր</b><span>գծում</span></div><div><b>96 կմ</b><span>ճանապարհ</span></div></div>
+    </div>
+    <div class="card chart">
+      <div class="hd"><span>Ըստ ժամի</span><span>֏</span></div>
+      <div class="bars" id="bars" role="img" aria-label="Վաստակն ըստ ժամի, լավագույնը 14:00՝ 2 000 ֏"></div>
+      <div class="hrs" id="hrs" aria-hidden="true"></div>
+    </div>
+    <div class="ret"><img src="assets/eco/cars/city.webp" alt=""><span class="plate">01 ET 001</span><span class="t2">Մեքենան կազատվի</span></div>
+    <div class="grow"></div>
+    <div class="foot"><button class="btn btn-brand">Ավարտել հերթապահությունը</button></div>
+  </div>
+</main>
+<script src="audit.js"></script>
+<script>
+  statusBar(document.getElementById('s'))
+  const st = D.init([
+    ['choose', 'Choose the car'], ['taken', 'Car already on a shift'], ['empty', 'No cars free'],
+    ['operator', 'Opened by the dispatcher'], ['end', 'End of shift summary'],
+  ])
+  if (st === 'taken') { const c = document.getElementById('car1'); c.classList.add('busy'); c.setAttribute('aria-checked', 'false'); c.setAttribute('aria-disabled', 'true'); c.querySelector('.rd').innerHTML = '' }
+  else document.getElementById('car1').classList.add('sel')
+  /* Earnings per hour, 09–17: seven rides, 9 800 ֏. One series, neutral; the best hour in ink with its value. */
+  const hrs = [['09', 0], ['10', 1100], ['11', 1400], ['12', 0], ['13', 1200], ['14', 2000], ['15', 1100], ['16', 1600], ['17', 1400]]
+  const max = 2000
+  document.getElementById('bars').innerHTML = hrs.map(([h, v]) => `<span class="b${v === max ? ' top' : ''}">${v === max ? '<em>2 000</em>' : ''}<i style="height:${Math.max(2, v / max * 68)}px"></i></span>`).join('')
+  document.getElementById('hrs').innerHTML = hrs.map(([h]) => `<span>${h}</span>`).join('')
+  icons()
+  D.noMap()
+</script>
+</body>
+</html>

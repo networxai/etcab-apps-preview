@@ -1,0 +1,173 @@
+/* Rider app, v2: the patterns every rider screen past the four heroes shares.
+   Values come from tokens.css; the few rider-only tokens are declared here and listed in RIDER-NOTES.md
+   as candidates for tokens.css. */
+:root {
+  --t-large: 600 28px/36px var(--font);   /* full-screen page title (iOS large title, capped at 28 by BRIEF); 36 not 34: Armenian ascenders */
+  --scrim-modal: rgb(0 0 0 / .40);        /* behind a modal sheet */
+  --danger-soft: rgb(200 30 30 / .08);
+  --key-board: #D4D6DC;                   /* iOS keyboard tray */
+  --key: #FFFFFF;
+  --key-2: #B9BCC4;
+}
+:root[data-theme="dark"] {
+  --scrim-modal: rgb(0 0 0 / .62);
+  --danger-soft: rgb(242 107 107 / .12);
+  --key-board: #1C1C1E;
+  --key: #48484C;
+  --key-2: #2E2E31;
+}
+
+/* ── Full-screen pages (no map): ground + surface groups, iOS inset-grouped ── */
+.page { position: absolute; inset: 0; display: flex; flex-direction: column; padding-top: 54px; background: var(--ground); }
+.page.on-surface { background: var(--surface); }
+.nav { flex: none; height: 52px; display: flex; align-items: center; gap: var(--s1); padding: 0 var(--s2); }
+.nav .navbtn { width: var(--tap); height: var(--tap); border-radius: var(--r-pill); display: grid; place-items: center; color: var(--ink); flex: none; }
+.nav .navbtn svg { width: 22px; height: 22px; }
+.nav .navttl { flex: 1; font: var(--t-headline); color: var(--ink); text-align: center; white-space: nowrap; }
+.nav .navend { width: var(--tap); flex: none; }
+.large { font: var(--t-large); color: var(--ink); padding: var(--s1) var(--margin) 0; letter-spacing: -.2px; }
+.lead { font: var(--t-body); color: var(--ink-2); padding: var(--s1) var(--margin) 0; }
+.scroll { flex: 1; min-height: 0; overflow: hidden; }
+.sect { font: var(--t-secondary-strong); color: var(--ink-2); padding: var(--s6) var(--margin) var(--s2); }
+.group { margin: 0 var(--margin); background: var(--surface); border-radius: var(--r-card); padding: 0 var(--s4); }
+.on-surface .group { background: var(--surface-2); }
+.group .row { min-height: 52px; }
+.group .row .ic { width: 32px; height: 32px; border-radius: 8px; background: var(--surface-2); }
+.on-surface .group .row .ic { background: var(--surface); }
+.group .row .ic svg { width: 18px; height: 18px; }
+.group .divider { margin-left: 44px; }
+.row .chev { width: 20px; height: 20px; color: var(--ink-3); flex: none; }
+.row .val { font: var(--t-body); color: var(--ink-2); white-space: nowrap; flex: none; }
+.row.danger .t1, .row.danger .ic { color: var(--danger); }
+
+/* ── Map screens ── */
+.puck { width: 22px; height: 22px; border-radius: 50%; background: var(--brand); border: 3.5px solid #fff; box-shadow: 0 0 0 10px var(--brand-soft), 0 2px 6px rgb(0 0 0 / .3); }
+.pin-a { width: 18px; height: 18px; border-radius: 50%; background: var(--approach); box-shadow: 0 0 0 4px var(--surface), 0 2px 6px rgb(0 0 0 / .3); display: grid; place-items: center; }
+.pin-a::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--surface); }
+.pin-b { width: 18px; height: 18px; border-radius: 4px; background: var(--approach); box-shadow: 0 0 0 4px var(--surface), 0 2px 6px rgb(0 0 0 / .3); display: grid; place-items: center; }
+.pin-b::after { content: ''; width: 6px; height: 6px; border-radius: 1px; background: var(--surface); }
+.maptag { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px 0 6px; border-radius: 10px; background: var(--surface);
+  box-shadow: var(--e2); white-space: nowrap; font: var(--t-secondary-strong); color: var(--ink); }
+.maptag b { display: inline-flex; align-items: center; height: 26px; padding: 0 8px; border-radius: 7px;
+  background: var(--ink); color: var(--surface); font: 600 13px/26px var(--font); font-variant-numeric: tabular-nums; }
+.maptag.plain { padding: 0 12px; }
+.sheet.r { padding-bottom: 34px; }
+.sheet .h-title { font: var(--t-title); color: var(--ink); }
+.sheet .h-sub { font: var(--t-secondary); color: var(--ink-2); margin-top: 2px; }
+
+/* ── Modal sheet over a dimmed map/page ── */
+.scrim { position: absolute; inset: 0; z-index: 14; background: var(--scrim-modal); }
+.sheet.modal { z-index: 16; padding-top: 8px; }
+.sheet .mhead { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); min-height: 44px; margin-bottom: var(--s2); }
+.sheet .mhead .h-title { flex: 1; }
+.xbtn { width: 36px; height: 36px; border-radius: var(--r-pill); background: var(--surface-2); display: grid; place-items: center; color: var(--ink); flex: none; }
+.xbtn svg { width: 18px; height: 18px; }
+.btn-danger { background: var(--danger-soft); color: var(--danger); }
+.btn:disabled, .btn[aria-disabled="true"] { background: var(--surface-3); color: var(--ink-2); }
+.btns { display: flex; flex-direction: column; gap: var(--s2); }
+.btns.h { flex-direction: row; }
+
+/* ── Choice rows (radio / check) ── */
+.choice { display: flex; align-items: center; gap: var(--s3); min-height: 52px; width: 100%; text-align: left; }
+.choice .t { flex: 1; font: var(--t-body); color: var(--ink); white-space: nowrap; }
+.radio { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--ink-3); flex: none; display: grid; place-items: center; }
+.choice[aria-checked="true"] .radio { box-shadow: inset 0 0 0 7px var(--ink); }
+.choice[aria-checked="true"] .t { font: var(--t-body-strong); }
+
+/* ── Chips that toggle ── */
+.chips { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.chip.tog { height: 36px; padding: 0 14px; background: var(--surface-2); }
+.chip.tog[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+
+/* ── Plate: an Armenian plate is a physical object — white in both themes ── */
+.plate { display: inline-flex; align-items: stretch; height: 30px; border-radius: 6px; background: #fff; box-shadow: inset 0 0 0 1.5px #111113, var(--e1);
+  overflow: hidden; flex: none; }
+.plate .eu { width: 16px; background: #1F4FBF; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 3px; gap: 2px; }
+.plate .eu i { display: block; width: 9px; height: 6px; background: linear-gradient(#D90012 33.3%, #0033A0 33.3% 66.6%, #F2A800 66.6%); border-radius: 1px; }
+.plate .eu b { font: 600 6px/6px var(--font); color: #fff; letter-spacing: .2px; }
+.plate .no { padding: 0 10px 0 8px; font: 600 17px/30px var(--font); color: #111113; letter-spacing: .6px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.plate.lg { height: 40px; border-radius: 8px; }
+.plate.lg .eu { width: 20px; padding-bottom: 5px; }
+.plate.lg .eu i { width: 12px; height: 8px; }
+.plate.lg .eu b { font-size: 7px; line-height: 7px; }
+.plate.lg .no { font-size: 24px; line-height: 40px; padding: 0 12px 0 10px; letter-spacing: 1px; }
+
+/* ── Driver photo placeholder (no photo asset: neutral, not a stock face) ── */
+.avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--surface-3); color: var(--ink-3); display: grid; place-items: center; flex: none; position: relative; }
+.avatar svg { width: 24px; height: 24px; }
+.avatar.ini { font: var(--t-headline); color: var(--ink-2); }
+.avatar.lg { width: 64px; height: 64px; }
+.avatar.lg svg { width: 30px; height: 30px; }
+.avatar.lg.ini { font: var(--t-title); }
+
+/* ── Car render on a soft ground ellipse (same rule as the tier cards) ── */
+.carart { position: relative; display: flex; align-items: flex-end; justify-content: center; flex: none; }
+.carart::before { content: ''; position: absolute; left: 10%; right: 10%; bottom: -2px; height: 8px; border-radius: 50%;
+  background: radial-gradient(closest-side, var(--car-ground), transparent); }
+.carart img { position: relative; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+
+/* ── Round action buttons with a label (call / message / share / cancel) ── */
+.acts { display: flex; justify-content: space-between; }
+.act { width: 80px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.act .o { width: 52px; height: 52px; border-radius: var(--r-pill); background: var(--surface-2); display: grid; place-items: center; color: var(--ink); }
+.act .o svg { width: 22px; height: 22px; }
+.act .l { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; }
+.act.danger .o { color: var(--danger); background: var(--danger-soft); }
+
+/* ── Banner (offline / degraded): inverted ink, never colour alone — icon + word ── */
+.banner { position: absolute; z-index: 25; left: var(--margin); right: var(--margin); top: 58px; min-height: 44px; display: flex; align-items: center; gap: var(--s3);
+  padding: 10px 12px 10px 14px; border-radius: var(--r-card); background: var(--ink); color: var(--surface); box-shadow: var(--e2); }
+.banner svg { width: 20px; height: 20px; flex: none; }
+.banner .bt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.banner .b1 { font: var(--t-secondary-strong); color: var(--surface); }
+.banner .b2 { font: var(--t-secondary); color: var(--surface); opacity: .82; }
+.banner .ba { font: var(--t-secondary-strong); color: var(--surface); height: 32px; padding: 0 10px; border-radius: 8px; background: rgb(127 127 127 / .28); flex: none; white-space: nowrap; }
+.banner.warn { background: var(--warn); }
+:root[data-theme="dark"] .banner.warn { color: #111113; }
+:root[data-theme="dark"] .banner.warn .b1, :root[data-theme="dark"] .banner.warn .b2, :root[data-theme="dark"] .banner.warn .ba { color: #111113; }
+.inline-note { display: flex; gap: var(--s2); align-items: flex-start; font: var(--t-secondary); color: var(--ink-2); }
+.inline-note svg { width: 16px; height: 16px; margin-top: 1px; flex: none; }
+.inline-note.err { color: var(--danger); }
+
+/* ── iOS phone keypad (login): drawn so the layout is judged with the keyboard up ── */
+.keypad { position: absolute; left: 0; right: 0; bottom: 0; z-index: 12; background: var(--key-board); padding: 8px 6px 42px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px 6px; }
+.keypad .k { height: 46px; border-radius: 6px; background: var(--key); box-shadow: 0 1px 0 rgb(0 0 0 / .3); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; font: 400 25px/28px var(--font); color: var(--ink); }
+.keypad .k.blank { background: none; box-shadow: none; }
+.keypad .k svg { width: 24px; height: 24px; }
+
+/* ── Armenian letter keyboard ── */
+.keyboard { position: absolute; left: 0; right: 0; bottom: 0; z-index: 12; background: var(--key-board); padding: 8px 3px 42px; display: flex; flex-direction: column; gap: 11px; }
+.keyboard .kr { display: flex; gap: 6px; justify-content: center; }
+.keyboard .kr.in { padding: 0 17px; }
+.keyboard .kk { flex: 1; max-width: 33px; height: 42px; border-radius: 5px; background: var(--key); box-shadow: 0 1px 0 rgb(0 0 0 / .3);
+  display: grid; place-items: center; font: 400 21px/24px var(--font); color: var(--ink); }
+.keyboard .kk.fn { max-width: 44px; background: var(--key-2); }
+.keyboard .kk.fn svg { width: 20px; height: 20px; }
+.keyboard .kk.w { max-width: 88px; font: 400 15px/20px var(--font); }
+.keyboard .kk.sp { max-width: none; flex: 4; font: 400 15px/20px var(--font); }
+
+/* ── Skeleton (loading) ── */
+.sk { background: var(--surface-3); border-radius: 6px; position: relative; overflow: hidden; }
+.sk::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / .35), transparent); animation: sk 1.4s infinite; }
+:root[data-theme="dark"] .sk::after { background: linear-gradient(90deg, transparent, rgb(255 255 255 / .06), transparent); }
+@keyframes sk { to { transform: translateX(100%); } }
+
+/* ── Route trace: the real OSRM polyline drawn without a basemap (history thumbnails, receipts) ── */
+.trace { display: block; background: var(--surface-2); border-radius: var(--r-card); }
+.trace .ln { fill: none; stroke: var(--route); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.trace .gr { fill: none; stroke: var(--hairline); stroke-width: 1; }
+.trace .a { fill: var(--approach); stroke: var(--surface-2); stroke-width: 2; }
+.trace .b { fill: var(--approach); stroke: var(--surface-2); stroke-width: 2; }
+
+/* ── Toast ── */
+.toast { position: absolute; z-index: 26; left: 50%; transform: translateX(-50%); display: inline-flex; align-items: center; gap: var(--s2); height: 40px; padding: 0 16px 0 12px;
+  border-radius: var(--r-pill); background: var(--ink); color: var(--surface); font: var(--t-secondary-strong); box-shadow: var(--e2); white-space: nowrap; }
+.toast svg { width: 18px; height: 18px; }
+
+/* ── Spinner ── */
+.spin { width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid currentColor; border-right-color: transparent; animation: spin .8s linear infinite; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin, .sk::after { animation: none; } }

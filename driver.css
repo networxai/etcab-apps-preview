@@ -1,0 +1,166 @@
+/* Driver screens beyond the two heroes. Everything here composes tokens.css; nothing sets a raw size or colour
+   except the plate (a physical object: white, black ink) and the "sun" overrides below.
+   Two density tiers (research/driver-apps.md move 1):
+     moving  – offer, ride, home online: one primary 72px, secondaries 56px, hero 40/48
+     parked  – login, shift, pre-orders, earnings, account: 52px buttons, 48px targets */
+
+[hidden] { display: none !important; }
+
+/* ── Sun: the high-contrast day option (Account → Theme). Light theme only. Shadows become 1.5px ink
+      rings because a soft shadow vanishes in direct sunlight; greys are pulled toward ink. ── */
+:root[data-sun] {
+  --ground: #FFFFFF; --surface: #FFFFFF; --surface-2: #EEEEEB; --surface-3: #D6D6D1; --raised: #FFFFFF;
+  --ink: #000000; --ink-2: #26262A; --ink-3: #3A3A3F; --hairline: rgb(0 0 0 / .22);
+  --brand: #235F06; --brand-ink: #1F5505; --ring: #2F7D0A; --route: #235F06;
+  --ok: #0A6B39; --warn: #8A3F02; --danger: #A31515;
+  --e1: 0 0 0 1.5px #000; --e2: 0 0 0 1.5px #000; --e-sheet: 0 -1.5px 0 #000;
+}
+
+/* ── Type additions (two only) ── */
+:root { --warn-soft: #F6EAE1; --ok-soft: #E7F3ED; --danger-soft: #FAE9E9; }
+:root[data-theme="dark"] { --warn-soft: #31291E; --ok-soft: #1A2924; --danger-soft: #2C1F20; }
+:root[data-sun] { --warn-soft: #F7EDE5; --ok-soft: #E6F0EB; --danger-soft: #F6E8E8; }
+/* Soft status grounds are flat hex, not color-mix(): text sits on them, and the contrast audit reads computed rgb. */
+:root { --t-large: 600 28px/34px var(--font); --t-act: 600 20px/24px var(--font); --h-go: 72px; --h-sec: 56px; }
+
+/* ── State switcher: lives OUTSIDE the 390px screen, so screenshots and audits never see it ── */
+.dswitch { position: fixed; top: 16px; left: 414px; width: 220px; font: var(--t-secondary); color: var(--ink); z-index: 99; }
+.dswitch h2 { font: var(--t-secondary-strong); color: var(--ink-2); margin: 0 0 8px; }
+.dswitch a { display: block; padding: 6px 10px; border-radius: 8px; color: var(--ink); text-decoration: none; }
+.dswitch a[aria-current] { background: var(--surface); box-shadow: var(--e1); font-weight: 600; }
+.dswitch .themes { display: flex; gap: 6px; margin: 12px 0; flex-wrap: wrap; }
+.dswitch .themes a { padding: 4px 10px; background: var(--surface-2); }
+@media (max-width: 600px) { .dswitch { display: none; } }  /* the 390px shooter and phones never see it */
+
+/* ── Parked page scaffold ── */
+.page { overflow: hidden; }
+.appbar { position: absolute; top: 54px; left: 0; right: 0; height: 56px; padding: 0 var(--margin); display: flex; align-items: center; gap: var(--s3); z-index: 5; }
+.appbar .sp { flex: 1; }
+.appbar .t { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+.iconbtn { width: 48px; height: 48px; border-radius: var(--r-pill); display: grid; place-items: center; color: var(--ink); background: var(--surface); box-shadow: var(--e1); flex: none; }
+.iconbtn.flat { background: transparent; box-shadow: none; }
+.iconbtn svg { width: 22px; height: 22px; }
+.content { position: absolute; top: 110px; left: 0; right: 0; bottom: 0; padding: 0 var(--margin) 34px; overflow: hidden; display: flex; flex-direction: column; }
+.ptitle { font: var(--t-large); color: var(--ink); white-space: nowrap; margin: 4px 0 var(--s1); }
+.psub { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.grow { flex: 1; min-height: 0; }
+.foot { display: flex; flex-direction: column; gap: var(--s2); }
+.sect { font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; margin: var(--s6) 0 var(--s2); display: flex; align-items: center; gap: var(--s2); }
+.sect .n { font-variant-numeric: tabular-nums; color: var(--ink-3); }
+
+/* ── Surfaces ── */
+.card { background: var(--surface); border-radius: var(--r-card); box-shadow: var(--e1); }
+.group { background: var(--surface); border-radius: var(--r-card); box-shadow: var(--e1); padding: 0 var(--s4); }
+.group .row + .row { border-top: 1px solid var(--hairline); }
+.row .end.ok { color: var(--ok); }
+.row .t2.mono, .row .end { font-variant-numeric: tabular-nums; }
+.row .chev { width: 20px; height: 20px; color: var(--ink-3); flex: none; }
+.row .ic.brand { background: var(--brand-soft); color: var(--brand-ink); }
+.row .ic.warn { background: color-mix(in srgb, var(--warn) 14%, transparent); color: var(--warn); }
+.row .ic.ok { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
+.row .ic.danger { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger); }
+
+/* ── Buttons ── */
+.btn-ink { background: var(--ink); color: var(--surface); }
+.btn-line { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--hairline); }
+.btn-danger-quiet { background: var(--danger-soft); color: var(--danger); }
+.btn-text { height: 48px; font: var(--t-body-strong); color: var(--ink); display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%; }
+.btn-text svg { width: 18px; height: 18px; }
+.btn.lg { height: 56px; }
+
+/* At-speed primary: the one filled thing on a moving screen. */
+.go { text-decoration: none; height: var(--h-go); width: 100%; border-radius: 20px; background: var(--brand); color: var(--on-brand); font: var(--t-act);
+  display: flex; align-items: center; justify-content: center; gap: 10px; position: relative; white-space: nowrap; }
+.go svg { width: 24px; height: 24px; stroke-width: 2; }
+.go.ink { background: var(--ink); color: var(--surface); }
+.go.quiet { background: var(--surface-2); color: var(--ink); }
+.go .sync { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); height: 28px; padding: 0 10px; border-radius: var(--r-pill);
+  background: rgb(0 0 0 / .28); color: #fff; font: var(--t-caption); display: inline-flex; align-items: center; gap: 4px; }
+.go .sync svg { width: 14px; height: 14px; }
+
+.slide { position: relative; height: var(--h-slide); border-radius: var(--r-pill); background: var(--brand); color: var(--on-brand);
+  display: flex; align-items: center; justify-content: center; font: var(--t-act); width: 100%; padding-left: 40px; white-space: nowrap; }
+.slide .knob { position: absolute; left: 6px; top: 6px; width: 60px; height: 60px; border-radius: 50%; background: #fff; color: #2F7D0A;
+  display: grid; place-items: center; box-shadow: 0 2px 8px rgb(0 0 0 / .2); }
+.slide .knob svg { width: 26px; height: 26px; stroke-width: 2; }
+.slide .hint { position: absolute; right: 22px; display: flex; opacity: .6; }
+.slide .hint svg { width: 20px; height: 20px; margin-left: -10px; }
+
+/* Secondary tools: an icon row ABOVE the primary, never beside it (research move 4). */
+.tools { display: flex; justify-content: space-around; gap: var(--s2); margin: var(--s4) 0; }
+.tool { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 72px; font: var(--t-caption); color: var(--ink-2); white-space: nowrap; }
+.tool .b { width: var(--h-sec); height: var(--h-sec); border-radius: var(--r-pill); background: var(--surface-2); color: var(--ink); display: grid; place-items: center; }
+.tool .b svg { width: 24px; height: 24px; }
+.tool.warn .b { background: var(--warn-soft); color: var(--warn); }
+.tool.warn { color: var(--warn); }
+
+/* ── Status pill (dot + word, never colour alone) ── */
+.spill { position: absolute; z-index: 20; top: 60px; left: 16px; height: 48px; padding: 0 18px 0 14px; border-radius: var(--r-pill);
+  background: var(--surface); box-shadow: var(--e2); display: inline-flex; align-items: center; gap: 10px; font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+.spill .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--ok-dot); box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok-dot) 22%, transparent); }
+.spill.away .dot { background: var(--warn); box-shadow: 0 0 0 4px color-mix(in srgb, var(--warn) 22%, transparent); border-radius: 3px; }
+.spill.off .dot { background: transparent; box-shadow: inset 0 0 0 2.5px var(--ink-3); }
+.spill.lost .dot { background: var(--danger); box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 22%, transparent); }
+.spill.demo .dot { background: var(--ink); border-radius: 3px; transform: rotate(45deg); box-shadow: none; width: 10px; height: 10px; }
+
+/* ── Notices: tone is a claim (amber = refusal / needs you, neutral = outcome, red = it failed) ── */
+.notice { display: flex; gap: var(--s3); align-items: flex-start; padding: var(--s3) var(--s4); border-radius: var(--r-card);
+  background: var(--surface-2); color: var(--ink); font: var(--t-secondary); }
+.notice svg { width: 20px; height: 20px; flex: none; margin-top: -1px; }
+.notice b { font-weight: 600; display: block; font-size: 15px; line-height: 20px; }
+.notice.warn { background: var(--warn-soft); }
+.notice.warn svg { color: var(--warn); }
+.notice.danger { background: var(--danger-soft); }
+.notice.danger svg { color: var(--danger); }
+.notice.ok svg { color: var(--ok); }
+
+/* Offline strip: persistent, non-blocking, escalates with a timer (§10.2, §10.7). */
+.offstrip { position: absolute; z-index: 25; top: 54px; left: 12px; right: 12px; height: 44px; border-radius: var(--r-card);
+  background: var(--ink); color: var(--surface); display: flex; align-items: center; gap: 10px; padding: 0 14px;
+  font: var(--t-secondary-strong); white-space: nowrap; box-shadow: var(--e2); }
+.offstrip svg { width: 18px; height: 18px; flex: none; }
+.offstrip .tm { margin-left: auto; font-variant-numeric: tabular-nums; opacity: .8; }
+
+/* ── Car + plate ── */
+.plate { height: 28px; padding: 0 8px; border-radius: 6px; background: #fff; color: #111113; box-shadow: inset 0 0 0 1.5px #111113;
+  font: 600 14px/28px var(--font); letter-spacing: .4px; font-variant-numeric: tabular-nums; white-space: nowrap; display: inline-block; }
+.carimg { object-fit: contain; filter: drop-shadow(0 3px 3px var(--car-ground)); display: block; }
+
+/* ── Countdown / progress ring ── */
+.dring { position: relative; flex: none; }
+.dring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.dring .in { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.dring .v { font: 600 15px/18px var(--font); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dring .u { font: 500 11px/14px var(--font); color: var(--ink-2); white-space: nowrap; }
+
+/* ── Segmented control ── */
+.seg { display: flex; background: var(--surface-3); border-radius: var(--r-control); padding: 4px; gap: 4px; }
+.seg button { flex: 1; height: 40px; border-radius: 10px; font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; }
+.seg button[aria-pressed="true"] { background: var(--raised); color: var(--ink); box-shadow: var(--e1); }
+
+/* ── Map pins shared by ride / pre-order screens ── */
+.pin { width: 18px; height: 18px; background: var(--approach); box-shadow: 0 0 0 4px var(--surface), 0 2px 6px rgb(0 0 0 / .3); display: grid; place-items: center; }
+.pin::after { content: ''; width: 6px; height: 6px; background: var(--surface); border-radius: inherit; }
+.pin.a { border-radius: 50%; } .pin.b { border-radius: 4px; }
+.pin.sm { width: 12px; height: 12px; box-shadow: 0 0 0 3px var(--surface); } .pin.sm::after { width: 4px; height: 4px; }
+.me { position: relative; width: 64px; height: 64px; display: grid; place-items: center; }
+.me::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--brand-soft); }
+.me svg { position: relative; z-index: 1; scale: 1.3; }
+
+/* Mini 2GIS map inside a card (pre-orders). The 2GIS logo stays visible per the terms. */
+.minimap { position: relative; overflow: hidden; background: var(--surface-2); border-radius: 10px; }
+.minimap > div { border-radius: inherit; }
+
+/* Stop list (pickup → drop) */
+.stops { position: relative; display: flex; flex-direction: column; gap: var(--s3); }
+.stops::before { content: ''; position: absolute; left: 7px; top: 20px; bottom: 20px; width: 2px; border-radius: 1px; background: var(--surface-3); }
+.stop { display: flex; gap: var(--s4); align-items: flex-start; }
+.stop .m { width: 16px; height: 16px; margin-top: 3px; flex: none; position: relative; z-index: 1; background: var(--ink); box-shadow: 0 0 0 4px var(--surface); }
+.stop .m.a { border-radius: 50%; } .stop .m.b { border-radius: 4px; }
+.stop .m::after { content: ''; position: absolute; inset: 5px; background: var(--surface); border-radius: inherit; }
+.stop .t1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+.stop .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* Dimmed scrim behind a modal sheet over a live screen */
+.scrim { position: absolute; inset: 0; z-index: 26; background: rgb(0 0 0 / .42); }
+.sheet.top { z-index: 27; }

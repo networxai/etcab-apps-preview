@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rider screens</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&display=swap">
+<style>
+  :root { --bg: #E9E9E6; --card: #FFFFFF; --ink: #111113; --ink-2: #5E5E63; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0A0A0B; --card: #161618; --ink: #F2F2F3; --ink-2: #A1A1A6; } }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--bg); color: var(--ink); font: 400 15px/22px 'Google Sans', system-ui, sans-serif; padding: 40px 16px 64px; }
+  header { max-width: 1200px; margin: 0 auto 28px; }
+  h1 { font: 600 28px/36px 'Google Sans', sans-serif; }
+  header p { color: var(--ink-2); margin-top: 6px; max-width: 760px; }
+  .grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; }
+  a { color: inherit; text-decoration: none; background: var(--card); border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 10px;
+    box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 8px 24px rgb(0 0 0 / .08); }
+  .thumbs { display: flex; gap: 6px; }
+  .thumbs img { width: calc(50% - 3px); aspect-ratio: 390 / 844; border-radius: 14px; object-fit: cover; background: var(--bg); }
+  b { font: 600 17px/24px 'Google Sans', sans-serif; }
+  span { color: var(--ink-2); font-size: 13px; line-height: 18px; }
+</style>
+</head>
+<body>
+<header><h1>Rider app, v2: every screen</h1>
+  <p>Day and night for each state. Open a screen for its state switcher. The four approved heroes (home, tiers) are in <a href="index.html" style="display:inline;padding:0;box-shadow:none;background:none;text-decoration:underline">index.html</a>.</p></header>
+<div class="grid" id="g"></div>
+<script>
+  const S = [
+    ['rider-opening', 'Opening', 'Letter-by-letter logo reveal, then the leaf', 'done'],
+    ['rider-login', 'Login', 'Phone, code, errors, resend, offline, name', 'phone'],
+    ['rider-home', 'Home', 'Approved hero', null],
+    ['rider-search', 'Address search', '2GIS suggest, saved, recent, pick on map', 'start'],
+    ['rider-tiers', 'Tiers and fare', 'Approved hero', null],
+    ['rider-book', 'Booking details', 'Note, Later, payment', 'details'],
+    ['rider-searching', 'Finding a car', 'Calm search, no cars, cancel', 'searching'],
+    ['rider-ride', 'Driver and ride', 'Assigned, arriving, arrived, riding, cancel', 'assigned'],
+    ['rider-done', 'Trip complete', 'Fare breakdown, rating, compliments', 'rate'],
+    ['rider-history', 'Ride history', 'List and detail', 'list'],
+    ['rider-account', 'Account', 'Profile, places, wallet, language, theme, delete', 'main'],
+    ['rider-offline', 'Offline and errors', 'Banner pattern, degraded, full-screen error', 'offline'],
+  ]
+  document.getElementById('g').innerHTML = S.map(([f, t, s, st]) => `<a href="${f}.html"><div class="thumbs">${['light', 'dark'].map((th) =>
+    `<img loading="lazy" alt="" src="shots/${st ? `${f}-${st}-${th}` : `${f}-${th}`}.png">`).join('')}</div><b>${t}</b><span>${s}</span></a>`).join('')
+</script>
+</body>
+</html>

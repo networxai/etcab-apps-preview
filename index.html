@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ETCAB apps v2 heroes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&display=swap">
+<style>
+  :root { --bg: #E9E9E6; --ink: #111113; --ink-2: #5E5E63; --bezel: #0B0B0C; --card: #FFFFFF; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0A0A0B; --ink: #F2F2F3; --ink-2: #A1A1A6; --bezel: #2A2A2E; --card: #161618; } }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--bg); color: var(--ink); font: 400 15px/22px 'Google Sans', system-ui, sans-serif; padding: 40px 16px 64px; }
+  header { max-width: 1800px; margin: 0 auto 32px; }
+  h1 { font: 600 28px/34px 'Google Sans', sans-serif; }
+  header p { color: var(--ink-2); margin-top: 6px; max-width: 760px; }
+  .grid { max-width: 1800px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 48px 64px; }
+  section h2 { font: 600 17px/24px 'Google Sans', sans-serif; margin-bottom: 4px; }
+  section .sub { color: var(--ink-2); font-size: 13px; margin-bottom: 16px; }
+  .pair { display: flex; gap: 24px; flex-wrap: wrap; }
+  figure { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  figcaption { font-size: 12px; color: var(--ink-2); }
+  .phone { width: 406px; height: 860px; padding: 8px; border-radius: 56px; background: var(--bezel); box-shadow: 0 1px 2px rgb(0 0 0 / .1), 0 24px 60px rgb(0 0 0 / .18); }
+  .phone iframe { width: 390px; height: 844px; border: 0; border-radius: 48px; display: block; background: #000; }
+  .hub { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0 12px; }
+  .hub a { display: flex; flex-direction: column; gap: 2px; min-width: 240px; padding: 14px 18px; border-radius: 14px; background: var(--card); color: var(--ink);
+    text-decoration: none; box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 8px 24px rgb(0 0 0 / .08); }
+  .hub a b { font: 600 17px/24px 'Google Sans', sans-serif; } .hub a span { font-size: 13px; color: var(--ink-2); }
+  .hub a:focus-visible { outline: 2px solid #2F7D0A; outline-offset: 2px; }
+  .setup { font-size: 13px; } .setup code { font-size: 12px; }
+  .sec { font: 600 22px/28px 'Google Sans', sans-serif; margin-top: 28px; }
+  footer { max-width: 1800px; margin: 48px auto 0; color: var(--ink-2); font-size: 12px; }
+  @media (max-width: 460px) { .phone { zoom: .82; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Eco Taxi apps v2</h1>
+  <nav class="hub" aria-label="Sections">
+    <a href="rider-index.html"><b>Rider app</b><span>Every screen and state, day and night</span></a>
+    <a href="driver-index.html"><b>Driver app</b><span>Every screen and state, day, night and sun</span></a>
+    <a href="#heroes"><b>The four heroes</b><span>Rider home · tiers · driver home · offer</span></a>
+  </nav>
+  <p class="setup">Live 2GIS map: create <code>v2/mapgl.local.js</code> with one line, <code>window.MAPGL_KEY="&lt;browser key&gt;"</code> (git-ignored). Without it, pages show a raster fallback and a badge.</p>
+  <h2 id="heroes" class="sec">The four heroes</h2>
+  <p>Eco Taxi: real logo, the six configured tiers and tariffs, one car per tier. One token system (<code>tokens.css</code>) across rider and driver. Google Sans for Armenian, Russian and Latin, tabular figures. Real Yerevan map tiles and real street routes. Day and night for each screen.</p>
+</header>
+<div class="grid" id="grid"></div>
+<footer>Map tiles © Stadia Maps © OpenMapTiles © OpenStreetMap contributors. Routes: OSRM over OpenStreetMap (ODbL). Partner photos: Unsplash (Unsplash Licence). Icons: Lucide (ISC). Car art drawn for this mock.</footer>
+<script>
+  const heroes = [
+    ['rider-home', 'Rider home', 'Map first; partners always on screen'],
+    ['rider-tiers', 'Rider tier choice and fare', 'Tiers scroll horizontally (owner rule)'],
+    ['driver-home', 'Driver home, online', 'Status, today, pre-orders, one 64pt action'],
+    ['driver-offer', 'Driver incoming offer', 'Countdown ring, pickup → drop, slide to accept'],
+    ['rider-home', 'Rider home, with a pre-order', 'The one allowed variant', 'preorder=1'],
+  ]
+  document.getElementById('grid').innerHTML = heroes.map(([f, t, s, q]) => `<section><h2>${t}</h2><div class="sub">${s}</div><div class="pair">
+    ${['light', 'dark'].map((th) => `<figure><div class="phone"><iframe title="${t}, ${th}" data-src="${f}.html?theme=${th}${q ? '&' + q : ''}"></iframe></div><figcaption>${th === 'light' ? 'Day' : 'Night'}</figcaption></figure>`).join('')}
+  </div></section>`).join('')
+  /* Each screen is a live 2GIS map, i.e. a WebGL context, and browsers cap live contexts (Chrome: 16, fewer on
+     some GPUs). Ten phones at once ran out and the last maps came up blank. So a phone only runs while it is
+     near the viewport; one scrolled far away is unloaded and its context freed. */
+  const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+    const f = e.target
+    if (e.isIntersecting) { if (!f.src || f.src === 'about:blank') f.src = f.dataset.src }
+    else if (f.src && f.src !== 'about:blank') f.src = 'about:blank'
+  }), { rootMargin: '0px' })
+  document.querySelectorAll('iframe[data-src]').forEach((f) => io.observe(f))
+</script>
+</body>
+</html>

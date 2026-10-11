@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Rider opening</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="rider.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="mapgl.local.js"></script>
+<script src="kit.js"></script>
+<script src="routes.js"></script>
+<script src="audit.js"></script>
+<script src="rider.js"></script>
+<style>
+  /* The real app's reveal (apps/rider/components/logo-reveal.tsx), re-timed on one clock exactly as it is there:
+     letters 200 ms apart, each landing over 380 ms with back(1.7) overshoot from 25% below and 70% scale; the O lands
+     solid; after a 150 ms beat the leaf (the counter, tinted to the ground so it reads as a hole) grows over 1.1 s. */
+  .splash { position: absolute; inset: 0; background: var(--ground); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .logo-r { position: relative; margin-top: -24px; }
+  .logo-r img, .logo-r .ctr { position: absolute; display: block; will-change: transform, opacity; }
+  .logo-r .ctr { background: var(--ground); -webkit-mask: url(assets/eco/letters/counter.png) center / 100% 100% no-repeat; mask: url(assets/eco/letters/counter.png) center / 100% 100% no-repeat; }
+  .tagline { position: absolute; left: 0; right: 0; top: calc(50% + 28px); text-align: center; font: var(--t-body); color: var(--ink-2); transition: opacity .4s; }
+  .foot { position: absolute; left: 0; right: 0; bottom: 64px; display: flex; justify-content: center; color: var(--ink-3); }
+  .replay { position: absolute; bottom: 56px; left: 50%; transform: translateX(-50%); height: 36px; padding: 0 14px; border-radius: var(--r-pill);
+    background: var(--surface); box-shadow: var(--e1); font: var(--t-secondary-strong); color: var(--ink); display: inline-flex; align-items: center; gap: 6px; }
+  .replay svg { width: 16px; height: 16px; }
+</style>
+</head>
+<body>
+<script>
+  /* Manifest of assets/eco/letters (manifest.json), inlined so the page also opens from file://. */
+  const M = { width: 1228, height: 220, letters: [
+    { file: '0.png', x: 17, y: 21, w: 196, h: 180 }, { file: '1.png', x: 200, y: 20, w: 188, h: 183 },
+    { file: '2.png', x: 375, y: 18, w: 208, h: 185, solid: '2-solid.png' }, { file: '3.png', x: 612, y: 25, w: 164, h: 172 },
+    { file: '4.png', x: 706, y: 25, w: 210, h: 172 }, { file: '5.png', x: 898, y: 24, w: 233, h: 173 }, { file: '6.png', x: 1117, y: 25, w: 91, h: 172 }],
+    counter: { file: 'counter.png', x: 390, y: 66, w: 136, h: 126, letter: 2 } }
+  const STEP = 200, LAND = 380, BEAT = 150, LEAF = 1100
+  const LETTERS_DONE = STEP * 6 + LAND, TOTAL = LETTERS_DONE + BEAT + LEAF
+  const H = 44, SC = H / M.height, W = M.width * SC
+  const back = (s) => (t) => { const u = t - 1; return u * u * ((s + 1) * u + s) + 1 }
+  const land = back(1.7), grow = back(1.15)
+  const win = (ms, a, b, f) => f(Math.min(1, Math.max(0, (ms - a) / (b - a))))
+
+  const logo = () => `<div class="logo-r" id="logo" role="img" aria-label="Eco Taxi" style="width:${W}px;height:${H}px">${M.letters.map((l, i) =>
+    `<img src="assets/eco/letters/${l.solid || l.file}" alt="" style="left:${l.x * SC}px;top:${l.y * SC}px;width:${l.w * SC}px;height:${l.h * SC}px">`).join('')}
+    <span class="ctr" style="left:${M.counter.x * SC}px;top:${M.counter.y * SC}px;width:${M.counter.w * SC}px;height:${M.counter.h * SC}px"></span></div>`
+
+  /* One clock, every piece derives its own eased progress from it (why: see logo-reveal.tsx "one clock"). */
+  function frame(ms) {
+    const imgs = document.querySelectorAll('#logo img'), ctr = document.querySelector('#logo .ctr')
+    imgs.forEach((im, i) => {
+      const p = win(ms, i * STEP, i * STEP + LAND, land)
+      im.style.opacity = p <= 0 ? 0 : Math.min(1, p / .4)
+      im.style.transform = `translateY(${(1 - p) * H * .25}px) scale(${.7 + .3 * p})`
+    })
+    const g = win(ms, LETTERS_DONE + BEAT, TOTAL, grow)
+    ctr.style.opacity = g <= 0 ? 0 : Math.min(1, g / .03)
+    ctr.style.transform = `scale(${g})`
+    const tg = document.querySelector('.tagline')
+    if (tg) tg.style.opacity = ms >= TOTAL ? 1 : 0
+  }
+  const frozen = (ms, extra = '') => ({ html: () => `<div class="splash">${logo()}</div>${extra}`, after: () => frame(ms) })
+
+  Rider.page({
+    title: 'Rider · Opening',
+    sub: 'The real app animates the ECO TAXI letters (assets/eco/letters + manifest), then grows the leaf. 2.83 s on one clock. Frozen frames for review, plus the live loop',
+    states: [
+      { id: 'live', group: 'Reveal', label: 'Live', note: 'Loops every 4.5 s here; plays once in the app, under the boot cover',
+        html: () => `<div class="splash">${logo()}</div><div class="tagline">Մեքենան՝ մի քանի րոպեում</div><button class="replay" id="replay">${R.i('rotate-ccw')}Կրկնել</button>`,
+        after: () => {
+          let t0 = performance.now()
+          document.getElementById('replay').onclick = () => { t0 = performance.now() }
+          const tick = (now) => { frame((now - t0) % 4500); requestAnimationFrame(tick) }
+          requestAnimationFrame(tick)
+        } },
+      { id: 'letters', group: 'Reveal', label: '0.9 s · letters', note: 'E, C, O landed (O solid), T mid-overshoot, A rising', ...frozen(900) },
+      { id: 'leaf', group: 'Reveal', label: '2.2 s · leaf', note: 'All letters seated; the counter grows from its own centre with a soft overshoot', ...frozen(2200) },
+      { id: 'done', group: 'Reveal', label: '2.83 s · done', note: 'Finished logotype; the tagline (login.tagline) fades in',
+        html: () => `<div class="splash">${logo()}</div><div class="tagline">Մեքենան՝ մի քանի րոպեում</div>`, after: () => frame(TOTAL) },
+      { id: 'slow', group: 'Boot', label: 'Slow boot', note: 'Past 3 s with the session still loading: a quiet spinner, no words, no progress lie',
+        html: () => `<div class="splash">${logo()}</div><div class="tagline">Մեքենան՝ մի քանի րոպեում</div><div class="foot" role="progressbar" aria-label="Բեռնում"><span class="spin"></span></div>`, after: () => frame(TOTAL) },
+      { id: 'reduced', group: 'Boot', label: 'Reduce Motion', note: 'Reduce Motion or a fleet with no letter artwork: the flat logotype, immediately',
+        html: () => `<div class="splash"><img src="assets/eco/logo-wide.png" alt="Eco Taxi" width="${W}" height="${H}" style="margin-top:-24px"></div><div class="tagline">Մեքենան՝ մի քանի րոպեում</div>` },
+    ],
+  })
+</script>
+</body>
+</html>

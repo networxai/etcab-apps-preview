@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Rider search</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="rider.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="mapgl.local.js"></script>
+<script src="kit.js"></script>
+<script src="routes.js"></script>
+<script src="audit.js"></script>
+<script src="rider.js"></script>
+<style>
+  /* Address search: two stacked fields joined by the dot-line-square glyph; recents and saved places before typing;
+     "on the map" always one tap away, so a dead geocoder never strands the rider. */
+  .fields { flex: none; display: flex; gap: var(--s3); padding: 0 var(--margin) 0 var(--s5); align-items: center; }
+  .glyph { flex: none; width: 10px; display: flex; flex-direction: column; align-items: center; }
+  .glyph .a { width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 3px var(--ink); }
+  .glyph .l { width: 2px; height: 38px; margin: 4px 0; background: repeating-linear-gradient(var(--ink-3) 0 3px, transparent 3px 7px); }
+  .glyph .b { width: 10px; height: 10px; border-radius: 2px; background: var(--ink); }
+  .fcol { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s2); }
+  .f { height: 48px; border-radius: var(--r-control); background: var(--surface-2); display: flex; align-items: center; gap: var(--s2); padding: 0 var(--s2) 0 var(--s4); }
+  .f.focus { box-shadow: inset 0 0 0 2px var(--ink); }
+  .f .fv { flex: 1; min-width: 0; font: var(--t-body); color: var(--ink); white-space: nowrap; display: flex; align-items: center; }
+  .f .fv.ph { color: var(--ink-3); }
+  .f .fl { font: var(--t-caption); color: var(--ink-2); flex: none; white-space: nowrap; }
+  .f .fx { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-3); flex: none; }
+  .f .fx svg { width: 18px; height: 18px; }
+  .caret { display: inline-block; width: 2px; height: 20px; background: var(--brand-ink); margin-left: 1px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .addstop { width: var(--tap); height: var(--tap); border-radius: var(--r-pill); background: var(--surface-2); display: grid; place-items: center; color: var(--ink); flex: none; align-self: flex-end; margin-bottom: 2px; }
+  .addstop svg { width: 20px; height: 20px; }
+
+  .list { padding: var(--s2) var(--margin) 0; }
+  .list .row { width: 100%; text-align: left; }
+  .list .divider { margin-left: 52px; }
+  .list .sect { padding: var(--s4) 0 var(--s1); }
+  .row .t1 b, .row .t2 b { font-weight: 600; color: var(--ink); }
+  .row .end.mono { font-variant-numeric: tabular-nums; }
+  .row.onmap .ic { background: var(--brand-soft); color: var(--brand-ink); }
+  .skrow { display: flex; align-items: center; gap: var(--s3); height: 56px; }
+  .skrow .sk.c { width: 40px; height: 40px; border-radius: 50%; flex: none; }
+  .skrow .lines { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+
+  .blank { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--s3); padding: 0 var(--s8) 96px; text-align: center; }
+  .blank .big { width: 64px; height: 64px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; color: var(--ink-2); }
+  .blank .big svg { width: 28px; height: 28px; }
+  .blank .msg { font: var(--t-headline); color: var(--ink); }
+  .blank .btns { margin-top: var(--s3); width: 100%; }
+
+  /* Pick on map: the pin is fixed at the centre of the visible map; the map moves under it. */
+  .centre { position: absolute; left: 50%; z-index: 8; display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -100%); pointer-events: none; }
+  .centre .maptag { margin-bottom: var(--s2); }
+  .centre .maptag .spin { width: 16px; height: 16px; border-width: 2px; color: var(--ink-2); }
+  .stalk { display: flex; flex-direction: column; align-items: center; transition: transform .2s; }
+  .stalk .head { width: 30px; height: 30px; border-radius: 50%; background: var(--approach); box-shadow: 0 0 0 3px var(--surface), 0 4px 10px rgb(0 0 0 / .3); display: grid; place-items: center; }
+  .stalk .head::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--surface); }
+  .stalk .stem { width: 3px; height: 16px; background: var(--approach); border-radius: 0 0 2px 2px; }
+  .lifted .stalk { transform: translateY(-14px); }
+  .shadow { position: absolute; left: 50%; z-index: 7; width: 14px; height: 5px; border-radius: 50%; transform: translate(-50%, -50%); background: rgb(0 0 0 / .35); }
+  .lifted + .shadow, .shadow.wide { width: 20px; height: 7px; background: rgb(0 0 0 / .22); }
+  .hint { position: absolute; z-index: 20; top: 66px; left: 50%; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 6px; height: 36px;
+    padding: 0 14px 0 12px; border-radius: var(--r-pill); background: var(--surface); box-shadow: var(--e2); font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; }
+  .hint svg { width: 16px; height: 16px; }
+  .picked .row { min-height: 64px; }
+  .picked .row .ic { background: var(--surface-2); }
+  .picked .lbl { font: var(--t-caption); color: var(--ink-2); }
+  .picked .btn { margin-top: var(--s3); }
+  .picked .sk.t { width: 160px; height: 18px; }
+  .picked .sk.s { width: 110px; height: 14px; margin-top: 6px; }
+</style>
+</head>
+<body>
+<script>
+  const FROM = 'Հանրապետության հրապարակ'
+  const fields = (to, o = {}) => `<div class="fields">
+      <div class="glyph" aria-hidden="true"><span class="a"></span><span class="l"></span><span class="b"></span></div>
+      <div class="fcol">
+        <div class="f" role="button" aria-label="Որտեղից՝ ${FROM}"><span class="fv">${FROM}</span></div>
+        <div class="f focus" role="textbox" aria-label="Ուր"><span class="fv ${to ? '' : 'ph'}">${to || 'Ուր'}<span class="caret"></span></span>${to ? `<button class="fx" aria-label="Մաքրել">${R.i('circle-x')}</button>` : ''}</div>
+      </div>
+      <button class="addstop" aria-label="Ավելացնել կանգառ">${R.i('plus')}</button></div>`
+  const nav = () => `<nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl">Երթուղի</span><span class="navend"></span></nav>`
+  const row = (ic, t1, t2, end, cls = '') => `<button class="row ${cls}"><span class="ic">${R.i(ic)}</span><span class="txt"><span class="t1">${t1}</span>${t2 ? `<span class="t2">${t2}</span>` : ''}</span>${end ? `<span class="end mono">${end}</span>` : ''}</button>`
+  const rows = (rs) => rs.map((r, i) => (i ? '<div class="divider"></div>' : '') + row(...r)).join('')
+  const onMap = () => row('map', 'Նշել քարտեզին', '', '', 'onmap')
+  const page = (body, extra = '') => `<div class="page on-surface">${nav()}${fields(...(body.to || []))}${body.html}</div>${extra}`
+
+  const M = 'Մաշտ'
+  const blank = (ic, msg, btns) => `<div class="blank"><span class="big">${R.i(ic)}</span><div class="msg">${msg}</div><div class="btns">${btns}</div></div>`
+
+  /* Pick on map: a real point in central Yerevan; the map is fitted so it sits at the centre of the visible map. */
+  const PICK = [40.18345, 44.51455]
+  const pickSheet = (moving) => `<section class="sheet r picked" id="sheet"><div class="grabber"></div>
+      <div class="row"><span class="ic">${R.i('map-pin')}</span><span class="txt"${moving ? ' aria-label="Որոշում ենք հասցեն"' : ''}>${moving
+        ? '<span class="sk t" aria-hidden="true"></span><span class="sk s" aria-hidden="true"></span>'
+        : '<span class="lbl">Ուր</span><span class="t1">Թումանյան 8</span><span class="t2">Կենտրոն, Երևան</span>'}</span></div>
+      ${moving ? '<button class="btn" disabled>Հաստատել</button>' : '<button class="btn btn-brand">Հաստատել</button>'}</section>`
+  const pickHtml = (moving) => `<div class="map" id="map" aria-label="Քարտեզ"></div>
+      <button class="fab" style="top:62px;left:16px" aria-label="Հետ">${R.i('arrow-left')}</button>
+      <div class="hint" role="note">${R.i('move')}Շարժեք քարտեզը</div>
+      <div class="centre ${moving ? 'lifted' : ''}" id="centre">${moving
+        ? '<span class="maptag plain" role="status" aria-label="Որոշում ենք հասցեն"><span class="spin"></span></span>'
+        : '<span class="maptag plain">Թումանյան 8</span>'}<span class="stalk" aria-hidden="true"><span class="head"></span><span class="stem"></span></span></div>
+      <span class="shadow ${moving ? 'wide' : ''}" id="shadow" aria-hidden="true"></span>${pickSheet(moving)}`
+  const pickMap = (s) => {
+    const sheetH = s.querySelector('#sheet').offsetHeight
+    const y = (844 - sheetH) / 2
+    s.querySelector('#centre').style.top = y + 'px'
+    s.querySelector('#shadow').style.top = y + 'px'
+    R.map(s, { fit: R.bbox(PICK, .0028, .0036), padTL: [0, 0], padBR: [0, sheetH] })
+  }
+
+  Rider.page({
+    title: 'Rider · Address search',
+    sub: '2GIS suggest in hy/ru/en, saved places, recent, pick on map with a fixed centre pin; empty and error never strand the rider',
+    states: [
+      { id: 'start', group: 'Search', label: 'Before typing', note: 'Recents and saved places first; “on the map” is the first row',
+        html: () => page({ html: `<div class="list">${onMap()}
+          <div class="sect">Պահպանված հասցեներ</div>${rows([['house', 'Տուն', 'Կոմիտասի պող. 22', '4.3 կմ'], ['briefcase', 'Աշխատանք', 'Վազգեն Սարգսյան 10', '0.4 կմ']])}
+          <div class="sect">Վերջին</div>${rows([['history', 'Կասկադ', 'Թամանյան փողոց', '2.1 կմ'], ['plane', 'Զվարթնոց օդանավակայան', 'Զվարթնոց', '12 կմ'], ['history', 'Մատենադարան', 'Մաշտոցի պող. 53', '1.6 կմ']])}</div>` }) },
+      { id: 'suggest', group: 'Search', label: 'Suggest', note: '2GIS suggest; the typed part is bolded where it matched (name or street)',
+        html: () => page({ to: [M], html: `<div class="list">${rows([
+          ['map-pin', `<b>${M}</b>ոցի պողոտա`, 'Կենտրոն, Երևան', '0.8 կմ'],
+          ['landmark', 'Մատենադարան', `<b>${M}</b>ոցի պող. 53`, '1.6 կմ'],
+          ['trees', `<b>${M}</b>ոցի պուրակ`, 'Կենտրոն, Երևան', '1.2 կմ'],
+          ['map-pin', `<b>${M}</b>ոցի պող. 7`, 'Կենտրոն, Երևան', '0.9 կմ'],
+          ['map-pin', `<b>${M}</b>ոցի փողոց`, 'Աբովյան', '18 կմ']])}</div>` }, R.keyboard()) },
+      { id: 'loading', group: 'Search', label: 'Loading', note: 'Skeleton rows hold the layout; no spinner over the list',
+        html: () => page({ to: [M], html: `<div class="list" aria-busy="true" aria-label="Որոնում ենք">${[150, 200, 120, 170].map((w) =>
+          `<div class="skrow" aria-hidden="true"><span class="sk c"></span><span class="lines"><span class="sk" style="width:${w}px;height:16px"></span><span class="sk" style="width:${w - 50}px;height:12px"></span></span></div>`).join('')}</div>` }, R.keyboard()) },
+      { id: 'empty', group: 'Search', label: 'No results', note: 'One line, and the map is the way out',
+        html: () => page({ to: ['Մաշտոցի 999'], html: blank('search-x', 'Ոչինչ չի գտնվել', `<button class="btn btn-quiet">${R.i('map')}Նշել քարտեզին</button>`) }) },
+      { id: 'error', group: 'Search', label: 'Error', note: 'Search service down: retry, or pick on the map, which still works',
+        html: () => page({ to: [M], html: blank('cloud-off', 'Որոնումը հասանելի չէ', `<button class="btn btn-brand">${R.i('rotate-cw')}Կրկնել</button><button class="btn btn-quiet">${R.i('map')}Նշել քարտեզին</button>`) }) },
+      { id: 'pick', group: 'On the map', label: 'Pin set', note: 'Fixed centre pin; the address snaps to the nearest building and shows on the pin and in the sheet',
+        html: () => pickHtml(false), map: pickMap },
+      { id: 'pick-moving', group: 'On the map', label: 'Dragging', note: 'Pin lifts while the map moves; address resolves on release, confirm waits for it',
+        html: () => pickHtml(true), map: pickMap },
+    ],
+  })
+</script>
+</body>
+</html>

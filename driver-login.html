@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Driver login</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="driver.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="kit.js"></script>
+<script src="driver.js"></script>
+<style>
+  .logo { position: absolute; top: 70px; left: 16px; width: 122px; height: 22px; z-index: 5; }
+  .hero-car { display: flex; justify-content: center; margin: 0 0 var(--s4); position: relative; }
+  .hero-car::after { content: ''; position: absolute; bottom: 4px; left: 50%; width: 220px; height: 18px; transform: translateX(-50%);
+    border-radius: 50%; background: radial-gradient(closest-side, var(--car-ground), transparent); z-index: 0; }
+  .hero-car img { width: 260px; height: 149px; object-fit: contain; position: relative; z-index: 1; }
+
+  .lbl { font: var(--t-caption); color: var(--ink-2); margin: var(--s6) 0 var(--s2); white-space: nowrap; }
+  .field { height: 56px; border-radius: var(--r-control); background: var(--surface); box-shadow: var(--e1); display: flex; align-items: center; gap: var(--s3); padding: 0 var(--s4) 0 6px; }
+  .field.focus { box-shadow: var(--e1), inset 0 0 0 2px var(--ink); }
+  .cc { height: 44px; padding: 0 12px; border-radius: 10px; background: var(--surface-2); display: inline-flex; align-items: center; gap: 6px;
+    font: var(--t-body-strong); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .cc .flag { width: 20px; height: 14px; border-radius: 3px; overflow: hidden; display: flex; flex-direction: column; flex: none; box-shadow: 0 0 0 .5px rgb(0 0 0 / .2); }
+  .cc .flag i { flex: 1; } .cc .flag i:nth-child(1) { background: #D90012; } .cc .flag i:nth-child(2) { background: #0033A0; } .cc .flag i:nth-child(3) { background: #F2A800; }
+  .num { font: 500 20px/24px var(--font); color: var(--ink); letter-spacing: .5px; font-variant-numeric: tabular-nums; white-space: nowrap; display: flex; align-items: center; }
+  .caret { width: 2px; height: 24px; background: var(--brand-ink); margin-left: 2px; border-radius: 1px; }
+
+  /* OTP */
+  .otp { display: flex; gap: var(--s2); margin-top: var(--s6); }
+  .otp span { width: 52px; height: 60px; border-radius: var(--r-card); background: var(--surface); box-shadow: var(--e1); display: grid; place-items: center;
+    font: 600 26px/32px var(--font); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .otp span.on { box-shadow: var(--e1), inset 0 0 0 2px var(--ink); }
+  .otp.err span { box-shadow: var(--e1), inset 0 0 0 2px var(--danger); color: var(--danger); }
+  .otp .caret { margin: 0; }
+  .resend { display: flex; align-items: center; gap: 6px; margin-top: var(--s4); font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .resend svg { width: 16px; height: 16px; }
+  .ferr { display: flex; align-items: center; gap: 6px; margin-top: var(--s3); font: var(--t-secondary-strong); color: var(--danger); white-space: nowrap; }
+  .ferr svg { width: 18px; height: 18px; }
+  .linkbtn { height: 48px; display: inline-flex; align-items: center; gap: 6px; font: var(--t-body-strong); color: var(--brand-ink); white-space: nowrap; margin-top: var(--s1); }
+  .linkbtn svg { width: 18px; height: 18px; }
+
+  .disp { margin-top: var(--s6); }
+  .disp .row { min-height: 72px; }
+  .callbtn { width: 48px; height: 48px; border-radius: 50%; background: var(--brand); color: var(--on-brand); display: grid; place-items: center; flex: none; }
+  .callbtn svg { width: 22px; height: 22px; }
+  .badge-ic { width: 64px; height: 64px; border-radius: 50%; background: var(--brand-soft); color: var(--brand-ink); display: grid; place-items: center; margin: var(--s2) 0 var(--s4); }
+  .badge-ic svg { width: 30px; height: 30px; }
+
+  /* The OS numeric keypad, drawn so the screen reads as it does in the hand. */
+  .kp { position: absolute; left: 0; right: 0; bottom: 0; height: 252px; background: var(--surface-3); padding: 8px 6px 42px; display: grid;
+    grid-template-columns: repeat(3, 1fr); grid-auto-rows: 46px; gap: 6px; z-index: 6; }
+  .kp b { border-radius: 8px; background: var(--raised); box-shadow: 0 1px 0 rgb(0 0 0 / .18); display: grid; place-items: center; font: 400 24px/28px var(--font); color: var(--ink); }
+  .kp b.fn { background: transparent; box-shadow: none; }
+  .kp svg { width: 24px; height: 24px; }
+  .kp-act { position: absolute; left: 16px; right: 16px; bottom: 268px; z-index: 6; display: flex; flex-direction: column; gap: var(--s3); }
+
+  /* Kicked */
+  .center { align-items: center; text-align: center; }
+  .pair { position: relative; width: 168px; height: 128px; margin: 168px auto var(--s6); }
+  .pair .ph { position: absolute; top: 0; width: 72px; height: 124px; border-radius: 16px; background: var(--surface); box-shadow: var(--e2); display: grid; place-items: center; }
+  .pair .ph::before { content: ''; position: absolute; top: 8px; width: 24px; height: 4px; border-radius: 2px; background: var(--surface-3); left: 24px; }
+  .pair .ph svg { width: 28px; height: 28px; }
+  .pair .old { left: 0; transform: rotate(-8deg); color: var(--ink-3); }
+  .pair .new { right: 0; transform: rotate(6deg); color: var(--ok); }
+  .pair .arrow { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; border-radius: 50%; background: var(--ink); color: var(--surface);
+    display: grid; place-items: center; z-index: 2; box-shadow: 0 0 0 4px var(--ground); }
+  .pair .arrow svg { width: 20px; height: 20px; }
+  .ttl-c { font: var(--t-large); color: var(--ink); white-space: nowrap; }
+  .sub-c { font: var(--t-body); color: var(--ink-2); white-space: nowrap; margin-top: var(--s2); }
+  .chip-c { margin-top: var(--s4); background: var(--surface); box-shadow: var(--e1); }
+  .page .btn-quiet { background: var(--surface); box-shadow: var(--e1); }  /* surface-2 on --ground is 1.0:1 — the button vanished */
+</style>
+</head>
+<body>
+<main class="screen page" id="s">
+  <img class="logo" src="assets/eco/logo-wide.png" alt="Eco Taxi" width="122" height="22" data-s="phone offline">
+
+  <div class="appbar" data-s="code dispatcher error">
+    <button class="iconbtn" aria-label="Փոխել համարը"><i data-lucide="arrow-left"></i></button>
+  </div>
+
+  <!-- ── phone / offline ── -->
+  <div class="content" data-s="phone offline" style="top:104px">
+    <div class="hero-car"><img src="assets/eco/cars/city.webp" alt=""></div>
+    <div class="ptitle">Մուտք</div>
+    <div class="psub">այն համարը, որը գրանցված է ձեր անունով</div>
+    <div class="lbl">Հեռախոսահամար</div>
+    <div class="field focus"><span class="cc"><span class="flag" aria-hidden="true"><i></i><i></i><i></i></span>+374</span><span class="num">91 23 45 67<span class="caret"></span></span></div>
+  </div>
+  <div class="kp-act" data-s="phone"><button class="btn btn-brand">Ուղարկել կոդը</button></div>
+  <div class="kp-act" data-s="offline">
+    <div class="notice warn" role="status"><i data-lucide="wifi-off"></i><div><b>Կապ չկա</b>Ստուգե՛ք ինտերնետը</div></div>
+    <button class="btn btn-quiet"><i data-lucide="rotate-cw"></i>Կրկին փորձել</button>
+  </div>
+
+  <!-- ── code / error ── -->
+  <div class="content" data-s="code error">
+    <div class="ptitle">Կոդ</div>
+    <div class="psub">SMS · +374 91 23 45 67</div>
+    <div class="otp" data-s="code" role="group" aria-label="Կոդ, 6 նիշ"><span>4</span><span>8</span><span>2</span><span class="on"><i class="caret"></i></span><span></span><span></span></div>
+    <div class="otp err" data-s="error" role="group" aria-label="Կոդ, 6 նիշ" aria-describedby="ferr" aria-invalid="true"><span>4</span><span>8</span><span>2</span><span>1</span><span>9</span><span>3</span></div>
+    <div class="ferr" id="ferr" data-s="error"><i data-lucide="circle-alert"></i>Կոդը սխալ է · մնաց 2 փորձ</div>
+    <div class="resend" data-s="code"><i data-lucide="clock"></i>Նոր կոդ՝ 0:42</div>
+    <button class="linkbtn" data-s="error"><i data-lucide="rotate-cw"></i>Ուղարկել նոր կոդ</button>
+    <div class="group disp">
+      <button class="row" style="width:100%;text-align:left"><span class="ic brand"><i data-lucide="headset"></i></span>
+        <span class="txt"><span class="t1">Կոդը թելադրում է դիսպետչերը</span><span class="t2">Եթե SMS-ը չի գալիս</span></span><i class="chev" data-lucide="chevron-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ── dispatcher-issued code (§11.2 SMS-outage fallback) ── -->
+  <div class="content" data-s="dispatcher">
+    <div class="badge-ic"><i data-lucide="headset"></i></div>
+    <div class="ptitle">Դիսպետչերի կոդը</div>
+    <div class="psub">վեց նիշ՝ SMS-ով կամ դիսպետչերի թելադրությամբ</div>
+    <div class="otp" role="group" aria-label="Կոդ, 6 նիշ"><span>7</span><span class="on"><i class="caret"></i></span><span></span><span></span><span></span><span></span></div>
+    <div class="group disp">
+      <div class="row"><span class="txt"><span class="t1">Զանգել դիսպետչերին</span><span class="t2">Eco Taxi · 24/7</span></span>
+        <button class="callbtn" aria-label="Զանգել դիսպետչերին"><i data-lucide="phone"></i></button></div>
+    </div>
+  </div>
+
+  <div class="kp" aria-hidden="true" data-not="kicked">
+    <b>1</b><b>2</b><b>3</b><b>4</b><b>5</b><b>6</b><b>7</b><b>8</b><b>9</b><b class="fn"></b><b>0</b><b class="fn"><i data-lucide="delete"></i></b>
+  </div>
+
+  <!-- ── kicked: the account opened on another phone (§11.2 one active device) ── -->
+  <div class="content center" data-s="kicked" style="top:54px">
+    <div class="pair" aria-hidden="true">
+      <span class="ph old"><i data-lucide="log-out"></i></span>
+      <span class="arrow"><i data-lucide="arrow-right"></i></span>
+      <span class="ph new"><i data-lucide="user-check"></i></span>
+    </div>
+    <div class="ttl-c">Դուք դուրս եք եկել</div>
+    <div class="sub-c">Հաշիվը բացվել է այլ հեռախոսում</div>
+    <span class="chip chip-c"><i data-lucide="smartphone"></i>Մեկ հաշիվ՝ մեկ հեռախոս</span>
+    <div class="grow"></div>
+    <div class="foot" style="width:100%">
+      <button class="btn btn-brand">Մուտք գործել</button>
+      <button class="btn-text"><i data-lucide="phone"></i>Զանգել դիսպետչերին</button>
+    </div>
+  </div>
+</main>
+<script src="audit.js"></script>
+<script>
+  statusBar(document.getElementById('s'))
+  D.init([
+    ['phone', 'Phone number'], ['code', 'SMS code'], ['dispatcher', 'Dispatcher-read code (§11.2)'],
+    ['error', 'Wrong code'], ['offline', 'Offline'], ['kicked', 'Signed out: other device'],
+  ])
+  icons()
+  D.noMap()
+</script>
+</body>
+</html>

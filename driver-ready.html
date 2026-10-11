@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Driver readiness</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="driver.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="kit.js"></script>
+<script src="driver.js"></script>
+<style>
+  .prog { display: flex; align-items: center; gap: var(--s4); margin: var(--s5) 0 var(--s4); }
+  .prog .dring .v { font: 600 20px/24px var(--font); }
+  .prog .t1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .prog .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .group .row { min-height: 72px; width: 100%; text-align: left; }
+  .st { display: inline-flex; align-items: center; gap: 4px; font: var(--t-secondary-strong); white-space: nowrap; }
+  .st svg { width: 20px; height: 20px; }
+  .st.ok { color: var(--ok); }
+  .row .t2.warn { color: var(--warn); }
+
+  /* Location disclosure visual */
+  .vis { position: relative; height: 128px; display: grid; place-items: center; margin: var(--s2) 0 var(--s4); }
+  .vis .halo { position: absolute; width: 128px; height: 128px; border-radius: 50%; background: var(--brand-soft); }
+  .vis .halo.h2 { width: 88px; height: 88px; background: var(--brand-soft); }
+  .vis .pinc { position: relative; width: 56px; height: 56px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; box-shadow: var(--e2); }
+  .vis .pinc svg { width: 28px; height: 28px; }
+  .vis .lock { position: absolute; left: calc(50% + 22px); top: calc(50% + 14px); width: 32px; height: 32px; border-radius: 50%; background: var(--ink); color: var(--surface);
+    display: grid; place-items: center; box-shadow: 0 0 0 3px var(--ground); }
+  .vis .lock svg { width: 16px; height: 16px; }
+  .dtitle { font: var(--t-title); color: var(--ink); }
+  .dbody { font: var(--t-body); color: var(--ink); margin-top: var(--s2); }
+  .osopts { margin-top: var(--s5); padding: var(--s1) var(--s4); }
+  .opt { display: flex; align-items: center; gap: var(--s3); min-height: 48px; font: var(--t-body); color: var(--ink-2); white-space: nowrap; }
+  .opt + .opt { border-top: 1px solid var(--hairline); }
+  .opt .rd { width: 20px; height: 20px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--ink-3); flex: none; }
+  .opt.on { color: var(--ink); font-weight: 600; }
+  .opt.on .rd { box-shadow: inset 0 0 0 6px var(--brand); }
+  .opt .tag { margin-left: auto; font: var(--t-caption); color: var(--brand-ink); }
+
+  /* Battery: a mock of the OS settings row the driver will see */
+  .mock { margin-top: var(--s5); padding: var(--s4); }
+  .mock .h { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; margin-bottom: var(--s3); }
+  .mock .app { display: flex; align-items: center; gap: var(--s3); }
+  .mock .app img { width: 40px; height: 40px; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px var(--hairline); padding: 4px; }
+  .mock .app .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .mock .app .t2 { font: var(--t-secondary-strong); color: var(--brand-ink); white-space: nowrap; }
+  .mock .opts { margin-top: var(--s3); border-top: 1px solid var(--hairline); }
+  .opt .ck { margin-left: auto; width: 20px; height: 20px; color: var(--brand-ink); }
+  .seg { background: var(--surface-3); }  /* on --ground, surface-2 is 1.0:1 and the track vanishes */
+  .notice.plain { background: var(--surface); box-shadow: var(--e1); }
+  .tog { margin-left: auto; width: 52px; height: 32px; border-radius: 16px; background: var(--brand); position: relative; flex: none; }
+  .tog::after { content: ''; position: absolute; right: 3px; top: 3px; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / .3); }
+  .steps { margin-top: var(--s5); display: flex; flex-direction: column; gap: var(--s4); position: relative; }
+  .steps::before { content: ''; position: absolute; left: 13px; top: 20px; bottom: 20px; width: 2px; background: var(--surface-3); }
+  .step { display: flex; align-items: center; gap: var(--s3); font: var(--t-body); color: var(--ink); white-space: nowrap; position: relative; }
+  .step .n { width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: var(--surface); display: grid; place-items: center; font: 600 14px/1 var(--font); flex: none; }
+  .step b { font-weight: 600; }
+
+  /* iOS lock-screen mock */
+  .lockscr { margin-top: var(--s4); height: 184px; border-radius: 20px; background-color: #1E2A22;
+    background-image: radial-gradient(120% 90% at 20% 0%, #2F4A2A 0%, #1E2A22 55%, #141816 100%); padding: 16px 12px; display: flex; flex-direction: column; align-items: center; }
+  .lockscr .clk { font: 600 40px/48px var(--font); color: #fff; font-variant-numeric: tabular-nums; }
+  .nt { margin-top: 12px; width: 100%; border-radius: 16px; background: #F4F4F2; padding: 10px 12px; display: flex; gap: 10px; align-items: flex-start; }
+  .nt img { width: 32px; height: 32px; border-radius: 8px; background: #fff; padding: 3px; flex: none; }
+  .nt .hd { display: flex; align-items: center; gap: 6px; font: var(--t-caption); color: #5E5E63; white-space: nowrap; }
+  .nt .hd b { color: #9A4705; font-weight: 600; }
+  .nt .t1 { font: 600 15px/20px var(--font); color: #111113; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .nt .t2 { font: var(--t-secondary); color: #3B3B40; white-space: nowrap; }
+
+  .done-ic { width: 72px; height: 72px; border-radius: 50%; background: var(--ok-soft); color: var(--ok); display: grid; place-items: center; margin: var(--s2) 0 var(--s4); }
+  .done-ic svg { width: 36px; height: 36px; stroke-width: 2.25; }
+</style>
+</head>
+<body>
+<main class="screen page" id="s">
+  <div class="appbar" data-s="location battery ios">
+    <button class="iconbtn" aria-label="Ետ"><i data-lucide="arrow-left"></i></button>
+  </div>
+
+  <!-- ── checklist ── -->
+  <div class="content" data-s="checklist" style="top:70px">
+    <div class="ptitle">Հեռախոսի ստուգում</div>
+    <div class="psub">Որ պատվերները չկորչեն</div>
+    <div class="prog"><span id="ring24"></span><div><div class="t1">Մնաց 2 քայլ</div><div class="t2">Android · Xiaomi</div></div></div>
+    <div class="group">
+      <div class="row"><span class="ic ok"><i data-lucide="bell-ring"></i></span><span class="txt"><span class="t1">Ծանուցումներ</span><span class="t2">Միացված է</span></span><span class="st ok"><i data-lucide="circle-check"></i></span></div>
+      <div class="row"><span class="ic ok"><i data-lucide="phone-incoming"></i></span><span class="txt"><span class="t1">Պատվերը՝ զանգի պես</span><span class="t2">Միացված է</span></span><span class="st ok"><i data-lucide="circle-check"></i></span></div>
+      <button class="row"><span class="ic warn"><i data-lucide="battery-warning"></i></span><span class="txt"><span class="t1">Մարտկոցի խնայողություն</span><span class="t2 warn">Սահմանափակում է</span></span><i class="chev" data-lucide="chevron-right"></i></button>
+      <button class="row"><span class="ic warn"><i data-lucide="map-pin"></i></span><span class="txt"><span class="t1">Դիրքը ֆոնում</span><span class="t2 warn">Միայն բացված ժամանակ</span></span><i class="chev" data-lucide="chevron-right"></i></button>
+    </div>
+    <div class="grow"></div>
+    <div class="foot"><button class="btn btn-brand">Ուղղել մարտկոցը</button></div>
+  </div>
+
+  <!-- ── location: prominent disclosure BEFORE the OS prompt (Google Play, §10.4) ── -->
+  <div class="content" data-s="location">
+    <div class="vis" aria-hidden="true"><span class="halo"></span><span class="halo h2"></span><span class="pinc"><i data-lucide="map-pin"></i></span><span class="lock"><i data-lucide="lock"></i></span></div>
+    <div class="dtitle">Էկրանը փակելիս պատվերները դադարում են</div>
+    <div class="dbody">Ավտոպարկին անհրաժեշտ է ձեր դիրքը մշտապես՝ ամենամոտ պատվերն ուղարկելու համար։ Ընտրե՛ք «Միշտ թույլատրել»։</div>
+    <div class="card osopts" aria-label="Ընտրե՛ք">
+      <div class="opt on"><span class="rd"></span>Միշտ թույլատրել<span class="tag">Ընտրե՛ք</span></div>
+      <div class="opt"><span class="rd"></span>Միայն օգտագործելիս</div>
+      <div class="opt"><span class="rd"></span>Չթույլատրել</div>
+    </div>
+    <div class="grow"></div>
+    <div class="foot"><button class="btn btn-brand">Բացել կարգավորումները</button><button class="btn-text">Ոչ հիմա</button></div>
+  </div>
+
+  <!-- ── battery: OEM whitelist ── -->
+  <div class="content" data-s="battery">
+    <div class="ptitle">Մարտկոց</div>
+    <div class="seg" role="group" aria-label="Հեռախոս" style="margin-top:var(--s4)"><button aria-pressed="true">Xiaomi</button><button aria-pressed="false">Samsung</button><button aria-pressed="false">Այլ</button></div>
+    <div class="card mock" aria-label="Կարգավորումների օրինակ">
+      <div class="app"><img src="assets/eco/mark.png" alt=""><div><div class="t1">Eco Taxi</div><div class="h" style="margin:0">Մարտկոցի խնայողություն</div></div></div>
+      <div class="opts">
+        <div class="opt on"><span class="rd"></span>Առանց սահմանափակման<i class="ck" data-lucide="check"></i></div>
+        <div class="opt"><span class="rd"></span>Խնայողական</div>
+        <div class="opt"><span class="rd"></span>Սահմանափակել ֆոնում</div>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step"><span class="n">1</span><span>Բացե՛ք <b>Կարգավորումներ</b></span></div>
+      <div class="step"><span class="n">2</span><span><b>Մարտկոց</b> → <b>Eco Taxi</b></span></div>
+      <div class="step"><span class="n">3</span><span>Ընտրե՛ք <b>Առանց սահմանափակման</b></span></div>
+    </div>
+    <div class="grow"></div>
+    <div class="foot"><button class="btn btn-brand">Բացել կարգավորումները</button></div>
+  </div>
+
+  <!-- ── iOS: Time-Sensitive alerts; honest about suspension (§10.4) ── -->
+  <div class="content" data-s="ios">
+    <div class="ptitle">iPhone</div>
+    <div class="psub">Պատվերը՝ ժամանակազգայուն ծանուցմամբ</div>
+    <div class="lockscr" aria-hidden="true">
+      <div class="clk" data-bg="#2F4A2A">9:41</div>
+      <div class="nt" data-bg="#F4F4F2"><img src="assets/eco/mark.png" alt=""><div><div class="hd">ECO TAXI · <b>Ժամանակազգայուն</b></div><div class="t1">Նոր պատվեր · 1 100 ֏</div><div class="t2">Մաշտոցի պող. 40 → Կոմիտաս</div></div></div>
+    </div>
+    <div class="notice plain" style="margin-top:var(--s4)"><i data-lucide="info"></i><div>Փակ հավելվածում պատվերը գալիս է ծանուցմամբ, ոչ թե զանգով</div></div>
+    <div class="group" style="margin-top:var(--s4)">
+      <div class="row"><span class="ic ok"><i data-lucide="bell-ring"></i></span><span class="txt"><span class="t1">Ծանուցումներ</span><span class="t2">Միացված է</span></span><span class="st ok"><i data-lucide="circle-check"></i></span></div>
+      <button class="row"><span class="ic warn"><i data-lucide="alarm-clock"></i></span><span class="txt"><span class="t1">Ժամանակազգայուն</span><span class="t2 warn">Անջատված է</span></span><i class="chev" data-lucide="chevron-right"></i></button>
+    </div>
+    <div class="grow"></div>
+    <div class="foot"><button class="btn btn-brand">Միացնել</button></div>
+  </div>
+
+  <!-- ── done ── -->
+  <div class="content" data-s="done" style="top:70px">
+    <div class="done-ic"><i data-lucide="check"></i></div>
+    <div class="ptitle">Պատրաստ է</div>
+    <div class="psub">Պատվերները կհասնեն նաև փակ էկրանին</div>
+    <div class="group" style="margin-top:var(--s5)">
+      <div class="row"><span class="ic ok"><i data-lucide="bell-ring"></i></span><span class="txt"><span class="t1">Ծանուցումներ</span></span><span class="st ok"><i data-lucide="circle-check"></i></span></div>
+      <div class="row"><span class="ic ok"><i data-lucide="phone-incoming"></i></span><span class="txt"><span class="t1">Պատվերը՝ զանգի պես</span></span><span class="st ok"><i data-lucide="circle-check"></i></span></div>
+      <div class="row"><span class="ic ok"><i data-lucide="battery-full"></i></span><span class="txt"><span class="t1">Մարտկոցի խնայողություն</span></span><span class="st ok"><i data-lucide="circle-check"></i></span></div>
+      <div class="row"><span class="ic ok"><i data-lucide="map-pin"></i></span><span class="txt"><span class="t1">Դիրքը ֆոնում</span></span><span class="st ok"><i data-lucide="circle-check"></i></span></div>
+    </div>
+    <div class="grow"></div>
+    <div class="foot"><button class="btn btn-brand">Սկսել հերթապահությունը<i data-lucide="arrow-right"></i></button></div>
+  </div>
+</main>
+<script src="audit.js"></script>
+<script>
+  statusBar(document.getElementById('s'))
+  D.init([
+    ['checklist', 'Checklist 2/4'], ['location', 'Background location disclosure'], ['battery', 'Battery whitelist (OEM)'],
+    ['ios', 'iOS: Time-Sensitive'], ['done', 'All ready'],
+  ])
+  document.getElementById('ring24').outerHTML = D.ring(64, 6, .5, '<span class="v">2/4</span>')
+  icons()
+  D.noMap()
+</script>
+</body>
+</html>

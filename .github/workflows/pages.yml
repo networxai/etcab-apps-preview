@@ -1,0 +1,31 @@
+name: pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      # The 2GIS browser key is not in git; it is written at deploy time from a repo secret.
+      - name: Map key
+        env:
+          MAPGL_KEY: ${{ secrets.MAPGL_KEY }}
+        run: printf 'window.MAPGL_KEY=%s;\n' "$(jq -Rn --arg k "$MAPGL_KEY" '$k')" > mapgl.local.js
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
