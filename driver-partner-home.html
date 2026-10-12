@@ -85,6 +85,22 @@
   .cbal { display: flex; align-items: center; justify-content: space-between; height: 48px; margin-top: var(--s2); }
   .cbal .v { font: var(--t-headline); color: var(--warn); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
+  /* P17: a partner ride just completed — the fleet done sheet, plus the fee taken from the wallet (Standard plan, Eco Comfort 15 %). */
+  .done-top { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: var(--s2); }
+  .done-top .ok { width: 48px; height: 48px; border-radius: 50%; background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); display: grid; place-items: center; }
+  .done-top .ok svg { width: 26px; height: 26px; stroke-width: 2.25; }
+  .done-top .l { font: var(--t-secondary); color: var(--ink-2); margin-top: var(--s3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .cash { display: flex; align-items: center; gap: var(--s3); margin: var(--s4) 0 var(--s2); padding: 14px var(--s4); border-radius: var(--r-card); background: var(--ok-soft); }
+  .cash svg { width: 24px; height: 24px; color: var(--ok); flex: none; }
+  .cash .t1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .cash .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .feeln { display: flex; align-items: center; gap: var(--s3); min-height: 56px; border-bottom: 1px solid var(--hairline); text-decoration: none; }
+  .feeln .ic { width: 40px; height: 40px; border-radius: 50%; background: var(--surface-2); color: var(--ink); display: grid; place-items: center; flex: none; }
+  .feeln .ic svg { width: 20px; height: 20px; }
+  .feeln .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .feeln .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .feeln .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .feeln .v { font: var(--t-headline); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .connlost { position: absolute; z-index: 25; top: 116px; left: 12px; right: 12px; height: 48px; border-radius: var(--r-card); background: var(--danger-soft);
     box-shadow: var(--e2); display: flex; align-items: center; gap: 10px; padding: 0 14px; font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; }
   .connlost svg { width: 18px; height: 18px; color: var(--danger); flex: none; }
@@ -112,11 +128,12 @@
       <div class="line" data-s="finish"><i data-lucide="navigation"></i>Ընթացիկ պատվեր</div>
       <div class="line warn" data-s="blocked"><i data-lucide="lock"></i>Նոր պատվերներ՝ ոչ</div>
       <div class="line" data-s="offline"><i data-lucide="history"></i>09:40-ի դրությամբ</div>
+      <div class="line" data-s="ridedone"><i data-lucide="flag"></i>Պատվերն ավարտված է</div>
       <span class="mycar" aria-label="Tesla Model 3, 44 KM 771, ձեր մեքենան"><img class="carimg" src="assets/eco/cars/partner.webp" alt=""><span class="plate">44 KM 771</span></span>
     </div>
 
     <!-- Wallet leads: balance hero + today's fees. Tapping it opens the wallet. -->
-    <a class="wal" href="driver-partner-wallet.html" data-not="finish" aria-label="Դրամապանակ">
+    <a class="wal" href="driver-partner-wallet.html" data-not="finish ridedone" aria-label="Դրամապանակ">
       <div>
         <div class="p-lbl lbl"><i data-lucide="wallet"></i>Դրամապանակ</div>
         <div class="p-hero" data-s="normal online offline">18 450<small>֏</small></div>
@@ -151,6 +168,17 @@
     <div class="cbal" data-s="finish"><span class="p-lbl">Դրամապանակ</span><span class="v">−45 ֏</span></div>
     <div class="notice" data-s="finish" style="margin-top:0"><i data-lucide="flag"></i><div class="tx"><b>Պատվերը կավարտեք</b><span>Հաջորդը՝ լիցքավորումից հետո</span></div></div>
 
+    <!-- ridedone (P17) -->
+    <div class="done-top" data-s="ridedone">
+      <span class="ok"><i data-lucide="check"></i></span>
+      <div class="l">Հանրապետության հր. · 14:52</div>
+      <div class="p-hero" style="margin-top:2px">1 300<small>֏</small></div>
+    </div>
+    <div class="cash" data-s="ridedone"><i data-lucide="banknote"></i><div><div class="t1">Վերցրե՛ք կանխիկ</div><div class="t2">Eco Comfort · 1 300 ֏ · ձերն է</div></div></div>
+    <a class="feeln" href="driver-partner-wallet.html?state=breakdown" data-s="ridedone" aria-label="Վճար 15 տոկոս, 195 դրամ դրամապանակից">
+      <span class="ic"><i data-lucide="percent"></i></span><span class="tx"><span class="t1">Վճար 15% · դրամապանակից</span><span class="t2">Մնացորդ՝ 18 645 → 18 450 ֏</span></span><span class="v">−195 ֏</span></a>
+    <button class="go" data-s="ridedone">Պատրաստ եմ</button>
+
     <a class="pre" href="driver-preorders.html" data-s="normal online offline" aria-label="Նախապես ամրագրված, 1">
       <span class="ic"><i data-lucide="calendar-clock"></i></span>
       <span class="txt"><span class="t1">Նախապես ամրագրված</span><span class="t2">Վաղը, 07:40 · Զվարթնոց</span></span>
@@ -166,10 +194,11 @@
 </main>
 <script src="audit.js"></script>
 <script>
-  statusBar(document.getElementById('s'))
+  statusBar(document.getElementById('s'), new URLSearchParams(location.search).get('state') === 'ridedone' ? '14:52' : undefined)
   const st = D.init([
     ['normal', 'Off the line · one tap on'], ['online', 'Online · waiting'], ['low', 'Low balance (warning)'],
     ['blocked', 'Blocked below 0 · top up'], ['finish', 'Below 0 mid-ride · finishes'], ['offline', 'No connection (cached)'],
+    ['ridedone', 'Ride complete · fee from the wallet'],
   ])
   D.partnerNav()
   icons()

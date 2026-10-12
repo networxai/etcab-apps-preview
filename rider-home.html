@@ -64,6 +64,35 @@
   .plate .no { padding: 0 8px 0 6px; font: 600 15px/26px var(--font); color: #111113; letter-spacing: .5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .livecard > svg { width: 20px; height: 20px; flex: none; }
   .logo { position: absolute; z-index: 20; top: 74px; left: 50%; transform: translateX(-50%); width: 112px; height: 20px; filter: drop-shadow(0 1px 1px rgb(0 0 0 / .08)); }
+  /* p1p2 R13: no live promotions → the house card (PartnerCarousel: the fleet's name on its brand tint), so the row is a guarantee.
+     The real card carries the «Գործընկեր» tag; drawn without it, because the card is the fleet's own (notes). */
+  .house { position: relative; width: 358px; height: 156px; border-radius: var(--r-card); background: var(--brand-soft); padding: var(--s4); display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; overflow: hidden; }
+  .house img { position: absolute; top: var(--s4); left: var(--s4); width: 40px; height: 40px; }
+  .house .hn { font: var(--t-headline); color: var(--brand-ink); }
+  .house .ht { font: var(--t-title); color: var(--ink); }
+  /* R13: a rider's first day: one quiet row (Shortcuts.tsx shortcuts-empty, hub.noRecent) instead of an absent section. */
+  .row.first .ic { background: var(--surface-2); color: var(--ink-2); }
+  .row.first .t2 { white-space: normal; }
+  /* R12: PartnerSheet.tsx as a modal sheet over home (page-local: home does not load rider.css). */
+  .pscrim { position: absolute; inset: 0; z-index: 30; background: rgb(0 0 0 / .48); } /* = rider.css --scrim-modal */
+  :root[data-theme="dark"] .pscrim { background: rgb(0 0 0 / .62); }
+  .psheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 31; background: var(--surface); border-radius: var(--r-sheet) var(--r-sheet) 0 0; padding: 8px var(--margin) 34px; box-shadow: var(--e3, 0 -8px 24px rgb(0 0 0 / .12)); }
+  .psheet .mh { display: flex; align-items: center; gap: var(--s3); margin: var(--s2) 0 var(--s3); }
+  .psheet .mh h2 { flex: 1; font: var(--t-title); color: var(--ink); }
+  .psheet .x { width: 44px; height: 44px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; color: var(--ink); flex: none; }
+  .psheet .x svg { width: 18px; height: 18px; }
+  .psheet .ph { position: relative; height: 180px; border-radius: var(--r-card); overflow: hidden; background: var(--brand-soft); }
+  .psheet .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .psheet .ph .tag { position: absolute; top: 10px; left: 10px; height: 22px; padding: 0 8px; border-radius: var(--r-pill); background: rgb(0 0 0 / .62); color: #fff; font: var(--t-caption); line-height: 22px; }
+  .psheet .sub { font: var(--t-headline); color: var(--ink); margin-top: var(--s3); }
+  .psheet .body { font: var(--t-body); color: var(--ink-2); margin-top: var(--s1); }
+  .psheet .dest { display: flex; align-items: center; gap: var(--s2); font: var(--t-secondary); color: var(--ink-2); margin-top: var(--s2); }
+  .psheet .dest svg { width: 16px; height: 16px; flex: none; }
+  .psheet .pb { display: flex; flex-direction: column; gap: var(--s2); margin-top: var(--s4); }
+  .psheet .pb button { height: var(--h-button); border-radius: var(--r-control); display: flex; align-items: center; justify-content: center; gap: var(--s2); font: var(--t-headline); }
+  .psheet .pb svg { width: 20px; height: 20px; }
+  .psheet .pb .go { background: var(--brand); color: var(--on-brand); font-variant-numeric: tabular-nums; }
+  .psheet .pb .q { background: var(--surface-2); color: var(--ink); }
   .puck { width: 22px; height: 22px; border-radius: 50%; background: var(--brand); border: 3.5px solid #fff; box-shadow: 0 0 0 10px var(--brand-soft), 0 2px 6px rgb(0 0 0 / .3); }
 </style>
 </head>
@@ -114,20 +143,37 @@
   /* ?active=1: the walkthrough ride (ECO.RIDE) is on its way; ?active=preorder: tomorrow's booking (ECO.BOOKINGS.air) has just
      been activated by the sweep and assigned to Սուրեն. Plate = the identity, as on the ride screen. */
   const active = qs.get('active')
+  /* p1p2 flags: ?ads=0 no live promotions (house card, R13); ?new=1 a rider's first day, no places (R13);
+     ?partner=<ECO.PROMOS id> an ad tapped, its sheet open (R12). */
+  const noAds = qs.get('ads') === '0', fresh = qs.get('new') === '1', promo = ECO.PROMOS.find((p) => p.id === qs.get('partner'))
+  if (noAds) {
+    document.querySelector('.partners').innerHTML = `<div class="track"><div class="house" role="img" aria-label="Eco Taxi · Ուղևորվեք մեզ հետ"><img src="assets/eco/mark.png" alt=""><span class="hn">Eco Taxi</span><span class="ht">Ուղևորվեք մեզ հետ</span></div></div>`
+  }
+  if (promo) {
+    document.getElementById('s').insertAdjacentHTML('beforeend', `<div class="pscrim" aria-hidden="true"></div>
+      <section class="psheet" role="dialog" aria-label="${promo.who}"><div class="grabber"></div>
+      <div class="mh"><h2>${promo.who}</h2><button class="x" aria-label="Փակել"><i data-lucide="x"></i></button></div>
+      <div class="ph"><img src="${promo.img}" alt=""><span class="tag">Գովազդ</span></div>
+      <div class="sub">${promo.offer}</div><div class="body">Ցույց տվեք այս էջը վճարելիս · մինչև ${promo.until}</div>
+      <div class="dest"><i data-lucide="map-pin"></i>${promo.addr}, Երևան</div>
+      <div class="pb"><button class="go"><i data-lucide="car"></i>Պատվիրել մեքենա · ≈ 7 րոպե</button><button class="q">Բացել էջը</button></div></section>`)
+    /* A modal sheet: home behind it is out of reach for touch and VoiceOver/TalkBack until the sheet closes. */
+    ;[...document.getElementById('s').children].forEach((c) => { if (!c.matches('.pscrim, .psheet, .statusbar, .homebar')) c.inert = true })
+  }
   const plate = (no) => `<span class="plate" role="img" aria-label="Համարանիշ ${no}"><span class="eu" aria-hidden="true"><i></i><b>AM</b></span><span class="no">${no}</span></span>`
   const live = active === 'preorder'
     ? { t1: 'Վարորդը նշանակված է', t2: ECO.BOOKINGS.air.driver.short + ' · նստել ' + ECO.BOOKINGS.air.time, plate: ECO.BOOKINGS.air.driver.plate, time: ECO.BOOKINGS.air.assignedAt }
     : active ? { t1: 'Մեքենան ճանապարհին է', t2: ECO.RIDE.driver.short + ' · ' + ECO.RIDE.approachMin + ' րոպե', plate: ECO.RIDE.driver.plate, time: '9:42' } : null
   if (live) document.getElementById('live').innerHTML = `<button class="livecard" aria-label="Ընթացիկ ուղևորություն՝ ${live.t1}, ${live.t2}, ${live.plate}"><span class="lv" aria-hidden="true"></span>
       <span class="txt"><span class="t1">${live.t1}</span><span class="t3">${plate(live.plate)}<span class="t2">${live.t2}</span></span></span><i data-lucide="chevron-right"></i></button>`
-  const rows = live ? [['house', 'Տուն', 'Կոմիտասի պող. 22', '', '≈ 9 րոպե']] : pre
+  const rows = fresh ? [['history', '', 'Ձեր վերջին ուղևորությունները կերևան այստեղ', 'first', '']] : live ? [['house', 'Տուն', 'Կոմիտասի պող. 22', '', '≈ 9 րոպե']] : pre
     ? [['calendar-clock', 'Վաղը, 08:30', 'Զվարթնոց օդանավակայան', 'soon', '<i data-lucide="chevron-right" style="width:20px;height:20px;color:var(--ink-3)"></i>'],
        ['house', 'Տուն', 'Կոմիտասի պող. 22', '', '≈ 9 րոպե']]
     : [['house', 'Տուն', 'Կոմիտասի պող. 22', '', '≈ 9 րոպե'],
        ['history', 'Կասկադ', 'Թամանյան փողոց', '', '≈ 6 րոպե']]
   document.getElementById('places').innerHTML = rows.map((r, i) =>
-    `${i ? '<div class="divider"></div>' : ''}<div class="row ${r[3]}" role="button" tabindex="0"><span class="ic"><i data-lucide="${r[0]}"></i></span>
-      <span class="txt"><span class="t1">${r[1]}</span><span class="t2">${r[2]}</span></span><span class="end">${r[4]}</span></div>`).join('')
+    `${i ? '<div class="divider"></div>' : ''}<div class="row ${r[3]}"${r[3] === 'first' ? '' : ' role="button" tabindex="0"'}><span class="ic"><i data-lucide="${r[0]}"></i></span>
+      <span class="txt">${r[1] ? `<span class="t1">${r[1]}</span>` : ''}<span class="t2">${r[2]}</span></span>${r[4] ? `<span class="end">${r[4]}</span>` : ''}</div>`).join('')
 
   statusBar(document.getElementById('s'), live ? live.time : undefined)
   icons()

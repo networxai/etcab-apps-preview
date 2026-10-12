@@ -179,7 +179,7 @@
      console has only the lane's cancel). The list filtered to «Պլանավորված»; the panel edits one booking in place —
      time (the same typed DateTimePicker as the lane), addresses, agreed price — pre-assigns or releases the driver,
      and cancels with the two-press ArmButton. Docked, never a modal (§9.8). ── */
-  const BOOK = new URLSearchParams(location.search).get('ride') === 'booking'
+  const BOOK = ['booking', 'booking-now'].includes(new URLSearchParams(location.search).get('ride')) /* booking-now: rides-panels.js, owner ruling (a) */
   if (BOOK) {
     const B = ECO.BOOKINGS, A = B.air
     document.getElementById('chip-all').classList.remove('on')
@@ -265,5 +265,6 @@
   htmlMarker(map, P[48], carTop(40, 'var(--brand)'), [18, 34])
   }
 </script>
+<script src="rides-panels.js"></script>
 </body>
 </html>

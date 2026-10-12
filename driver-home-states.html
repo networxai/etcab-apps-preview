@@ -19,7 +19,7 @@
   .fab.lg { width: 48px; height: 48px; }
   .logo { position: absolute; z-index: 20; top: 75px; left: 50%; transform: translateX(-50%); width: 100px; height: 18px; }
   /* Off the line: the map steps back, so nobody reads it as "working". */
-  :root[data-state="offline"] #map > div, :root[data-state="blocked"] #map > div { filter: grayscale(1) opacity(.7); }
+  :root[data-state="offline"] #map > div, :root[data-state="blocked"] #map > div, :root[data-state="noshift"] #map > div { filter: grayscale(1) opacity(.7); }
 
   .top { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
   .line { display: flex; align-items: center; gap: var(--s2); font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; }
@@ -96,6 +96,36 @@
   .meter i { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; border-radius: 3px; background: var(--warn); }
   .meter b { position: absolute; top: -4px; bottom: -4px; width: 2px; left: 96%; background: var(--ink); border-radius: 1px; }
   .notice { margin-top: var(--s4); }
+  /* ── p1p2 pass: online variants and edge states (D05, D09–D13, D42) ── */
+  .wait { display: flex; align-items: center; gap: var(--s2); font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; }
+  .wait .bars { display: inline-flex; gap: 3px; }
+  .wait .bars i { width: 4px; height: 4px; border-radius: 2px; background: var(--ok-dot); }
+  .wait .bars i:nth-child(2) { opacity: .6; } .wait .bars i:nth-child(3) { opacity: .3; }
+  .carpick { display: inline-flex; align-items: center; gap: 6px; height: 48px; padding: 0 12px; border-radius: 12px; background: var(--surface);
+    box-shadow: inset 0 0 0 1.5px var(--hairline); border: 1.5px dashed var(--ink-3); font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; flex: none; text-decoration: none; }
+  .carpick svg { width: 18px; height: 18px; }
+  /* Location «While using» warning: amber banner over the map with the one fix (location-warning.tsx, Banner tone warn). */
+  .locwarn { position: absolute; z-index: 25; top: 116px; left: 12px; right: 12px; border-radius: var(--r-card); background: var(--warn-soft);
+    box-shadow: var(--e2); padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+  .locwarn .h { display: flex; gap: 10px; align-items: flex-start; font: var(--t-body-strong); color: var(--ink); }
+  .locwarn .h svg { width: 20px; height: 20px; color: var(--warn); flex: none; margin-top: 1px; }
+  .locwarn .btn { height: 48px; background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--hairline); }
+  /* Map unavailable: a quiet ground and one line, the sheet keeps working (map.unavailable). */
+  .nomap { position: absolute; inset: 0; z-index: 1; background: var(--surface-2); display: flex; align-items: flex-start; justify-content: center; padding-top: 200px; }
+  .nomap .c { display: flex; flex-direction: column; align-items: center; gap: var(--s3); text-align: center; max-width: 260px; }
+  .nomap .ic { width: 56px; height: 56px; border-radius: 50%; background: var(--surface); box-shadow: var(--e1); display: grid; place-items: center; color: var(--ink-2); }
+  .nomap .ic svg { width: 26px; height: 26px; }
+  .nomap .t { font: var(--t-body-strong); color: var(--ink); }
+  /* Pending offer after the offer screen was left (HomeSheet: urgent card, ring-coloured edge). */
+  .pend { display: flex; flex-direction: column; gap: 6px; padding: var(--s4); border-radius: var(--r-card); margin-top: var(--s3); text-decoration: none;
+    background: var(--surface); box-shadow: inset 0 0 0 2px var(--ring), var(--e1); }
+  .pend .r { display: flex; align-items: center; justify-content: space-between; }
+  .pend .tg { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: var(--r-pill); background: var(--brand); color: var(--on-brand); font: var(--t-secondary-strong); white-space: nowrap; }
+  .pend .tg svg { width: 16px; height: 16px; }
+  .pend .km { font: var(--t-secondary-strong); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pend .t1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .notice.doc { text-decoration: none; color: var(--ink); }
+  .notice.doc .chev { margin-left: auto; color: var(--ink-3); align-self: center; }
   .notice .s { white-space: nowrap; font-variant-numeric: tabular-nums; }
 </style>
 </head>
@@ -104,16 +134,19 @@
   <div class="map" id="map" aria-label="Քարտեզ"></div>
 
   <div class="spill away" role="status" data-s="away"><span class="dot"></span>Բացակա</div>
-  <div class="spill off" role="status" data-s="offline blocked"><span class="dot"></span>Գծից դուրս</div>
+  <div class="spill" role="status" data-s="location lowfleet nomap newoffer docexpiry held"><span class="dot"></span>Գծում</div>
+  <div class="spill off" role="status" data-s="offline blocked noshift"><span class="dot"></span>Գծից դուրս</div>
   <div class="spill lost" role="status" data-s="lost"><span class="dot"></span>Կապ չկա</div><!-- design-head: the pill never says Գծում while the link is down (§10.2, research move 6) -->
   <div class="spill" role="status" data-s="active"><span class="dot"></span>Պատվերով</div>
   <div class="spill demo" role="status" data-s="demo"><span class="dot"></span>Փորձնական</div>
   <button class="fab lg" style="top:60px;right:16px" aria-label="Հաշիվ"><i data-lucide="user-round"></i></button>
   <img class="logo" id="logo" src="assets/eco/logo-wide.png" alt="Eco Taxi" width="100" height="18"><!-- hidden by script when the status pill grows into it («Կապ չկա»): two shapes, never one string -->
 
+  <div class="nomap" data-s="nomap" role="status"><div class="c"><span class="ic"><i data-lucide="map-pin-off"></i></span><span class="t">Քարտեզն անհասանելի է — հասցեները գործում են</span></div></div>
+  <div class="locwarn" role="alert" data-s="location"><div class="h"><i data-lucide="map-pin"></i>Էկրանը փակելիս պատվերները դադարում են</div><button class="btn"><i data-lucide="settings"></i>Բացել կարգավորումները</button></div>
   <div class="connlost" role="alert" data-s="lost"><i data-lucide="wifi-off"></i>Վերականգնվում է<span class="tm">0:48</span></div>
 
-  <button class="fab lg" id="recentre" style="right:16px" aria-label="Կենտրոնացնել ինձ վրա"><i data-lucide="locate-fixed"></i></button>
+  <button class="fab lg" id="recentre" data-not="nomap" style="right:16px" aria-label="Կենտրոնացնել ինձ վրա"><i data-lucide="locate-fixed"></i></button>
 
   <section class="sheet" id="sheet">
     <div class="grabber"></div>
@@ -124,17 +157,28 @@
       <div class="line" data-s="active"><i data-lucide="navigation"></i>Ընթացիկ պատվեր</div>
       <div class="line" data-s="demo"><i data-lucide="graduation-cap"></i>Ուսուցում</div>
       <div class="line warn" data-s="blocked"><i data-lucide="lock"></i>Արգելափակված է</div>
-      <span class="mycar" aria-label="Volkswagen ID.3, 01 ET 001"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="plate">01 ET 001</span></span>
+      <div class="wait" data-s="location lowfleet nomap newoffer docexpiry"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>Սպասում ենք պատվերի</div>
+      <div class="line" data-s="noshift"><i data-lucide="car-front"></i>Հերթապահություն չկա</div>
+      <div class="line warn" data-s="held"><i data-lucide="pause"></i><span class="mono-t">10:05-ից</span> պատվերներ չեն լինի</div>
+      <a class="carpick" data-s="noshift" href="driver-shift.html?state=choose"><i data-lucide="plus"></i>Ընտրե՛ք մեքենան</a>
+      <span class="mycar" data-not="noshift" aria-label="Volkswagen ID.3, 01 ET 001"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="plate">01 ET 001</span></span>
     </div>
 
     <!-- earnings hero: away, offline, lost -->
-    <div class="earn" data-s="away lost">
+    <div class="earn" data-s="away lost location lowfleet nomap docexpiry">
       <div><div class="lbl">Այսօր</div><div class="hero">1 200<small>֏</small></div></div>
       <div class="side"><span class="count">1 պատվեր</span><button class="eye" aria-label="Թաքցնել գումարը"><i data-lucide="eye"></i></button></div>
     </div>
 
     <!-- away: why, in one line -->
     <div class="notice warn" data-s="away" style="margin:0 0 var(--s4)"><i data-lucide="phone-missed"></i><div><b>Բաց եք թողել 2 պատվեր</b>Սեղմե՛ք՝ վերադառնալու համար</div></div>
+
+    <!-- lowfleet: cash in hand nearing the fleet limit (wallet.lowFleet; amber, a reminder not a block) -->
+    <div class="notice warn" data-s="lowfleet" style="margin:0 0 var(--s4)"><i data-lucide="banknote"></i><div><b>Շուտով հանձնե՛ք կանխիկը գրասենյակում</b><span class="s">Կանխիկ՝ 4 300 ֏ · սահմանը՝ 5 000 ֏</span></div></div>
+    <!-- docexpiry: one document inside its 14-day window (drawn ahead: docs live at the office, D42) -->
+    <a class="notice warn doc" data-s="docexpiry" href="driver-account.html?state=docs" style="margin:0 0 var(--s4)"><i data-lucide="file-clock"></i><div><b>Տաքսու թույլտվությունը՝ 12 օրից</b><span class="s">մինչև 21.10.2026 · Գրասենյակում</span></div><i class="chev" data-lucide="chevron-right"></i></a>
+    <!-- newoffer: the offer screen was left while the offer still runs; the card is the way back (HomeSheet onOpenOffer) -->
+    <a class="pend" data-s="newoffer" href="driver-offer.html" aria-label="Նոր պատվեր, Մաշտոցի պող. 37"><span class="r"><span class="tg"><i data-lucide="bell-ring"></i>Նոր պատվեր</span><span class="km">1,4 կմ</span></span><span class="t1" data-eco="RIDE.pickup">Մաշտոցի պող. 37</span></a>
 
     <!-- active ride -->
     <a class="ride" href="driver-ride.html?state=enroute" data-s="active" aria-label="Վերադառնալ պատվերին, Մաշտոցի պող. 37">
@@ -154,16 +198,19 @@
       <div class="notice warn"><i data-lucide="banknote"></i><div><b>Կանխիկ պատվերները դադարեցվել են</b><span class="s">Մարե՛ք 200 ֏՝ գիծ վերադառնալու համար</span></div></div>
     </div>
 
-    <div class="today" data-s="offline active demo">
+    <div class="today" data-s="offline active demo noshift newoffer held">
       <span class="l">Այսօր · 1 պատվեր</span><span class="v">1 200 ֏</span>
     </div>
 
     <a class="pre" href="driver-preorders.html" data-not="demo blocked" aria-label="Նախապես ամրագրված, 2">
       <span class="ic"><i data-lucide="calendar-clock"></i></span>
-      <span class="txt"><span class="t1">Նախապես ամրագրված</span><span class="t2">Այսօր, 10:05 · Կոմիտասի պող. 49</span></span>
+      <span class="txt"><span class="t1">Նախապես ամրագրված</span><span class="t2">Այսօր, 10:35 · Կոմիտասի պող. 49</span></span>
       <span class="n">3</span><i class="chev" data-lucide="chevron-right"></i>
     </a>
 
+    <a class="go" href="driver-shift.html?state=choose" data-s="noshift"><i data-lucide="key-round"></i>Սկսել հերթապահությունը</a>
+    <a class="go" href="driver-preorders.html?state=started" data-s="held"><i data-lucide="navigation"></i>Ճանապարհին եմ</a>
+    <button class="drive" data-s="location lowfleet nomap newoffer docexpiry"><i data-lucide="power"></i>Դուրս գալ գծից</button>
     <button class="go" data-s="away"><i data-lucide="power"></i>Վերադառնալ գիծ</button>
     <button class="go" data-s="offline"><i data-lucide="power"></i>Անցնել գիծ</button>
     <button class="drive" data-s="lost"><i data-lucide="power"></i>Դուրս գալ գծից</button>
@@ -174,11 +221,13 @@
 </main>
 <script src="audit.js"></script>
 <script>
-  statusBar(document.getElementById('s'))
   const st = D.init([
     ['away', 'Away (auto, missed offers)'], ['offline', 'Offline (off the line)'], ['lost', 'Connection lost'],
     ['active', 'Active ride card'], ['demo', 'Practice ride running'], ['blocked', 'Blocked (debt over limit)'],
+    ['noshift', 'No open shift'], ['location', 'Location «while using» warning'], ['held', 'Held for a pre-order (T−30)'],
+    ['lowfleet', 'Fleet cash near limit'], ['nomap', 'Map unavailable'], ['newoffer', 'Pending offer card (left the offer)'], ['docexpiry', 'Document expiring (banner)'],
   ])
+  statusBar(document.getElementById('s'), { held: '10:06', noshift: '7:58' }[st])
   icons()
   /* The logo stays only while the status pill keeps clear of it (12px). */
   const pill = [...document.querySelectorAll('.spill')].find((e) => !e.hidden), logo = document.getElementById('logo')
@@ -188,16 +237,18 @@
   const me = [40.1823, 44.5072]
   const A = ROUTES.driverToPickup.pts
   const box = (p, d) => [[p[0] - d, p[1] - d * 1.35], [p[0] + d, p[1] + d * 1.35]]
+  if (st === 'nomap') { D.noMap() } else {
   const fit = st === 'active' ? A : st === 'demo' ? A : box(me, .0034)
   const map = makeMap(document.getElementById('map'), { sheetH, badge: { bottom: (sheetH + 22) + 'px', left: '16px' }, fit,
-    padTL: [40, st === 'lost' ? 180 : 120], padBR: [40, sheetH + 20] })
+    padTL: [40, st === 'lost' ? 180 : st === 'location' ? 240 : 120], padBR: [40, sheetH + 20] })
   const meCar = (deg) => `<div class="me">${carTop(deg, 'var(--brand)', 'rgb(255 255 255 / .75)')}</div>`
   if (st === 'active' || st === 'demo') {
     drawRoute(map, A.slice(12), { weight: 5, color: st === 'demo' ? cssVar('--ink-2') : undefined })
     htmlMarker(map, A[A.length - 1], '<div class="pin a"></div>', [18, 18])
     htmlMarker(map, A[12], meCar(40), [64, 64])
   } else {
-    htmlMarker(map, me, st === 'offline' || st === 'blocked' ? `<div class="me">${carTop(-38, 'var(--ink-3)', 'rgb(255 255 255 / .75)')}</div>` : meCar(-38), [64, 64])
+    htmlMarker(map, me, st === 'offline' || st === 'blocked' || st === 'noshift' ? `<div class="me">${carTop(-38, 'var(--ink-3)', 'rgb(255 255 255 / .75)')}</div>` : meCar(-38), [64, 64])
+  }
   }
 </script>
 </body>

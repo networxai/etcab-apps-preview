@@ -57,6 +57,19 @@
   .busyline .spin { width: 16px; height: 16px; border-width: 2px; }
   .btn .spin { width: 18px; height: 18px; }
   .page .toast { top: 110px; }
+  /* p1p2: session ended (R07), lock-out (R08), first-sign-in consent (R06). A notice is a card on the page, never a modal. */
+  .notice { display: grid; grid-template-columns: 24px 1fr; gap: var(--s3); align-items: start; margin-top: var(--s4); padding: var(--s3) var(--s4);
+    border-radius: var(--r-card); background: var(--surface-2); }
+  .notice > svg { width: 22px; height: 22px; color: var(--ink); margin-top: 1px; }
+  .notice.amber > svg { color: var(--warn); }
+  .notice b { display: block; font: var(--t-body-strong); color: var(--ink); }
+  .notice span { display: block; font: var(--t-secondary); color: var(--ink-2); margin-top: 2px; }
+  .notice .mono { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; }
+  .otp.off .d { color: var(--ink-3); background: var(--surface-2); opacity: .7; }
+  .consent { margin-top: var(--s4); font: var(--t-secondary); color: var(--ink-2); }
+  .consent .lk { display: flex; gap: var(--s2); margin-top: var(--s1); }
+  .consent .lk button { height: 44px; padding: 0 var(--s3); border-radius: var(--r-pill); background: var(--surface-2); font: var(--t-secondary-strong); color: var(--ink); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .consent .lk svg { width: 16px; height: 16px; color: var(--ink-2); }
 </style>
 </head>
 <body>
@@ -107,12 +120,25 @@
         html: () => codePage(`${boxes('', '', 0)}<div class="resend"><button class="link">Կրկին ուղարկել</button><button class="link" style="color:var(--ink)">${''}Ստանալ զանգով</button></div>`,
           '<div class="toast" role="status" style="top:62px">' + R.i('check') + 'Կոդն ուղարկվեց</div>') },
 
+      { id: 'locked', group: 'Code', label: 'Locked out', note: 'R08 (drawn ahead: the API answers 429 and the app shows only «Կոդը սխալ է»). After the last wrong attempt the boxes go quiet, the wait is a number, and the ways out are a new number or a person. Amber icon: a rule, not a failure',
+        html: () => codePage(`${boxes('482971', 'off')}<div class="notice amber" role="status">${R.i('lock')}<div><b>Փորձերը սպառվեցին</b><span>Նոր կոդ կարող եք խնդրել <span class="mono">4:59</span> հետո</span></div></div>
+          <div class="resend"><button class="link">Փոխել համարը</button><button class="link" style="color:var(--ink)">${R.i('phone', 'style="width:18px;height:18px;margin-right:6px"')}Զանգել դիսպետչերին</button></div>`) },
+      { id: 'expired', group: 'Phone', label: 'Session ended', note: 'R07 (drawn ahead: _layout.tsx replaces to /login silently). Said once, in place, with the number kept: nothing the rider saved is lost, so the line says so',
+        html: () => phonePage({ fcls: '', clear: false, note: `<div class="notice" role="status">${R.i('log-out')}<div><b>Մուտքի ժամկետն ավարտվել է</b><span>Մուտք գործեք նույն համարով․ ուղևորություններն ու հասցեները պահված են</span></div></div>` }) },
       { id: 'name', group: 'First sign-in', label: 'Name', note: 'Only on the first sign-in; the driver greets the rider by it',
         html: () => `<div class="page on-surface">
           <nav class="nav"><span class="navend"></span><span class="navttl"></span><button class="navbtn" aria-label="Բաց թողնել" style="width:auto;padding:0 8px;font:var(--t-body-strong);color:var(--ink-2)">Հետո</button></nav>
           <div class="form" style="margin-top:var(--s2);margin-bottom:0"><h1 class="large">Ինչպե՞ս դիմենք ձեզ</h1>
-          <div class="field focus" style="padding-left:var(--s4)"><span class="num"><span class="lbl">Անուն</span><span class="v">Անի<span class="caret"></span></span></span></div>
+          <div class="field focus" style="padding-left:var(--s4)"><span class="num"><span class="lbl">Անուն</span><span class="v">Աննա<span class="caret"></span></span></span></div>
           <button class="btn btn-brand">Շարունակել</button></div>${R.keyboard()}</div>` },
+      { id: 'terms', group: 'First sign-in', label: 'Terms and privacy', note: 'R06 (store requirement; drawn ahead: no consent step today). On the first sign-in only, under the one primary: continuing is accepting, and both documents are a 44pt tap away. Accepted version is stored with the customer',
+        html: () => `<div class="page on-surface">
+          <nav class="nav"><span class="navend"></span><span class="navttl"></span><button class="navbtn" aria-label="Բաց թողնել" style="width:auto;padding:0 8px;font:var(--t-body-strong);color:var(--ink-2)">Հետո</button></nav>
+          <div class="form" style="margin-top:var(--s2);margin-bottom:0"><h1 class="large">Ինչպե՞ս դիմենք ձեզ</h1>
+          <div class="field focus" style="padding-left:var(--s4)"><span class="num"><span class="lbl">Անուն</span><span class="v">Աննա<span class="caret"></span></span></span></div>
+          <button class="btn btn-brand">Շարունակել</button>
+          <div class="consent">Շարունակելով՝ ընդունում եք Eco Taxi-ի պայմաններն ու գաղտնիության քաղաքականությունը
+            <div class="lk"><button>${R.i('file-text')}Պայմաններ</button><button>${R.i('shield')}Գաղտնիություն</button></div></div></div>${R.keyboard()}</div>` },
     ],
   })
 </script>

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Billing plans</title>
+<link rel="stylesheet" href="console.css">
+<link rel="stylesheet" href="corporate.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+<style>
+  /* Mirrors apps/operator components/admin/billing-plans.tsx + billing-assign.tsx + billing-new-plan.tsx +
+     billing-tier-overrides.tsx + billing-format.ts (money spec): what the fleet keeps from each FLEET driver and from when.
+     Assign card on top (driver, plan, «Նշանակել»; assigning starts a new period, the old plan stays and explains deductions
+     already made), then the plans list — name, «Ինչ է պահվում» in words (describePlan: «20%», «18% · Eco Business»,
+     «6 000 ֏ օրական»), drivers on it — with the new-plan row inside the list (commission % plus per-tier rates). Admin only;
+     a dispatcher is redirected. Partner fee plans (prepaid wallet) are their own page (feeplans.html). */
+  .bp { display: flex; flex-direction: column; gap: 12px; padding: 12px var(--inset) var(--inset); max-width: 1120px; }
+  .sec.open { overflow: visible; }
+  .lead2 { font: var(--c-body); color: var(--ink-muted); }
+  .lead2 a { color: var(--brand-text); }
+  .asg { display: grid; grid-template-columns: 300px 300px auto minmax(0, 1fr); gap: 12px; align-items: end; }
+  .combo { display: flex; align-items: center; gap: 8px; height: var(--h-m); padding: 0 10px; border-radius: var(--r-ctl); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-control); }
+  .combo.focus { box-shadow: inset 0 0 0 1px var(--focus-ring), 0 0 0 3px var(--brand-soft); }
+  .combo .val { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .combo .ph { color: var(--ink-faint); }
+  .note2 { font: var(--c-small); color: var(--ink-faint); padding: 0 var(--inset) 12px; }
+  .tbl.pl td { height: 44px; }
+  .tbl.pl td.what { white-space: normal; }
+  .tbl.pl .nm2 { display: flex; align-items: center; gap: 8px; font: var(--c-strong); }
+  .tbl.pl tr.off td { color: var(--ink-faint); }
+  .np td { background: var(--surface-alt); height: auto !important; padding-top: 10px; padding-bottom: 10px; white-space: normal; vertical-align: top; }
+  .npg { display: grid; grid-template-columns: 260px 140px minmax(0, 1fr); gap: 12px; align-items: start; }
+  .ovr { display: flex; flex-direction: column; gap: 6px; }
+  .ovr .r { display: flex; gap: 6px; align-items: center; }
+  .np .foot2 { display: flex; gap: 6px; justify-content: flex-end; margin-top: 10px; }
+  .err2 { font: var(--c-small); color: var(--danger-c); margin-top: 4px; }
+  .pct { display: flex; align-items: center; gap: 6px; }
+  .pct .u { font: var(--c-small); color: var(--ink-muted); }
+  .menu { position: absolute; z-index: 10; top: calc(100% + 4px); left: 0; right: 0; background: var(--surface); border-radius: var(--r-ctl); box-shadow: var(--e2); padding: 4px; }
+  .menu div { height: 32px; display: flex; align-items: center; gap: 8px; padding: 0 8px; border-radius: 6px; font: var(--c-body); }
+  .menu div.hi { background: var(--surface-alt); }
+  .menu div small { margin-left: auto; font: var(--c-small); color: var(--ink-faint); }
+</style>
+</head>
+<body>
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <span class="crumb">Ֆինանսներ <i data-lucide="chevron-right"></i></span><h1>Վճարային պլաններ</h1>
+      <div class="live"></div>
+    </header>
+    <div class="content one">
+      <section class="card page" aria-label="Վճարային պլաններ"><div class="scroll-y grow"><div class="bp" id="bp"></div></div></section>
+    </div>
+  </div>
+</div>
+<script>
+  /* ?state= (none) assigning: the plan picker open on Լիլիթ Մ. · assigned (neutral «Նշանակված է · …») · new (the new-plan row
+     filled: «Հանգստյան օրեր», 15% with an Eco Business rate) · invalid (a percent the API would refuse: the field says why). */
+  const st = new URLSearchParams(location.search).get('state') || ''
+  shell('settlement')
+  const PLANS = [
+    ['Պարկի ստանդարտ 20%', '20%', 9],
+    ['Նոր վարորդ', '10%', 2],
+    ['Օրական վարձ', ECO.amd(6000) + ' օրական', 1],
+    ['Մեծ մեքենաներ', '20% · 15% · Eco Van · 18% · Eco Business', 0],
+    ['Ամառ 2026', '18% · ' + ECO.amd(100) + ' պատվերի համար', 0, true],
+  ]
+  if (st === 'assigned') { PLANS[0][2] = 8; PLANS[1][2] = 3 }
+  const combo = (label, val, ph, focus, menu) => `<div><span class="label">${label}</span><div style="position:relative"><div class="combo${focus ? ' focus' : ''}" data-truncate role="combobox" aria-expanded="${!!menu}" aria-label="${label}"><span class="val${val ? '' : ' ph'}">${val || ph}</span><i data-lucide="chevrons-up-down"></i></div>${menu || ''}</div></div>`
+  const menu = st === '' ? `<div class="menu" data-overlay role="listbox">${PLANS.filter((p) => !p[3]).map((p, i) => `<div class="${i === 1 ? 'hi' : ''}" role="option" aria-selected="${i === 1}">${p[0]}<small>${p[1].split(' · ')[0]}</small></div>`).join('')}</div>` : ''
+  const assign = `<section class="sec${st === "" ? " open" : ""}"><h3>Նշանակել պլան վարորդին</h3><div class="pad">
+      <div class="asg">${combo('Վարորդ', 'Լիլիթ Մանուկյան · 077 18-30-22', 'Ընտրել վարորդ')}${combo('Պլան', st === '' ? '' : 'Նոր վարորդ', 'Ընտրել պլան', st === '', menu)}
+        <button class="btn primary"${st === '' ? ' disabled style="opacity:.5"' : ''}>Նշանակել</button><span></span></div>
+      ${st === 'assigned' ? '<div class="notice neutral" role="status" style="margin-top:12px"><i data-lucide="check"></i><span>Նշանակված է · Լիլիթ Մանուկյան</span></div>' : ''}</div>
+      <p class="note2">Նշանակումը սկսում է նոր ժամանակահատված։ Հին պլանը մնում է և բացատրում է արդեն կատարված պահումները։</p></section>`
+
+  const newRow = (st === 'new' || st === 'invalid') ? `<tr class="np"><td colspan="3"><div class="npg">
+      <div><span class="label">Անվանում</span><div class="input${st === 'new' ? '' : ''}"><span class="val">Հանգստյան օրեր</span></div></div>
+      <div><span class="label">Միջնորդավճար %</span><div class="pct"><div class="input${st === 'invalid' ? ' err focus' : ''}" style="width:96px" aria-invalid="${st === 'invalid'}"><span class="val mono">${st === 'invalid' ? '12,555' : '15'}</span></div><span class="u">%</span></div>
+        ${st === 'invalid' ? '<p class="err2" role="status">Տոկոս 0-ից 100, առավելագույնը երկու տասնորդական նիշ՝ «20» կամ «12,5»։</p>' : ''}</div>
+      <div><span class="label">Դասի դրույք</span><div class="ovr">
+        <div class="r">${combo('', 'Eco Business', 'Ընտրեք դասը').replace('<span class="label"></span>', '')}<div class="pct"><div class="input${st === 'new' ? ' focus' : ''}" style="width:80px" aria-label="Դասի միջնորդավճար %"><span class="val mono">18</span></div><span class="u">%</span></div>
+          <button class="btn ghost icon s" aria-label="Հեռացնել դասի դրույքը"><i data-lucide="x"></i></button></div>
+        <div><button class="btn ghost s"><i data-lucide="plus"></i>Դասի դրույք</button></div></div></div>
+    </div><div class="foot2"><button class="btn ghost s">Չեղարկել</button><button class="btn primary s"${st === 'invalid' ? ' disabled style="opacity:.5"' : ''}><i data-lucide="check"></i>Ստեղծել <span class="kbd">↵</span></button></div></td></tr>`
+    : `<tr><td colspan="3"><button class="btn ghost s"><i data-lucide="plus"></i>Նոր պլան</button></td></tr>`
+
+  const rows = PLANS.map(([n, what, d, arch]) => `<tr class="${arch ? 'off' : ''}"><td><span class="nm2">${n}${arch ? '<span class="pill">արխիվացված</span>' : ''}</span></td>
+      <td class="what num">${what}</td><td class="c">${d} վարորդ</td></tr>`).join('')
+  document.getElementById('bp').innerHTML = `
+    <p class="lead2">Ինչ է պահվում յուրաքանչյուր վարորդից և երբվանից · պարկի վարորդներ։ Գործընկերների վճարները՝ <a href="feeplans.html?theme=${THEME}">Վճարի պլաններ</a>։</p>
+    ${assign}
+    <section class="sec"><h3>Պլաններ <span class="sub mono">${PLANS.length}</span></h3>
+      <table class="tbl pl" aria-label="Պլաններ"><colgroup><col style="width:300px"><col><col style="width:140px"></colgroup>
+        <thead><tr><th>Պլան</th><th>Ինչ է պահվում</th><th class="c">Վարորդներ</th></tr></thead><tbody>${rows}${newRow}</tbody></table></section>`
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

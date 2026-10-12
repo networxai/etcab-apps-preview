@@ -58,7 +58,7 @@
     ['Վարդան Մանուկյան', 'ՎՄ', '094 30-25-66', '05 VM 050', 'business', 'off'], ['Հովիկ Զաքարյան', 'ՀԶ', '098 41-09-37', '64 HZ 640', 'van', 'off'], ['Աշոտ Բաղդասարյան', 'ԱԲ', '055 76-48-21', '38 AB 381', 'city', 'off']]
   const FLEET = DRIVERS.filter((d) => d.type === 'fleet').concat(EXTRA.map(([name, ini, phone, plate, tier, state]) => ({ name, ini, phone, plate, tier, state, type: 'fleet' })))
   const sel = +(new URLSearchParams(location.search).get('d') ?? 0)
-  const docState = ['ok', 'ok', 'warn', 'bad', 'ok', 'ok', 'ok', 'ok', 'ok', 'warn', 'ok', 'ok']
+  const docState = ['bad', 'ok', 'warn', 'bad', 'ok', 'ok', 'ok', 'ok', 'ok', 'warn', 'ok', 'ok']
   const today = [2964, 3420, 1860, 0, 2280, 3110, 0, 0, 0, 0, 0, 0]
   document.getElementById('rows').innerHTML = FLEET.map((d, i) => {
     const [tone, word] = DSTATE[d.state]
@@ -90,10 +90,10 @@
           <dl class="facts"><dt>Մեքենա</dt><dd><span class="plate">${d.plate}</span></dd><dt>Փաթեթ</dt><dd>${T.name}</dd><dt>Մոդել</dt><dd>${partner ? 'Model 3 · սեփական' : 'ID.3 · պարկի'}</dd><dt>Այսօր</dt><dd>9 · 14 820 ֏</dd></dl></div>
       </div>
       <div class="blk" style="margin-bottom:12px">
-        <h3><i data-lucide="file-text"></i>Փաստաթղթեր<span class="end pill warn" style="height:20px"><i data-lucide="clock"></i>1 լրանում է</span></h3>
+        <h3><i data-lucide="file-text"></i>Փաստաթղթեր<span class="end pill bad" style="height:20px"><i data-lucide="circle-alert"></i>1 ժամկետանց</span></h3>
         <div class="docs" data-truncate>
           <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>Վկայական</b><span>licence-2024.pdf</span></span><span class="pill ok">Վավեր է մինչև <span class="num">14.04.2027</span></span><button class="btn ghost icon s" aria-label="Ներբեռնել"><i data-lucide="download"></i></button></div>
-          <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>Ապահովագրություն (ԱՊՊԱ)</b><span>osago-2025.pdf</span></span><span class="pill warn">Մինչև <span class="num">20.10.2026</span></span><button class="btn ghost icon s" aria-label="Ներբեռնել"><i data-lucide="download"></i></button></div>
+          <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>Ապահովագրություն (ԱՊՊԱ)</b><span>osago-2025.pdf</span></span><span class="pill bad"><i data-lucide="circle-alert"></i>Ժամկետանց՝ <span class="num">02.10.2026</span></span><button class="btn ghost icon s" aria-label="Ներբեռնել"><i data-lucide="download"></i></button></div>
           <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>Թույլտվություն</b><span>taxi-permit.pdf</span></span><span class="pill ok">Մինչև <span class="num">01.02.2027</span></span><button class="btn ghost icon s" aria-label="Ներբեռնել"><i data-lucide="download"></i></button></div>
           <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>Հաշվառման վկայական</b><span>${partner ? 'Սեփական մեքենա' : 'Պարկի մեքենա'} · reg.pdf</span></span><span class="pill">ժամկետը նշված չէ</span><button class="btn ghost icon s" aria-label="Ներբեռնել"><i data-lucide="download"></i></button></div>
         </div>
@@ -103,5 +103,6 @@
   icons()
   document.documentElement.dataset.mapReady = 'none'
 </script>
+<script src="drivers-tabs.js"></script>
 </body>
 </html>

@@ -31,6 +31,31 @@
   .offer .go.quiet { overflow: hidden; background: var(--surface); box-shadow: var(--e1); }
   .go .drain { position: absolute; left: 0; bottom: 0; height: 4px; width: 66%; background: var(--ink-3); }
   .offer .ot { font: 600 20px/26px var(--font); }
+  /* p1p2 · preorder-now (owner ruling a): one context line above the fare; everything else is the normal offer. */
+  .octx { display: flex; align-items: center; gap: 8px; min-height: 32px; margin: -8px 0 8px; padding: 4px 12px; border-radius: var(--r-pill); align-self: flex-start;
+    background: var(--brand-soft); color: var(--ink); font: var(--t-secondary-strong); white-space: nowrap; }
+  .octx svg { width: 16px; height: 16px; flex: none; }
+  /* lock-android: the full-screen intent shows the same offer over the keyguard; only a lock glyph says so. */
+  .lockdot { position: absolute; z-index: 30; top: 14px; left: 50%; transform: translateX(-50%); width: 28px; height: 20px; display: grid; place-items: center; color: var(--ink); }
+  .lockdot svg { width: 14px; height: 14px; }
+  /* lock-ios: iOS has no full-screen call for an app — a Time-Sensitive notification on the lock screen. The lock screen
+     is the system's, the same in every app theme: a dark wallpaper with white type. */
+  .ios { position: absolute; inset: 0; background: radial-gradient(120% 80% at 30% 10%, #2c3a2a 0%, #141816 55%, #0b0c0b 100%); color: #fff; }
+  .ios .clk { position: absolute; top: 96px; left: 0; right: 0; text-align: center; }
+  .ios .clk .d { font: 600 17px/22px var(--font); color: rgb(255 255 255 / .86); }
+  .ios .clk .t { font: 300 92px/1 var(--font); letter-spacing: -2px; font-variant-numeric: tabular-nums; margin-top: 14px; }
+  .ios .ntf { position: absolute; top: 300px; left: 12px; right: 12px; border-radius: 22px; padding: 12px 14px 14px; background: rgb(245 245 245 / .9); color: #111113; box-shadow: 0 8px 24px rgb(0 0 0 / .3); }
+  .ios .ntf .h { display: flex; align-items: center; gap: 8px; font: 500 13px/18px var(--font); color: #3c3c43; }
+  .ios .ntf .h img { width: 20px; height: 20px; border-radius: 5px; }
+  .ios .ntf .h .ts { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; color: #8a4b00; font-weight: 600; }
+  .ios .ntf .h .ts svg { width: 14px; height: 14px; }
+  .ios .ntf .t1 { font: 600 17px/22px var(--font); margin-top: 6px; }
+  .ios .ntf .t2 { font: 400 15px/20px var(--font); color: #2b2b30; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .ios .cap { position: absolute; left: 24px; right: 24px; top: 448px; text-align: center; font: 400 14px/20px var(--font); color: rgb(255 255 255 / .9); }
+  .ios .bar { position: absolute; left: 32px; right: 32px; bottom: 54px; display: flex; justify-content: space-between; }
+  .ios .bar span { width: 52px; height: 52px; border-radius: 50%; background: rgb(255 255 255 / .16); display: grid; place-items: center; color: #fff; }
+  .ios .bar svg { width: 22px; height: 22px; }
+  .ios + .statusbar, .ios ~ .statusbar { color: #fff; }
 </style>
 </head>
 <body>
@@ -45,7 +70,20 @@
     declined: { glyph: 'check', title: 'Դուք հրաժարվեցիք', sub: 'Դուք գծում եք · «Հեռու է»' },
   }[st]
   const home = `<a class="go quiet" href="driver-home.html?theme=${THEME}"><span class="drain" aria-hidden="true"></span><i data-lucide="house"></i>Գլխավոր</a>`
-  s.innerHTML = D.offer(res ? { result: res, foot: home } : st === 'company' ? { secs: 9, pay: 'company' } : { secs: 6 }) + (st === 'decline' ? `
+  /* preorder-now (owner ruling a, drawn ahead): Աննա pressed «Սկսել հիմա» on B-0912 at 9:52, standing at Կոմիտասի 22 where R-2417
+     just dropped her. Սուրեն, pre-assigned, gets the first offer; decline (with a reason) or expiry hands it to normal dispatch. */
+  const B = ECO.BOOKINGS.air
+  const pre = { no: B.id, tier: B.tier, pickup: B.pickup, pickupNote: 'Աննա · նստել հիմա', drop: B.drop, dropNote: 'Մալաթիա-Սեբաստիա', approachMin: 7, approachKm: 2.6, km: B.km, min: B.min, fare: B.fare, pay: B.pay }
+  const R = ECO.RIDE
+  const ios = `<div class="ios" role="img" aria-label="Կողպված էկրան, ժամանակազգայուն ծանուցում">
+      <div class="clk"><div class="d">Ուրբաթ, 9 հոկտեմբերի</div><div class="t">9:41</div></div>
+      <div class="ntf" role="alert"><div class="h"><img src="assets/eco/mark.png" alt="">Eco Taxi<span class="ts"><i data-lucide="clock-alert"></i>Ժամանակազգայուն</span></div>
+        <div class="t1">Նոր պատվեր · ${ECO.amd(R.fare)}</div><div class="t2">${R.pickup} · ${R.approachMin} րոպե · ${ECO.km(R.approachKm)}</div></div>
+      <div class="cap">Փակ հավելվածում պատվերը գալիս է ժամանակազգայուն ծանուցմամբ, ոչ թե զանգով։</div>
+      <div class="bar" aria-hidden="true"><span><i data-lucide="flashlight"></i></span><span><i data-lucide="camera"></i></span></div></div>`
+  s.innerHTML = st === 'lock-ios' ? ios : D.offer(res ? { result: res, foot: home } : st === 'company' ? { secs: 9, pay: 'company' }
+    : st === 'preorder-now' ? { secs: 9, ride: pre, context: { text: 'Ձեր նախնական պատվերը · ուղևորը սկսում է հիմա' } } : st === 'lock-android' ? { secs: 6, context: { icon: 'lock', text: 'Կողպված էկրանին · ապակողպել պետք չէ' } } : { secs: 6 })
+    + (st === 'lock-android' ? '<span class="lockdot" aria-hidden="true"><i data-lucide="lock"></i></span>' : '') + (st === 'decline' ? `
   <div class="scrim" data-s="decline"></div>
   <section class="sheet top" data-s="decline" role="dialog" aria-label="Ինչո՞ւ եք հրաժարվում">
     <div class="grabber"></div>
@@ -59,15 +97,22 @@
       <button class="reason" role="listitem"><span>Այլ պատճառ</span><i data-lucide="chevron-right"></i></button>
     </div>
   </section>` : '')
-  statusBar(s)
+  statusBar(s, st === 'preorder-now' ? '9:52' : undefined)
   D.init([
     ['taken', 'Taken by another driver'], ['expired', 'Expired (no answer)'], ['decline', 'Decline: one tap on a reason (ticking)'], ['declined', 'Declined, back on the line'], ['company', 'Company ride (paid by company)'],
+    ['preorder-now', 'Pre-order started now · first offer to its driver'], ['lock-android', 'Locked screen · Android full-screen'], ['lock-ios', 'Locked screen · iOS Time-Sensitive'],
   ])
   const r3 = document.getElementById('ring3')
   if (r3) r3.outerHTML = D.ring(48, 4, .5, '<span class="v">6</span>', 'var(--warn)')
   icons()
   if (st === 'decline') for (const el of [s.querySelector('.offer')]) { el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true'); el.inert = true }
-  D.offerMap(!!res)
+  if (st === 'lock-ios') D.noMap()
+  else if (st === 'preorder-now') {
+    /* Trip geometry: DROUTES.air (Բաղրամյան 24 → Զվարթնոց) stands in for Կոմիտասի 22 → Զվարթնոց; the approach is a short
+       dashed run into its start. */
+    const T = DROUTES.air.pts, a0 = T[0]
+    D.offerMap(false, { A: [[a0[0] + .012, a0[1] + .010], [a0[0] + .006, a0[1] + .004], a0], B: T })
+  } else D.offerMap(!!res)
 </script>
 </body>
 </html>

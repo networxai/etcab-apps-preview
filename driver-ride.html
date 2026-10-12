@@ -83,6 +83,20 @@
   .stitle { font: var(--t-title); color: var(--ink); white-space: nowrap; margin: var(--s1) 0 var(--s4); }
   .callrow { display: flex; align-items: center; gap: var(--s3); height: 72px; width: 100%; text-align: left; }
   .callrow + .callrow { border-top: 1px solid var(--hairline); }
+  /* p1p2 · SOS (D39, drawn ahead) and a destination changed by the dispatcher (D22). */
+  .sos .sh { display: flex; align-items: center; gap: var(--s3); margin: var(--s1) 0 var(--s4); }
+  .sos .sh .ic { width: 48px; height: 48px; border-radius: 50%; background: var(--danger-soft); color: var(--danger); display: grid; place-items: center; flex: none; }
+  .sos .sh .ic svg { width: 24px; height: 24px; }
+  .sos .sh .t1 { font: var(--t-title); color: var(--ink); white-space: nowrap; }
+  .sos .sh .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .sos .go.alarm { background: var(--danger); color: var(--surface); } /* dark --danger is a light red: dark ink on it, not white (2.96:1) */
+  .sos .call112 { height: var(--h-sec); width: 100%; margin-top: var(--s3); border-radius: 16px; background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--hairline);
+    font: var(--t-headline); display: flex; align-items: center; justify-content: center; gap: var(--s2); }
+  .sos .call112 svg { width: 22px; height: 22px; }
+  .sos .where { display: flex; align-items: center; gap: 8px; margin-bottom: var(--s4); padding: 10px 12px; border-radius: var(--r-card); background: var(--surface-2); font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .sos .where svg { width: 18px; height: 18px; color: var(--ink-2); flex: none; }
+  .chg { display: flex; flex-direction: column; gap: 4px; margin-top: var(--s3); }
+  .chg .old { font: var(--t-secondary); color: var(--ink-2); text-decoration: line-through; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .callrow .av { width: 48px; height: 48px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; font: var(--t-headline); color: var(--ink); flex: none; }
   .callrow .av svg { width: 22px; height: 22px; }
   .callrow .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
@@ -142,14 +156,14 @@
 
   <div class="offstrip" role="status" data-s="offline"><i data-lucide="cloud-off"></i>կապ չկա — գործողությունները կուղարկվեն<span class="tm">2:14</span></div>
 
-  <div class="guide" data-s="enroute inprogress company-inprogress chat" role="region" aria-label="Ուղղորդում">
+  <div class="guide" data-s="enroute inprogress company-inprogress chat destchanged sos" role="region" aria-label="Ուղղորդում">
     <span class="turn"><i data-lucide="corner-up-right"></i></span>
-    <div><div class="dist"><span data-s="enroute chat">300</span><span data-s="inprogress company-inprogress">650</span><small>մ</small></div>
-      <div class="st" data-s="enroute chat">Թումանյան փ.</div><div class="st" data-s="inprogress company-inprogress">Կոմիտասի պող.</div></div>
+    <div><div class="dist"><span data-s="enroute chat">300</span><span data-s="inprogress company-inprogress sos">650</span><span data-s="destchanged">400</span><small>մ</small></div>
+      <div class="st" data-s="enroute chat">Թումանյան փ.</div><div class="st" data-s="inprogress company-inprogress sos destchanged">Կոմիտասի պող.</div></div>
     <div class="then"><i data-lucide="corner-up-left"></i>ապա</div>
   </div>
 
-  <button class="fab lg" id="fab" style="right:16px" aria-label="Ընդհանուր տեսք" data-s="enroute inprogress assigned offline arrived noshow noshowsent company-inprogress chat"><i data-lucide="locate-fixed"></i></button>
+  <button class="fab lg" id="fab" style="right:16px" aria-label="Ընդհանուր տեսք" data-s="enroute inprogress assigned offline arrived noshow noshowsent company-inprogress chat destchanged sos"><i data-lucide="locate-fixed"></i></button>
 
   <!-- ── assigned: on the way to start (tap "On my way") ── -->
   <section class="sheet" data-s="assigned" data-sheet>
@@ -210,6 +224,25 @@
       <div><div class="eyebrow"><span class="d"></span>4 րոպե · 2,9 կմ · 9:51</div><div class="addr" data-eco="RIDE.drop">Կոմիտասի պող. 22</div></div>
       <div class="big" style="font:var(--t-title)" data-eco="RIDE.fare|amd">1 100 ֏</div>
     </div>
+    <div class="tools" style="justify-content:flex-start;gap:var(--s4)">
+      <button class="tool"><span class="b"><i data-lucide="phone"></i></span>Զանգել</button>
+      <button class="tool"><span class="b"><i data-lucide="headset"></i></span>Դիսպետչեր</button>
+    </div>
+    <div class="slide" role="slider" aria-label="Ավարտել" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+      <span class="knob"><i data-lucide="flag"></i></span>Ավարտել
+      <span class="hint" aria-hidden="true"><i data-lucide="chevron-right"></i><i data-lucide="chevron-right"></i></span>
+    </div>
+  </section>
+
+  <!-- ── destchanged (D22): the dispatcher moved the drop mid-ride; the price follows the new route (drawn ahead) ── -->
+  <section class="sheet" data-s="destchanged" data-sheet>
+    <div class="grabber"></div>
+    <div class="notice info" role="status"><i data-lucide="route"></i><div><b>Դիսպետչերը փոխեց նպատակակետը</b>Ուղևորի խնդրանքով · 9:48</div></div>
+    <div class="head" style="margin-top:var(--s3)">
+      <div><div class="eyebrow"><span class="d"></span>2 րոպե · 1,1 կմ · 9:50</div><div class="addr">Կոմիտասի պող. 8</div></div>
+      <div class="big" style="font:var(--t-title)">1 000 ֏</div>
+    </div>
+    <div class="chg"><span class="old">Կոմիտասի պող. 22 · 1 100 ֏</span></div>
     <div class="tools" style="justify-content:flex-start;gap:var(--s4)">
       <button class="tool"><span class="b"><i data-lucide="phone"></i></span>Զանգել</button>
       <button class="tool"><span class="b"><i data-lucide="headset"></i></span>Դիսպետչեր</button>
@@ -286,7 +319,16 @@
   </section>
 
   <!-- ── call ── -->
-  <div class="scrim" data-s="call cancel chat"></div>
+  <div class="scrim" data-s="call cancel chat sos"></div>
+  <!-- ── SOS (D39, drawn ahead; reached from «Ավելին»): alert the dispatcher with the live position, or call 112 ── -->
+  <section class="sheet top sos" data-s="sos" data-sheet="modal" role="alertdialog" aria-label="Արտակարգ դեպք">
+    <div class="grabber"></div>
+    <div class="sh"><span class="ic"><i data-lucide="siren"></i></span><div><div class="t1">Արտակարգ դեպք</div><div class="t2">Դիսպետչերը կտեսնի ձեր դիրքը և պատվերը</div></div></div>
+    <div class="where"><i data-lucide="map-pin"></i>Կոմիտասի պող. · №2417 · 9:48</div>
+    <button class="go alarm"><i data-lucide="siren"></i>Ահազանգել դիսպետչերին</button>
+    <button class="call112"><i data-lucide="phone"></i>Զանգել 112</button>
+    <button class="btn-text" style="margin-top:var(--s2)">Փակել</button>
+  </section>
   <section class="sheet top" data-s="call" data-sheet="modal" role="dialog" aria-label="Զանգել">
     <div class="grabber"></div>
     <div class="stitle">Զանգել</div>
@@ -335,7 +377,7 @@
 <script>
   const st0 = new URLSearchParams(location.search).get('state') || 'assigned'
   /* The clock follows ECO.RIDE: assigned 9:41, at the pickup 9:45, riding 9:47, dropped 9:51. */
-  statusBar(document.getElementById('s'), { enroute: '9:43', arrived: '9:45', noshow: '9:50', noshowsent: '9:51', offline: '9:45', call: '9:45', cancel: '9:45', inprogress: '9:47', done: '9:51', chat: '9:43', 'company-inprogress': '9:47', 'company-done': '9:51', changed: '9:43', reassigned: '9:43' }[st0] || '9:41')
+  statusBar(document.getElementById('s'), { enroute: '9:43', arrived: '9:45', noshow: '9:50', noshowsent: '9:51', offline: '9:45', call: '9:45', cancel: '9:45', inprogress: '9:47', done: '9:51', chat: '9:43', 'company-inprogress': '9:47', 'company-done': '9:51', changed: '9:43', reassigned: '9:43', destchanged: '9:48', sos: '9:48' }[st0] || '9:41')
   const st = D.init([
     ['assigned', 'Assigned · On my way'], ['enroute', 'En route · Arrived (guidance)'], ['arrived', 'Arrived · wait, slide Start'],
     ['noshow', 'No-show available (5:00+)'], ['noshowsent', 'No-show raised'], ['inprogress', 'In progress · slide Complete'],
@@ -343,6 +385,7 @@
     ['call', 'Call sheet'], ['cancel', 'Cancel or give back'], ['chat', 'Chat · quick replies (ahead)'],
     ['company-inprogress', 'Company ride · in progress'], ['company-done', 'Company ride · complete, collect nothing'],
     ['changed', 'Cancelled by passenger (mid-approach)'], ['reassigned', 'Reassigned by dispatcher'],
+    ['destchanged', 'Destination changed by dispatcher (re-priced)'], ['sos', 'SOS · alert dispatcher / 112 (ahead)'],
   ])
   document.getElementById('fring').outerHTML = D.ring(28, 4, .4, '', 'var(--warn)')
   icons()
@@ -350,15 +393,16 @@
   const A = ROUTES.driverToPickup.pts, B = ROUTES.pickupToDrop.pts
   const bear = (p, q) => Math.atan2((q[1] - p[1]) * Math.cos(p[0] * Math.PI / 180), q[0] - p[0]) * 180 / Math.PI
   const car = (pts, i) => `<div class="me">${carTop(bear(pts[i], pts[Math.min(i + 2, pts.length - 1)]), 'var(--brand)', 'rgb(255 255 255 / .75)')}</div>`
-  const base = ['call', 'cancel'].includes(st) ? 'arrived' : st === 'chat' ? 'enroute' : { 'company-inprogress': 'inprogress', 'company-done': 'done', reassigned: 'changed' }[st] || st
-  const main = document.querySelector('.sheet[data-sheet]:not([hidden]):not(.top)') || document.querySelector('.sheet[data-s~="arrived"]')
-  if (['call', 'cancel', 'chat'].includes(st)) { main.hidden = false; for (const el of [main, document.getElementById('fab'), document.getElementById('map'), ...document.querySelectorAll('.guide:not([hidden])')]) { el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true') } }
+  const base = ['call', 'cancel'].includes(st) ? 'arrived' : st === 'chat' ? 'enroute' : { 'company-inprogress': 'inprogress', 'company-done': 'done', reassigned: 'changed', sos: 'inprogress' }[st] || st
+  const main = document.querySelector('.sheet[data-sheet]:not([hidden]):not(.top)') || (st === 'sos' ? document.querySelector('.sheet[data-s~="inprogress"]') : document.querySelector('.sheet[data-s~="arrived"]'))
+  if (st === 'sos') main.hidden = false
+  if (['call', 'cancel', 'chat', 'sos'].includes(st)) { main.hidden = false; for (const el of [main, document.getElementById('fab'), document.getElementById('map'), ...document.querySelectorAll('.guide:not([hidden])')]) { el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true') } }
   const sheetH = main.offsetHeight
   document.getElementById('fab').style.bottom = (sheetH + 12) + 'px'
-  const topPad = { enroute: 200, inprogress: 200, offline: 140 }[base] || 110
+  const topPad = { enroute: 200, inprogress: 200, destchanged: 200, offline: 140 }[base] || 110
   const near = (p, d) => [[p[0] - d, p[1] - d * 1.3], [p[0] + d, p[1] + d * 1.3]]
   const fit = { assigned: [...A, ...B.slice(0, 40)], enroute: A.slice(10), arrived: near(A[A.length - 1], .0016), noshow: near(A[A.length - 1], .0016),
-    noshowsent: near(A[A.length - 1], .0016), offline: near(A[A.length - 1], .0016), inprogress: B.slice(50), done: B, forced: [...A, ...B], changed: near(A[18], .004) }[base]
+    noshowsent: near(A[A.length - 1], .0016), offline: near(A[A.length - 1], .0016), inprogress: B.slice(50), destchanged: B.slice(50), done: B, forced: [...A, ...B], changed: near(A[18], .004) }[base]
   const map = makeMap(document.getElementById('map'), { sheetH, badge: { top: '170px', left: '16px' }, fit, padTL: [40, topPad], padBR: [40, sheetH + 30] })
   const P = A[A.length - 1], DROP = B[B.length - 1]
   if (base === 'assigned' || base === 'forced') {
@@ -377,6 +421,14 @@
   } else if (base === 'inprogress') {
     drawRoute(map, B.slice(60), { weight: 6 })
     htmlMarker(map, DROP, '<div class="pin b"></div>', [18, 18])
+    htmlMarker(map, B[60], car(B, 60), [64, 64])
+  } else if (base === 'destchanged') {
+    /* The new drop is earlier on the same street: the rest of the old route greys out behind a struck pin. */
+    const NEW = 75
+    drawRoute(map, B.slice(NEW), { weight: 4, color: cssVar('--ink-3'), dash: '1 8' })
+    drawRoute(map, B.slice(60, NEW + 1), { weight: 6 })
+    htmlMarker(map, DROP, '<div class="pin b" style="opacity:.45"></div>', [18, 18])
+    htmlMarker(map, B[NEW], '<div class="pin b"></div>', [18, 18])
     htmlMarker(map, B[60], car(B, 60), [64, 64])
   } else if (base === 'changed') {
     htmlMarker(map, A[18], car(A, 18), [64, 64])

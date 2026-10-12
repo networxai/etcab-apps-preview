@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Promotions</title>
+<link rel="stylesheet" href="console.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+<style>
+  /* Mirrors apps/operator components/admin/promotions.tsx (List+create archetype, image-led row, §6.14 grid:
+     thumbnail · title · a tap · order · state · action) and promotion-create.tsx (the 12-column field card, revealed by
+     «Նոր քարտ» or N, in the list's place). The right column is the rider home as the rider sees it — the same cards,
+     sizes and scrim as rider-home.html, so the operator previews the carousel, not a form. */
+  .content { grid-template-columns: minmax(0, 1fr) 312px; }
+  .lst { min-width: 0; }
+  .explain { font: var(--c-body); color: var(--ink-muted); padding: 10px var(--inset); border-bottom: 1px solid var(--line-soft); max-width: 900px; }
+  .tb { display: flex; align-items: center; gap: 6px; padding: 8px var(--inset); border-bottom: 1px solid var(--line-soft); }
+  .tb .input { width: 240px; }
+  .pt td { height: 56px; }
+  .thumb { width: 64px; height: 36px; border-radius: 6px; object-fit: cover; display: block; background: var(--surface-alt); }
+  .thumb.broken { display: grid; place-items: center; color: var(--danger-c); box-shadow: inset 0 0 0 1px var(--danger-c); }
+  .nm2 { display: flex; flex-direction: column; min-width: 0; }
+  .nm2 b { font: var(--c-strong); overflow: hidden; text-overflow: ellipsis; }
+  .nm2 span { font: var(--c-small); color: var(--ink-muted); overflow: hidden; text-overflow: ellipsis; }
+  .tap { display: flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%; overflow: hidden; color: var(--ink-muted); white-space: nowrap; }
+  .tap b { font-weight: 500; color: var(--ink); overflow: hidden; text-overflow: ellipsis; }
+  tr.paused td { color: var(--ink-faint); }
+  tr.paused .thumb { opacity: .55; }
+  .acts { display: flex; gap: 6px; justify-content: flex-end; }
+  .broken-note { font: var(--c-small); color: var(--danger-c); display: flex; align-items: center; gap: 4px; }
+  /* Create card (promotion-create.tsx): 12-column field grid — title 6 · subtitle 6 · body 12 · image 6 · link 6 · destination 9 · order 3. */
+  .create { margin: 12px var(--inset); border-radius: var(--r-card); box-shadow: inset 0 0 0 1px var(--line-soft), var(--e1); background: var(--surface); }
+  .create h3 { font: var(--c-head); padding: 12px var(--inset) 0; display: flex; align-items: center; gap: 8px; }
+  .fg { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px 12px; padding: 12px var(--inset); }
+  .fg .f { min-width: 0; } .s6 { grid-column: span 6; } .s12 { grid-column: span 12; } .s9 { grid-column: span 9; } .s3 { grid-column: span 3; }
+  .fg .hint { font: var(--c-small); color: var(--ink-muted); margin-top: 4px; }
+  .create .foot { display: flex; align-items: center; gap: 8px; padding: 0 var(--inset) 12px; }
+  .create .foot .faint { margin-left: auto; font: var(--c-small); }
+  .sug { margin-top: 4px; border-radius: var(--r-ctl); background: var(--surface); box-shadow: var(--e2); }
+  .sug div { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; font: var(--c-body); }
+  .sug div.on { background: var(--surface-alt); }
+  /* Preview: the rider home's lower half at 0.82 (390 → 320 px). Values copied from rider-home.html. */
+  .pv { padding: 12px var(--inset); display: flex; flex-direction: column; gap: 8px; }
+  .pv .cap { font: var(--c-small); color: var(--ink-muted); }
+  .phone { width: 280px; height: 236px; border-radius: 28px; overflow: hidden; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-soft), var(--e2); position: relative; }
+  .phone .in { width: 390px; transform: scale(.718); transform-origin: 0 0; padding: 16px 16px 0; }
+  .r-sheet .where { display: flex; align-items: center; gap: 12px; height: 52px; padding: 0 16px; border-radius: 14px; background: var(--surface-2); font: 500 17px/22px var(--font); color: var(--ink); }
+  .r-sheet .chips { display: flex; gap: 8px; margin-top: 12px; }
+  .r-sheet .chips span { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 18px; background: var(--surface-2); font: 500 14px/18px var(--font); color: var(--ink); white-space: nowrap; }
+  .partners { margin: 12px -16px 0; overflow: hidden; }
+  .track { display: flex; gap: 8px; padding: 0 16px; }
+  .ad { position: relative; flex: none; width: 318px; height: 156px; border-radius: 12px; overflow: hidden; background: var(--surface-3); }
+  .ad.new { box-shadow: 0 0 0 3px var(--focus-ring); }
+  .ad img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .ad .copy { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; color: #fff; padding: 56px 16px 14px; background: linear-gradient(180deg, rgb(0 0 0 / .02) 0%, rgb(0 0 0 / .6) 45%, rgb(0 0 0 / .82) 100%); }
+  .ad .who { font: 500 13px/18px var(--font); color: rgb(255 255 255 / .86); white-space: nowrap; }
+  .ad .offer { font: 600 22px/28px var(--font); color: #fff; white-space: nowrap; letter-spacing: -.1px; }
+  .ad .tag2 { position: absolute; top: 10px; left: 10px; z-index: 1; height: 22px; padding: 0 8px; border-radius: 999px; background: rgb(0 0 0 / .62); color: #fff; font: 400 12px/22px var(--font); }
+  .dots { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
+  .dots i { width: 6px; height: 6px; border-radius: 3px; background: var(--surface-3); }
+  .dots i.on { width: 18px; background: var(--ink); }
+  .pv .order { display: flex; flex-direction: column; gap: 2px; font: var(--c-body); }
+  .pv .order div { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; min-height: 28px; }
+  .pv .order .mono { width: 20px; color: var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <span class="crumb">Ուղևորի հավելված <i data-lucide="chevron-right"></i></span><h1>Բիզնես գործընկերների քարտեր</h1>
+      <div class="live"></div>
+    </header>
+    <div class="content">
+      <section class="card lst" aria-labelledby="t1">
+        <div class="card-h"><h2 id="t1">Քարտեր</h2><span class="sub num" id="cnt"></span>
+          <span class="end"><button class="btn primary s" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր քարտ<span class="kbd">N</span></button></span></div>
+        <p class="explain">Այն, ինչ ուղևորը տեսնում է հավելվածի գլխավոր էջում՝ «Ո՞ւր եք գնում» տողի տակ. տարածք, որը վաճառում է ավտոպարկը։ Հասցեով քարտը պատվիրում է մեքենա մինչև գործընկերի դուռը, հղումով քարտը բացում է նրա էջը։</p>
+        <div id="create"></div>
+        <div class="tb">
+          <span class="input"><i data-lucide="search"></i><span class="val ph">օր. Սուրճ</span></span>
+          <div role="group" aria-label="Զտիչներ" class="row-flex" style="gap:6px"><button class="chip on">Միացված <span class="c" id="c-on"></span></button><button class="chip">Անջատված <span class="c" id="c-off"></span></button></div>
+        </div>
+        <div class="scroll-y grow">
+          <table class="tbl pt"><colgroup><col style="width:96px"><col><col style="width:26%"><col style="width:64px"><col style="width:112px"><col style="width:140px"></colgroup>
+            <thead><tr><th></th><th>Վերնագիր</th><th>Սեղմելիս</th><th class="r"><abbr title="Հերթականություն" style="text-decoration:none">Հերթ.</abbr></th><th>Վիճակ</th><th></th></tr></thead>
+            <tbody id="rows"></tbody></table>
+        </div>
+      </section>
+      <aside class="card" aria-labelledby="t2">
+        <div class="card-h"><h2 id="t2">Ինչպես է տեսնում ուղևորը</h2></div>
+        <div class="pv">
+          <div class="phone" aria-label="Ուղևորի գլխավոր էջի նախադիտում"><div class="in">
+            <div class="r-sheet"><div class="where"><i data-lucide="search"></i>Ո՞ւր եք գնում</div>
+              <div class="chips"><span><i data-lucide="house"></i>Տուն</span><span><i data-lucide="briefcase"></i>Աշխատանք</span><span><i data-lucide="calendar-clock"></i>Նախապես</span></div></div>
+            <div class="partners"><div class="track" id="track"></div><div class="dots" id="dots" aria-hidden="true"></div></div>
+          </div></div>
+          <span class="cap">Միացված քարտերը՝ ըստ հերթականության։ Անջատվածները ուղևորը չի տեսնում։</span>
+          <div class="order" id="order"></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<script>
+  shell('promotions')
+  const q = new URLSearchParams(location.search)
+  const NEW = q.get('new') === '1'
+  /* ECO.PROMOS are the three cards rider-home.html shows, in its order; two page-local paused cards show the other states
+     (one with a picture that no longer opens: promotions.imageBroken). */
+  const cards = ECO.PROMOS.map((p, i) => ({ ...p, sub: p.offer, order: (i + 1) * 10, tap: ['dest', p.addr] }))
+  cards[2].tap = ['link', 'araks-spa.am']
+  cards.push({ id: 'flora', who: 'Ֆլորա ծաղկասրահ', sub: '−10% ծաղկեփնջերին', img: 'https://images.unsplash.com/photo-1487070183336-b863922373d4?w=700&h=340&q=80&auto=format&fit=crop', on: false, order: 40, tap: ['link', 'flora.am'] })
+  cards.push({ id: 'gurman', who: 'Գուրման սուրճ', sub: 'Երկրորդ սուրճը՝ նվեր', img: null, on: false, order: 50, tap: null })
+  const NEWC = { id: 'kino', who: 'Մոսկվա կինոթատրոն', offer: 'Տոմս՝ 2 000 ֏', img: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=700&h=340&q=80&auto=format&fit=crop' }
+  const live = cards.filter((c) => c.on)
+  document.getElementById('cnt').textContent = cards.length
+  document.getElementById('c-on').textContent = live.length
+  document.getElementById('c-off').textContent = cards.length - live.length
+  document.getElementById('rows').innerHTML = cards.map((c) => {
+    const thumb = c.img ? `<img class="thumb" src="${c.img}" alt="">` : `<span class="thumb broken" role="img" aria-label="Այս նկարը չի բացվում — ուղևորը դատարկ քարտ կտեսնի" title="Այս նկարը չի բացվում — ուղևորը դատարկ քարտ կտեսնի"><i data-lucide="image-off"></i></span>`
+    const tap = !c.tap ? '<span class="tap faint">ոչինչ չի լինում</span>'
+      : c.tap[0] === 'dest' ? `<span class="tap"><i data-lucide="car-taxi-front"></i><span class="nm2"><b>${c.tap[1]}</b><span>պատվեր դեպի</span></span></span>`
+      : `<span class="tap"><i data-lucide="external-link"></i><span class="nm2"><b class="mono">${c.tap[1]}</b><span>բացվում է</span></span></span>`
+    const verb = c.on ? 'Անջատել' : 'Միացնել'
+    return `<tr class="${c.on ? '' : 'paused'}"><td>${thumb}</td><td><span class="nm2"><b>${c.who}</b><span>${c.img ? c.sub : '<span class="broken-note"><i data-lucide="image-off"></i>Նկարը չի բացվում</span>'}</span></span></td><td>${tap}</td>
+      <td class="r mono">${c.order}</td><td><span class="pill ${c.on ? 'ok' : ''}"><i class="d"></i>${c.on ? 'Միացված' : 'Անջատված'}</span></td>
+      <td><span class="acts"><button class="btn ghost icon s" aria-label="Խմբագրել — ${c.who}" title="Խմբագրել"><i data-lucide="pencil"></i></button><button class="btn secondary s" aria-label="${verb} — ${c.who}">${verb}</button></span></td></tr>`
+  }).join('')
+  /* ?new=1: the create card open in the list's place, filled from a call with the partner; the preview shows where the
+     card will land (order 25: between Տարոն and Արաքս), outlined. Submit stays disabled until the address is picked from
+     the suggestions (promotions.pickSuggestion), exactly as intake's AddressField. */
+  if (NEW) document.getElementById('create').innerHTML = `<div class="create" role="group" aria-labelledby="cr">
+    <h3 id="cr"><i data-lucide="plus"></i>Ավելացնել քարտ</h3>
+    <div class="fg">
+      <div class="f s6"><label class="label">Վերնագիր</label><span class="input focus"><span class="val">${NEWC.who}</span></span></div>
+      <div class="f s6"><label class="label">Տողը վերնագրի տակ</label><span class="input"><span class="val">${NEWC.offer}</span></span></div>
+      <div class="f s12"><label class="label">Ինչ է ասում քարտը բացելիս՝ առաջարկը գործընկերի բառերով</label><span class="input"><span class="val">Երեքշաբթի և չորեքշաբթի ցանկացած սեանս՝ 2 000 ֏, Eco Taxi-ով եկողներին</span></span></div>
+      <div class="f s6"><label class="label">Նկարի հասցե (URL)</label><span class="input"><span class="val mono">https://moscowcinema.am/eco.jpg</span></span><div class="hint">Գործընկերի կայքի նկար, կամ այս API-ի /media ուղի</div></div>
+      <div class="f s6"><label class="label">Հղում (բացվում է դիտարկիչում)</label><span class="input"><span class="val ph">օր. https://flora.am</span></span></div>
+      <div class="f s9"><label class="label">Հասցե (սեղմելով՝ պատվեր այնտեղ)</label><span class="input l"><i data-lucide="map-pin"></i><span class="val">Աբովյան 18</span></span>
+        <div class="sug" role="listbox" aria-label="Հասցեների առաջարկներ"><div class="on" role="option" aria-selected="true"><i data-lucide="map-pin"></i>Աբովյան փ. 18, Մոսկվա կինոթատրոն</div><div role="option"><i data-lucide="map-pin"></i>Աբովյան փ. 18/1</div></div>
+        <div class="hint">Ընտրեք հասցեն առաջարկներից կամ մաքրեք դաշտը</div></div>
+      <div class="f s3"><label class="label">Հերթականություն</label><span class="input"><span class="val mono">25</span></span><div class="hint">Ամբողջ թիվ՝ 0-ից 1000</div></div>
+    </div>
+    <div class="foot"><button class="btn primary" aria-disabled="true" style="opacity:.5">Ավելացնել քարտ</button><button class="btn secondary">Չեղարկել</button><span class="faint">Esc փակում է միայն դատարկ ձևը</span></div>
+  </div>`
+  /* The carousel: live cards by order (the API's order is the rider's order). With ?new=1 the draft card is shown at its slot. */
+  const strip = live.map((c) => ({ who: c.who, offer: c.offer || c.sub, img: c.img, order: c.order }))
+  if (NEW) strip.push({ who: NEWC.who, offer: NEWC.offer, img: NEWC.img, order: 25, isNew: true })
+  strip.sort((a, b) => a.order - b.order)
+  /* The phone shows from the first card; with ?new=1 it is scrolled so the draft card is the one in view. */
+  const first = NEW ? strip.findIndex((s) => s.isNew) : 0
+  document.getElementById('track').innerHTML = strip.map((s, i) => `<article class="ad${s.isNew ? ' new' : ''}" data-photo ${i !== first ? 'data-peek' : ''} data-scrim="0:0,0.2:0,0.55:0.6,1:0.82">
+    <img src="${s.img}" alt=""><span class="tag2">Գովազդ</span><div class="copy"><div class="who">${s.who}</div><div class="offer">${s.offer}</div></div></article>`).join('')
+  document.getElementById('track').style.transform = `translateX(${-326 * first}px)`
+  document.getElementById('dots').innerHTML = strip.map((_, i) => `<i class="${i === first ? 'on' : ''}"></i>`).join('')
+  document.getElementById('order').innerHTML = strip.map((s) => `<div><span class="mono r">${s.order}</span>${s.who}${s.isNew ? ' <span class="pill brand" style="height:20px">Նոր · չպահպանված</span>' : ''}</div>`).join('')
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

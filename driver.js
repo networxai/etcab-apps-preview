@@ -97,7 +97,8 @@ window.D && (window.D.partnerNav = function () {
    o.decline: false hides the decline chip. Facts are ECO.RIDE (kit.js). ── */
 window.D && (window.D.offer = function (o) {
   o = o || {}
-  const R = ECO.RIDE, W = 12, secs = o.secs == null ? 9 : o.secs
+  /* o.ride overrides the walkthrough facts (p1p2: a pre-order started now, owner ruling (a)); o.context is one line above the fare. */
+  const R = o.ride || ECO.RIDE, W = 12, secs = o.secs == null ? 9 : o.secs
   const size = 96, sw = 7, r = (size - sw) / 2, c = 2 * Math.PI * r, frac = o.result ? 0 : secs / W
   const tone = !o.result && secs <= 5 ? 'var(--warn)' : 'var(--ring)'
   const inner = o.result ? `<div class="in gl"><i data-lucide="${o.result.glyph}"></i></div>` : `<div class="in"><span class="sec">${secs}</span><span class="u">վրկ</span></div>`
@@ -114,6 +115,7 @@ window.D && (window.D.offer = function (o) {
     </div>
     <div class="ocard"><div class="map" id="map" aria-label="Երթուղին քարտեզի վրա"></div></div>
     <div class="obody">
+      ${o.context ? `<div class="octx"><i data-lucide="${o.context.icon || 'calendar-clock'}"></i><span>${o.context.text}</span></div>` : ''}
       <div class="orow">
         <div><div class="fare">${ECO.amd(R.fare)}</div>
           <div class="tags"><span class="chip">${R.tier}</span>${o.pay === 'company' ? `<span class="chip co"><i data-lucide="building-2"></i>Վճարում է ընկերությունը</span>` : `<span class="chip"><i data-lucide="${pay.icon}"></i>${pay.label}</span>`}</div></div>
@@ -124,7 +126,7 @@ window.D && (window.D.offer = function (o) {
       <div class="trip"><i data-lucide="route"></i>${ECO.km(R.km)} · ${R.min} րոպե<small>ուղևորություն</small></div>`}
       <div class="stops">
         <div class="stop"><span class="m a"></span><div><div class="t1">${R.pickup}</div><div class="t2">${R.pickupNote}</div></div></div>
-        <div class="stop"><span class="m b"></span><div><div class="t1">${R.drop}</div><div class="t2">Արաբկիր</div></div></div>
+        <div class="stop"><span class="m b"></span><div><div class="t1">${R.drop}</div><div class="t2">${R.dropNote || 'Արաբկիր'}</div></div></div>
       </div>
       <div class="grow"></div>
       ${o.foot || `<div class="slide" role="slider" aria-label="Ընդունել" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
@@ -134,8 +136,8 @@ window.D && (window.D.offer = function (o) {
 })
 
 /* The offer's strip map: approach (dashed ink) and trip (route green), both fitted inside the card. */
-window.D && (window.D.offerMap = function (quiet) {
-  const A = ROUTES.driverToPickup.pts, B = ROUTES.pickupToDrop.pts
+window.D && (window.D.offerMap = function (quiet, alt) {
+  const A = (alt && alt.A) || ROUTES.driverToPickup.pts, B = (alt && alt.B) || ROUTES.pickupToDrop.pts
   const map = makeMap(document.getElementById('map'), { fit: [...A, ...B], padTL: [28, 28], padBR: [28, 36], badge: { top: '8px', left: '8px' } })
   drawRoute(map, A, { color: cssVar(quiet ? '--ink-3' : '--approach'), weight: 4, dash: '1 8' })
   drawRoute(map, B, { weight: 5, color: quiet ? cssVar('--ink-3') : undefined })

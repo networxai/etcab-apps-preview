@@ -53,6 +53,45 @@
   .fact b { font: var(--t-headline); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .idrow { display: flex; gap: var(--s2); align-items: center; justify-content: center; margin-top: var(--s3); }
   .foot { margin-top: auto; }
+  /* p1p2 (P02–P04): rejected, more information, suspended, terms, applied. Domain refusals are amber, never red. */
+  /* A self-applicant's own car carries no fleet livery: an icon, not an Eco render. */
+  .halo .own { position: relative; color: var(--ink-2); }
+  .halo .own svg { width: 88px; height: 88px; stroke-width: 1.25; }
+  .halo .badge.warn { background: var(--warn-soft); color: var(--warn); }
+  :root[data-state="rejected"] .halo::before, :root[data-state="suspended"] .halo::before { border-color: var(--warn); }
+  :root[data-state="rejected"] .halo img, :root[data-state="suspended"] .halo img { filter: grayscale(.85) opacity(.7); }
+  .why { padding: var(--s4); margin-top: var(--s5); display: flex; flex-direction: column; gap: var(--s3); }
+  .why .h { display: flex; align-items: center; gap: var(--s3); }
+  .why .ic { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--warn-soft); color: var(--warn); }
+  .why .ic svg { width: 20px; height: 20px; }
+  .why .t1 { font: var(--t-headline); color: var(--ink); }
+  .why .t2 { font: var(--t-secondary); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .ask { display: flex; align-items: center; gap: var(--s3); min-height: 60px; }
+  .ask + .ask { border-top: 1px solid var(--hairline); }
+  .ask .ic2 { width: 40px; height: 40px; border-radius: 10px; background: var(--surface-2); color: var(--ink); display: grid; place-items: center; flex: none; }
+  .ask .ic2 svg { width: 20px; height: 20px; }
+  .ask .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .ask .tx b { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .ask .tx span { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .ask .add { height: 48px; padding: 0 14px; border-radius: var(--r-pill); background: var(--ink); color: var(--surface); font: var(--t-secondary-strong); display: inline-flex; align-items: center; gap: 6px; flex: none; }
+  .ask .add svg { width: 16px; height: 16px; }
+  .ask .add.ico { width: 48px; padding: 0; justify-content: center; }
+  .ask .add.ico svg { width: 20px; height: 20px; }
+  .ask.done .add { background: var(--ok-soft); color: var(--ink); }
+  .ask.done .add svg { color: var(--ok); }
+  .hd { display: flex; align-items: center; gap: var(--s3); margin-top: var(--s2); }
+  .hd .ic { width: 48px; height: 48px; border-radius: 14px; background: var(--brand-soft); color: var(--brand-ink); display: grid; place-items: center; flex: none; }
+  .hd .ic svg { width: 24px; height: 24px; }
+  .terms { padding: var(--s1) var(--s4); margin-top: var(--s4); }
+  .terms .ln { display: flex; gap: var(--s3); align-items: center; min-height: 56px; }
+  .terms .ln + .ln { border-top: 1px solid var(--hairline); }
+  .terms .ln svg { width: 20px; height: 20px; color: var(--ink-2); flex: none; }
+  .terms .ln .tx { flex: 1; display: flex; flex-direction: column; }
+  .terms .ln b { font: var(--t-body-strong); color: var(--ink); }
+  .terms .ln span { font: var(--t-secondary); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .terms .ln .nw { height: 22px; padding: 0 8px; border-radius: var(--r-pill); background: var(--brand-soft); color: var(--ink); font: var(--t-caption); display: inline-flex; align-items: center; flex: none; }
+  .vline { font: var(--t-caption); color: var(--ink-2); margin-top: var(--s3); text-align: center; font-variant-numeric: tabular-nums; }
+  .foot .btn + .btn-text { margin-top: var(--s1); }
 </style>
 </head>
 <body>
@@ -86,17 +125,82 @@
       </div>
     </section>
 
+
+    <!-- ── rejected (P02): the office said no; the reason and the one fix ── -->
+    <section class="center" data-s="rejected">
+      <div class="halo"><img class="carimg" src="assets/eco/cars/partner.webp" alt="Tesla Model 3"><span class="badge warn"><i data-lucide="octagon-x"></i></span></div>
+      <div class="h1">Մեքենան չի հաստատվել</div>
+      <div class="sub">Գրասենյակ · այսօր, 11:20</div>
+    </section>
+    <div class="card why" data-s="rejected">
+      <div class="h"><span class="ic"><i data-lucide="image-off"></i></span><div><div class="t1">Տեխզննման լուսանկարն անընթեռնելի է</div><div class="t2">Մնացածը կարգին է</div></div></div>
+    </div>
+
+    <!-- ── moreinfo (P02): the office needs one more document ── -->
+    <section class="center" data-s="moreinfo">
+      <div class="halo"><img class="carimg" src="assets/eco/cars/partner.webp" alt="Tesla Model 3"><span class="badge wait"><i data-lucide="file-question"></i></span></div>
+      <div class="h1">Եվս մեկ փաստաթուղթ</div>
+      <div class="sub">Մնացածը ստուգված է</div>
+    </section>
+    <div class="group" data-s="moreinfo" style="margin-top:var(--s5)">
+      <div class="ask"><span class="ic2"><i data-lucide="shield"></i></span><span class="tx"><b>Ապահովագրություն</b><span>Առաջին էջը, ամբողջությամբ</span></span><button class="add ico" aria-label="Լուսանկարել ապահովագրությունը"><i data-lucide="camera"></i></button></div>
+      <div class="ask done"><span class="ic2"><i data-lucide="file-text"></i></span><span class="tx"><b>Հաշվառման վկայական</b><span>Ստուգված</span></span><span class="add ico" role="img" aria-label="Ստուգված"><i data-lucide="check"></i></span></div>
+    </div>
+
+    <!-- ── suspended (P02): the office paused the partner account; money stays, orders stop ── -->
+    <section class="center" data-s="suspended">
+      <div class="halo"><img class="carimg" src="assets/eco/cars/partner.webp" alt="Tesla Model 3"><span class="badge warn"><i data-lucide="lock"></i></span></div>
+      <div class="h1">Հաշիվը կասեցված է</div>
+      <div class="sub">Նոր պատվերներ՝ ոչ</div>
+    </section>
+    <div class="card why" data-s="suspended">
+      <div class="h"><span class="ic"><i data-lucide="pause"></i></span><div><div class="t1">Գրասենյակի որոշմամբ</div><div class="t2">10 հոկտ., 09:05 · մինչև զանգը</div></div></div>
+    </div>
+    <div class="facts" data-s="suspended">
+      <div class="fact"><span class="l"><i data-lucide="wallet"></i>Դրամապանակ</span><b>18 450 ֏</b></div>
+      <div class="fact"><span class="l"><i data-lucide="calendar-clock"></i>Նախապես · 1</span><b>Հանձնված է</b></div>
+    </div>
+
+    <!-- ── terms (P03): a new version of the partner terms; accept before going on the line ── -->
+    <section data-s="terms">
+      <div class="hd"><span class="ic"><i data-lucide="file-pen-line"></i></span><div><div class="ptitle" style="margin:0">Նոր պայմաններ</div><div class="psub">Գործընկերոջ պայմաններ · տարբերակ 3</div></div></div>
+      <div class="card terms" role="list" aria-label="Ինչ է փոխվել">
+        <div class="ln" role="listitem"><i data-lucide="percent"></i><span class="tx"><b>Վճար՝ 15% պատվերից</b><span>Eco Comfort · առաջ՝ 17%</span></span><span class="nw">Նոր</span></div>
+        <div class="ln" role="listitem"><i data-lucide="lock"></i><span class="tx"><b>Կանգ՝ 0 ֏-ից ցածր</b><span>Զգուշացում՝ 3 000 ֏-ից</span></span></div>
+        <div class="ln" role="listitem"><i data-lucide="landmark"></i><span class="tx"><b>Հարկ՝ անջատված</b><span>Միացնելուց առաջ՝ ծանուցում</span></span></div>
+      </div>
+      <div class="vline">Ուժի մեջ է 15 հոկտ.-ից · նախորդը՝ տարբերակ 2</div>
+    </section>
+
+    <!-- ── applied (P04): a self sign-up sent from the app; the office calls next ── -->
+    <section class="center" data-s="applied">
+      <div class="halo"><span class="own" aria-hidden="true"><i data-lucide="car-front"></i></span><span class="badge wait"><i data-lucide="send"></i></span></div>
+      <div class="h1">Հայտն ուղարկված է</div>
+      <div class="sub">Հայտ № A-0007 · այսօր, 08:47</div>
+    </section>
+    <div class="card steps" data-s="applied" role="list" aria-label="Հաջորդ քայլերը">
+      <div class="tli done" role="listitem"><span class="d"><i data-lucide="check"></i></span><span class="t1">Հայտը՝ Hyundai Ioniq 5 · 19 HG 519</span></div>
+      <div class="tli now" role="listitem"><span class="d"></span><span class="t1">Գրասենյակը կզանգի</span><span class="end p-tag"><i data-lucide="clock"></i>1 օրում</span></div>
+      <div class="tli" role="listitem"><span class="d"><i data-lucide="building-2"></i></span><span class="t1 dim">Փաստաթղթերը՝ գրասենյակում</span></div>
+      <div class="tli" role="listitem"><span class="d"><i data-lucide="power"></i></span><span class="t1 dim">Գծում լինել</span></div>
+    </div>
     <div class="foot">
       <button class="btn btn-quiet on-ground lg" data-s="pending"><i data-lucide="phone"></i>Զանգել գրասենյակ</button>
       <button class="go x" data-s="approved"><i data-lucide="power"></i>Գծում լինել</button>
       <button class="btn-text" data-s="approved"><i data-lucide="file-text"></i>Պայմաններ</button>
+      <button class="btn btn-brand" data-s="rejected"><i data-lucide="camera"></i>Նորից լուսանկարել</button>
+      <button class="btn btn-brand" data-s="moreinfo"><i data-lucide="send"></i>Ուղարկել</button>
+      <button class="btn btn-brand" data-s="terms"><i data-lucide="check"></i>Ընդունում եմ</button>
+      <button class="btn btn-quiet on-ground lg" data-s="suspended applied"><i data-lucide="phone"></i>Զանգել գրասենյակ</button>
+      <button class="btn-text" data-s="rejected moreinfo"><i data-lucide="phone"></i>Զանգել գրասենյակ</button>
+      <button class="btn-text" data-s="terms"><i data-lucide="file-text"></i>Ամբողջական տեքստը</button>
     </div>
   </div>
 </main>
 <script src="audit.js"></script>
 <script>
   statusBar(document.getElementById('s'))
-  D.init([['pending', 'Car pending · calm wait'], ['approved', 'Approved moment']])
+  D.init([['pending', 'Car pending · calm wait'], ['approved', 'Approved moment'], ['rejected', 'Rejected · reason · re-shoot'], ['moreinfo', 'More information needed'], ['suspended', 'Account suspended by the office'], ['terms', 'New terms version · accept'], ['applied', 'Self sign-up sent (applied)']])
   D.partnerNav()
   icons()
   D.noMap()

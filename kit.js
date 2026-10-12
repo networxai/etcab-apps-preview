@@ -71,6 +71,35 @@
        pre-order, set in console Settings → Dispatch (drawn ahead: no push type yet). */
     DISPATCH: { phone: '010 55-55-55', reminderMin: 30 },
 
+    /* ── p1p2 pass: facts that two surfaces show. ── */
+    /* The rider ECO.RIDE.rider as the console's customer record knows her (admin/customers/[id]); the rider app's
+       saved places are the same two. */
+    CUSTOMER: { name: 'Աննա Հակոբյան', short: 'Աննա Հ.', phone: '091 23-45-67', since: 'մարտ 2025', rides: 47, rating: '4,8', debt: 0,
+      places: { home: 'Կոմիտասի պող. 22', work: 'Վազգեն Սարգսյանի 26/1' } },
+    /* A blacklisted caller (§10.11): refused by the rider app at order (book.blacklisted), flagged at console intake
+       (blacklist-notice.tsx), and listed in the Requests inbox as «refused at order». */
+    BLACKLIST: { phone: '096 70-11-58', name: 'Գևորգ Ս.', reason: 'Երեք անգամ չներկայացավ, վարորդի հետ վեճ', since: '2 հոկտ.', by: 'Անի Դավթյան', refusedAt: '9:12' },
+    /* Console operators (shell avatar ԱԴ/ՄՀ/ՍԱ). Roles follow the API's operator roles. The API's operator has an email,
+       not a name (operators.tsx lists by email); the names are the console shell's, drawn ahead. */
+    OPERATORS: [
+      { name: 'Անի Դավթյան', ini: 'ԱԴ', role: 'dispatcher', on: true, email: 'ani@ecotaxi.am' },
+      { name: 'Մարիամ Հովսեփյան', ini: 'ՄՀ', role: 'dispatcher', on: true, email: 'mariam@ecotaxi.am' },
+      { name: 'Սոնա Աբգարյան', ini: 'ՍԱ', role: 'dispatcher', on: true, email: 'sona@ecotaxi.am' },
+      { name: 'Գոհար Մինասյան', ini: 'ԳՄ', role: 'admin', on: false, email: 'gohar@ecotaxi.am' },
+    ],
+    /* Rider-home ads = console Promotions (the owner's «partners always on home» rule). Order is the carousel order. */
+    PROMOS: [
+      { id: 'lumen', who: 'Լյումեն սրճարան', offer: '−15% ուղևորներին', img: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=700&h=340&q=80&auto=format&fit=crop', on: true, addr: 'Աբովյան 12', until: '31 հոկտ.', taps: 412 },
+      { id: 'taron', who: 'Տարոն ռեստորան', offer: 'Աղանդեր՝ նվեր', img: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=700&h=340&q=80&auto=format&fit=crop', on: true, addr: 'Թումանյան 21', until: '15 նոյ.', taps: 268 },
+      { id: 'araks', who: 'Արաքս սպա', offer: 'Մերսում՝ −20%', img: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=700&h=340&q=80&auto=format&fit=crop', on: true, addr: 'Սայաթ-Նովա 5', until: '30 նոյ.', taps: 97 },
+    ],
+    /* App versions for «update required» (rider R68, driver D40): the minimum the fleet accepts, set by the office. */
+    APP: { rider: { have: '1.3.2', min: '1.4.0' }, driver: { have: '2.2.7', min: '2.3.0' } },
+    /* The walkthrough ride's fiscal receipt (R58, drawn ahead: no fiscal API yet; console's «Ֆիսկալ հերթ»). */
+    FISCAL: { ride: '2417', no: '00041872', device: 'ՀԴՄ 51002417', tin: '02598741', seller: 'Էկո Տաքսի ՍՊԸ', at: '9 հոկտ. 2026, 9:51' },
+    /* The partner's top-up arriving (P10): Կարեն, blocked at −320 ֏ in the app, pays 5 000 ֏ at the office. */
+    TOPUP: { id: 'TU-0419', amount: 5000, before: -320, after: 4680, via: 'office', at: '10:12', by: 'Անի Դավթյան' },
+
     BOOKINGS: {
       /* Աննա's (ECO.RIDE.rider) walkthrough booking: tomorrow's airport run, pre-assigned to Սուրեն. */
       air: { id: 'B-0912', who: 'rider', when: 'Վաղը, 08:30', day: 'Շաբաթ, 10 հոկտ.', iso: '2026-10-10T08:30', time: '08:30', held: '08:00', activates: '08:15',
@@ -78,7 +107,10 @@
         rider: 'Աննա', phone: '091 23-45-67', booked: 'Այսօր, 9:38',
         driver: { name: 'Սուրեն Մկրտչյան', short: 'Սուրեն Մ.', first: 'Սուրեն', ini: 'ՍՄ', phone: '094 12-40-77', plate: '22 OU 447', car: 'Toyota Prius · մոխրագույն', rating: '4,8' },
         /* The activation story (R41/R43): the sweep assigns at 08:12, the driver starts early at 08:02 (held from 08:00). */
-        assignedAt: '08:12', startedAt: '08:02', etaMin: 6 },
+        assignedAt: '08:12', startedAt: '08:02', etaMin: 6,
+        /* Owner ruling 2026-10-12 (a): when the rider presses «Սկսել հիմա», the pre-assigned driver gets the first offer
+           (the normal offer screen, 20 s); if he declines or lets it expire the ride goes to normal dispatch. Drawn ahead. */
+        startNow: { at: '9:52', offerSec: 20, first: 'Սուրեն Մ.', fallback: 'dispatch' } },
       /* A booking whose pre-assigned driver was blocked: problemReason → the rider's warn tag «Մեքենան դեռ նշանակված չէ»,
          the console's driver_blocked pill. */
       sun: { id: 'B-0917', who: 'rider', when: 'կիրակի, 19:00', day: 'Կիրակի, 11 հոկտ.', iso: '2026-10-11T19:00', time: '19:00', held: '18:30', activates: '18:45',
@@ -88,8 +120,10 @@
       co: { id: 'B-0921', who: 'rider', when: 'երկուշաբթի, 09:00', day: 'Երկուշաբթի, 12 հոկտ.', iso: '2026-10-12T09:00', time: '09:00', held: '08:30', activates: '08:45',
         pickup: 'Կոմիտասի պող. 22', drop: 'Վազգեն Սարգսյանի 26/1', tier: 'Eco City', km: 4.1, min: 11, fare: 1100, pay: 'company', ref: 'MKT-204',
         rider: 'Աննա Հակոբյան', phone: '091 23-45-67', booked: 'Այսօր, 9:39', driver: null },
-      /* Արամ's (ECO.RIDE.driver) two commitments, as driver-preorders draws them. */
-      kom: { id: 'B-0898', who: 'driver', when: 'Այսօր, 10:05', iso: '2026-10-09T10:05', time: '10:05', held: '09:35', activates: '09:50',
+      /* Արամ's (ECO.RIDE.driver) two commitments, as driver-preorders draws them.
+         kom was 10:05 (held from 09:35), which held Արամ while the walkthrough offered him R-2417 at 9:41. Moved to 10:35:
+         held from 10:05, after R-2417 drops at 9:51, so the walkthrough and the hold no longer overlap (p1p2 pass). */
+      kom: { id: 'B-0898', who: 'driver', when: 'Այսօր, 10:35', iso: '2026-10-09T10:35', time: '10:35', held: '10:05', activates: '10:20',
         pickup: 'Կոմիտասի պող. 49', drop: 'Հանրապետության հր.', tier: 'Eco City', fare: 1200, pay: 'cash', rider: 'Լուսինե', phone: '098 51-20-44',
         driver: { name: 'Արամ Պետրոսյան', short: 'Արամ Պ.', plate: '01 ET 001' } },
       bag: { id: 'B-0904', who: 'driver', when: 'Վաղը, 07:40', iso: '2026-10-10T07:40', time: '07:40', held: '07:10', activates: '07:25',

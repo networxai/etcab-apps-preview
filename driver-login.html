@@ -70,6 +70,10 @@
   .ttl-c { font: var(--t-large); color: var(--ink); white-space: nowrap; }
   .sub-c { font: var(--t-body); color: var(--ink-2); white-space: nowrap; margin-top: var(--s2); }
   .chip-c { margin-top: var(--s4); background: var(--surface); box-shadow: var(--e1); }
+  .gate { position: relative; width: 128px; height: 128px; margin: 168px auto var(--s6); display: grid; place-items: center; }
+  .gate .ring { position: absolute; inset: 0; border-radius: 50%; background: var(--warn-soft); }
+  .gate .disc { position: relative; width: 64px; height: 64px; border-radius: 50%; background: var(--surface); box-shadow: var(--e2); display: grid; place-items: center; color: var(--warn); }
+  .gate .disc svg { width: 30px; height: 30px; }
   .page .btn-quiet { background: var(--surface); box-shadow: var(--e1); }  /* surface-2 on --ground is 1.0:1 — the button vanished */
 </style>
 </head>
@@ -87,7 +91,7 @@
     <div class="ptitle">Մուտք</div>
     <div class="psub">այն համարը, որը գրանցված է ձեր անունով</div>
     <div class="lbl">Հեռախոսահամար</div>
-    <div class="field focus"><span class="cc"><span class="flag" aria-hidden="true"><i></i><i></i><i></i></span>+374</span><span class="num">91 23 45 67<span class="caret"></span></span></div>
+    <div class="field focus"><span class="cc"><span class="flag" aria-hidden="true"><i></i><i></i><i></i></span>+374</span><span class="num">93 44 55 66<span class="caret"></span></span></div>
   </div>
   <div class="kp-act" data-s="phone"><button class="btn btn-brand">Ուղարկել կոդը</button></div>
   <div class="kp-act" data-s="offline">
@@ -98,7 +102,7 @@
   <!-- ── code / error ── -->
   <div class="content" data-s="code error">
     <div class="ptitle">Կոդ</div>
-    <div class="psub">SMS · +374 91 23 45 67</div>
+    <div class="psub">SMS · +374 93 44 55 66</div>
     <div class="otp" data-s="code" role="group" aria-label="Կոդ, 6 նիշ"><span>4</span><span>8</span><span>2</span><span class="on"><i class="caret"></i></span><span></span><span></span></div>
     <div class="otp err" data-s="error" role="group" aria-label="Կոդ, 6 նիշ" aria-describedby="ferr" aria-invalid="true"><span>4</span><span>8</span><span>2</span><span>1</span><span>9</span><span>3</span></div>
     <div class="ferr" id="ferr" data-s="error"><i data-lucide="circle-alert"></i>Կոդը սխալ է · մնաց 2 փորձ</div>
@@ -122,7 +126,7 @@
     </div>
   </div>
 
-  <div class="kp" aria-hidden="true" data-not="kicked">
+  <div class="kp" aria-hidden="true" data-not="kicked disabled deleted">
     <b>1</b><b>2</b><b>3</b><b>4</b><b>5</b><b>6</b><b>7</b><b>8</b><b>9</b><b class="fn"></b><b>0</b><b class="fn"><i data-lucide="delete"></i></b>
   </div>
 
@@ -142,6 +146,21 @@
       <button class="btn-text"><i data-lucide="phone"></i>Զանգել դիսպետչերին</button>
     </div>
   </div>
+  <!-- ── disabled (D02): the office switched the account off; the code step refuses with the reason, not «Չհաջողվեց» (drawn ahead) ── -->
+  <div class="content center" data-s="disabled deleted" style="top:54px">
+    <div class="gate" aria-hidden="true"><span class="ring"></span><span class="disc"><i data-lucide="user-lock" data-s="disabled"></i><i data-lucide="user-x" data-s="deleted"></i></span></div>
+    <div class="ttl-c" data-s="disabled">Հաշիվն անջատված է</div>
+    <div class="ttl-c" data-s="deleted">Հաշիվը ջնջված է</div>
+    <div class="sub-c" data-s="disabled">Անջատել է ընկերությունը</div>
+    <div class="sub-c" data-s="deleted">Նոր հաշիվ բացում է ընկերությունը</div>
+    <span class="chip chip-c" data-s="disabled"><i data-lucide="calendar"></i>8 հոկտ., 18:40-ից</span>
+    <span class="chip chip-c" data-s="deleted"><i data-lucide="phone"></i>+374 93 44 55 66</span>
+    <div class="grow"></div>
+    <div class="foot" style="width:100%">
+      <button class="btn btn-brand"><i data-lucide="phone"></i>Զանգել դիսպետչերին</button>
+      <button class="btn-text">Փոխել համարը</button>
+    </div>
+  </div>
 </main>
 <script src="audit.js"></script>
 <script>
@@ -149,6 +168,7 @@
   D.init([
     ['phone', 'Phone number'], ['code', 'SMS code'], ['dispatcher', 'Dispatcher-read code (§11.2)'],
     ['error', 'Wrong code'], ['offline', 'Offline'], ['kicked', 'Signed out: other device'],
+    ['disabled', 'Account disabled by the office'], ['deleted', 'Deleted account tries to sign in'],
   ])
   icons()
   D.noMap()

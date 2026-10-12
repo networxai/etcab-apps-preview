@@ -118,6 +118,30 @@
   .empty .t1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
   .empty .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
   .notice { margin-top: var(--s3); }
+  /* p1p2: receipt + arrived (P10), unavailable + noaccount (P08), notset (P09), month statement (P11). */
+  .rc-hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding: var(--s5) var(--s4) var(--s4); margin-top: var(--s2); }
+  .rc-hero .ok { width: 48px; height: 48px; border-radius: 50%; background: var(--ok-soft); color: var(--ok); display: grid; place-items: center; margin-bottom: var(--s3); }
+  .rc-hero .ok svg { width: 24px; height: 24px; stroke-width: 2.25; }
+  .rc-hero .p-hero { color: var(--ink); }
+  .rc-hero .l { font: var(--t-secondary); color: var(--ink-2); margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .kv .row { min-height: 52px; }
+  .kv .row .t1 { color: var(--ink-2); font: var(--t-secondary); }
+  .kv .row .end { font: var(--t-body-strong); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .delta { display: flex; align-items: center; justify-content: center; gap: var(--s2); margin-top: var(--s3); font: var(--t-body-strong); font-variant-numeric: tabular-nums; }
+  .delta .was { color: var(--warn); }
+  .delta svg { width: 18px; height: 18px; color: var(--ink-3); }
+  .arrived-go { margin-top: auto; }
+  .notset { padding: var(--s3) 0 var(--s3) 52px; display: flex; align-items: center; gap: var(--s2); font: var(--t-body-strong); color: var(--ink); }
+  .notset svg { width: 18px; height: 18px; color: var(--ink-2); }
+  .months { display: flex; gap: var(--s2); margin-top: var(--s2); }
+  .months .chip { height: 48px; padding: 0 16px; }
+  .months .chip[aria-pressed="true"] { background: var(--ink) !important; color: var(--surface); }
+  .mon .row { min-height: 52px; }
+  .mon .row .end { font: var(--t-body-strong); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .mon .row .end.plus { color: var(--p-plus); }
+  .mon .row .end.dim { color: var(--ink-2); font-weight: 400; }
+  .mon .row.tot .t1 { font: var(--t-headline); }
+  .mon .row .t1 { display: flex; align-items: center; gap: var(--s2); }
 </style>
 </head>
 <body>
@@ -130,20 +154,23 @@
   </div>
 
   <div class="content">
-    <div class="ptitle" data-s="main empty offline">Դրամապանակ</div>
-    <div class="ptitle" data-s="topup">Լիցքավորել</div>
+    <div class="ptitle" data-s="main empty offline arrived unavailable noaccount">Դրամապանակ</div>
+    <div class="ptitle" data-s="topup notset">Լիցքավորել</div>
+    <div class="ptitle" data-s="receipt">Լիցքավորում</div>
+    <div class="ptitle" data-s="statement">Քաղվածք</div>
     <div class="ptitle" data-s="ledger breakdown">Գործարքներ</div>
     <div class="ptitle" data-s="week">Շաբաթ</div>
 
     <!-- ── main / empty / offline ── -->
-    <section data-s="main empty offline">
+    <section data-s="main empty offline arrived">
       <div class="card balc" style="margin-top:var(--s2)">
         <span id="ring"></span>
         <div class="r">
           <div class="p-lbl">Մնացորդ</div>
           <div class="p-hero" data-s="main offline">18 450<small>֏</small></div>
           <div class="p-hero" data-s="empty">0<small>֏</small></div>
-          <span class="p-tag ok" data-s="main"><i data-lucide="check"></i>Պատվերներ՝ այո</span>
+          <div class="p-hero" data-s="arrived" data-amt="after"></div>
+          <span class="p-tag ok" data-s="main arrived"><i data-lucide="check"></i>Պատվերներ՝ այո</span>
           <span class="p-tag" data-s="offline"><i data-lucide="history"></i>09:40-ի դրությամբ</span>
           <span class="p-tag warn" data-s="empty"><i data-lucide="wallet"></i>Լիցքավորեք</span>
         </div>
@@ -152,6 +179,8 @@
         <div class="stat"><span class="l">Այսօր<i data-lucide="percent"></i></span><b>−1 470 ֏</b><span class="s">7 պատվեր · 15%</span></div>
         <a class="stat" href="?state=week"><span class="l">Շաբաթ<i data-lucide="chevron-right"></i></span><b>−14 100 ֏</b><span class="s">47 պատվեր</span></a>
       </div>
+      <div class="notice ok" data-s="arrived" role="status"><i data-lucide="circle-check"></i><div><b>Լիցքավորումը ստացվեց · <span data-amt="amount"></span></b>Նոր պատվերները նորից կգան</div></div>
+      <div class="delta" data-s="arrived" aria-label="Մնացորդը՝ առաջ և հիմա"><span class="was" data-amt="before"></span><i data-lucide="arrow-right"></i><span data-amt="after"></span></div>
       <div class="notice" data-s="empty"><i data-lucide="info"></i><div><b>Նախ՝ լիցքավորում</b>Վճարը՝ 15% ամեն պատվերից</div></div>
       <button class="btn btn-brand topbtn" data-s="main offline empty"><i data-lucide="plus"></i>Լիցքավորել</button>
 
@@ -173,7 +202,7 @@
     </section>
 
     <!-- ── top-up instructions ── -->
-    <section data-s="topup">
+    <section data-s="topup notset">
       <div class="card code" style="margin-top:var(--s2)">
         <div class="p-lbl">Ձեր վճարման կոդը</div>
         <div class="h"><span class="big" data-eco="ref">000041</span><button class="copy"><i data-lucide="copy"></i>Պատճենել</button></div>
@@ -186,8 +215,9 @@
 
       <div class="sect">Այսօր հասանելի</div>
       <div class="group meth">
-        <div class="row"><span class="ic"><i data-lucide="landmark"></i></span><span class="txt"><span class="t1">Բանկային փոխանցում</span><span class="t2"><span data-eco="bankname">Ամերիաբանկ</span> · 1 աշխատանքային օրում</span></span></div>
-        <div class="det">
+        <div class="row"><span class="ic"><i data-lucide="landmark"></i></span><span class="txt"><span class="t1">Բանկային փոխանցում</span><span class="t2" data-not="notset"><span data-eco="bankname">Ամերիաբանկ</span> · 1 աշխատանքային օրում</span><span class="t2" data-s="notset">Տվյալները դեռ լրացված չեն</span></span></div>
+        <div class="notset" data-s="notset"><i data-lucide="building-2"></i>Հարցրե՛ք գրասենյակում</div>
+        <div class="det" data-not="notset">
           <button class="cp" aria-label="Պատճենել ստացողին"><span class="k">Ստացող</span><span class="v" data-eco="holder">Էկո Տաքսի ՍՊԸ</span><i data-lucide="copy"></i></button>
           <button class="cp" aria-label="Պատճենել հաշվեհամարը"><span class="k">Հաշիվ</span><span class="v" data-eco="account">1570 •••• 4417</span><i data-lucide="copy"></i></button>
           <button class="cp" aria-label="Պատճենել վճարման կոդը"><span class="k">Նպատակ</span><span class="v" data-eco="ref">000041</span><i data-lucide="copy"></i></button>
@@ -196,6 +226,48 @@
       </div>
 
       <div class="soonline"><i data-lucide="clock"></i>Շուտով՝ Idram, Telcell, քարտ</div>
+    </section>
+
+    <!-- ── receipt (P10): one top-up, as the office recorded it (ECO.TOPUP) ── -->
+    <section data-s="receipt">
+      <div class="card rc-hero">
+        <span class="ok"><i data-lucide="check"></i></span>
+        <div class="p-hero" data-amt="amount+"></div>
+        <div class="l">Կանխիկ գրասենյակում · այսօր, <span data-amt="at"></span></div>
+        <div class="delta"><span class="was" data-amt="before"></span><i data-lucide="arrow-right"></i><span data-amt="after"></span></div>
+      </div>
+      <div class="group kv" style="margin-top:var(--s3)">
+        <div class="row"><span class="txt"><span class="t1">Վճարման կոդ</span></span><span class="end" data-eco="ref">000041</span></div>
+        <div class="row"><span class="txt"><span class="t1">Ընդունեց</span></span><span class="end" data-amt="by"></span></div>
+        <div class="row"><span class="txt"><span class="t1">Կտրոն</span></span><span class="end" data-amt="id"></span></div>
+        <div class="row"><span class="txt"><span class="t1">Պատվերներ</span></span><span class="end" style="color:var(--ok)">Այո, 10:12-ից</span></div>
+      </div>
+      <button class="btn btn-quiet on-ground pdf"><i data-lucide="share"></i>Կիսվել կտրոնով</button>
+    </section>
+
+    <!-- ── unavailable / noaccount (P08): wallet.unavailable, wallet.noAccount ── -->
+    <section data-s="unavailable noaccount">
+      <div class="empty" style="padding-top:96px">
+        <span class="ei" data-s="unavailable"><i data-lucide="cloud-off"></i></span><span class="ei" data-s="noaccount"><i data-lucide="wallet"></i></span>
+        <div class="t1" data-s="unavailable">Դրամապանակը հիմա հասանելի չէ</div>
+        <div class="t2" data-s="unavailable">Պատվերները չեն փոխվում</div>
+        <div class="t1" data-s="noaccount">Դրամապանակ դեռ չկա</div>
+        <div class="t2" data-s="noaccount">Գրասենյակը կբացի առաջին լիցքավորմամբ</div>
+      </div>
+    </section>
+
+    <!-- ── month statement (P11) ── -->
+    <section data-s="statement">
+      <div class="months"><button class="chip on-ground">Հոկտեմբեր</button><button class="chip on-ground" aria-pressed="true">Սեպտեմբեր</button><button class="chip on-ground">Օգոստոս</button></div>
+      <div class="group mon" style="margin-top:var(--s4)">
+        <div class="row"><span class="txt"><span class="t1">Սկիզբ</span><span class="t2">1 սեպտ.</span></span><span class="end dim">4 200 ֏</span></div>
+        <div class="row"><span class="txt"><span class="t1">Լիցքավորումներ</span><span class="t2">4 · գրասենյակ, բանկ</span></span><span class="end plus">+60 000 ֏</span></div>
+        <div class="row"><span class="txt"><span class="t1">Վճար 15%</span><span class="t2">181 պատվեր · 362 000 ֏</span></span><span class="end">−54 300 ֏</span></div>
+        <div class="row"><span class="txt"><span class="t1">Ճշգրտումներ</span><span class="t2">2 · սպասման վճար</span></span><span class="end plus">+600 ֏</span></div>
+        <div class="row"><span class="txt"><span class="t1">Հարկ<span class="p-prop">առաջարկ</span></span><span class="t2">անջատված է</span></span><span class="end dim">—</span></div>
+        <div class="row tot"><span class="txt"><span class="t1">Վերջ · 30 սեպտ.</span></span><span class="end">10 500 ֏</span></div>
+      </div>
+      <button class="btn btn-quiet on-ground pdf"><i data-lucide="file-down"></i>PDF</button>
     </section>
 
     <!-- ── ledger (also behind the breakdown sheet) ── -->
@@ -238,6 +310,9 @@
       </div>
       <button class="btn btn-quiet on-ground pdf"><i data-lucide="file-down"></i>PDF</button>
     </section>
+    <a class="go x arrived-go" href="driver-partner-home.html?state=online" data-s="arrived"><i data-lucide="power"></i>Գծում լինել</a>
+    <div class="arrived-go" data-s="unavailable"><button class="btn btn-brand"><i data-lucide="rotate-cw"></i>Կրկին փորձել</button></div>
+    <div class="arrived-go" data-s="noaccount"><button class="btn btn-brand"><i data-lucide="phone"></i>Զանգել գրասենյակ</button></div>
   </div>
 
   <!-- ── per-ride breakdown sheet ── -->
@@ -263,6 +338,8 @@
   const st = D.init([
     ['main', 'Balance · ring · recent'], ['topup', 'Top up · code, bank, office'], ['ledger', 'Ledger · fees, top-ups, adjustments'],
     ['breakdown', 'Per-ride fee breakdown'], ['week', 'Weekly statement'], ['empty', 'Empty (new partner)'], ['offline', 'Offline (cached)'],
+    ['receipt', 'Top-up receipt'], ['arrived', 'Money arrived · orders back on'], ['unavailable', 'Wallet unavailable · retry'], ['noaccount', 'No wallet yet'],
+    ['notset', 'Top-up details not set'], ['statement', 'Monthly statement'],
   ])
   D.partnerNav()
   /* Shared facts come from kit.js ECO, so the console and this app cannot disagree on the code or the bank. */
@@ -271,7 +348,12 @@
   if (st === 'breakdown') document.querySelectorAll('.content, .appbar').forEach((el) => el.setAttribute('data-overlay', ''))  /* under the modal sheet on purpose */
   const ringIn = (d) => '<span class="v">' + d + '</span><span class="u">օր</span>'
   const r = document.getElementById('ring')
-  if (r) r.outerHTML = st === 'empty' ? D.ring(96, 10, 0, ringIn('0')) : D.ring(96, 10, 8 / 14, ringIn('≈8'))
+  if (r) r.outerHTML = st === 'empty' ? D.ring(96, 10, 0, ringIn('0')) : st === 'arrived' ? D.ring(96, 10, 2 / 14, ringIn('≈2')) : D.ring(96, 10, 8 / 14, ringIn('≈8'))
+  /* P10: the one top-up both surfaces show (ECO.TOPUP; the console's Top-ups page records it). */
+  const T = ECO.TOPUP, hero = (n) => ECO.num(n) + '<small>֏</small>'
+  const A = { amount: ECO.amd(T.amount).replace(/^/, '+'), 'amount+': '+' + hero(T.amount), before: ECO.amd(T.before), after: ECO.amd(T.after), at: T.at, by: T.by, id: T.id }
+  document.querySelectorAll('[data-amt]').forEach((el) => { const k = el.dataset.amt; el.innerHTML = k === 'after' && el.classList.contains('p-hero') ? hero(T.after) : A[k] })
+  if (['arrived', 'receipt'].includes(st)) document.querySelector('.statusbar span').textContent = T.at
   icons()
   D.noMap()
 </script>

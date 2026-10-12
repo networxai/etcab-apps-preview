@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vehicles</title>
+<link rel="stylesheet" href="console.css">
+<link rel="stylesheet" href="corporate.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+<style>
+  /* Mirrors apps/operator components/admin/fleet-vehicles.tsx + vehicle-row.tsx + vehicle-create.tsx + vehicle-approval.tsx.
+     One list for every car: company cars (no owner: «Ընկերության») and partners' own cars (owner = the partner, a link to
+     their card). Plate / model / class / owner edit in place; «Հիմա» is who is driving it on an open shift. A partner car's
+     approval is decided here too: Approve is one press; Reject / Suspend open an inline panel under the row (reason + a
+     two-press ArmButton), never a modal. Retire is the row's reveal action (opacity, so it stays in the keyboard's reach)
+     and is armed: «Հանել · պատվերները կմնան». Class = the tier list, as everywhere in v2 (review X10). */
+  .tbl.vt td { height: 44px; }
+  .vt .plate { font-family: var(--mono); }
+  .vt .acts { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+  .vt .own { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .vt .own a { color: var(--ink); text-decoration: none; font: var(--c-strong); overflow: hidden; text-overflow: ellipsis; }
+  .vt .own a:hover { text-decoration: underline; }
+  .vt .co { color: var(--ink-muted); }
+  .vt tr.dec td { background: var(--surface-alt); }
+  .vt tr.panel td { background: var(--surface-alt); height: auto; padding-top: 10px; padding-bottom: 12px; white-space: normal; }
+  .decide { display: flex; align-items: flex-start; gap: 8px; }
+  .decide .f { width: 420px; }
+  .decide .f .hint.err { color: var(--danger-c); }
+  .rowmsg { display: flex; align-items: center; gap: 8px; font: var(--c-body); }
+  .ttl { display: flex; align-items: center; gap: 8px; }
+  .lgd { font: var(--c-small); color: var(--ink-faint); display: flex; gap: 12px; }
+  .addrow .inl { flex-wrap: nowrap; }
+  .addrow .input .val { font-family: var(--mono); }
+  .addrow .hintx { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; }
+  @media (max-width: 1400px) { .vt col.c-owner { width: 196px !important; } .vt col.c-now { width: 132px !important; } .hide-s { display: none; } }
+</style>
+</head>
+<body>
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <span class="crumb">Ավտոպարկ <i data-lucide="chevron-right"></i></span><h1>Մեքենաներ</h1><span class="crumb num" id="count"></span>
+      <div class="live"></div>
+    </header>
+    <div class="content one">
+      <section class="card page" aria-label="Մեքենաներ" id="list"></section>
+    </div>
+  </div>
+</div>
+<script>
+  /* ?state= (none) the list, a pending partner car selected with Approve / Reject · add (the inline create row, «N») ·
+     reject (the decision panel under Լևոն Թ.'s pending van: reason missing → «Պարտադիր է», ArmButton armed) ·
+     retire-refused (Retire on a car someone is driving: the API's refusal under the row, amber) · ?as=dispatcher (the desk
+     sees the list; adding, approving and retiring are an admin's). */
+  const q = new URLSearchParams(location.search)
+  const st = q.get('state') || '', disp = q.get('as') === 'dispatcher'
+  shell('vehicles')
+  const D = Object.fromEntries(DRIVERS.map((d) => [d.plate, d]))
+  /* Company cars: the shift cars of the fleet drivers on shift (console.js DRIVERS) and the free ones driver-shift.html offers. */
+  const FLEET = [
+    ['01 ET 001', 'Volkswagen ID.3', 'city'], ['22 OU 447', 'Toyota Prius', 'city'], ['18 OL 220', 'Volkswagen ID.3', 'kids'],
+    ['55 SM 620', 'Volkswagen ID.3', 'city'], ['35 OS 512', 'Volkswagen Multivan', 'van'], ['12 TT 304', 'Volkswagen ID.3', 'city'],
+    ['61 HS 450', 'Volkswagen ID.3', 'city'], ['01 ET 014', 'Tesla Model 3', 'partner'], ['01 ET 007', 'Volkswagen ID.4', 'business'],
+    ['01 ET 021', 'Մինիվեն', 'van'], ['01 ET 002', 'Volkswagen ID.3', 'city'], ['01 ET 009', 'Volkswagen ID.3', 'kids'],
+    ['01 ET 011', 'Toyota Prius', 'city'], ['01 ET 018', 'Volkswagen ID.4', 'business'], ['01 ET 005', 'Volkswagen ID.3', 'city'],
+    ['01 ET 003', 'Toyota Prius', 'city', 'retired'],
+  ].map(([plate, model, tier, ret]) => ({ plate, model, tier, owner: null, now: D[plate] && D[plate].type === 'fleet' ? D[plate] : null, retired: !!ret, appr: 'approved' }))
+  const PART = PARTNERS.map((p) => ({ plate: p.plate, model: p.model.split(' · ')[0].replace(/^VW /, 'Volkswagen '), tier: p.tier, owner: p, now: ['ride', 'free', 'away'].includes(p.state) ? p : null, retired: false, appr: p.appr }))
+  /* Pending first (it waits on somebody here), then suspended, company cars, partners' cars, retired. */
+  const rank = (v) => (v.retired ? 4 : v.owner && v.appr === 'pending' ? 0 : v.owner && v.appr !== 'approved' ? 1 : v.owner ? 3 : 2)
+  const ALL = [...PART, ...FLEET].sort((a, b) => rank(a) - rank(b))
+  document.getElementById('count').textContent = ALL.length
+  const selPlate = st === 'retire-refused' ? '01 ET 001' : '50 LT 650'
+  const named = (verb, v) => `${verb} — ${v.plate}`
+
+  const statePill = (v) => {
+    if (v.retired) return '<span class="pill"><i class="d"></i>Հանված</span>'
+    if (v.owner && v.appr !== 'approved') { const [tone, word, ic] = { pending: ['warn', 'Սպասում է հաստատման', 'clock'], rejected: ['', 'Մերժված', 'x'], suspended: ['warn', 'Կասեցված', 'pause'] }[v.appr]; return `<span class="pill ${tone}"><i data-lucide="${ic}"></i>${word}</span>` }
+    return '<span class="pill ok"><i class="d"></i>Շահագործման մեջ</span>'
+  }
+  const acts = (v) => {
+    if (disp) return ''
+    if (v.retired) return '<button class="btn ghost s rev-act">Վերադարձնել</button>'
+    if (v.owner && v.appr === 'pending') return `<button class="btn secondary s" aria-label="${named('Հաստատել', v)}">Հաստատել</button><button class="btn ghost s" aria-expanded="${st === 'reject' && v.plate === selPlate}" aria-label="${named('Մերժել', v)}">Մերժել</button>`
+    if (v.owner && v.appr === 'suspended') return `<button class="btn secondary s" aria-label="${named('Հաստատել', v)}">Հաստատել</button>`
+    if (v.owner) return `<button class="btn ghost s rev-act" aria-label="${named('Կասեցնել', v)}">Կասեցնել</button>`
+    const armed = st === 'retire-refused' && v.plate === selPlate
+    return `<button class="btn s ${armed ? 'armed' : 'ghost rev-act'}" aria-label="${named('Հանել շահագործումից', v)}">${armed ? 'Հանել · պատվերները կմնան' : '<i data-lucide="archive"></i>Հանել'}</button>`
+  }
+  const row = (v) => {
+    const on = v.plate === selPlate && (st === 'reject' || st === 'retire-refused' || st === '')
+    const T = tierById(v.tier)
+    let h = `<tr class="${v.retired ? 'off ' : ''}${on ? 'on' : ''}"><td><span class="plate">${v.plate}</span></td><td>${v.model}</td>
+      <td><span class="carcell"><span class="car xs">${carImg(v.tier)}</span>${T.name}</span></td>
+      <td>${v.owner ? `<span class="own"><span class="typ partner" title="Գործընկեր" aria-label="Գործընկեր"><i data-lucide="handshake"></i></span><a href="partners.html?theme=${THEME}" aria-label="Բացել գործընկերոջ քարտը — ${v.owner.name}">${v.owner.name}</a></span>` : '<span class="co">Ընկերության</span>'}</td>
+      <td>${v.now ? `<span class="who"><span class="av" style="width:24px;height:24px;font-size:11px">${v.now.ini}</span><span>${v.now.name.split(' ')[0]} ${v.now.name.split(' ')[1][0]}.</span></span>` : '<span class="dash" title="Ոչ ոք չի վարում">—</span>'}</td>
+      <td>${statePill(v)}</td><td><span class="acts">${acts(v)}</span></td></tr>`
+    if (on && st === 'reject') h += `<tr class="panel"><td colspan="7"><div class="decide" data-testid="vehicle-decision">
+        <div class="f"><div class="input err focus" role="textbox" aria-label="Պատճառ" aria-invalid="true"><span class="val ph">Ինչ պետք է ուղղի գործընկերը</span></div><p class="hint err" role="status">Պարտադիր է</p></div>
+        <button class="btn s armed">Մերժել · գործընկերը չի կարող վարել</button><button class="btn ghost s">Չեղարկել</button></div></td></tr>`
+    if (on && st === 'retire-refused') h += `<tr class="panel"><td colspan="7"><div class="notice amber rowmsg" role="status"><i data-lucide="triangle-alert"></i><span>Այս մեքենայով վարորդ է հերթապահում։ Նախ տեղափոխեք նրան այլ մեքենա կամ ավարտեք հերթապահությունը, ապա հանեք։</span></div></td></tr>`
+    return h
+  }
+  const n = (f) => ALL.filter(f).length
+  const chips = TIERS.filter((t) => ALL.some((v) => v.tier === t.id)).map((t) => `<span class="chip" role="button" aria-pressed="false">${t.name} <span class="c num">${n((v) => v.tier === t.id && !v.retired)}</span></span>`).join('')
+  const add = st === 'add' ? `<tr class="addrow"><td colspan="7"><div class="inl">
+      <div class="input focus" style="width:132px" role="textbox" aria-label="Համարանիշ"><span class="val">01 ET 024</span></div>
+      <div class="input" style="width:200px" role="textbox" aria-label="Մոդել"><span class="val" style="font-family:var(--font)">Volkswagen ID.3</span></div>
+      <div class="select input" style="width:150px" role="combobox" aria-label="Դաս"><span class="val" style="font-family:var(--font)">Eco City</span><i data-lucide="chevrons-up-down"></i></div>
+      <div class="select input" style="width:220px" role="combobox" aria-label="Սեփականատեր"><span class="val ph" style="font-family:var(--font)">Ընկերության</span><i data-lucide="chevrons-up-down"></i></div>
+      <button class="btn primary s"><i data-lucide="check"></i>Ավելացնել մեքենա <span class="kbd">↵</span></button><button class="btn ghost s">Չեղարկել</button>
+      <span class="hintx hide-s">Վարորդը կցում է հերթափոխը սկսելիս</span></div></td></tr>` : ''
+
+  document.getElementById('list').innerHTML = `
+    <div class="toolrow">
+      <div class="input" style="width:260px"><i data-lucide="search"></i><span class="val ph">օր. 35 SO 042 կամ Prius</span><span class="kbd">/</span></div>
+      <div role="group" aria-label="Զտիչներ" class="row-flex" style="gap:6px;flex-wrap:wrap">
+        <span class="chip" role="button" aria-pressed="false"><i data-lucide="clock"></i>Սպասում է հաստատման <span class="c num">${n((v) => v.owner && v.appr === 'pending')}</span></span>${chips}
+        <span class="chip" role="button" aria-pressed="false">Հանված <span class="c num">${n((v) => v.retired)}</span></span></div>
+      <span class="sp"></span>
+      ${disp ? '' : `<button class="btn secondary" aria-expanded="${st === 'add'}" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր մեքենա <span class="kbd">N</span></button>`}
+    </div>
+    ${disp ? '<p class="explain" style="padding-top:0;padding-bottom:10px">Մեքենա ավելացնել, հաստատել և հանել կարող է ադմինը։ Դիսպետչերը տեսնում է, ով ինչ մեքենայով է։</p>' : ''}
+    <div class="scroll-y grow" data-truncate>
+      <table class="tbl vt" aria-label="Մեքենաներ"><colgroup><col style="width:116px"><col class="c-model"><col style="width:160px"><col class="c-owner" style="width:220px"><col class="c-now" style="width:150px"><col style="width:196px"><col style="width:220px"></colgroup>
+        <thead><tr><th>Համարանիշ</th><th>Մոդել</th><th>Դաս</th><th>Սեփականատեր</th><th>Հիմա</th><th>Վիճակ</th><th></th></tr></thead>
+        <tbody>${add}${ALL.map(row).join('')}</tbody></table></div>`
+  icons()
+  /* Open on the row the state is about. */
+  const on = document.querySelector('tr.on')
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

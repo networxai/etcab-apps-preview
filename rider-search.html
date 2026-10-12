@@ -73,6 +73,11 @@
   .picked .btn { margin-top: var(--s3); }
   .picked .sk.t { width: 160px; height: 18px; }
   .picked .sk.s { width: 110px; height: 14px; margin-top: 6px; }
+  /* R17: search entered from «Նախապես». One brand-soft line under the fields says this trip is for later; the time is the next step. */
+  .laterline { display: flex; align-items: center; gap: var(--s2); min-height: 44px; margin: var(--s2) var(--margin) 0; padding: 0 var(--s3);
+    border-radius: var(--r-card); background: var(--brand-soft); color: var(--brand-ink); font: var(--t-secondary-strong); }
+  .laterline svg { width: 18px; height: 18px; flex: none; }
+  .laterline span { color: var(--ink-2); font: var(--t-secondary); }
 </style>
 </head>
 <body>
@@ -122,8 +127,12 @@
     states: [
       { id: 'start', group: 'Search', label: 'Before typing', note: 'Recents and saved places first; “on the map” is the first row',
         html: () => page({ html: `<div class="list">${onMap()}
-          <div class="sect">Պահպանված հասցեներ</div>${rows([['house', 'Տուն', 'Կոմիտասի պող. 22', '4,3 կմ'], ['briefcase', 'Աշխատանք', 'Վազգեն Սարգսյան 10', '0,4 կմ']])}
+          <div class="sect">Պահպանված հասցեներ</div>${rows([['house', 'Տուն', 'Կոմիտասի պող. 22', '4,3 կմ'], ['briefcase', 'Աշխատանք', 'Վազգեն Սարգսյանի 26/1', '0,4 կմ']])}
           <div class="sect">Վերջին</div>${rows([['history', 'Կասկադ', 'Թամանյան փողոց', '2,1 կմ'], ['plane', 'Զվարթնոց օդանավակայան', 'Զվարթնոց', '12 կմ'], ['history', 'Մատենադարան', 'Մաշտոցի պող. 53', '1,6 կմ']])}</div>` }) },
+      { id: 'later', group: 'Search', label: 'For later', note: 'R17 (drawn ahead: search.tsx only sets draft.later). Reached from «Նախապես»: one brand-soft line under the fields, so the rider knows the time comes next; book then opens on the When sheet',
+        html: () => page({ html: `<div class="laterline" role="note">${R.i('calendar-clock')}Նախապես<span>· ժամը կընտրեք հաջորդ քայլում</span></div><div class="list">${onMap()}
+          <div class="sect">Պահպանված հասցեներ</div>${rows([['house', 'Տուն', 'Կոմիտասի պող. 22', '4,3 կմ'], ['briefcase', 'Աշխատանք', 'Վազգեն Սարգսյանի 26/1', '0,4 կմ']])}
+          <div class="sect">Վերջին</div>${rows([['plane', 'Զվարթնոց օդանավակայան', 'Զվարթնոց', '12 կմ'], ['history', 'Կասկադ', 'Թամանյան փողոց', '2,1 կմ']])}</div>` }) },
       { id: 'suggest', group: 'Search', label: 'Suggest', note: '2GIS suggest; the typed part is bolded where it matched (name or street)',
         html: () => page({ to: [M], html: `<div class="list">${rows([
           ['map-pin', `<b>${M}</b>ոցի պողոտա`, 'Կենտրոն, Երևան', '0,8 կմ'],

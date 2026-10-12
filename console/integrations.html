@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integrations</title>
+<link rel="stylesheet" href="console.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+<style>
+  /* Mirrors apps/operator components/admin/integrations.tsx (§9.6, Config screen §10.D.3): two cards, maps then sms, 6 + 6.
+     A credential is NEVER displayed, because GET /integrations answers only `configured` and `updatedAt`: every field
+     renders empty even when set, and there is no preview column. Field names and hints stay English on purpose (2GIS's and
+     the SMS broker's own names — the one recorded exception to Armenian-first); title, status, save and errors are hy. */
+  .content { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .head2 { grid-column: 1 / 3; padding: 4px 4px 0; display: flex; flex-direction: column; gap: 8px; }
+  .head2 p { font: var(--c-body); color: var(--ink-muted); max-width: 900px; }
+  .fl { padding: 8px var(--inset) 0; display: flex; flex-direction: column; gap: 10px; }
+  .fd .label { display: flex; align-items: center; gap: 6px; }
+  .fd .label .mono { font-size: 12px; color: var(--ink); }
+  .fd .req { font: var(--c-small); color: var(--ink-muted); }
+  .fd .hint { font: var(--c-small); color: var(--ink-muted); margin-top: 4px; }
+  .fd .why { font: var(--c-small); color: var(--danger-c); margin-top: 4px; display: flex; gap: 4px; align-items: center; }
+  .fd .input .val { font-family: var(--mono); }
+  .ft { display: flex; align-items: center; gap: 8px; padding: 12px var(--inset); margin-top: auto; border-top: 1px solid var(--line-soft); }
+  .ft .notice { flex: 1; }
+</style>
+</head>
+<body>
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <span class="crumb">Կառավարում <i data-lucide="chevron-right"></i></span><h1>Ինտեգրումներ</h1>
+      <div class="live"></div>
+    </header>
+    <div class="content">
+      <div class="head2"><p>Քարտեզի և SMS-ի բանալիները։ Պահպանվածը երբեք չի ցուցադրվում։</p></div>
+      <section class="card" aria-labelledby="k-maps" id="maps"></section>
+      <section class="card" aria-labelledby="k-sms" id="sms"></section>
+    </div>
+  </div>
+</div>
+<script>
+  shell('integrations')
+  const REFUSED = new URLSearchParams(location.search).get('state') === 'refused'
+  const F = {
+    maps: [['apiKey', 1, 1, 'Server key. Used for address search, geocoding and route estimates. Must be a server-side key — an SDK-tagged key is bound to a mobile application and is refused with 403.'],
+      ['browserKey', 0, 1, 'Sent to browsers and handsets to draw the map. Scope it to MapGL and Map Tiles only, restricted by origin — a search-capable key here spends the fleet’s monthly quota from anyone’s devtools.'],
+      ['routingKey', 0, 1, 'Only if route estimates live on a different key from search. Left empty, routing uses the server key.'],
+      ['locale', 0, 0, 'The language 2GIS answers in, e.g. hy_AM.'],
+      ['location', 0, 0, 'Where address suggestions are biased towards, as "lon,lat", e.g. 44.4991,40.1792. Without it a street name may be answered from another city.'],
+      ['baseUrl', 0, 0, 'Only for a sandbox. Leave empty for the live API.']],
+    sms: [['login', 1, 0, 'The broker account.'], ['password', 1, 1, 'The broker password.'], ['sender', 1, 0, 'The name a customer sees the message from.'],
+      ['baseUrl', 1, 0, 'The broker’s address, as an absolute URL. Messages are sent to <baseUrl>/broker-api/send.']],
+  }
+  /* What the owner has typed in the refused state (a re-save of the maps card): secrets stay dots, the bad value is shown. */
+  const TYPED = REFUSED ? { apiKey: '••••••••••••••••••••', browserKey: '••••••••••••••••••••', locale: 'hy_AM', location: '40.1792,44.4991' } : {}
+  const card = (kind, title, sub, when) => {
+    const fields = F[kind].map(([n, req, secret, hint]) => {
+      const bad = REFUSED && kind === 'maps' && n === 'location'
+      const v = kind === 'maps' ? TYPED[n] : null
+      return `<div class="fd"><label class="label"><span class="mono">${n}</span>${req ? '<span class="req">· Պարտադիր է</span>' : ''}</label>
+        <span class="input${bad ? ' err' : ''}">${secret ? '<i data-lucide="key-round"></i>' : ''}<span class="val${v ? '' : ' ph'}">${v || ''}</span></span>
+        ${bad ? '<div class="why" id="why-loc"><i data-lucide="circle-alert"></i>Մերժվեց — ստուգեք այս արժեքը մատակարարի փաստաթղթերով։</div>' : ''}<div class="hint">${hint.replace('<', '&lt;').replace('>', '&gt;')}</div></div>`
+    }).join('')
+    const status = when ? `<span class="pill ok"><i class="d"></i>Կարգավորված է · <span class="num">${when}</span></span>` : '<span class="pill"><i class="d"></i>Կարգավորված չէ</span>'
+    const foot = REFUSED && kind === 'maps'
+      ? `<div class="notice red" role="alert"><i data-lucide="circle-alert"></i><span>Արժեքները մերժվեցին։ Ստուգեք նշված դաշտերը մատակարարի փաստաթղթերով և պահպանեք կրկին։</span></div>`
+      : `<div class="notice neutral"><i data-lucide="info"></i><span>Պահպանելը փոխարինում է ամբողջ բանալին։ Լրացրեք բոլոր դաշտերը, ոչ միայն փոփոխվածը։</span></div>`
+    return `<div class="card-h"><h2 id="k-${kind}">${title}</h2><span class="sub">${sub}</span><span class="end">${status}</span></div>
+      <div class="scroll-y grow"><div class="fl">${fields}</div></div>
+      <div class="ft">${foot}<button class="btn primary">Պահպանել</button></div>`
+  }
+  document.getElementById('maps').innerHTML = card('maps', 'Քարտեզ', '2GIS', '02.10.2026, 14:20')
+  document.getElementById('sms').innerHTML = card('sms', 'SMS', 'broker', '28.09.2026, 11:05')
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

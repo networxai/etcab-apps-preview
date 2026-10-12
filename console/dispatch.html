@@ -12,6 +12,7 @@
 <script src="../kit.js"></script>
 <script src="../routes.js"></script>
 <script src="console.js"></script>
+<script src="dispatch-states.js"></script>
 <script src="console-audit.js"></script>
 <style>
   .content { grid-template-columns: 452px minmax(340px, 380px) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) 100px; }
@@ -247,6 +248,7 @@
     'assign-force': '<button class="btn secondary xs">Նշանակել <span class="kbd">A</span></button><button class="btn secondary xs">Ուղարկել որոնման</button><button class="btn secondary xs">Փոխել վիճակը…</button><button class="btn ghost xs icon" aria-label="Զանգել ուղևորին"><i data-lucide="phone"></i></button>',
     'search-assign': '<button class="btn secondary xs">Նշանակել <span class="kbd">A</span></button><button class="btn secondary xs">Ուղարկել որոնման</button><button class="btn secondary xs">Փոխել վիճակը…</button><button class="btn ghost xs icon" aria-label="Զանգել ուղևորին"><i data-lucide="phone"></i></button>',
   }
+  if (window.DX) DX.lanes(lanes, acts) /* dispatch-states.js: ?state= / ?intake= variants */
   let h = ''
   for (const L of lanes) {
     h += `<div class="l-${L.k}"><div class="lane-h"><i data-lucide="${L.ic}"></i>${L.name} <span class="c num">${L.rows.length}</span><span class="end">${L.end}</span></div>`
@@ -401,6 +403,7 @@
   htmlMarker(map, [40.1990, 44.5205], '<div class="mk-pin l-problems" style="transform:none"><i></i><b>07:34</b></div>', [90, 24], [12, 12])
   htmlMarker(map, [40.1735, 44.5005], '<div class="mk-pin l-unassigned" style="transform:none"><i></i><b>01:06</b></div>', [90, 24], [12, 12])
   htmlMarker(map, [40.1800, 44.5185], '<div class="mk-pin l-unassigned" style="transform:none"><i></i><b>00:42</b></div>', [90, 24], [12, 12])
+  if (window.DX) DX.after()
 </script>
 </body>
 </html>

@@ -86,6 +86,19 @@
   .reason .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
   .reason .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .reason svg { width: 20px; height: 20px; color: var(--warn); flex: none; }
+  .reason .t2.wrap { white-space: normal; }
+  /* Save a place (R64, drawn ahead: POST /customer/places exists, the app has no add UI). The address is already chosen
+     (from search, or offered after a ride); the rider only names it: three label chips, Other opens a name field. */
+  .pa-addr { display: flex; gap: var(--s3); align-items: center; padding: var(--s3) var(--s4); border-radius: var(--r-card); background: var(--surface-2); }
+  .pa-addr svg { width: 20px; height: 20px; color: var(--ink-2); flex: none; }
+  .pa-addr .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .pa-addr .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .pa-addr .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .pa-lbl { font: var(--t-secondary-strong); color: var(--ink-2); margin: var(--s4) 0 var(--s2); }
+  .pa-chips { display: flex; gap: var(--s2); flex-wrap: wrap; }
+  .pa-chips .chip svg { width: 16px; height: 16px; }
+  .sheet.modal .field { margin-top: var(--s3); height: 56px; }
+  .sheet.modal.pa-sheet { bottom: 251px; padding-bottom: var(--s4); } /* rides on the raised keyboard, as iOS moves it */
 </style>
 </head>
 <body>
@@ -122,12 +135,12 @@
 
   const places = (all) => `<div class="page">${back()}<h1 class="large">Հասցեներ</h1><div class="gap"></div>
     ${grp([
-      r('house', 'Տուն', `<button class="rm" aria-label="Հեռացնել Տուն">${R.i('circle-minus')}</button>`, { t2: 'Կոմիտասի պող. 22', chev: false, btn: false }),
-      r('briefcase', 'Աշխատանք', `<button class="rm" aria-label="Հեռացնել Աշխատանք">${R.i('circle-minus')}</button>`, { t2: 'Վազգեն Սարգսյան 10', chev: false, btn: false }),
-      ...(all ? [r('heart', 'Մայրիկի մոտ', `<button class="rm" aria-label="Հեռացնել Մայրիկի մոտ">${R.i('circle-minus')}</button>`, { t2: 'Դավթաշեն, 3-րդ թաղ. 14', chev: false, btn: false })] : []),
+      r('house', 'Տուն', `<button class="rm" aria-label="Հեռացնել Տուն">${R.i('circle-minus')}</button>`, { t2: ECO.CUSTOMER.places.home, chev: false, btn: false }),
+      r('briefcase', 'Աշխատանք', `<button class="rm" aria-label="Հեռացնել Աշխատանք">${R.i('circle-minus')}</button>`, { t2: ECO.CUSTOMER.places.work, chev: false, btn: false }),
+      ...(all === true || all === 'failed' ? [r('heart', 'Մայրիկի մոտ', `<button class="rm" aria-label="Հեռացնել Մայրիկի մոտ">${R.i('circle-minus')}</button>`, { t2: 'Դավթաշեն, 3-րդ թաղ. 14', chev: false, btn: false })] : []),
       r('plus', 'Ավելացնել հասցե', '', { chev: false, cls: 'add' }),
     ])}
-    ${all ? '' : `<div class="toast" role="status">${R.i('check')}Հասցեն հեռացվեց<button class="undo">Հետարկել</button></div>`}</div>`
+    ${all === 'failed' ? `<div class="toast" role="status">${R.i('circle-alert')}Հասցեն հեռացնել չստացվեց<button class="undo">Կրկնել</button></div>` : all ? '' : `<div class="toast" role="status">${R.i('check')}Հասցեն հեռացվեց<button class="undo">Հետարկել</button></div>`}</div>`
 
   const wallet = (debt) => `<div class="page">${back()}<h1 class="large">Հաշվեկշիռ</h1>
     <div class="bal">${debt
@@ -140,6 +153,12 @@
       r('building-2', ECO.COMPANY.name, '', { chev: false, btn: false, t2: 'Ընկերության հաշիվ · ընտրվում է պատվիրելիս' }),
       r('wallet', ECO.PAY.card.label, `<span class="soon">${ECO.PAY.soon}</span>`, { chev: false, btn: false, cls: 'off' }),
     ])}</div>`
+
+  /* delete-blocked variants: account.deleteBlocked as the title, the API's reason as the body (account.blocked*). */
+  const blocked = (ic, why, cta) => over(`<div class="grabber"></div><div class="badge warn">${R.i('triangle-alert')}</div>
+          <div class="mhead"><span class="h-title">Հաշիվը հնարավոր չէ ջնջել հիմա</span></div>
+          <div class="reason">${R.i(ic)}<span class="txt"><span class="t2 wrap" style="font:var(--t-body);color:var(--ink)">${why}</span></span></div>
+          <div class="btns"><button class="btn btn-brand">${cta}</button><button class="btn btn-quiet">Փակել</button></div>`)
 
   Rider.page({
     title: 'Rider · Account',
@@ -154,10 +173,20 @@
           ${grp([r('file-text', 'Օգտագործման պայմաններ'), r('shield', 'Գաղտնիության քաղաքականություն')])}</div>` },
       { id: 'name', group: 'Account', label: 'Edit name', note: 'One field; the driver greets the rider by it',
         html: () => `<div class="page on-surface">${back('Անուն')}<div class="form">
-          <div class="field focus"><span class="num"><span class="lbl">Անուն</span><span class="v">Անի Հակոբյան<span class="caret"></span></span></span></div>
+          <div class="field focus"><span class="num"><span class="lbl">Անուն</span><span class="v">${ECO.CUSTOMER.name}<span class="caret"></span></span></span></div>
           <button class="btn btn-brand">Պահպանել</button></div>${R.keyboard()}</div>` },
       { id: 'places', group: 'Places', label: 'Saved places', note: 'Remove is visible on every row (44pt), not a hidden swipe', html: () => places(true) },
       { id: 'place-removed', group: 'Places', label: 'Removed + undo', note: 'No confirm dialog: the undo is the safety net', html: () => places(false) },
+      { id: 'place-add', group: 'Places', label: 'Save a place', note: 'R64, drawn ahead: offered on the done screen and from a search result («Պահպանել հասցեն»). The address is fixed; the rider picks Home, Work or Other and, for Other, types a name. Home and Work replace the old ones (the sheet says so). One primary, keyboard up (new strings)',
+        html: () => `<div data-overlay aria-hidden="true" inert style="position:absolute;inset:0">${places(true)}</div><div class="scrim"></div>
+          <section class="sheet modal r pa-sheet" role="dialog" aria-modal="true">${mhead('Պահպանել հասցեն')}
+            <div class="pa-addr">${R.i('map-pin')}<span class="tx"><span class="t1">${ECO.RIDE.pickup}</span><span class="t2">${ECO.RIDE.pickupNote}</span></span></div>
+            <div class="pa-lbl">Անվանում</div>
+            <div class="pa-chips" role="radiogroup" aria-label="Անվանում">
+              <button class="chip tog" role="radio" aria-checked="false">${R.i('house')}Տուն</button><button class="chip tog" role="radio" aria-checked="false">${R.i('briefcase')}Աշխատանք</button><button class="chip tog" role="radio" aria-checked="true" aria-pressed="true">${R.i('heart')}Այլ</button></div>
+            <div class="field focus"><span class="num"><span class="lbl">Անուն</span><span class="v">Մարզասրահ<span class="caret"></span></span></span></div>
+            <div class="btns"><button class="btn btn-brand">Պահպանել</button></div></section>${R.keyboard()}` },
+      { id: 'place-remove-failed', group: 'Places', label: 'Remove failed', note: 'R64, real string (account.placeDeleteFailed): the row comes back and the toast offers a retry. Neutral, not red: nothing was lost', html: () => places('failed') },
       { id: 'wallet', group: 'Balance', label: 'Debt', note: 'account.debtNote said plainly; the linked company is listed (AccountSheets.tsx WalletSheet), card is shown as «Շուտով», not hidden', html: () => wallet(true) },
       { id: 'wallet-clear', group: 'Balance', label: 'Clear', html: () => wallet(false) },
       { id: 'language', group: 'Settings', label: 'Language', note: 'Each language named, and coded, in its own script (ՀՅ / РУ / EN, as the driver app); applies on tap',
@@ -176,6 +205,10 @@
           <div class="mhead"><span class="h-title">Հաշիվը հնարավոր չէ ջնջել հիմա</span></div>
           <div class="reason">${R.i('wallet')}<span class="txt"><span class="t1">Չմարված պարտք</span><span class="t2">${A(DEBT)} · 7 հոկտեմբերի</span></span></div>
           <div class="btns"><button class="btn btn-brand">Դիտել հաշվեկշիռը</button><button class="btn btn-quiet">Փակել</button></div>`) },
+      { id: 'delete-blocked-ride', group: 'Leave', label: 'Delete blocked · ride', note: 'R63, real (account.blockedRide): a ride is still running. The way out is the ride itself',
+        html: () => blocked('car-front', 'Ընթացիկ ուղևորությունը նախ պետք է ավարտվի կամ չեղարկվի', 'Բացել ուղևորությունը') },
+      { id: 'delete-blocked-other', group: 'Leave', label: 'Delete blocked · other', note: 'R63, real (account.blockedOther): any other refusal. The office decides, so the action is the office phone',
+        html: () => blocked('headset', 'Հիմա հնարավոր չէ։ Կապվեք գրասենյակի հետ', 'Զանգել գրասենյակ') },
     ],
   })
 </script>

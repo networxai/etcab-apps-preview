@@ -132,6 +132,14 @@
   .eta { display: flex; align-items: center; gap: 8px; margin-top: var(--s3); font: var(--t-body-strong); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .eta svg { width: 18px; height: 18px; color: var(--brand-ink); }
   .sheet .go.x { height: 76px; }
+  .cobadge { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: var(--r-pill); background: var(--surface-2); color: var(--ink); font: var(--t-caption); white-space: nowrap; box-shadow: inset 0 0 0 1px var(--hairline); }
+  .cobadge svg { width: 14px; height: 14px; }
+  .notice.co { margin-top: var(--s4); background: var(--surface-2); color: var(--ink); }
+  .notice.co svg { color: var(--ink); }
+  .notice.gone { margin-top: var(--s4); background: var(--surface); box-shadow: var(--e1); }
+  .notice.gone b { font-size: 15px; }
+  .startctl .notice div { white-space: normal; }
+  .startctl .go.long { font: var(--t-headline); padding: 0 var(--s4); text-align: center; }
   .spin { animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   @media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
@@ -142,35 +150,38 @@
 
   <!-- ═════════ LIST / OFFLINE / EMPTY / ERROR: parked page ═════════ -->
   <div class="offstrip" role="status" data-s="offline"><i data-lucide="cloud-off"></i>կապ չկա — ցուցադրվում է պահված ցուցակը</div>
-  <div class="appbar" data-s="list offline empty error"><button class="iconbtn" aria-label="Ետ"><i data-lucide="arrow-left"></i></button></div>
-  <section class="content" data-s="list offline empty error">
+  <div class="appbar" data-s="list offline empty error gone"><button class="iconbtn" aria-label="Ետ"><i data-lucide="arrow-left"></i></button></div>
+  <section class="content" data-s="list offline empty error gone">
     <div class="ptitle">Նախապես ամրագրված</div>
     <div class="psub" data-s="list">3 պատվեր · բոլորը՝ Eco City</div>
+    <div class="psub" data-s="gone">2 պատվեր · բոլորը՝ Eco City</div>
+    <!-- D32 preorders.gone: the dispatcher released or reassigned a booking; it leaves the list with one neutral line (not red). -->
+    <div class="notice gone" data-s="gone" role="status"><i data-lucide="calendar-x"></i><div><b>Այս պատվերն այլևս ձերը չէ — ցուցակը փոխվել է</b>Վաղը, 07:40 · Բաղրամյան պող. 24</div></div>
     <div class="psub stale" data-s="offline"><i data-lucide="history"></i>թարմացվել է 09:12</div>
 
-    <div class="list" data-s="list offline">
+    <div class="list" data-s="list offline gone">
       <div class="sect"><span>Այսօր</span><span class="n">2</span></div>
-      <button class="card pcard now" aria-label="Այսօր 10:05, Կոմիտասի պողոտա 49 — Հանրապետության հրապարակ, 1 200 դրամ, կարող եք սկսել">
+      <button class="card pcard now" aria-label="Այսօր 10:35, Կոմիտասի պողոտա 49 — Հանրապետության հրապարակ, 1 200 դրամ, կարող եք սկսել">
         <span class="pc-l">
-          <span class="pc-top"><span data-ring="24|րոպե|.8|brand"></span><span><span class="pc-time" style="display:block">10:05</span><span class="pc-hold" style="display:block">սկսել՝ 09:35-ից</span></span></span>
+          <span class="pc-top"><span data-ring="24|րոպե|.8|brand"></span><span><span class="pc-time" style="display:block">10:35</span><span class="pc-hold" style="display:block">սկսել՝ 10:05-ից</span></span></span>
           <span class="pc-ad"><span class="d a"></span>Կոմիտասի պող. 49</span>
           <span class="pc-ad"><span class="d b"></span>Հանրապետության հր.</span>
           <span class="pc-bot"><span class="startchip" data-not="offline"><i data-lucide="navigation"></i>Սկսել</span><span class="startchip off" data-s="offline"><i data-lucide="wifi-off"></i>Կապ է պետք</span><span class="fare">1 200 ֏</span></span>
         </span>
         <span class="minimap pc-map" data-route="kom" aria-hidden="true"></span>
       </button>
-      <button class="card pcard" aria-label="Այսօր 18:30, Կասկադ — Ծիծեռնակաբերդ, 1 000 դրամ">
+      <button class="card pcard" aria-label="Այսօր 18:30, Կասկադ — Ծիծեռնակաբերդ, 1 000 դրամ, վճարում է ընկերությունը">
         <span class="pc-l">
           <span class="pc-top"><span data-ring="8|ժամ|.65"></span><span><span class="pc-time" style="display:block">18:30</span><span class="pc-hold" style="display:block">ազատ՝ մինչև 18:00</span></span></span>
           <span class="pc-ad"><span class="d a"></span>Կասկադ</span>
           <span class="pc-ad"><span class="d b"></span>Ծիծեռնակաբերդ</span>
-          <span class="pc-bot"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="fare">1 000 ֏</span></span>
+          <span class="pc-bot"><span class="cobadge"><i data-lucide="building-2"></i>Ընկերություն</span><span class="fare">1 000 ֏</span></span>
         </span>
         <span class="minimap pc-map" data-route="tsi" aria-hidden="true"></span>
       </button>
 
-      <div class="sect"><span>Վաղը</span><span class="n">1</span></div>
-      <button class="card pcard" aria-label="Վաղը, շաբաթ, 07:40, Բաղրամյան 24 — Զվարթնոց, 2 000 դրամ">
+      <div class="sect" data-not="gone"><span>Վաղը</span><span class="n">1</span></div>
+      <button class="card pcard" data-not="gone" aria-label="Վաղը, շաբաթ, 07:40, Բաղրամյան 24 — Զվարթնոց, 2 000 դրամ">
         <span class="pc-l">
           <span class="pc-top"><span data-ring="21|ժամ|.12"></span><span><span class="pc-time" style="display:block">07:40</span><span class="pc-hold" style="display:block">ազատ՝ մինչև 07:10</span></span></span>
           <span class="pc-ad"><span class="d a"></span>Բաղրամյան պող. 24</span>
@@ -195,11 +206,11 @@
   </section>
 
   <!-- ═════════ MAP STATES ═════════ -->
-  <div class="map" id="map" aria-label="Քարտեզ" data-not="list offline empty error"></div>
-  <button class="iconbtn back" aria-label="Ետ" data-s="details startable starting refused noconn earlier cantmake cantmake-released cantmake-kept"><i data-lucide="arrow-left"></i></button>
+  <div class="map" id="map" aria-label="Քարտեզ" data-not="list offline empty error gone"></div>
+  <button class="iconbtn back" aria-label="Ետ" data-s="details startable starting refused noconn earlier cantmake cantmake-released cantmake-kept onride balance balance-partner noshift changed blacklisted company"><i data-lucide="arrow-left"></i></button>
 
   <!-- details: one booking, with its start control (StartControl: the commitment's startBlockedBy decides the button) -->
-  <section class="sheet" data-s="details startable starting refused noconn earlier cantmake cantmake-released cantmake-kept" data-sheet>
+  <section class="sheet" data-s="details startable starting refused noconn earlier cantmake cantmake-released cantmake-kept onride balance balance-partner noshift changed blacklisted company" data-sheet>
     <div class="grabber"></div>
     <div class="dhead">
       <div><div class="eyebrow"><i data-lucide="calendar-clock"></i><span id="d-eyebrow"></span></div><div class="hero" id="d-time"></div></div>
@@ -209,6 +220,7 @@
       <div class="stop"><span class="m a"></span><div><div class="t1" id="d-a"></div><div class="t2" id="d-a2"></div></div></div>
       <div class="stop"><span class="m b"></span><div><div class="t1" id="d-b"></div><div class="t2" id="d-b2"></div></div></div>
     </div>
+    <div class="notice co" data-s="company" role="note"><i data-lucide="building-2"></i><div><b>Վճարում է ընկերությունը</b>Ոչինչ մի՛ վերցրեք ուղևորից</div></div>
     <div class="tl" id="d-tl"></div>
     <div class="tools" data-not="cantmake-released">
       <button class="tool"><span class="b"><i data-lucide="phone"></i></span>Ուղևոր</button>
@@ -217,12 +229,20 @@
     </div>
     <!-- the start control, one per state -->
     <div class="startctl">
-      <div class="go x outlined" role="button" aria-disabled="true" data-s="details">09:35-ից</div>
-      <div class="go x outlined" role="button" aria-disabled="true" data-s="earlier">Նախ՝ 10:05-ի պատվերը</div>
+      <div class="go x outlined" role="button" aria-disabled="true" data-s="details">10:05-ից</div>
+      <div class="go x outlined" role="button" aria-disabled="true" data-s="earlier">Նախ՝ 10:35-ի պատվերը</div>
       <div class="go x outlined" role="button" aria-disabled="true" data-s="cantmake cantmake-kept">07:10-ից</div>
       <button class="go x" data-s="startable"><i data-lucide="navigation"></i>Ճանապարհին եմ</button>
       <div class="go x" role="button" aria-disabled="true" data-s="starting"><i data-lucide="loader-circle" class="spin"></i>Սկսում ենք</div>
       <div class="go x" role="button" aria-disabled="true" data-s="noconn"><i data-lucide="wifi-off"></i>Կապ է պետք</div>
+      <!-- StartControl Blocked (startBlockedBy) — p1p2 pass: on_ride, balance, no_shift, customer_blacklisted, and the 409 «changed». -->
+      <div class="go x outlined long" role="button" aria-disabled="true" data-s="onride">Ավարտեք ընթացիկ ուղևորությունը</div>
+      <div data-s="balance" class="col"><div class="notice warn" role="status"><i data-lucide="lock"></i><div><b>Կանխիկը կանգնած է · −5 200 ֏</b>Սահմանաչափը՝ −5 000 ֏</div></div><button class="go x"><i data-lucide="plus"></i>Լիցքավորեք հաշվեկշիռը</button></div>
+      <div data-s="balance-partner" class="col"><div class="notice warn" role="status"><i data-lucide="lock"></i><div><b>Հաշվեկշիռը՝ −320 ֏</b>Վճարման կոդ՝ 000041</div></div><button class="go x"><i data-lucide="plus"></i>Լիցքավորեք հաշվեկշիռը</button></div>
+      <div data-s="noshift" class="col"><div class="notice warn" role="status"><i data-lucide="car-front"></i><div>Նախ սկսե՛ք հերթապահությունը</div></div><button class="go x"><i data-lucide="key-round"></i>Սկսել հերթապահությունը</button></div>
+      <div class="notice info" data-s="changed" role="status"><i data-lucide="refresh-cw"></i><div>Փոխվել է, թարմացնում ենք</div></div>
+      <div class="notice warn" data-s="blacklisted" role="status"><i data-lucide="shield-alert"></i><div>Այս պատվերը հնարավոր չէ սկսել — դիսպետչերը կզանգի</div></div>
+      <div class="go x outlined" role="button" aria-disabled="true" data-s="company">18:00-ից</div>
       <div data-s="refused" class="col"><div class="notice warn" role="status"><i data-lucide="circle-pause"></i><div>Նախ անցե՛ք գիծ</div></div><button class="go x"><i data-lucide="power"></i>Գծում լինել</button></div>
     </div>
     <div data-s="details earlier" class="cant"><button class="btn btn-line"><i data-lucide="clock-alert"></i>Չեմ հասցնի</button><div class="ask-cap">Կխնդրենք դիսպետչերին · որոշումը նրանն է</div></div>
@@ -238,7 +258,7 @@
   <div class="headsup" data-s="reminder" role="alert">
     <div class="hu-top">
       <span data-ring="25|րոպե|.83"></span>
-      <div class="txt"><div class="hu-app"><img src="assets/eco/mark.png" alt="">Eco Taxi · հիմա</div><div class="hu-t">25 րոպեից՝ նստեցում</div><div class="hu-s">Կոմիտասի պող. 49 · 10:05</div></div>
+      <div class="txt"><div class="hu-app"><img src="assets/eco/mark.png" alt="">Eco Taxi · հիմա</div><div class="hu-t">25 րոպեից՝ նստեցում</div><div class="hu-s">Կոմիտասի պող. 49 · 10:35</div></div>
       <img class="carimg hu-car" src="assets/eco/cars/city.webp" alt="">
     </div>
     <button class="go x"><i data-lucide="navigation"></i>Ճանապարհին եմ</button>
@@ -249,7 +269,7 @@
       <span class="mycar" aria-label="Volkswagen ID.3, 01 ET 001"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="plate">01 ET 001</span></span></div>
     <button class="pre" aria-label="Նախապես ամրագրված, 2">
       <span class="ic"><i data-lucide="calendar-clock"></i></span>
-      <span class="txt"><span class="t1">Նախապես ամրագրված</span><span class="t2">10:05 · Հանրապետության հր.</span></span>
+      <span class="txt"><span class="t1">Նախապես ամրագրված</span><span class="t2">10:35 · Հանրապետության հր.</span></span>
       <i class="chev" data-lucide="chevron-right"></i>
     </button>
   </section>
@@ -260,7 +280,7 @@
     <span class="tag"><i data-lucide="calendar-check"></i>Նախապես ամրագրվածը սկսվեց</span>
     <div class="ahead">
       <div><div class="addr">Կոմիտասի պող. 49</div><div class="meta">Լուսինե · Eco City · <i data-lucide="banknote"></i>Կանխիկ</div></div>
-      <div class="big">10:05</div>
+      <div class="big">10:35</div>
     </div>
     <div class="eta" data-s="started"><i data-lucide="navigation"></i>Դեպի ուղևոր · 6 րոպե, 2,1 կմ</div>
     <div class="tools">
@@ -279,17 +299,24 @@
     ['started', 'Started → en route'], ['refused', 'Start refused (offline)'], ['noconn', 'Start · no connection'], ['earlier', 'Blocked · earlier booking'],
     ['cantmake', '«Չեմ հասցնի» · request sent'], ['cantmake-released', '«Չեմ հասցնի» · dispatcher took it'], ['cantmake-kept', '«Չեմ հասցնի» · asked to keep it'], ['reminder', 'Reminder (T−25) + start'],
     ['activated', 'Activated by fleet (T−15)'], ['empty', 'Empty'], ['offline', 'Offline (cached)'], ['error', 'Error'],
+    ['onride', 'Start blocked · on a ride'], ['balance', 'Start blocked · balance (fleet)'], ['balance-partner', 'Start blocked · balance (partner)'],
+    ['noshift', 'Start blocked · no shift'], ['changed', 'Start · 409 changed (blue)'], ['blacklisted', 'Start refused · rider blacklisted'],
+    ['gone', 'Booking taken away by dispatcher'], ['company', 'Company-paid pre-order'],
   ])
-  statusBar(document.getElementById('s'), { details: '9:20', reminder: '9:40', activated: '9:50', started: '9:42', starting: '9:41', cantmake: '9:22', 'cantmake-released': '9:31', 'cantmake-kept': '9:31' }[st])
+  statusBar(document.getElementById('s'), { list: '10:11', startable: '10:11', refused: '10:12', noconn: '10:12', earlier: '10:14', details: '9:20', reminder: '10:10', activated: '10:20', started: '10:13', starting: '10:12', cantmake: '9:22', 'cantmake-released': '9:31', 'cantmake-kept': '9:31',
+    onride: '10:08', balance: '10:11', 'balance-partner': '10:11', noshift: '10:06', changed: '10:12', blacklisted: '10:12', gone: '10:11', company: '10:11' }[st])
 
-  /* Two bookings drive the sheet: today's 10:05 (inside its window from 09:35) and tomorrow's airport run. */
+  /* Two bookings drive the sheet: today's 10:35 (inside its window from 10:05; moved from 10:05 so it no longer holds Արամ during the 9:41 walkthrough) and tomorrow's airport run. */
   const BK = {
-    kom: { route: 'kom', eyebrow: 'Այսօր · Հանրապետության հր.', time: '10:05', fare: ECO.amd(1200), a: 'Կոմիտասի պող. 49', a2: 'Լուսինե · Կանխիկ', b: 'Հանրապետության հր.', b2: ECO.km(5.8) + ' · 8 րոպե',
-      tl: [['done', 'Նշանակեց դիսպետչերը', 'այսօր 08:52'], [st === 'details' ? 'next' : 'done', 'Նոր պատվերներ չեն գա', '09:35'], [st === 'details' ? '' : 'next', 'Պատվերն ակտիվանում է', '09:50'], ['', 'Նստեցում', '10:05']] },
+    kom: { route: 'kom', eyebrow: 'Այսօր · Հանրապետության հր.', time: '10:35', fare: ECO.amd(1200), a: 'Կոմիտասի պող. 49', a2: 'Լուսինե · Կանխիկ', b: 'Հանրապետության հր.', b2: ECO.km(5.8) + ' · 8 րոպե',
+      tl: [['done', 'Նշանակեց դիսպետչերը', 'այսօր 08:52'], [st === 'details' ? 'next' : 'done', 'Նոր պատվերներ չեն գա', '10:05'], [st === 'details' ? '' : 'next', 'Պատվերն ակտիվանում է', '10:20'], ['', 'Նստեցում', '10:35']] },
+    /* D33: the 18:30 booking is company-paid (page-local; the driver sees the tag, never the company name). */
+    tsi: { route: 'tsi', eyebrow: 'Այսօր · Ծիծեռնակաբերդ', time: '18:30', fare: ECO.amd(1000), a: 'Կասկադ', a2: 'Գայանե · Ընկերության հաշվին', b: 'Ծիծեռնակաբերդ', b2: ECO.km(3.8) + ' · 7 րոպե',
+      tl: [['done', 'Նշանակեց դիսպետչերը', 'այսօր 08:52'], ['next', 'Նոր պատվերներ չեն գա', '18:00'], ['', 'Պատվերն ակտիվանում է', '18:15'], ['', 'Նստեցում', '18:30']] },
     air: { route: 'air', eyebrow: 'Վաղը · Զվարթնոց', time: '07:40', fare: ECO.amd(2000), a: 'Բաղրամյան պող. 24', a2: 'Արմեն · Կանխիկ', b: 'Զվարթնոց', b2: ECO.km(13.1) + ' · 19 րոպե',
       tl: [['done', 'Նշանակեց դիսպետչերը', 'այսօր 08:52'], ['next', 'Նոր պատվերներ չեն գա', '07:10'], ['', 'Պատվերն ակտիվանում է', '07:25'], ['', 'Նստեցում', '07:40']] },
   }
-  const bk = ['earlier', 'cantmake', 'cantmake-released', 'cantmake-kept'].includes(st) ? BK.air : BK.kom
+  const bk = ['earlier', 'cantmake', 'cantmake-released', 'cantmake-kept'].includes(st) ? BK.air : st === 'company' ? BK.tsi : BK.kom
   if (document.getElementById('d-time')) {
     const set = (id, v) => (document.getElementById(id).textContent = v)
     set('d-eyebrow', bk.eyebrow); set('d-time', bk.time); set('d-fare', bk.fare); set('d-a', bk.a); set('d-a2', bk.a2); set('d-b', bk.b); set('d-b2', bk.b2)
@@ -324,7 +351,7 @@
       <circle cx="${ax}" cy="${ay}" r="6" fill="var(--ink)" stroke="var(--surface)" stroke-width="3"/><rect x="${bx - 6}" y="${by - 6}" width="12" height="12" rx="3" fill="var(--ink)" stroke="var(--surface)" stroke-width="3"/></svg>`
   }
 
-  if (st === 'list' || st === 'offline') { document.querySelectorAll('.pc-map').forEach((el) => thumb(el, DROUTES[el.dataset.route].pts, st === 'offline')); D.noMap() }
+  if (st === 'list' || st === 'offline' || st === 'gone') { document.querySelectorAll('.pc-map').forEach((el) => thumb(el, DROUTES[el.dataset.route].pts, st === 'offline')); D.noMap() }
   else if (st === 'empty' || st === 'error') D.noMap()
   else {
     const sheet = document.querySelector('.sheet:not([hidden])')

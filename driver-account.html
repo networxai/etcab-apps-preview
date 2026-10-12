@@ -132,6 +132,37 @@
   .shiftrow .txt { flex: 1; display: flex; flex-direction: column; }
   .shiftrow .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
   .shiftrow .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  /* p1p2 · help, legal, update, delete blocked, diagnostics, rating + past rides (D36–D41) */
+  .callcard { display: flex; align-items: center; gap: var(--s3); padding: var(--s3) var(--s3) var(--s3) var(--s4); margin-bottom: var(--s4); }
+  .callcard .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .callcard .t1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .callcard .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .callcard .ph { width: 56px; height: 56px; border-radius: 50%; background: var(--brand); color: var(--on-brand); display: grid; place-items: center; flex: none; }
+  .callcard .ph svg { width: 24px; height: 24px; }
+  .gl { font: var(--t-secondary-strong); color: var(--ink-2); margin: var(--s4) 0 var(--s2); white-space: nowrap; }
+  .legal h3 { font: var(--t-headline); color: var(--ink); margin: var(--s4) 0 var(--s1); }
+  .legal p { font: var(--t-body); color: var(--ink); }
+  .legal .meta { font: var(--t-secondary); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .kv { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); min-height: 44px; font: var(--t-secondary); color: var(--ink-2); }
+  .kv + .kv { border-top: 1px solid var(--hairline); }
+  .kv b { font: var(--t-secondary-strong); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .diag { padding: var(--s1) var(--s4); }
+  [data-s="diag"] .ptitle, [data-s="diag"] .psub, [data-s="help"] .row .t1, [data-s="legal"] .ptitle { white-space: normal; }
+  .rate { display: flex; align-items: flex-end; gap: var(--s3); margin: var(--s2) 0 var(--s4); }
+  .rate .v { font: var(--t-hero); color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -.5px; }
+  .rate .s { padding-bottom: 8px; font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .stars { display: inline-flex; gap: 2px; color: var(--warn); } .stars svg { width: 16px; height: 16px; fill: currentColor; }
+  .bars5 .b5 { display: grid; grid-template-columns: 16px 1fr 36px; align-items: center; gap: var(--s2); height: 24px; font: var(--t-caption); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .bars5 .t { height: 6px; border-radius: 3px; background: var(--surface-3); position: relative; overflow: hidden; }
+  .bars5 .t i { position: absolute; inset: 0 auto 0 0; background: var(--ink); border-radius: 3px; }
+  .bars5 .b5 span:last-child { text-align: right; }
+  .pr { display: flex; align-items: center; gap: var(--s3); min-height: 60px; }
+  .group .pr + .pr { border-top: 1px solid var(--hairline); }
+  .pr .tm { width: 44px; font: var(--t-secondary-strong); color: var(--ink); font-variant-numeric: tabular-nums; flex: none; }
+  .pr .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .pr .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pr .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .pr .f { font: var(--t-body-strong); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; flex: none; }
   .locked { color: var(--ink-3); box-shadow: inset 0 0 0 1.5px var(--hairline); background: transparent; }
 </style>
 </head>
@@ -146,7 +177,7 @@
     <section data-s="main signout">
       <div class="who">
         <span class="av" aria-hidden="true">ԱՊ</span>
-        <div><div class="name">Արամ Պետրոսյան</div><div class="ph">+374 93 41 22 08</div></div>
+        <div><div class="name">Արամ Պետրոսյան</div><div class="ph">+374 93 44 55 66</div></div>
       </div>
       <div class="card mycar"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="txt"><span class="t1">Volkswagen ID.3</span><span class="t2">Eco City</span></span><span class="plate">01 ET 001</span></div>
       <div class="group">
@@ -157,10 +188,11 @@
         <div class="row"><span class="ic"><i data-lucide="activity"></i></span><span class="txt"><span class="t1">Հերթապահության տվյալներ</span></span><i class="chev" data-lucide="chevron-right"></i></div>
       </div>
       <div class="group">
+        <div class="row"><span class="ic"><i data-lucide="life-buoy"></i></span><span class="txt"><span class="t1">Օգնություն և իրավական</span></span><i class="chev" data-lucide="chevron-right"></i></div>
         <div class="row"><span class="ic"><i data-lucide="log-out"></i></span><span class="txt"><span class="t1">Դուրս գալ</span></span></div>
         <div class="row"><span class="ic danger"><i data-lucide="user-x"></i></span><span class="txt"><span class="t1 danger">Ջնջել իմ հաշիվը</span></span></div>
       </div>
-      <div class="ver">Տարբերակ 1.4.0 (212)</div>
+      <div class="ver">Տարբերակ 2.3.1 (241)</div>
     </section>
 
     <!-- ── documents ── -->
@@ -244,6 +276,106 @@
       </div>
     </section>
 
+    <!-- ── delete blocked (D36, account.deleteBlocked): a debt or an open ride stops it; the way forward is the balance ── -->
+    <section data-s="deleteblocked" class="grow" style="display:flex;flex-direction:column">
+      <div class="center">
+        <span class="bigic warn"><i data-lucide="lock"></i></span>
+        <div class="h2">Ջնջե՞լ հաշիվը</div>
+        <div class="sub">Դեռ ոչ — ավարտե՛ք պատվերը կամ մարե՛ք պարտքը</div>
+      </div>
+      <div class="group fate">
+        <div class="row"><span class="ic warn"><i data-lucide="banknote"></i></span><span class="txt"><span class="t1">Պարտք՝ 5 200 ֏</span><span class="t2">Հանձնե՛ք գրասենյակում</span></span></div>
+        <div class="row"><span class="ic ok"><i data-lucide="check"></i></span><span class="txt"><span class="t1">Ընթացիկ պատվեր չկա</span></span></div>
+      </div>
+      <span class="grow"></span>
+      <div class="foot">
+        <a class="btn btn-brand" href="driver-earnings.html?state=blocked" style="text-decoration:none"><i data-lucide="wallet"></i>Տեսնել հաշվեկշիռը</a>
+        <button class="btn btn-quiet on-ground">Պահել հաշիվը</button>
+      </div>
+    </section>
+
+    <!-- ── help + legal (D38, store requirement; drawn ahead: the real account has neither) ── -->
+    <section data-s="help">
+      <div class="ptitle" style="margin-bottom:var(--s4)">Օգնություն</div>
+      <div class="card callcard"><span class="txt"><span class="t1">Դիսպետչեր</span><span class="t2"><span data-eco="DISPATCH.phone">010 55-55-55</span> · 24/7</span></span><button class="ph" aria-label="Զանգել դիսպետչերին"><i data-lucide="phone"></i></button></div>
+      <div class="group">
+        <div class="row"><span class="ic"><i data-lucide="key-round"></i></span><span class="txt"><span class="t1">Հերթապահության սկիզբ</span></span><i class="chev" data-lucide="chevron-right"></i></div>
+        <div class="row"><span class="ic"><i data-lucide="bell-off"></i></span><span class="txt"><span class="t1">Պատվերներ չեն գալիս</span></span><i class="chev" data-lucide="chevron-right"></i></div>
+        <div class="row"><span class="ic"><i data-lucide="banknote"></i></span><span class="txt"><span class="t1">Կանխիկի հանձնում</span></span><i class="chev" data-lucide="chevron-right"></i></div>
+        <div class="row"><span class="ic"><i data-lucide="package-search"></i></span><span class="txt"><span class="t1">Մոռացված իր մեքենայում</span></span><i class="chev" data-lucide="chevron-right"></i></div>
+      </div>
+      <div class="group">
+        <div class="row"><span class="ic danger"><i data-lucide="siren"></i></span><span class="txt"><span class="t1">Արտակարգ դեպք</span><span class="t2">պատվերի ընթացքում՝ «Ավելին»-ում</span></span><span class="end">112</span></div>
+      </div>
+      <div class="gl">Իրավական</div>
+      <div class="group">
+        <div class="row"><span class="ic"><i data-lucide="file-text"></i></span><span class="txt"><span class="t1">Օգտագործման պայմաններ</span></span><i class="chev" data-lucide="chevron-right"></i></div>
+        <div class="row"><span class="ic"><i data-lucide="shield"></i></span><span class="txt"><span class="t1">Գաղտնիության քաղաքականություն</span></span><i class="chev" data-lucide="chevron-right"></i></div>
+      </div>
+    </section>
+
+    <!-- ── legal: one document, read in the app (headings, short sections; full text also on the web) ── -->
+    <section data-s="legal" class="legal">
+      <div class="ptitle">Գաղտնիության քաղաքականություն</div>
+      <div class="meta">Տարբերակ 3 · ուժի մեջ՝ 1 սեպտ. 2026</div>
+      <h3>Ինչ ենք հավաքում</h3><p>Անուն, հեռախոս, մեքենա, դիրքը՝ միայն հերթապահության ընթացքում։</p>
+      <h3>Ինչու</h3><p>Ամենամոտ պատվերն ուղարկելու, վճարները հաշվելու և անվտանգության համար։</p>
+      <h3>Ով է տեսնում</h3><p>Ընկերության դիսպետչերները և ձեր ուղևորը՝ միայն պատվերի ընթացքում։</p>
+      <h3>Ջնջում</h3><p>Հաշիվ › Ջնջել իմ հաշիվը։ Պատվերները պահվում են օրենքով։</p>
+      <div class="foot" style="margin-top:var(--s5)"><button class="btn btn-quiet on-ground"><i data-lucide="external-link"></i>Բացել կայքում</button></div>
+    </section>
+
+    <!-- ── update required (D40, drawn ahead: no min-version API yet; ECO.APP.driver) ── -->
+    <section data-s="update" class="grow" style="display:flex;flex-direction:column">
+      <div class="center" style="margin-top:96px">
+        <span class="bigic neutral"><i data-lucide="circle-arrow-up"></i></span>
+        <div class="h2">Թարմացրե՛ք հավելվածը</div>
+        <div class="sub">Այս տարբերակով պատվերներ չեն գա</div>
+        <span class="tag warn" style="margin-top:var(--s4)"><i data-lucide="smartphone"></i><span id="u-ver"></span></span>
+      </div>
+      <span class="grow"></span>
+      <div class="foot">
+        <button class="btn btn-brand lg"><i data-lucide="download"></i>Թարմացնել</button>
+        <button class="btn-text"><i data-lucide="phone"></i>Զանգել դիսպետչերին</button>
+      </div>
+    </section>
+
+    <!-- ── diagnostics (D37): the real screen, an internal tool — build lines, the shift report, Copy ── -->
+    <section data-s="diag">
+      <div class="ptitle">Հերթապահության տվյալներ</div>
+      <div class="psub" style="margin-bottom:var(--s4)">ընկերության համար — ուղարկե՛ք չափված հերթապահության վերջում</div>
+      <div class="card diag">
+        <div class="kv">Ավտոպարկ<b>eco · 2.3.1 (241)</b></div>
+        <div class="kv">API<b>v1 · 2026-10-08</b></div>
+        <div class="kv">Հերթապահություն<b>08:02-ից · 01 ET 001</b></div>
+        <div class="kv">Դիրքի կետեր<b>1 284</b></div>
+        <div class="kv">Ամենաերկար բացը<b>38 վրկ · 08:51</b></div>
+        <div class="kv">Դիրքը ֆոնում<b>Միշտ</b></div>
+        <div class="kv">Մարտկոց<b>Առանց սահմանափակման</b></div>
+        <div class="kv">Սարք<b>Xiaomi · Android 14</b></div>
+      </div>
+      <div class="foot" style="margin-top:var(--s4)"><button class="btn btn-quiet on-ground"><i data-lucide="copy"></i>Պատճենել</button></div>
+    </section>
+
+    <!-- ── rating + past rides (D41, drawn ahead: no driver rating or history endpoint) ── -->
+    <section data-s="rating">
+      <div class="ptitle">Վարկանիշ</div>
+      <div class="rate"><span class="v" data-eco="RIDE.driver.rating">4,9</span><span class="s"><span class="stars" aria-hidden="true"><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i></span><br>վերջին 100 գնահատական</span></div>
+      <div class="bars5" aria-label="Գնահատականների բաշխում">
+        <div class="b5"><span>5</span><span class="t"><i style="width:88%"></i></span><span>88</span></div>
+        <div class="b5"><span>4</span><span class="t"><i style="width:9%"></i></span><span>9</span></div>
+        <div class="b5"><span>3</span><span class="t"><i style="width:2%"></i></span><span>2</span></div>
+        <div class="b5"><span>2</span><span class="t"><i style="width:1%"></i></span><span>1</span></div>
+        <div class="b5"><span>1</span><span class="t"><i style="width:0"></i></span><span>0</span></div>
+      </div>
+      <div class="gl">Երեկ, հինգշաբթի, 8 հոկտ.</div>
+      <div class="group">
+        <div class="pr"><span class="tm">19:12</span><span class="txt"><span class="t1" data-truncate>Կասկադ → Ծիծեռնակաբերդ</span><span class="t2">Կանխիկ · ★ 5</span></span><span class="f">1 000 ֏</span></div>
+        <div class="pr"><span class="tm">17:40</span><span class="txt"><span class="t1" data-truncate>Զվարթնոց → Բաղրամյան պող. 24</span><span class="t2">Ընկերություն · ★ 5</span></span><span class="f">2 000 ֏</span></div>
+        <div class="pr"><span class="tm">15:05</span><span class="txt"><span class="t1" data-truncate>Մաշտոցի պող. 37 → Արաբկիր</span><span class="t2">Կանխիկ · ★ 4</span></span><span class="f">900 ֏</span></div>
+      </div>
+    </section>
+
     <!-- ── delete requested ── -->
     <section data-s="deleterequested" class="grow" style="display:flex;flex-direction:column">
       <div class="center">
@@ -284,7 +416,10 @@
     ['main', 'Account'], ['docs', 'Documents · expiry'], ['language', 'Language'], ['theme', 'Theme · incl. Sun'],
     ['demo', 'Practice ride'], ['demorunning', 'Practice ride · running'], ['delete', 'Delete account'],
     ['deleterequested', 'Deletion requested'], ['signout', 'Sign out · blocked by shift'],
+    ['deleteblocked', 'Delete blocked · debt or ride'], ['help', 'Help · dispatcher, FAQ, legal'], ['legal', 'Privacy policy'],
+    ['update', 'Update required'], ['diag', 'Shift diagnostics'], ['rating', 'Rating + past rides'],
   ])
+  const uv = document.getElementById('u-ver'); if (uv) uv.textContent = ECO.APP.driver.have + ' · նվազագույնը՝ ' + ECO.APP.driver.min
   if (st === 'signout') for (const id of ['bar', 'content']) { const el = document.getElementById(id); el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true') }
   icons()
   D.noMap()

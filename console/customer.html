@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customer</title>
+<link rel="stylesheet" href="console.css">
+<link rel="stylesheet" href="corporate.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+<style>
+  /* Mirrors apps/operator components/admin/customer-record.tsx + customer-notes.tsx + note-byline.tsx (§9.6, §4):
+     breadcrumb «Հաճախորդներ › name» (the list IS search?scope=customers — /admin/customers is not a route), the name and the
+     phone in mono, the door to their rides (a search by phone, not a second implementation), the blacklist banner with its
+     reason (lift is an admin's: a dispatcher is told who can), notes on the left, employer and the blacklist form on the
+     right. Blacklisting is not armed: the required reason (≥ 3 characters) is the deliberate second step. The record is
+     both roles' — the dispatcher who took the call writes the notes. */
+  .cr { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 12px; padding: 12px var(--inset) var(--inset); align-items: start; }
+  .crhead { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 14px var(--inset) 0; }
+  .crhead h2 { font: var(--c-title); white-space: nowrap; }
+  .crhead .meta { display: flex; align-items: center; gap: 10px; margin-top: 4px; font: var(--c-body); color: var(--ink-muted); flex-wrap: wrap; }
+  .crhead .meta a { color: var(--brand-text); display: inline-flex; align-items: center; gap: 4px; text-decoration: none; font: var(--c-strong); }
+  .crhead .meta a:hover { text-decoration: underline; }
+  .sepd { width: 1px; height: 14px; background: var(--line-soft); }
+  .banner { margin: 12px var(--inset) 0; }
+  .banner .notice { align-items: center; padding: 10px 12px; }
+  .banner .notice .t { flex: 1; min-width: 0; }
+  .banner .notice b { display: block; font: var(--c-strong); }
+  .banner .notice .by { font: var(--c-small); margin-top: 2px; }
+  .facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-radius: var(--r-card); box-shadow: inset 0 0 0 1px var(--line-soft); }
+  .facts .kpi { border-right: 1px solid var(--line-soft); padding: 10px var(--inset); }
+  .facts .kpi:last-child { border-right: 0; }
+  .facts .kpi .v { font: 600 20px/28px var(--font); }
+  .ahead { display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border-radius: var(--r-tag); background: var(--info-soft); color: var(--ink); box-shadow: inset 0 0 0 1px var(--info); font: 500 12px/16px var(--font); margin-left: 6px; }
+  .notes { list-style: none; }
+  .note { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 10px var(--inset); border-bottom: 1px solid var(--line-soft); }
+  .note .tx { font: var(--c-body); color: var(--ink); white-space: normal; }
+  .note .by { font: var(--c-small); color: var(--ink-faint); margin-top: 2px; }
+  .note .by .mono { font-size: 12px; }
+  .note.ret .tx { color: var(--ink-muted); text-decoration: line-through; text-decoration-color: var(--line-control); }
+  .addn { display: flex; gap: 8px; padding: 12px var(--inset); align-items: center; }
+  .addn .input { flex: 1; }
+  .sub2 { padding: 8px var(--inset) 4px; font: var(--c-label); color: var(--ink-faint); }
+  .side { display: flex; flex-direction: column; gap: 12px; }
+  .onacc { display: flex; align-items: center; gap: 6px; font: var(--c-body); margin-top: 8px; }
+  .onacc.yes { color: var(--ok-text); }
+  .stack { display: flex; flex-direction: column; gap: 10px; }
+  .select { display: flex; align-items: center; gap: 8px; height: var(--h-m); padding: 0 10px; border-radius: var(--r-ctl); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-control); }
+  .select .val { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .anonname { color: var(--ink-muted); }
+  @media (max-width: 1400px) { .cr { grid-template-columns: minmax(0, 1fr) 340px; } .facts .kpi { padding: 10px 12px; } }
+</style>
+</head>
+<body>
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <span class="crumb"><a href="search.html?scope=customers" id="crumb" style="color:inherit">Հաճախորդներ</a> <i data-lucide="chevron-right"></i></span><h1 id="title"></h1>
+      <div class="live"></div>
+    </header>
+    <div class="content one">
+      <section class="card page" aria-labelledby="title"><div class="scroll-y grow" id="body"></div></section>
+    </div>
+  </div>
+</div>
+<script>
+  /* ?state= (none) Աննա (ECO.CUSTOMER), a company employee, two notes and one retracted · blacklisted (ECO.BLACKLIST, the
+     caller refused in the rider app at 9:12; admin sees «Հանել սև ցուցակից») · blacklisted&as=dispatcher (lift is an
+     admin's) · anon (the rider deleted the account: §10.13 anonymises name, number and places; rides, ratings and notes stay). */
+  const q = new URLSearchParams(location.search)
+  const st = q.get('state') || '', disp = q.get('as') === 'dispatcher'
+  shell('customers')
+  document.getElementById('crumb').href = 'search.html?theme=' + THEME + '&scope=customers'
+  const CU = ECO.CUSTOMER, BL = ECO.BLACKLIST, CO = ECO.COMPANY
+  const bl = st === 'blacklisted', anon = st === 'anon'
+  const P = bl ? { name: BL.name, ini: 'ԳՍ', phone: BL.phone, rides: 9, rating: '3,1', since: 'հունիս 2026', debt: 0 }
+    : anon ? { name: 'Ջնջված հաշիվ', ini: '—', phone: '', rides: 23, rating: '4,6', since: 'հունվ. 2025', debt: 0 }
+    : { ...CU, ini: 'ԱՀ' }
+  document.getElementById('title').textContent = P.name
+
+  const note = (tx, who, when, ret) => `<li class="note${ret ? ' ret' : ''}"><div><div class="tx">${tx}</div><div class="by">${who} · <span class="mono">${when}</span>${ret ? ` · հետ է վերցրել՝ ${ret}` : ''}</div></div>
+      ${ret ? '<span class="pill">Հետ վերցված</span>' : `<button class="btn ghost s rev-act" aria-label="Հետ վերցնել: ${tx}"><i data-lucide="undo-2"></i>Հետ վերցնել</button>`}</li>`
+  const notes = bl ? [
+      note('Զանգում է նույն համարից՝ տարբեր անուններով։ Երկու անգամ վարորդին սպառնացել է։', 'Անի Դավթյան', '2.10 18:52'),
+      note('Երեք անգամ չներկայացավ, ամեն անգամ խնդրեց սպասել «2 րոպե»։', 'Մարիամ Հովսեփյան', '27.09 22:31'),
+    ] : anon ? [
+      note('Սիրում է, որ զանգեն հասնելուց 5 րոպե առաջ', 'Նախկին օպերատոր', '14.03 10:02'),
+    ] : [
+      note('Սիրում է, որ զանգեն հասնելուց 5 րոպե առաջ', 'Անի Դավթյան', '6.10 19:07'),
+      note('Օդանավակայանի ուղևորություններին՝ մեծ ճամպրուկ, Eco Comfort կամ Van', 'Սոնա Աբգարյան', '22.09 08:40'),
+    ]
+  const retracted = bl || anon ? '' : `<div class="sub2">Հետ վերցված</div><ul class="notes">${note('Ուշանում է վճարել կանխիկ', 'Սոնա Աբգարյան', '3.09 12:15', 'Անի Դավթյան, 4.09')}</ul>`
+
+  const banner = bl ? `<div class="banner"><div class="notice red" role="note"><i data-lucide="ban"></i><div class="t"><b>Սև ցուցակում է</b>${BL.reason}
+        <div class="by">${BL.by} · <span class="mono">${BL.since}</span> · հաջորդ պատվերը մերժվում է, հավելվածում մերժվեց <span class="mono">${BL.refusedAt}</span>-ին${disp ? ' · Սև ցուցակից հանել կարող է միայն ադմինը:' : ''}</div></div>
+        ${disp ? '' : '<button class="btn danger s">Հանել սև ցուցակից</button>'}</div></div>`
+    : anon ? `<div class="banner"><div class="notice neutral" role="note"><i data-lucide="user-x"></i><div class="t"><b>Ուղևորը ջնջել է հաշիվը · 3 հոկտ.</b>Անունը, հեռախոսը և պահված հասցեները հեռացված են։ Պատվերները, գնահատականները և նշումները մնում են ավտոպարկի գրառումներում։</div></div></div>` : ''
+
+  const kpi = (k, v, s) => `<div class="kpi"><span class="k">${k}</span><span class="v num">${v}</span>${s ? `<span class="s">${s}</span>` : ''}</div>`
+  const facts = `<div><div class="sub2" style="padding:0 0 6px">Ամփոփում<span class="ahead">նախագիծ</span></div><div class="facts">
+      ${kpi('Պատվերներ', P.rides, 'սկսած ' + P.since)}${kpi('Գնահատական', P.rating, 'վարորդներից')}${kpi('Պարտք', ECO.amd(P.debt), P.debt ? '' : 'պարտք չկա')}${kpi('Չներկայացավ', bl ? 3 : 0, '90 օրում')}</div></div>`
+
+  const employer = anon ? '' : `<section class="sec"><h3>Գործատու</h3><div class="pad stack">
+      <div class="select" data-truncate role="combobox" aria-label="Գործատու" aria-expanded="false"><span class="val${bl ? ' faint' : ''}">${bl ? 'Գործատու չկա' : CO.name}</span><i data-lucide="chevrons-up-down"></i></div>
+      <p class="onacc${bl ? '' : ' yes'}" role="status"><i data-lucide="${bl ? 'triangle-alert' : 'check'}"></i>${bl ? 'Հիմա վերցված պատվերը ՉԻ լինի հաշվի վրա:' : 'Հիմա վերցված պատվերը կլինի հաշվի վրա:'}</p>
+      ${bl ? '' : `<a href="company.html?theme=${THEME}&tab=employees" style="font:var(--c-strong);color:var(--brand-text);text-decoration:none">${CO.short} · աշխատակիցներ →</a>`}</div></section>`
+  const blForm = bl || anon ? '' : `<section class="sec"><h3>Սև ցուցակ</h3><div class="pad stack">
+      <div class="notice amber"><i data-lucide="triangle-alert"></i><span>Սև ցուցակը մերժում է այս զանգողի հաջորդ պատվերը։ Արդեն ընթացող պատվերին չի դիպչում։ Հանել կարող է միայն ադմինը։</span></div>
+      <div><span class="label">Պատճառ</span><div class="input"><span class="val ph">օր. 3 անգամ չներկայացավ</span></div><p class="hint">Առնվազն 3 նիշ։ Տեսնում են միայն օպերատորները, զանգողը՝ երբեք։</p></div>
+      <div><button class="btn danger-fill" disabled aria-disabled="true" style="opacity:.5">Սև ցուցակ</button></div></div></section>`
+
+  document.getElementById('body').innerHTML = `
+    <div class="crhead"><span class="av l">${P.ini}</span><div style="min-width:0"><h2 class="${anon ? 'anonname' : ''}">${P.name}</h2>
+      <div class="meta">${anon ? '<span>Հեռախոսը հեռացված է</span>' : `<span class="mono" style="color:var(--ink)">${P.phone}</span>`}<span class="sepd" aria-hidden="true"></span>
+        <a href="search.html?theme=${THEME}${anon ? '' : bl ? '&state=blacklist' : ''}"><i data-lucide="link"></i>Այս զանգողի պատվերները</a>
+        ${bl ? '<span class="pill bad"><i data-lucide="ban"></i>Սև ցուցակ</span>' : ''}</div></div>
+      ${anon ? '' : '<a class="btn secondary s" href="tel:" style="text-decoration:none"><i data-lucide="phone"></i>Զանգել</a>'}</div>
+    ${banner}
+    <div class="cr">
+      <div class="stack">${facts}
+        <section class="sec"><h3>Նշումներ <span class="sub mono">${notes.length}</span></h3><ul class="notes">${notes.join('')}</ul>${retracted}
+          <form class="addn" onsubmit="return false"><div class="input${st ? '' : ' focus'}" role="textbox" aria-label="Ավելացնել նշում"><span class="val${st ? ' ph' : ''}">${st ? 'օր. Սիրում է, որ զանգեն հասնելուց 5 րոպե առաջ' : 'Ուղևորը կրկին խնդրեց մանկական նստոց'}</span></div>
+            <button class="btn secondary">Պահպանել նշումը</button></form></section></div>
+      <div class="side">${employer}${blForm}</div>
+    </div>`
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

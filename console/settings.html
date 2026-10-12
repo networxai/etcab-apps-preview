@@ -9,6 +9,7 @@
 <script src="../kit.js"></script>
 <script src="console.js"></script>
 <script src="console-audit.js"></script>
+<script src="settings-money.js"></script>
 <style>
   /* Mirrors apps/operator components/admin/dispatch-settings.tsx: five groups in one 48rem column, every field a number
      with its unit, no preview band. The Pre-bookings group gains the rider reminder (owner decision 2026-10-12, drawn
@@ -46,9 +47,9 @@
     <div class="content">
       <section class="card page" aria-label="Կարգավորումներ">
         <nav class="tabsl" style="margin-top:0" aria-label="Կարգավորումների բաժիններ">
-          <a href="#" class="on" aria-current="page"><i data-lucide="activity"></i>Դիսպետչեր</a>
-          <a href="#"><i data-lucide="wallet"></i>Գումար</a>
-          <a href="#"><i data-lucide="receipt-text"></i>Հաշիվներ</a>
+          <a href="settings.html" data-tab="dispatch"><i data-lucide="activity"></i>Դիսպետչեր</a>
+          <a href="settings.html?tab=money" data-tab="money"><i data-lucide="wallet"></i>Գումար</a>
+          <a href="settings.html?tab=invoicing" data-tab="invoicing"><i data-lucide="receipt-text"></i>Հաշիվներ</a>
         </nav>
         <div class="scroll-y grow"><div class="col" id="col"></div></div>
       </section>
@@ -63,7 +64,9 @@
   const SW = (l, on) => `<div class="set"><span class="l">${l}</span><span class="v"><span class="switch${on ? ' on' : ''}" role="switch" aria-checked="${on}"><i class="t"></i>${on ? 'Միացված' : 'Անջատված'}</span><span class="u"></span></span></div>`
   const G = (title, rows, ex) => `<section class="grp"><h2>${title}</h2>${ex ? `<p class="ex">${ex}</p>` : ''}${rows.join('')}</section>`
   const R = ECO.DISPATCH.reminderMin
-  document.getElementById('col').innerHTML = `
+  const TAB = new URLSearchParams(location.search).get('tab') || 'dispatch'
+  document.querySelectorAll('.tabsl a').forEach((a) => { a.href += (a.href.includes('?') ? '&' : '?') + 'theme=' + THEME; if (a.dataset.tab === TAB) { a.classList.add('on'); a.setAttribute('aria-current', 'page') } })
+  if (TAB === 'dispatch') document.getElementById('col').innerHTML = `
     <p class="lead">Ինչպես է համակարգն ընտրում վարորդին յուրաքանչյուր պատվերի համար՝ ով է թեկնածու, ինչպես են դասակարգվում, ինչպես են ուղարկվում առաջարկները։</p>
     ${G('Առաքում', [SW('Ավտոմատ առաքում ստեղծելիս', true)])}
     ${G('Ո՞վ է թեկնածու', [N('Շառավղի քայլերը', '2, 4, 7', 'կմ', 'Թվեր՝ ստորակետով բաժանված, օրինակ՝ «2, 4, 7»։'), SW('Մեքենայի դասը պետք է համընկնի', true), N('Նվազագույն վարկանիշ', '', '', '', 'օր. 4.5'), N('Բաց առաջարկներ մեկ վարորդի', '1', '')])}
@@ -75,11 +78,13 @@
     ${G('Նախնական պատվերներ', [N('Ակտիվացնել պատվերը մինչ', '15', 'րոպե'), N('Պահել վարորդին մինչ', '30', 'րոպե'), N('Վարորդը կարող է մեկնել մինչ', '', 'րոպե', '', 'ինչպես պահելը'),
       `<div class="set new"><span class="l"><b>Հիշեցում ուղևորին նախնական պատվերից առաջ</b><span class="newtag">Նոր</span><small>Ուղևորը ստանում է ծանուցում՝ ժամը, հասցեն և նշանակված մեքենան։ 0՝ անջատված</small></span><span class="v"><span class="input focus"><span class="val mono">${R}</span></span><span class="u">րոպե</span></span></div>`])}
     <div class="foot"><button class="btn primary">Պահպանել</button><button class="btn secondary">Վերականգնել լռելյայնը</button><span class="pill warn">Չպահպանված</span><span class="rev">Տարբերակ 14</span></div>`
+  if (TAB !== 'dispatch') window.drawMoneyTab(TAB)
   icons()
   /* The page opens on what this state is about: the Pre-bookings group with the new reminder row (the real page is one
      scrolling column; the operator has scrolled to it). */
   document.fonts.ready.then(() => {
     const box = document.querySelector('.page .scroll-y'), row = document.querySelector('.set.new')
+    if (!row) return
     box.scrollTop += row.getBoundingClientRect().top - box.getBoundingClientRect().top - box.clientHeight / 2 + row.offsetHeight / 2
   })
   document.fonts.ready.then(() => { document.documentElement.dataset.mapReady = 'none' })

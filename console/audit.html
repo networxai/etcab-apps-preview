@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audit log</title>
+<link rel="stylesheet" href="console.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+<style>
+  /* Mirrors apps/operator components/admin/audit-log.tsx + audit-ledger.tsx (§9.6, §21; Linear pass §6.18): a filter row
+     (operator, kind, id, from, to, action) and a fixed-layout ledger when (mono) · who · what · on what. «What» is the
+     Armenian label, the raw token its tooltip; «on what» opens a ride, customer or driver (the OPENS allow-list) and shows
+     the raw id for the rest. Admin-only at the API (GET /audit-log). Read-only by design: no row has an action. */
+  .content { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+  .explain { font: var(--c-body); color: var(--ink-muted); padding: 10px var(--inset) 0; max-width: 900px; }
+  .f12 { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; padding: 10px var(--inset) 12px; border-bottom: 1px solid var(--line-soft); }
+  .f12 > label { width: 168px; } .f12 > label:nth-child(4), .f12 > label:nth-child(5) { width: 132px; } .f12 > label:nth-child(6) { width: 232px; }
+  .f12 .input .val { white-space: nowrap; }
+  .f12 .btns { display: flex; gap: 6px; }
+  .at td { height: 40px; }
+  .at td.mono { color: var(--ink-muted); }
+  .day td { height: 32px; background: var(--surface-alt); font: var(--c-label); color: var(--ink-muted); }
+  .dim { color: var(--ink-faint); margin-left: 4px; }
+  .tok { display: inline-flex; align-items: center; height: 20px; padding: 0 6px; border-radius: var(--r-tag); background: var(--surface-alt); box-shadow: inset 0 0 0 1px var(--line-soft); font: var(--c-label); color: var(--ink-muted); margin-right: 8px; }
+  .open { color: var(--brand-text); text-decoration: none; font: var(--c-strong); }
+  .raw { font: 400 12px/16px var(--mono); color: var(--ink-muted); }
+  .foot2 { display: flex; align-items: center; gap: 8px; padding: 8px var(--inset); border-top: 1px solid var(--line-soft); font: var(--c-small); color: var(--ink-muted); }
+  .foot2 .btns { margin-left: auto; display: flex; gap: 6px; }
+  tr.hit td:first-child { box-shadow: inset 3px 0 0 var(--brand-vivid); }
+</style>
+</head>
+<body>
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <span class="crumb">Կառավարում <i data-lucide="chevron-right"></i></span><h1>Գործողությունների գրանցամատյան</h1>
+      <div class="live"></div>
+    </header>
+    <div class="content">
+      <section class="card" aria-labelledby="t1">
+        <h2 id="t1" class="sr">Մատյանի գրառումները</h2>
+        <p class="explain">Օպերատորի յուրաքանչյուր գործողություն գրանցվում է այստեղ: Մատյանը միայն կարդալու համար է — գրառումը փոխել կամ ջնջել հնարավոր չէ, և հենց դա է այն դարձնում ապացույց:</p>
+        <div class="f12" role="search" aria-label="Զտել մատյանը" id="filters"></div>
+        <div class="scroll-y grow" data-truncate>
+          <table class="tbl at"><colgroup><col style="width:168px"><col style="width:22%"><col><col style="width:30%"></colgroup>
+            <thead><tr><th>Երբ</th><th>Ով</th><th>Ինչ</th><th>Ինչի վրա</th></tr></thead>
+            <tbody id="rows"></tbody></table>
+        </div>
+        <div class="foot2" id="foot"></div>
+      </section>
+    </div>
+  </div>
+</div>
+<script>
+  shell('audit')
+  const TARGET = new URLSearchParams(location.search).get('target')
+  const R = ECO.RIDE, B = ECO.BOOKINGS
+  /* [when, actor (null = system), action token, Armenian label, kind token, kind label, id or name, opens?] — today is
+     ECO.DAY; times follow the stories the other mocks tell (B-0898 assigned 08:52 in driver-preorders; settings revision 14;
+     the Արաքս card switched on; R-2417's own trail in the filtered state). */
+  const E = [
+    ['day', 'Այսօր, ' + ECO.DAY.short],
+    ['09:41:07', null, 'ride.assign', 'Պատվերին վարորդ նշանակվեց', 'ride', 'Պատվեր', 'R-' + R.no + ' · ' + R.driver.short, 1],
+    ['09:40:31', null, 'ride.create', 'Պատվերը ստեղծվեց', 'ride', 'Պատվեր', 'R-' + R.no + ' · հավելվածից', 1],
+    ['09:38:44', 'Մարիամ Հովսեփյան', 'ride.claim', 'Պատվերը վերցվեց', 'ride', 'Պատվեր', 'R-2414', 1],
+    ['09:35:02', null, 'driver.auto_away', 'Վարորդն ավտոմատ անցավ «Բացակա» կարգավիճակի', 'driver', 'Վարորդ', 'Վահե Սարգսյան', 1],
+    ['09:31:19', 'Անի Դավթյան', 'ride.release', 'Պատվերն ազատվեց', 'ride', 'Պատվեր', 'R-2411', 1],
+    ['09:22:50', 'Սոնա Աբգարյան', 'ride.force_transition', 'Պատվերի վիճակը հարկադրաբար փոխվեց', 'ride', 'Պատվեր', 'R-2409', 1],
+    ['09:05:13', 'Գոհար Մինասյան', 'promotion.enable', 'Գործընկերոջ քարտը միացվեց', 'promotion', 'Գործընկերոջ քարտ', 'b71e04c2-9a5d-4c1e', 0],
+    ['08:58:40', 'Գոհար Մինասյան', 'dispatch.config.update', 'Դիսպետչերի կարգավորումները փոխվեցին', 'tenant_dispatch_config', 'Դիսպետչերի կարգավորումներ', 'տարբերակ 14', 0],
+    ['08:52:06', 'Անի Դավթյան', 'scheduled_ride.edit', 'Նախնական պատվերը փոխվեց', 'scheduled_ride', 'Նախնական պատվեր', B.kom.id + ' · ' + B.kom.driver.short, 0],
+    ['08:47:22', 'Գոհար Մինասյան', 'report.rides_export', 'Պատվերների հաշվետվությունն արտահանվեց', 'report', 'Հաշվետվություն', '08.10.2026', 0],
+    ['08:31:55', 'Անի Դավթյան', 'driver.document_read', 'Վարորդի փաստաթուղթը դիտվեց', 'driver', 'Վարորդ', 'Վահե Սարգսյան', 1],
+    ['08:20:14', 'Մարիամ Հովսեփյան', 'driver.issue_login_code', 'Վարորդին մուտքի կոդ տրվեց', 'driver', 'Վարորդ', 'Մհեր Աբգարյան', 1],
+    ['day', 'Երեկ, 8 հոկտ.'],
+    ['21:14:09', 'Սոնա Աբգարյան', 'scheduled_ride.create', 'Նախնական պատվերը ստեղծվեց', 'scheduled_ride', 'Նախնական պատվեր', B.sun.id, 0],
+    ['18:02:37', 'Գոհար Մինասյան', 'operator.password-reset', 'Օպերատորի գաղտնաբառը վերականգնվեց', 'operator', 'Օպերատոր', 'Սոնա Աբգարյան', 0],
+    ['15:10:51', null, 'driver.deletion_requested', 'Վարորդը հաշվի ջնջում պահանջեց', 'driver', 'Վարորդ', R.driver.name, 1],
+    ['14:08:30', 'Անի Դավթյան', 'ride.edit', 'Պատվերը փոխվեց', 'ride', 'Պատվեր', 'R-2388', 1],
+  ]
+  /* ?target=2417: the reviewer asks «what happened to R-2417» — kind Պատվեր, id typed, everything about the one ride. */
+  const T = [
+    ['day', 'Այսօր, ' + ECO.DAY.short],
+    ['09:41:07', null, 'ride.assign', 'Պատվերին վարորդ նշանակվեց', 'ride', 'Պատվեր', 'R-' + R.no + ' · ' + R.driver.short, 1],
+    ['09:40:31', null, 'ride.create', 'Պատվերը ստեղծվեց', 'ride', 'Պատվեր', 'R-' + R.no + ' · հավելվածից', 1],
+  ]
+  const L = TARGET ? T : E
+  const F = (label, v, ph, icon) => `<label><span class="label">${label}</span><span class="input${TARGET && v ? ' focus' : ''}">${icon ? `<i data-lucide="${icon}"></i>` : ''}<span class="val${v ? '' : ' ph'}">${v || ph}</span>${icon ? '' : '<i data-lucide="chevron-down"></i>'}</span></label>`
+  document.getElementById('filters').innerHTML = F('Օպերատոր', '', 'Բոլորը') + F('Տեսակ', TARGET ? 'Պատվեր' : '', 'Բոլոր տեսակները') + F('Իդենտիֆիկատոր', TARGET ? 'R-' + TARGET : '', 'օր. 3f2a9c1e-…', 'hash')
+    + F('Սկսած', '09.10 00:00', '', 'calendar') + F('Մինչև', '', 'հիմա', 'calendar') + F('Ինչ', '', 'օր. ride.force_transition', 'search')
+    + `<span class="btns"><button class="btn primary">Կիրառել</button>${TARGET ? '<button class="btn ghost">Մաքրել զտիչները</button>' : ''}</span>`
+  document.getElementById('rows').innerHTML = L.map((e) => {
+    if (e[0] === 'day') return `<tr class="day"><td colspan="4">${e[1]}</td></tr>`
+    const [when, who, tok, what, kind, kindL, id, opens] = e
+    const actor = who ? who : `<span class="faint">Համակարգ</span><span class="dim">(ավտոմատ)</span>`
+    const on = opens ? `<span class="tok">${kindL}</span><a class="open" href="#">Բացել <span class="mono">${id}</span> →</a>` : `<span class="tok">${kindL}</span><span class="raw" title="${id}">${id}</span>`
+    return `<tr class="${TARGET ? 'hit' : ''}"><td class="mono">${when}</td><td>${actor}</td><td title="${tok}">${what}</td><td>${on}</td></tr>`
+  }).join('')
+  document.getElementById('foot').innerHTML = TARGET ? `<span>2 գրառում · վարորդի և ուղևորի քայլերը պատվերի ժամանակագրությունում են</span><span class="btns"><a class="btn secondary s" href="rides.html?theme=${THEME}">Բացել R-${TARGET}<i data-lucide="arrow-right"></i></a></span>`
+    : `<span>Կան ավելի շատ գրառումներ — նեղացրեք զտիչները կամ անցեք հաջորդ էջ</span><span class="btns"><button class="btn secondary s" aria-disabled="true" style="opacity:.5"><i data-lucide="chevron-left"></i>Նախորդը</button><button class="btn secondary s">Հաջորդը<i data-lucide="chevron-right"></i></button></span>`
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

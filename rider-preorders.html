@@ -75,6 +75,11 @@
   #sheet .btns { margin-top: var(--s4); }
   .cap { font: var(--t-caption); color: var(--ink-2); text-align: center; margin-top: var(--s2); }
   .confirm .body { font: var(--t-body); color: var(--ink-2); margin-bottom: var(--s4); }
+  /* start now: the search bar from rider-searching, the pre-assigned driver under it */
+  .sbar { height: 3px; border-radius: 2px; background: var(--surface-3); overflow: hidden; margin: var(--s3) 0 var(--s3); position: relative; }
+  .sbar::after { content: ''; position: absolute; top: 0; bottom: 0; width: 34%; border-radius: 2px; background: var(--brand); animation: sslide 1.6s ease-in-out infinite; }
+  @keyframes sslide { from { left: -34%; } to { left: 100%; } }
+  @media (prefers-reduced-motion: reduce) { .sbar::after { animation: none; left: 33%; } }
 
   /* iOS call action sheet (tel:): system chrome, not the app's — system blue, its own two cards. */
   .ios-as { position: absolute; z-index: 16; left: 8px; right: 8px; bottom: 34px; display: flex; flex-direction: column; gap: 8px; }
@@ -188,6 +193,25 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
       <div class="ctl" aria-hidden="true" style="left:46px">${R.i('flashlight')}</div><div class="ctl" aria-hidden="true" style="right:46px">${R.i('camera')}</div></div>`
   const reminderCard = (t) => nt(t, `${DP.reminderMin} րոպեից՝ ձեր նախնական պատվերը`, `${B.time} · ${B.pickup} → ${B.dropShort}`)
 
+  /* Start now (owner ruling a): the booking becomes a ride; the pre-assigned driver is asked first, then normal dispatch. */
+  const startSheet = (fallback) => `<div class="map" id="map" aria-label="Քարտեզ"></div>${fab()}
+      <section class="sheet r" id="sheet"><div class="grabber"></div>
+        <h2 class="h-title">${fallback ? 'Որոնում ենք մեքենա' : 'Հարցնում ենք ձեր վարորդին'}</h2>
+        <div class="h-sub">${BK.air.pickup} → ${BK.air.dropShort} · ${A(BK.air.fare)}</div>
+        <div class="sbar" role="progressbar" aria-label="${fallback ? 'Որոնում ենք մեքենա' : 'Սպասում ենք վարորդի պատասխանին'}"></div>
+        ${fallback
+          ? `<div class="notice">${R.i('info')}<span>${BK.air.driver.first}ը հիմա չի կարող · ընտրում ենք մոտակա մեքենան</span></div>`
+          : driverRow(BK.air.driver)}
+        <div class="btns"><button class="btn btn-quiet">${R.i('phone')}Զանգել դիսպետչերին</button></div>
+      </section>`
+  const startMap = (fallback) => (s) => {
+    const PK = ROUTES.preAir.pts[0]
+    const m = R.map(s, { fit: R.bbox(PK, .0034, .0044), padTL: [24, 96], padBR: [24, s.querySelector('#sheet').offsetHeight + 16] })
+    htmlMarker(m, PK, '<div class="pin-a"></div>', [18, 18])
+    const cars = fallback ? [[[.0024, -.0031], 58], [[-.0019, .0027], 214], [[.0029, .0022], 140]] : [[[.0021, -.0026], 150]]
+    cars.forEach(([o, d]) => htmlMarker(m, [PK[0] + o[0], PK[1] + o[1]], carTop(d), [18, 34]))
+  }
+
   Rider.page({
     title: 'Rider · Pre-orders',
     sub: 'A booking for later, from the list to the car: list, the booking, start it now, call the dispatcher to change it, the reminder, and the push when a driver is assigned. The rider cannot cancel or edit in the app (owner, 12 Oct). ECO.BOOKINGS: tomorrow 08:30 to Zvartnots with Սուրեն pre-assigned',
@@ -201,12 +225,16 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
       { id: 'detail-company', group: 'Bookings', label: 'Company', note: 'An on-account booking: «Ընկերության հաշվին» names the company and its cost code where the payment would be. No driver yet (Monday)',
         html: () => detailSheet(BK.co), map: mapFor(BK.co) },
 
-      { id: 'start-confirm', group: 'Actions', label: 'Start now', note: 'Owner decision: a rider may bring a booking forward. One question, same price; the search starts at once and the screen becomes the live ride (rider-searching → rider-ride). The pre-assigned driver gets it first if free (dispatch decides)',
+      { id: 'start-confirm', group: 'Actions', label: 'Start now', note: 'Owner decision: a rider may bring a booking forward. One question, same price; the search starts at once and the screen becomes the live ride (rider-searching → rider-ride). Owner ruling 12 Oct: the pre-assigned driver (Սուրեն) gets the first offer; if he declines or lets it ring out, normal dispatch takes over — the copy says exactly that, so the fallback is no surprise (new strings)',
         html: () => overDetail(BK.air, `<section class="sheet r modal confirm" role="dialog" aria-label="Սկսե՞լ հիմա"><div class="grabber"></div>
           <div class="mhead"><h2 class="h-title">Սկսե՞լ հիմա</h2><button class="xbtn" aria-label="Փակել">${R.i('x')}</button></div>
-          <p class="body">Մեքենան կփնտրենք հենց հիմա։ Գինը նույնն է՝ ${A(BK.air.fare)}։</p>
+          <p class="body">Նախ կառաջարկենք ձեր վարորդին՝ ${BK.air.driver.first}ին։ Եթե նա հիմա չկարողանա, կգտնենք այլ մեքենա։ Գինը նույնն է՝ ${A(BK.air.fare)}։</p>
           <div class="btns"><button class="btn btn-brand">Սկսել հիմա</button><button class="btn btn-quiet">Ոչ, թողնել</button></div></section>`),
         map: mapFor(BK.air) },
+      { id: 'start-sent', group: 'Actions', label: 'Start now · asking your driver', time: BK.air.startNow.at, note: `Owner ruling (a), drawn ahead: right after «Սկսել հիմա» the booking is a live ride and the offer rings on ${BK.air.startNow.first}'s phone first (the normal ${BK.air.startNow.offerSec} s offer, driver-offer-states#preorder-now). The sheet names him and his car; the bar is the same calm search bar. No in-app cancel here: changes stay with the dispatcher (see NOTES, needs owner decision)`,
+        html: () => startSheet(false), map: startMap(false) },
+      { id: 'start-fallback', group: 'Actions', label: 'Start now · another car', time: '9:53', note: `Owner ruling (a): ${BK.air.startNow.first} declined or let the offer expire, so normal dispatch searches for any free Eco City nearby. One neutral line says why the face changed; same price. When a car accepts, the screen becomes rider-ride#assigned`,
+        html: () => startSheet(true), map: startMap(true) },
       { id: 'call', group: 'Actions', label: 'Call to change', note: '«Զանգել դիսպետչերին» opens the phone (tel:, the fleet\'s dispatcherPhone): iOS asks once. Changing the time, the addresses or cancelling is the dispatcher\'s (§8: bookings are edited by the operator)',
         html: () => overDetail(BK.air, `<div class="ios-as" role="dialog" aria-label="Զանգ"><div class="grp"><div class="hd">Դիսպետչեր · Eco Taxi</div><button>${R.i('phone')}Զանգել ${DP.phone}</button></div><button class="x">Չեղարկել</button></div>`),
         map: mapFor(BK.air) },

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search</title>
+<link rel="stylesheet" href="console.css">
+<link rel="stylesheet" href="corporate.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+<style>
+  /* Mirrors apps/operator components/search/search-screen.tsx + search-results.tsx (§9.5). One query field (autofocused),
+     the «Երեկ» window chip and «Որոնել ↵»; «Կարդալ որպես» is the override, not the normal way in — the server reads the
+     query as a phone, a plate, an address, a name or a driver by itself and says what it read in one line. Rides then
+     customers, each a card; ↑↓ walk the results, ↵ opens one. No pagination: «Կան ավելին — նեղացրեք որոնումը». The Rides
+     list (rides.html) is the day's working list; this page is the lookup beside it (owner, 12 Oct). */
+  .sp { display: flex; flex-direction: column; gap: 12px; padding: 4px var(--inset) var(--inset); max-width: 1180px; }
+  .qrow { display: flex; align-items: center; gap: 8px; }
+  .qrow .input.l { flex: 1; box-shadow: inset 0 0 0 1px var(--focus-ring), 0 0 0 3px var(--brand-soft); }
+  .qrow .input.l .val { font: 500 15px/20px var(--font); }
+  .as { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .as .lbl { font: var(--c-label); color: var(--ink-muted); margin-right: 4px; }
+  .readas { font: var(--c-body); color: var(--ink-muted); }
+  .readas b { color: var(--ink); font-weight: 500; }
+  .hint0 { font: var(--c-body); color: var(--ink-muted); padding: 24px 0; }
+  .explain2 { font: var(--c-body); color: var(--ink-muted); max-width: 760px; }
+  .rc { border-radius: var(--r-card); box-shadow: inset 0 0 0 1px var(--line-soft); overflow: hidden; }
+  .rc > h2 { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 var(--inset); font: var(--c-head); border-bottom: 1px solid var(--line-soft); }
+  .rc > h2 .n { font: 500 12px/16px var(--mono); color: var(--ink-faint); }
+  .rc > h2 .keys { margin-left: auto; display: flex; gap: 12px; font: var(--c-small); color: var(--ink-faint); font-weight: 400; }
+  .rc > h2 .keys span { display: inline-flex; align-items: center; gap: 4px; }
+  .rc .msg { padding: 14px var(--inset); font: var(--c-body); color: var(--ink-muted); }
+  .rc .more { padding: 8px var(--inset); font: var(--c-small); color: var(--ink-muted); border-top: 1px solid var(--line-soft); }
+  .tbl td.when { font-family: var(--mono); }
+  .tbl td.when small { display: block; font: 400 12px/14px var(--mono); color: var(--ink-faint); margin-top: -2px; }
+  .tbl tr.two td { height: 48px; }
+  mark { background: var(--brand-tint); color: inherit; border-radius: 3px; box-shadow: 0 0 0 1px var(--brand-tint); }
+  a.lk { color: var(--ink); text-decoration: none; font: var(--c-strong); }
+  a.lk:hover { text-decoration: underline; }
+  tr.focusrow td { background: var(--surface-alt); }
+  tr.focusrow td:first-child { box-shadow: inset 3px 0 0 var(--brand-vivid); }
+  .nav .search { box-shadow: inset 0 0 0 1px var(--focus-ring); color: var(--ink-muted); } /* this page is the search box opened */
+  tr.focusrow a.lk { text-decoration: underline; text-decoration-color: var(--focus-ring); text-underline-offset: 3px; }
+</style>
+</head>
+<body>
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <h1 id="title">Որոնում</h1>
+      <div class="live"></div>
+    </header>
+    <div class="content one">
+      <section class="card page" aria-labelledby="title"><div class="toolrow" style="padding-bottom:4px"><span class="sp2" style="flex:1"></span><span id="back"></span></div>
+        <div class="scroll-y grow"><div class="sp" id="sp"></div></div></section>
+    </div>
+  </div>
+</div>
+<script>
+  /* ?state= (none) a phone «091 23» → Աննա's rides + her record · plate (01 ET 001 → Արամ's car today) · hint (nothing asked)
+     · none (no matches) · yesterday (the date window alone) · blacklist (a blacklisted caller's number: the flag shows before the dispatcher rings back) ; ?scope=customers (the «Հաճախորդներ» nav entry). */
+  const q = new URLSearchParams(location.search)
+  const st = q.get('state') || '', customers = q.get('scope') === 'customers'
+  shell(customers ? 'customers' : 'search')
+  const R = ECO.RIDE, CU = ECO.CUSTOMER, BL = ECO.BLACKLIST
+  document.getElementById('title').textContent = customers ? 'Հաճախորդներ' : 'Որոնում'
+  document.getElementById('back').innerHTML = customers
+    ? `<a class="btn ghost" href="search.html?theme=${THEME}" style="text-decoration:none">Որոնել նաև պատվերներ</a>`
+    : `<a class="btn secondary" href="dispatch.html?theme=${THEME}" style="text-decoration:none"><i data-lucide="arrow-left"></i>Վերադառնալ հերթ</a>`
+
+  const query = { '': '091 23', plate: '01 ET 001', hint: '', none: 'Արշակունյաց 112', yesterday: '', blacklist: '096 70' }[st] ?? ''
+  const shownQ = customers ? (st === 'hint' ? '' : 'Աննա') : query
+  const mk = (s, part) => (part && s.includes(part) ? s.replace(part, `<mark>${part}</mark>`) : s)
+  const dims = customers ? ['Ինչպես երևում է', 'Հեռախոս', 'Անուն'] : ['Ինչպես երևում է', 'Հեռախոս', 'Անուն', 'Հասցե', 'Համարանիշ', 'Վարորդ', 'Տեքստ']
+  const form = `${customers ? '<p class="explain2">Գտեք հաճախորդին հեռախոսով կամ անունով։ Նրա քարտը՝ նշումներով և սև ցուցակով, բացվում է տողից։</p>' : ''}
+    <form role="search" class="qrow" onsubmit="return false">
+      <div class="input l" role="textbox" aria-label="${customers ? 'Հեռախոս կամ անուն' : 'Հեռախոս, անուն, հասցե, համարանիշ կամ վարորդ'}"><i data-lucide="search"></i>
+        <span class="val${shownQ ? ' mono' : ' ph'}">${shownQ || (customers ? 'օր. 091 44-40-01 կամ Կարեն' : 'օր. 11 AA 111, 091 44-40-01, Բաղրամյան 24')}</span>
+        ${shownQ ? '<button type="button" class="btn ghost icon s" aria-label="Մաքրել որոնումը"><i data-lucide="x"></i></button>' : ''}</div>
+      ${customers ? '' : `<span class="chip${st === 'yesterday' ? ' on' : ''}" role="button" aria-pressed="${st === 'yesterday'}">Երեկ</span>`}
+      <button class="btn primary l">Որոնել <span class="kbd">↵</span></button></form>
+    <div class="as" role="group" aria-label="Կարդալ որպես"><span class="lbl">Կարդալ որպես</span>${dims.map((d, i) => `<span class="chip${i === 0 ? ' on' : ''}" role="button" aria-pressed="${i === 0}">${d}</span>`).join('')}</div>`
+
+  /* [clock, day-or-null, pickup, phone, driver, plate, open] — the fleet's clock; the day under it when not today. */
+  const A = [
+    [R.requested, null, R.pickup, R.rider.phone, R.driver.name, R.driver.plate],
+    ['18:22', '8 հոկտ.', 'Կոմիտասի պող. 22', R.rider.phone, 'Լիլիթ Մանուկյան', '18 OL 220'],
+    ['08:47', '8 հոկտ.', 'Կոմիտասի պող. 22', R.rider.phone, 'Սուրեն Մկրտչյան', '22 OU 447'],
+    ['19:05', '6 հոկտ.', 'Կասկադ', R.rider.phone, 'Տիգրան Աբրահամյան', '12 TT 304'],
+    ['08:31', '2 հոկտ.', 'Կոմիտասի պող. 22', R.rider.phone, 'Գագիկ Ավետիսյան', '34 LS 108'],
+    ['21:40', '29 սեպտ.', 'Թումանյան 21', R.rider.phone, null, null],
+  ]
+  const P = [
+    ['09:02', null, 'Բաղրամյան պող. 24', '077 41-22-08', R.driver.name, R.driver.plate],
+    ['08:14', null, 'Արշակունյաց 34', '099 50-71-13', R.driver.name, R.driver.plate],
+    ['21:55', '8 հոկտ.', 'Սայաթ-Նովա 5', '093 18-60-02', R.driver.name, R.driver.plate],
+    ['17:31', '8 հոկտ.', 'Կոմիտասի պող. 49', '098 51-20-44', R.driver.name, R.driver.plate],
+  ]
+  const Y = [
+    ['23:48', '8 հոկտ.', 'Աբովյան 12', '094 22-17-30', 'Արմեն Գրիգորյան', '35 OS 512'],
+    ['23:12', '8 հոկտ.', 'Վազգեն Սարգսյանի 26/1', '091 08-44-71', 'Էդգար Պողոսյան', '27 EP 336'],
+    ['22:40', '8 հոկտ.', 'Կասկադ', '077 63-12-90', 'Դավիթ Կարապետյան', '09 DK 118'],
+    ['22:05', '8 հոկտ.', 'Թումանյան 21', '055 30-41-18', 'Գագիկ Ավետիսյան', '34 LS 108'],
+    ['21:55', '8 հոկտ.', 'Սայաթ-Նովա 5', '093 18-60-02', R.driver.name, R.driver.plate],
+    ['21:31', '8 հոկտ.', 'Մաշտոցի պող. 37', '098 77-02-44', 'Տիգրան Աբրահամյան', '12 TT 304'],
+    ['20:58', '8 հոկտ.', 'Հալաբյան 41', '041 33-21-90', 'Նարեկ Հովհաննիսյան', '07 AB 913'],
+    ['20:16', '8 հոկտ.', 'Բաղրամյան պող. 24', '077 41-22-08', 'Լիլիթ Մանուկյան', '18 OL 220'],
+  ]
+  const rows = { '': A, plate: P, yesterday: Y, none: [], blacklist: [['18:40', '2 հոկտ.', 'Արշակունյաց 34', BL.phone, 'Վահե Սարգսյան', '55 SM 620'], ['22:15', '27 սեպտ.', 'Թումանյան 21', BL.phone, 'Հայկ Սահակյան', '61 HS 450']] }[st]
+  const hl = { '': ['phone', '091 23'], plate: ['plate', '01 ET 001'], blacklist: ['phone', '096 70'] }[st] || [null, null]
+  const ride = (r, i) => `<tr class="two${i === 0 ? ' focusrow' : ''}"><td class="when">${r[0]}${r[1] ? `<small>${r[1]}</small>` : ''}</td>
+      <td><a class="lk" href="rides.html?theme=${THEME}" title="${r[2]}">${r[2]}</a></td>
+      <td class="mono">${hl[0] === 'phone' ? mk(r[3], hl[1]) : r[3]}</td>
+      <td>${r[4] || '<span class="dash">—</span>'}</td>
+      <td>${r[5] ? `<span class="plate">${hl[0] === 'plate' ? mk(r[5], hl[1]) : r[5]}</span>` : '<span class="dash">—</span>'}</td></tr>`
+  const keys = '<span class="keys" aria-hidden="true"><span><span class="kbd">↑</span><span class="kbd">↓</span>ընտրել</span><span><span class="kbd">↵</span>բացել</span></span>'
+  const rideCard = (list, more) => `<section class="rc" aria-label="Պատվերներ"><h2>Պատվերներ <span class="n">${list.length}</span>${list.length ? keys : ''}</h2>
+      ${list.length ? `<table class="tbl" data-truncate><colgroup><col style="width:88px"><col><col style="width:152px"><col style="width:200px"><col style="width:136px"></colgroup>
+        <thead><tr><th>Ժամը</th><th>Վերցնելու հասցե</th><th>Հեռախոս</th><th>Վարորդ</th><th>Մեքենա</th></tr></thead><tbody>${list.map(ride).join('')}</tbody></table>`
+        : '<p class="msg">Համապատասխան պատվերներ չկան</p>'}${more ? '<p class="more">Կան ավելին — նեղացրեք որոնումը</p>' : ''}</section>`
+  const cust = (list, part) => `<section class="rc" aria-label="Հաճախորդներ"><h2>Հաճախորդներ <span class="n">${list.length}</span></h2>
+      ${list.length ? `<table class="tbl" data-truncate><colgroup><col><col style="width:168px"><col style="width:144px"></colgroup>
+        <thead><tr><th>Հաճախորդ</th><th>Հեռախոս</th><th></th></tr></thead><tbody>${list.map(([n, ph, bl, href], i) => `<tr class="${customers && i === 0 ? 'focusrow' : ''}">
+          <td><a class="lk" href="${href}">${part && n.includes(part) ? mk(n, part) : n}</a></td><td class="mono">${part && ph.includes(part) ? mk(ph, part) : ph}</td>
+          <td>${bl ? '<span class="pill bad"><i data-lucide="ban"></i>Սև ցուցակ</span>' : ''}</td></tr>`).join('')}</tbody></table>`
+        : '<p class="msg">Համապատասխան հաճախորդներ չկան</p>'}</section>`
+  const cHref = `customer.html?theme=${THEME}`, cBl = `customer.html?theme=${THEME}&state=blacklisted`
+  let body = ''
+  if (customers) {
+    body = st === 'hint' ? '<p class="hint0">Գրեք հեռախոս, համարանիշ, հասցե կամ անուն և սեղմեք Enter։</p>'
+      : `<p class="readas">Կարդացվեց որպես <b>Անուն</b></p>` + cust([[CU.name, CU.phone, false, cHref], ['Աննա Մելիքյան', '094 61-18-25', false, cHref], ['Աննա Սարգսյան', '077 12-90-04', false, cHref], ['Աննա Ղազարյան', '098 33-47-60', false, cHref]], 'Աննա')
+  } else if (st === 'hint') body = '<p class="hint0">Գրեք հեռախոս, համարանիշ, հասցե կամ անուն և սեղմեք Enter։</p>'
+  else {
+    const read = { '': 'Հեռախոս', blacklist: 'Հեռախոս', plate: 'Համարանիշ', none: 'Հասցե', yesterday: 'ամսաթվերի միջակայք' }[st]
+    const win = st === 'yesterday' ? ' <span class="mono">· 8.10</span>' : ''
+    const cs = {
+      '': [[CU.name, CU.phone, false, cHref], ['Արթուր Բ.', '091 23-08-17', false, cHref]],
+      blacklist: [[BL.name, BL.phone, true, cBl]], plate: [], none: [], yesterday: [] }[st]
+    body = `<p class="readas">Կարդացվեց որպես <b>${read}</b>${win}</p>` + rideCard(rows, st === 'yesterday') + cust(cs, hl[0] === 'phone' ? hl[1] : null)
+  }
+  document.getElementById('sp').innerHTML = form + body
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

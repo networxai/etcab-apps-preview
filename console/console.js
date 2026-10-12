@@ -30,12 +30,16 @@
     { items: [['overview', 'layout-dashboard', 'Ընդհանուր'], ['dispatch', 'activity', 'Դիսպետչեր', '2', true], ['rides', 'list', 'Պատվերներ'], ['requests', 'inbox', 'Հարցումներ', '4', true]] },
     { group: 'Ավտոպարկ', items: [['drivers', 'users', 'Վարորդներ', '30'], ['vehicles', 'car', 'Մեքենաներ', '28'], ['tariffs', 'tag', 'Սակագներ'], ['zones', 'map', 'Գոտիներ']] },
     { group: 'Գործընկերներ', items: [['partners', 'handshake', 'Գործընկերներ', '12'], ['approvals', 'badge-check', 'Հաստատումներ', '3', true], ['topups', 'wallet', 'Լիցքավորումներ'], ['feeplans', 'percent', 'Վճարի պլաններ']] },
-    { group: 'Ֆինանսներ', items: [['settlement', 'receipt', 'Վարորդների հաշիվներ'], ['customers', 'user-check', 'Հաճախորդներ'], ['companies', 'building-2', 'Ընկերություններ'], ['invoices', 'receipt-text', 'Հաշիվների ձևավորում'], ['fiscal', 'scroll-text', 'Ֆիսկալ հերթ'], ['reports', 'chart-column', 'Հաշվետվություններ']] },
+    { group: 'Ֆինանսներ', items: [['settlement', 'receipt', 'Հաշվարկներ' /* nav.billing in lib/i18n.ts → /admin/billing */], ['customers', 'user-check', 'Հաճախորդներ'], ['companies', 'building-2', 'Ընկերություններ'], ['invoices', 'receipt-text', 'Հաշիվների ձևավորում'], ['fiscal', 'scroll-text', 'Ֆիսկալ հերթ'], ['reports', 'chart-column', 'Հաշվետվություններ']] },
     { group: 'Ուղևորի հավելված', fold: true, items: [['promotions', 'megaphone', 'Ակցիաներ'], ['bizpartners', 'store', 'Բիզնես գործընկերներ'], ['apptexts', 'smartphone', 'Տեքստեր և կապ']] },
     { group: 'Կառավարում', fold: true, items: [['operators', 'user-cog', 'Օպերատորներ'], ['integrations', 'plug', 'Ինտեգրումներ'], ['audit', 'history', 'Աուդիտ'], ['settings', 'settings', 'Կարգավորումներ']] },
   ]
-  const PAGES = ['overview', 'dispatch', 'rides', 'drivers', 'tariffs', 'partners', 'approvals', 'topups', 'feeplans', 'companies', 'company', 'invoices', 'settings']
-  const href = (id) => (PAGES.includes(id) ? `${id}.html?theme=${THEME}` : '#')
+  const PAGES = ['overview', 'dispatch', 'rides', 'drivers', 'tariffs', 'partners', 'approvals', 'topups', 'feeplans', 'companies', 'company', 'invoices', 'settings',
+    /* p1p2 pass: the remaining real routes, plus the planned Requests inbox. */
+    'requests', 'vehicles', 'zones', 'settlement', 'customers', 'reports', 'promotions', 'operators', 'integrations', 'audit', 'search']
+  /* Nav ids whose file is named after the real route rather than the nav word. */
+  const FILE = { settlement: 'billing', customers: 'customer' }
+  const href = (id) => (PAGES.includes(id) ? `${FILE[id] || id}.html?theme=${THEME}` : '#')
 
   window.shell = function (active) {
     const screen = document.getElementById('screen')
@@ -46,7 +50,7 @@
     let h = rail
       ? `<div class="brand" style="padding:0;margin-bottom:8px"><img class="mark" src="${A}mark.png" alt="Eco Taxi"></div>`
       : `<div class="brand"><img class="wide" src="${A}logo-wide.png" alt="Eco Taxi"><button class="btn ghost icon s" aria-label="Փակել վահանակը"><i data-lucide="panel-left-close"></i></button></div>
-         <div class="search"><i data-lucide="search"></i><span class="grow">Որոնել…</span><span class="kbd">⌘K</span></div>`
+         <a class="search" href="search.html?theme=${THEME}" style="text-decoration:none"><i data-lucide="search"></i><span class="grow">Որոնել…</span><span class="kbd">⌘K</span></a>`
     h += '<div class="scroll">'
     NAV.forEach((g, gi) => {
       const folded = !rail && g.fold && !g.items.some(([id]) => id === active)

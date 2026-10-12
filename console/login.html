@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login</title>
+<link rel="stylesheet" href="console.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+<style>
+  /* Mirrors apps/operator app/(auth)/login/login-form.tsx + setup-key.tsx (§6.19 / §11): one 400px card on the ground,
+     the fleet's initial on a brand chip (never a bitmap: the console is white-labelled), email, password and the
+     authenticator code on ONE card (the API answers one 401 for a wrong password and a missing code alike, on purpose),
+     the refusal as a standing Notice above the L primary, theme + language in the card's foot. First login swaps the card
+     for the enrolment card: one card at a time, never a wizard of both. No shell: nothing is authenticated yet. */
+  .screen.login { grid-template-columns: minmax(0, 1fr); place-items: center; overflow: auto; }
+  .lc { width: 400px; background: var(--surface); border-radius: var(--r-card); box-shadow: var(--e2); display: flex; flex-direction: column; }
+  .lc.wide { width: 460px; }
+  .lh { padding: 24px 24px 8px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+  .chipm { width: 36px; height: 36px; border-radius: 10px; background: var(--brand-fill); color: var(--brand-fill-ink); display: grid; place-items: center; font: 600 18px/1 var(--font); margin-bottom: 8px; }
+  .lh h1 { font: var(--c-title); }
+  .lh p { font: var(--c-body); color: var(--ink-muted); }
+  .lb { padding: 12px 24px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .fld .label small { font: var(--c-small); color: var(--ink-faint); margin-left: 6px; font-weight: 400; }
+  .input.l .val { font: var(--c-row); font-weight: 400; }
+  .dots { letter-spacing: 3px; }
+  .otp { display: flex; align-items: center; gap: 6px; }
+  .otp .bx { width: 44px; height: var(--h-l); border-radius: var(--r-ctl); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-strong); display: grid; place-items: center; font: 500 18px/1 var(--mono); }
+  .otp .bx.cur { box-shadow: inset 0 0 0 1px var(--focus-ring), 0 0 0 3px var(--brand-soft); }
+  .otp .bx.err { box-shadow: inset 0 0 0 1px var(--danger-c); }
+  .otp .dash { width: 10px; height: 2px; background: var(--line-control); margin: 0 4px; }
+  .btn.l.full { width: 100%; }
+  .lf { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--line-soft); font: var(--c-small); color: var(--ink-faint); }
+  .lf .note { flex: 1; min-width: 0; }
+  .lf .ver { font-family: var(--mono); }
+  .key { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 12px; border-radius: var(--r-ctl); background: var(--surface-alt); }
+  .key p { flex: 1; display: flex; flex-wrap: wrap; gap: 4px 8px; font: 500 14px/20px var(--mono); }
+  .qrrow { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 16px; align-items: start; }
+  .qr { width: 132px; height: 132px; padding: 8px; border-radius: var(--r-ctl); background: #fff; box-shadow: inset 0 0 0 1px var(--line-soft); }
+  .qr svg { width: 100%; height: 100%; display: block; }
+  .ahead { align-self: flex-start; display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border-radius: var(--r-tag); background: var(--info-soft); color: var(--ink); box-shadow: inset 0 0 0 1px var(--info); font: 500 12px/16px var(--font); }
+  .steps { font: var(--c-small); color: var(--ink-muted); display: flex; flex-direction: column; gap: 4px; }
+  .steps b { color: var(--ink); font-weight: 500; }
+  .stamp { margin-top: 12px; font: var(--c-small); color: var(--ink-faint); text-align: center; }
+  .stamp a { color: var(--brand-text); }
+</style>
+</head>
+<body>
+<div class="screen login" id="screen">
+  <div>
+    <form class="lc" id="card" aria-labelledby="h"></form>
+    <p class="stamp"><a href="index.html" id="idx">Ինդեքս</a></p>
+  </div>
+</div>
+<script>
+  /* ?state= (none) filled, ready to press · refused (auth.login.error: wrong password, wrong code, OR a disabled operator —
+     the API answers one 401 for all three, on purpose) · ratelimited (amber: paused, not refused) · enrol (first login:
+     the setup key, QR drawn ahead) · enrol-bad (auth.totp.badCode on the enrolment card). */
+  const st = new URLSearchParams(location.search).get('state') || ''
+  document.getElementById('idx').href = 'index.html?theme=' + THEME
+  const me = ECO.OPERATORS[0]
+  const theme = THEME === 'dark'
+  const foot = `<div class="lf"><a class="btn ghost icon s" href="?theme=${theme ? 'light' : 'dark'}${st ? '&state=' + st : ''}" aria-label="Թեմա"><i data-lucide="${theme ? 'sun' : 'moon'}"></i></a>
+    <span class="note">Ցերեկային / գիշերային տեսքը հիշվում է այս դիտարկիչում</span>
+    <button type="button" class="btn ghost s" aria-label="Լեզու">Հայ</button><span class="ver">v1.8.3</span></div>`
+  const otp = (digits, cur, err) => {
+    const bx = (i) => `<span class="bx${i === cur ? ' cur' : ''}${err ? ' err' : ''}">${digits[i] || ''}</span>`
+    return `<div class="otp" role="textbox" aria-label="Նույնականացման կոդ">${bx(0)}${bx(1)}${bx(2)}<i class="dash"></i>${bx(3)}${bx(4)}${bx(5)}</div>`
+  }
+  const field = (label, html, extra) => `<div class="fld"><span class="label">${label}${extra ? `<small>${extra}</small>` : ''}</span>${html}</div>`
+  const submit = (t, kbd = true) => `<button type="submit" class="btn primary l full">${t}${kbd ? ' <span class="kbd">↵</span>' : ''}</button>`
+  const card = document.getElementById('card')
+
+  if (st === 'enrol' || st === 'enrol-bad') {
+    /* setup-key.tsx: the secret in 4-character groups, mono, with «Պատճենել»; the code is required here. */
+    card.classList.add('wide')
+    const key = 'JBSW Y3DP EHPK 3PXP 4Q2M 7RTA'
+    card.innerHTML = `<div class="lh"><h1 id="h">Կարգավորեք ձեր նույնականացնողը</h1><p>Սկանավորեք կոդը ձեր հավելվածում կամ մուտքագրեք բանալին ձեռքով։ Այն ցուցադրվում է մեկ անգամ։</p></div>
+      <div class="lb">
+        <div class="qrrow"><div class="qr" id="qr" role="img" aria-label="QR կոդ նույնականացման հավելվածի համար"></div>
+          <div class="steps"><span class="ahead">QR · նախագիծ</span><span><b>1.</b> Բացեք Google Authenticator կամ նմանը</span><span><b>2.</b> Սկանավորեք կամ մուտքագրեք բանալին</span><span><b>3.</b> Գրեք 6 նիշանոց կոդը ներքևում</span></div></div>
+        <div><span class="label">Կարգավորման բանալի</span><div class="key"><p translate="no">${key.split(' ').map((g) => `<span>${g}</span>`).join('')}</p><button type="button" class="btn ghost s"><i data-lucide="copy"></i>Պատճենել</button></div>
+          <p class="hint" role="status" style="font:var(--c-small);color:var(--ink-faint);margin-top:4px">${st === 'enrol' ? 'Պատճենվեց' : ''}</p></div>
+        ${field('Նույնականացման կոդ', st === 'enrol' ? otp('4821', 4) : otp('482109', 5, true))}
+        ${st === 'enrol-bad' ? '<div class="notice red" role="alert"><i data-lucide="circle-alert"></i><span>Այդ կոդը չընդունվեց։ Ստուգեք ձեր նույնականացնողը և կրկնեք։</span></div>' : ''}
+        ${submit('Հաստատել', false)}
+      </div>${foot}`
+  } else {
+    const refusal = {
+      refused: '<div class="notice red" role="alert"><i data-lucide="circle-alert"></i><span>Էլ. փոստը, գաղտնաբառը կամ կոդը չընդունվեց</span></div>',
+      ratelimited: '<div class="notice amber" role="status"><i data-lucide="clock"></i><span>Մուտքի չափազանց շատ փորձեր։ Կրկին փորձեք 4 րոպեից։</span></div>',
+    }[st] || ''
+    const pwFocus = st === 'refused'
+    card.innerHTML = `<div class="lh"><span class="chipm" aria-hidden="true">E</span><h1 id="h">Մուտք</h1><p>Դիսպետչերի կոնսոլ</p></div>
+      <div class="lb">
+        ${field('Էլ. փոստ', `<div class="input l"><span class="val mono">${me.email}</span></div>`)}
+        ${field('Գաղտնաբառ', `<div class="input l${pwFocus ? ' focus' : ''}"><span class="val dots">••••••••••••••</span></div>`)}
+        ${field('Նույնականացման կոդ', st === 'ratelimited' ? otp('193', -1) : otp(pwFocus ? '' : '193', pwFocus ? -1 : 3), 'եթե արդեն կարգավորված է')}
+        ${refusal}
+        ${submit('Մուտք գործել')}
+      </div>${foot}`
+  }
+
+  /* A deterministic stand-in QR (finder squares + pseudo-random modules): a picture of where the QR goes, not a code. */
+  const qr = document.getElementById('qr')
+  if (qr) {
+    const n = 25; let s = 7, h = ''
+    const rnd = () => ((s = (s * 9301 + 49297) % 233280) / 233280)
+    const finder = (x, y) => (x < 7 && y < 7) || (x >= n - 7 && y < 7) || (x < 7 && y >= n - 7)
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (!finder(x, y) && rnd() > 0.52) h += `<rect x="${x}" y="${y}" width="1" height="1"/>`
+    const f = (x, y) => `<rect x="${x}" y="${y}" width="7" height="7"/><rect x="${x + 1}" y="${y + 1}" width="5" height="5" fill="#fff"/><rect x="${x + 2}" y="${y + 2}" width="3" height="3"/>`
+    qr.innerHTML = `<svg viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges" fill="#111" aria-hidden="true">${h}${f(0, 0)}${f(n - 7, 0)}${f(0, n - 7)}</svg>`
+  }
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

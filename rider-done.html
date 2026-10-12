@@ -64,6 +64,22 @@
   .thanks .ok svg { width: 34px; height: 34px; stroke-width: 2; }
   .thanks .large { padding: 0; }
   .thanks .sum { font: var(--t-body); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  /* Fiscal receipt (R58, drawn ahead): the tax receipt as the state issues it, set as a paper card on the ground —
+     seller, TIN, device, number and time, the one service line, total and method, and the verification QR. */
+  .fis { margin-top: var(--s2); background: var(--surface); border-radius: var(--r-card); box-shadow: var(--e1); padding: var(--s4); display: flex; flex-direction: column; }
+  .page.on-surface .fis { background: var(--surface-2); box-shadow: none; }
+  .fis .seller { font: var(--t-body-strong); color: var(--ink); text-align: center; }
+  .fis .meta { display: flex; flex-direction: column; margin-top: var(--s2); }
+  .fis .m { display: flex; justify-content: space-between; gap: var(--s3); min-height: 24px; font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .fis .m b { font: var(--t-secondary-strong); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .fis .cut { border-top: 1.5px dashed var(--ink-3); margin: var(--s3) 0; opacity: .7; }
+  .fis .item { display: flex; justify-content: space-between; gap: var(--s3); font: var(--t-body); color: var(--ink); }
+  .fis .item span:last-child, .fis .tot span:last-child { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .fis .item small { display: block; font: var(--t-secondary); color: var(--ink-2); }
+  .fis .tot { display: flex; justify-content: space-between; font: var(--t-headline); color: var(--ink); margin-top: var(--s2); }
+  .fis .qr { display: flex; gap: var(--s3); align-items: center; margin-top: var(--s2); }
+  .fis .qr svg { flex: none; background: #fff; border-radius: 6px; padding: 6px; }
+  .fis .qr span { font: var(--t-secondary); color: var(--ink-2); }
 </style>
 </head>
 <body>
@@ -93,6 +109,15 @@
   const stars = (n) => `<div class="stars" role="radiogroup" aria-label="Գնահատեք վարորդին">${[1, 2, 3, 4, 5].map((i) =>
     `<button class="${i <= n ? 'on' : ''}" role="radio" aria-checked="${i === n}" aria-label="${i} աստղ">${S}</button>`).join('')}</div>`
   const chips = (list, on) => `<div class="chips">${list.map((c, i) => `<button class="chip tog" aria-pressed="${on.includes(i)}">${c}</button>`).join('')}</div>`
+  /* A stand-in QR: a seeded 25×25 module grid with the three finder squares (not a real code). Always dark on white. */
+  const qr = () => {
+    let x = 2417, d = ''
+    const rnd = () => ((x = (x * 1103515245 + 12345) % 2147483648) / 2147483648)
+    const fin = (r, c) => [[0, 0], [0, 18], [18, 0]].some(([a, b]) => r >= a && r < a + 7 && c >= b && c < b + 7)
+    for (let r = 0; r < 25; r++) for (let c = 0; c < 25; c++) if (!fin(r, c) && rnd() > .52) d += `M${c * 3} ${r * 3}h3v3h-3z`
+    const f = (a, b) => `M${b * 3} ${a * 3}h21v21h-21zM${b * 3 + 3} ${a * 3 + 3}v15h15v-15zM${b * 3 + 6} ${a * 3 + 6}h9v9h-9z`
+    return `<svg width="88" height="88" viewBox="0 0 75 75" aria-hidden="true"><path fill="#111113" fill-rule="evenodd" d="${d}${f(0, 0)}${f(0, 18)}${f(18, 0)}"/></svg>`
+  }
   const page = (body, foot) => `<div class="page on-surface">${nav}<div class="body">${body}</div><div class="foot">${foot}</div></div>`
 
   Rider.page({
@@ -113,6 +138,24 @@
         html: () => page(`${tripHead()}${collapsed}${who}${stars(3)}<div class="q" style="text-align:center">Ի՞նչը չստացվեց</div>
           ${chips(['Ուշացավ', 'Անզգույշ վարում', 'Մեքենան մաքուր չէր', 'Երկար երթուղի', 'Անհարմար զրույց'], [1])}`,
           '<button class="btn btn-brand">Ուղարկել</button><button class="btn-text">Բաց թողնել</button>') },
+      { id: 'fiscal', label: 'Fiscal receipt', time: '9:52', note: 'R58, drawn ahead (no fiscal API yet; the console\'s «Ֆիսկալ հերթ» holds the ones that failed to issue). Reached from «Ստացական» on Thanks and from the History receipt. The receipt as issued (ECO.FISCAL): seller, ՀՎՀՀ, ՀԴՄ, number, time, the one service line, total, method and the tax office\'s QR. Share sends the PDF (system share sheet); nothing else on screen (new strings)',
+        html: () => `<div class="page">${nav.replace('Ուղևորությունն ավարտված է', 'Ֆիսկալ կտրոն').replace('aria-label="Փակել">' + R.i('x'), 'aria-label="Փակել">' + R.i('x'))}<div class="body">
+          <div class="fis" aria-label="Ֆիսկալ կտրոն">
+            <div class="seller">${ECO.FISCAL.seller}</div>
+            <div class="meta">
+              <div class="m"><span>ՀՎՀՀ</span><b>${ECO.FISCAL.tin}</b></div>
+              <div class="m"><span>Սարք</span><b>${ECO.FISCAL.device}</b></div>
+              <div class="m"><span>Կտրոն №</span><b>${ECO.FISCAL.no}</b></div>
+              <div class="m"><span>Ամսաթիվ</span><b>${ECO.FISCAL.at}</b></div>
+            </div>
+            <div class="cut"></div>
+            <div class="item"><span>Տաքսու ծառայություն<small>${RD.tier} · R-${RD.no} · ${ECO.km(RD.km)}</small></span><span>${R.amd(RD.fare)}</span></div>
+            <div class="cut"></div>
+            <div class="tot"><span>Ընդամենը</span><span>${R.amd(RD.fare)}</span></div>
+            <div class="m" style="margin-top:var(--s1)"><span>${ECO.PAY.cash.label}</span><b>${R.amd(RD.fare)}</b></div>
+            <div class="qr">${qr()}<span>Ստուգեք կտրոնը ՊԵԿ կայքում</span></div>
+          </div></div>
+          <div class="foot"><button class="btn btn-brand">${R.i('share')}Կիսվել</button><button class="btn btn-quiet">${R.i('download')}Պահել PDF</button></div></div>` },
       { id: 'thanks', label: 'Thanks', note: 'Calm close; the next ride is one tap',
         html: () => page(`<div class="thanks"><span class="ok">${R.i('check')}</span><h1 class="large">Շնորհակալություն</h1>
           <span class="sum">${R.amd(RD.fare)} · ${ECO.PAY.cash.label} · ${DV.first}</span></div>`,
