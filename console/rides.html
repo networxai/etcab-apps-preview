@@ -79,7 +79,7 @@
         </div>
         <div class="scroll-y grow">
           <table class="tbl rt">
-            <colgroup><col style="width:68px"><col><col style="width:118px"><col style="width:150px"><col style="width:124px"><col style="width:92px"></colgroup>
+            <colgroup><col style="width:68px"><col><col style="width:118px"><col style="width:150px"><col style="width:140px"><col style="width:92px"></colgroup>
             <thead><tr><th>Ժամը</th><th>Երթուղի</th><th>Փաթեթ</th><th>Վարորդ</th><th>Վիճակ</th><th class="r">Գին</th></tr></thead>
             <tbody id="rows"></tbody>
           </table>
@@ -151,6 +151,8 @@
     ['11:02', 'Ծովակալ Իսակովի պող. 24', 'Նոր Նորք, Գայի 7', '011 00-08-02', '20352', 'city', 'Տիգրան Աբրահամյան', '12 TT 304', 'done', 1800],
     ['10:44', 'Պուշկինի 15', 'Նալբանդյան 50', '093 60-12-48', '20344', 'partner', 'Գագիկ Ավետիսյան', '34 LS 108', 'done', 1000],
     ['10:19', 'Մամիկոնյանց 30', 'Բաբաջանյան 76', '091 77-31-08', '20336', 'city', null, null, 'cancel', null],
+    /* The walkthrough ride (ECO.RIDE): requested 9:40, picked up 9:45, dropped 9:51, cash. */
+    [ECO.RIDE.requested, ECO.RIDE.pickup, ECO.RIDE.drop, ECO.RIDE.rider.phone, ECO.RIDE.no, ECO.RIDE.tierId, ECO.RIDE.driver.name, ECO.RIDE.driver.plate, 'done', ECO.RIDE.fare],
   ]
   document.getElementById('rows').innerHTML = R.map(([t, a, b, ph, id, tier, drv, pl, st, f, on]) => {
     const [lane, word] = ST[st]

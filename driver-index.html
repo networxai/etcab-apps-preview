@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&display=swap">
 <style>
   :root { --bg: #E9E9E6; --ink: #111113; --ink-2: #5E5E63; --card: #fff; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0A0A0B; --ink: #F2F2F3; --ink-2: #A1A1A6; --card: #161618; } }
   :root[data-theme="dark"] { --bg: #0A0A0B; --ink: #F2F2F3; --ink-2: #A1A1A6; --card: #161618; }
   * { box-sizing: border-box; margin: 0; }
   body { background: var(--bg); color: var(--ink); font: 400 15px/22px 'Google Sans', system-ui, sans-serif; padding: 32px 16px 64px; }
@@ -20,7 +19,9 @@
   section { margin-top: 40px; }
   h2 { font: 600 20px/28px 'Google Sans', sans-serif; display: flex; gap: 12px; align-items: baseline; }
   h2 a { font: 400 13px/18px 'Google Sans', sans-serif; color: var(--ink-2); }
-  .row { display: flex; gap: 20px; overflow-x: auto; padding: 16px 0 8px; }
+  .row { display: flex; flex-wrap: wrap; gap: 20px; padding: 16px 0 8px; } /* wraps: no row is cut at the viewport edge (review H3) */
+  .en { display: block; font: 400 13px/18px 'Google Sans', sans-serif; color: var(--ink-2); margin-top: 4px; max-width: 820px; }
+  .bar a { font: inherit; padding: 6px 14px; border-radius: 999px; background: var(--card); color: var(--ink); text-decoration: none; }
   figure { flex: none; display: flex; flex-direction: column; gap: 8px; }
   figure a { display: block; border-radius: 28px; overflow: hidden; box-shadow: 0 1px 2px rgb(0 0 0 / .1), 0 12px 32px rgb(0 0 0 / .14); }
   figure img { width: 234px; height: 506px; display: block; background: var(--card); }
@@ -29,40 +30,38 @@
 </head>
 <body>
 <header>
-  <h1>Driver app: every screen</h1>
-  <p>Eleven screens, 63 states beyond the two heroes, in day and night. Click a phone to open the live page; its state switcher sits to the right of the screen. Sun is the high-contrast day option (Account → Theme).</p>
-  <div class="bar" role="group" aria-label="Theme"><button data-t="light" aria-pressed="true">Day</button><button data-t="dark" aria-pressed="false">Night</button></div>
+  <h1>Վարորդի հավելված․ բոլոր էկրանները<span class="en">Driver app, every screen: 15 screens (11 fleet, 4 partner), 90 states, in day, night and Sun. Click a phone to open the live page; its state switcher sits to the right of the phone. Sun is the high-contrast day option (Account → Theme). Primary in-car actions are 76 pt.</span></h1>
+  <div class="bar" role="group" aria-label="Թեմա / Theme"><button data-t="light" aria-pressed="true">Ցերեկ · Day</button><button data-t="dark" aria-pressed="false">Գիշեր · Night</button><button data-t="sun" aria-pressed="false">Արև · Sun</button><a href="driver-types.html">Պարկի և գործընկեր · Fleet vs Partner</a><a href="index.html">Գլխավոր · Hub</a></div>
 </header>
 <main id="g"></main>
 <script>
   const G = [
-    ['driver-home', [['', 'Home, online (approved hero)']]],
-    ['driver-offer', [['', 'Offer (approved hero)']]],
-['driver-login', [['phone', 'Phone number'], ['code', 'SMS code'], ['dispatcher', 'Dispatcher-read code (§11.2)'], ['error', 'Wrong code'], ['offline', 'Offline'], ['kicked', 'Signed out: other device']]],
-['driver-ready', [['checklist', 'Checklist 2/4'], ['location', 'Background location disclosure'], ['battery', 'Battery whitelist (OEM)'], ['ios', 'iOS: Time-Sensitive'], ['done', 'All ready']]],
-['driver-shift', [['choose', 'Choose the car'], ['taken', 'Car already on a shift'], ['empty', 'No cars free'], ['operator', 'Opened by the dispatcher'], ['end', 'End of shift summary']]],
-['driver-home-states', [['away', 'Away (auto, missed offers)'], ['offline', 'Offline (off the line)'], ['lost', 'Connection lost'], ['active', 'Active ride card'], ['demo', 'Practice ride running'], ['blocked', 'Blocked (debt over limit)']]],
-['driver-preorders', [['list', 'My pre-orders'], ['details', 'Details sheet'], ['cantmake', '«Չեմ հասցնի» requested'], ['reminder', 'Reminder (T−25)'], ['activated', 'Activated → live ride'], ['empty', 'Empty'], ['offline', 'Offline (cached)'], ['error', 'Error']]],
-['driver-offer-states', [['taken', 'Taken by another driver'], ['expired', 'Expired (no answer)'], ['decline', 'Decline with reason (ticking)'], ['declined', 'Declined, back on the line']]],
-['driver-ride', [['assigned', 'Assigned · On my way'], ['enroute', 'En route · Arrived (guidance)'], ['arrived', 'Arrived · wait, slide Start'], ['noshow', 'No-show available (5:00+)'], ['noshowsent', 'No-show raised'], ['inprogress', 'In progress · slide Complete'], ['done', 'Complete · collect cash'], ['forced', 'Forced acknowledgement'], ['offline', 'Offline · actions will sync'], ['call', 'Call sheet'], ['cancel', 'Cancel with reason']]],
-['driver-earnings', [['today', 'Today · cash/card split'], ['week', 'Week · daily bars'], ['ledger', 'Ledger with reasons'], ['owed', 'Balance · owed (offset_cash)'], ['blocked', 'Balance · blocked at limit'], ['credit', 'Balance · credit'], ['withdraw', 'Withdrawal (driver_withdrawal)'], ['withdrawsent', 'Withdrawal requested'], ['unavailable', 'Unavailable · retry']]],
-['driver-account', [['main', 'Account'], ['docs', 'Documents · expiry'], ['language', 'Language'], ['theme', 'Theme · incl. Sun'], ['demo', 'Practice ride'], ['demorunning', 'Practice ride · running'], ['delete', 'Delete account'], ['deleterequested', 'Deletion requested'], ['signout', 'Sign out · blocked by shift']]],
-['driver-partner-onboarding', [['pending', 'Partner · car pending'], ['approved', 'Partner · approved moment']]],
-['driver-partner-home', [['normal', 'Partner · off the line, one tap on'], ['online', 'Partner · online'], ['low', 'Partner · low balance'], ['blocked', 'Partner · blocked below 0'], ['finish', 'Partner · below 0 mid-ride, finishes'], ['offline', 'Partner · no connection']]],
-['driver-partner-wallet', [['main', 'Wallet · balance ring'], ['topup', 'Top up · code, bank, office'], ['ledger', 'Ledger'], ['breakdown', 'Per-ride fee breakdown'], ['week', 'Weekly statement'], ['empty', 'Empty'], ['offline', 'Offline']]],
-['driver-types', [['', 'Fleet vs Partner · side by side']]],
-['driver-partner-car', [['approved', 'My car · approved'], ['pending', 'My car · pending'], ['rejected', 'My car · rejected'], ['expiring', 'My car · document expiring']]],
+    ['driver-home', [["", "Home, online (hero)"]]],
+    ['driver-offer', [["", "Offer, full-screen and call-like (hero)"]]],
+    ['driver-login', [["phone", "Phone number"], ["code", "SMS code"], ["dispatcher", "Dispatcher-read code (§11.2)"], ["error", "Wrong code"], ["offline", "Offline"], ["kicked", "Signed out: other device"]]],
+    ['driver-ready', [["checklist", "Checklist 2/4"], ["location", "Background location disclosure"], ["battery", "Battery whitelist (OEM)"], ["ios", "iOS: Time-Sensitive"], ["done", "All ready"]]],
+    ['driver-shift', [["choose", "Choose the car"], ["taken", "Car already on a shift"], ["empty", "No cars free"], ["operator", "Opened by the dispatcher"], ["end", "End of shift summary"]]],
+    ['driver-home-states', [["away", "Away (auto, missed offers)"], ["offline", "Offline (off the line)"], ["lost", "Connection lost"], ["active", "Active ride card"], ["demo", "Practice ride running"], ["blocked", "Blocked (debt over limit)"]]],
+    ['driver-preorders', [["list", "My pre-orders"], ["details", "Details · before T−30"], ["startable", "Details · start (T−30)"], ["starting", "Starting…"], ["started", "Started → en route"], ["refused", "Start refused (offline)"], ["noconn", "Start · no connection"], ["earlier", "Blocked · earlier booking"], ["cantmake", "«Չեմ հասցնի» requested"], ["reminder", "Reminder (T−25) + start"], ["activated", "Activated by fleet (T−15)"], ["empty", "Empty"], ["offline", "Offline (cached)"], ["error", "Error"]]],
+    ['driver-offer-states', [["taken", "Taken by another driver"], ["expired", "Expired (no answer)"], ["decline", "Decline: one tap on a reason (ticking)"], ["declined", "Declined, back on the line"]]],
+    ['driver-ride', [["assigned", "Assigned · On my way"], ["enroute", "En route · Arrived (guidance)"], ["arrived", "Arrived · wait, slide Start"], ["noshow", "No-show available (5:00+)"], ["noshowsent", "No-show raised"], ["inprogress", "In progress · slide Complete"], ["done", "Complete · collect cash"], ["forced", "Forced acknowledgement"], ["offline", "Offline · actions will sync"], ["call", "Call sheet"], ["cancel", "Cancel with reason"]]],
+    ['driver-earnings', [["today", "Today · cash/company split"], ["week", "Week · daily bars"], ["ledger", "Ledger with reasons"], ["owed", "Balance · owed (offset_cash)"], ["blocked", "Balance · blocked at limit"], ["credit", "Balance · credit"], ["withdraw", "Withdrawal (driver_withdrawal)"], ["withdrawsent", "Withdrawal requested"], ["unavailable", "Unavailable · retry"]]],
+    ['driver-account', [["main", "Account"], ["docs", "Documents · expiry"], ["language", "Language"], ["theme", "Theme · incl. Sun"], ["demo", "Practice ride"], ["demorunning", "Practice ride · running"], ["delete", "Delete account"], ["deleterequested", "Deletion requested"], ["signout", "Sign out · blocked by shift"]]],
+    ['driver-partner-onboarding', [["pending", "Car pending · calm wait"], ["approved", "Approved moment"]]],
+    ['driver-partner-home', [["normal", "Off the line · one tap on"], ["online", "Online · waiting"], ["low", "Low balance (warning)"], ["blocked", "Blocked below 0 · top up"], ["finish", "Below 0 mid-ride · finishes"], ["offline", "No connection (cached)"]]],
+    ['driver-partner-wallet', [["main", "Balance · ring · recent"], ["topup", "Top up · code, bank, office"], ["ledger", "Ledger · fees, top-ups, adjustments"], ["breakdown", "Per-ride fee breakdown"], ["week", "Weekly statement"], ["empty", "Empty (new partner)"], ["offline", "Offline (cached)"]]],
+    ['driver-partner-car', [["approved", "Approved"], ["pending", "Pending approval"], ["rejected", "Rejected · reason · re-shoot"], ["expiring", "Document expiring"]]],
   ]
-  let theme = 'light'
+  const q = new URLSearchParams(location.search)
+  let theme = q.get('sun') === '1' ? 'sun' : q.get('theme') === 'dark' ? 'dark' : 'light'
+  const qs = () => (theme === 'sun' ? 'theme=light&sun=1' : 'theme=' + theme)
   const draw = () => {
-    document.getElementById('g').innerHTML = G.map(([f, states]) => '<section><h2>' + f.replace('driver-', '') + '<a href="' + f + '.html?theme=' + theme + '">open live</a></h2><div class="row">' +
-      states.map(([s, l]) => '<figure><a href="' + f + '.html?theme=' + theme + (s ? '&state=' + s : '') + '"><img loading="lazy" alt="' + l + '" src="shots/' + f + (s ? '-' + s : '') + '-' + theme + '.png"></a><figcaption>' + l + '</figcaption></figure>').join('') + '</div></section>').join('')
+    document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light'
+    document.querySelectorAll('.bar button').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.t === theme)))
+    document.getElementById('g').innerHTML = G.map(([f, states]) => '<section><h2>' + f.replace('driver-', '') + '<a href="' + f + '.html?' + qs() + '">open live</a></h2><div class="row">' +
+      states.map(([s, l]) => '<figure><a href="' + f + '.html?' + qs() + (s ? '&state=' + s : '') + '"><img loading="lazy" alt="' + l + '" src="shots/' + f + (s ? '-' + s : '') + '-' + theme + '.png"></a><figcaption>' + l + '</figcaption></figure>').join('') + '</div></section>').join('')
   }
-  document.querySelectorAll('.bar button').forEach((b) => b.onclick = () => {
-    theme = b.dataset.t
-    document.querySelectorAll('.bar button').forEach((x) => x.setAttribute('aria-pressed', x === b))
-    draw()
-  })
+  document.querySelectorAll('.bar button').forEach((b) => b.onclick = () => { theme = b.dataset.t; history.replaceState(null, '', '?' + qs()); draw() })
   draw()
 </script>
 </body>

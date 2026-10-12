@@ -5,14 +5,17 @@
    html() returns the phone's markup; map(), when present, runs after icons and owns the live 2GIS map. */
 (function () {
   const q = new URLSearchParams(location.search)
-  const NB = ' ' /* narrow no-break space: thousands and before ֏ */
+  const NB = ECO.NB /* no-break space: thousands and before ֏ (kit.js ECO, the one formatter) */
 
   const R = {
     NB,
-    amd: (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, NB) + NB + '֏',
+    amd: (n) => ECO.amd(n), /* one formatter for every surface: «1 100 ֏» */
+    km: (x) => ECO.km(x),   /* decimal comma: «4,3 կմ» */
     i: (name, extra) => `<i data-lucide="${name}"${extra ? ' ' + extra : ''}></i>`,
     plate: (no, lg) => `<span class="plate${lg ? ' lg' : ''}" role="img" aria-label="Համարանիշ ${no}"><span class="eu" aria-hidden="true"><i></i><b>AM</b></span><span class="no">${no}</span></span>`,
-    avatar: (lg) => `<span class="avatar${lg ? ' lg' : ''}" role="img" aria-label="Վարորդի լուսանկար"><i data-lucide="user-round"></i></span>`,
+    /* The driver's face: no photo yet, so initials on a brand-tinted disc (the driver app's own avatar), never a grey glyph.
+       A photo URL from the backend replaces the initials when the fleet uploads one. */
+    avatar: (lg, ini) => `<span class="avatar ini${lg ? ' lg' : ''}" role="img" aria-label="Վարորդ՝ ${ECO.RIDE.driver.name}">${ini || ECO.RIDE.driver.ini}</span>`,
     car: (kind, w, h, alt) => `<span class="carart" style="width:${w}px;height:${h}px">${carImg(kind, alt)}</span>`,
 
     /* The real OSRM polyline, projected (equirectangular, cos φ) into a w×h box: a route you can recognise, no basemap. */

@@ -34,7 +34,27 @@
   .tier .price { font: var(--t-headline); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; margin-top: var(--s2); }
   .tier .tick { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; z-index: 1; }
   .tier .tick svg { width: 13px; height: 13px; stroke-width: 2.25; }
+  .tier .art .seat { position: absolute; right: 2px; top: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--surface); box-shadow: var(--e1);
+    display: grid; place-items: center; color: var(--ink); z-index: 1; }
+  .tier .art .seat svg { width: 14px; height: 14px; }
   .grabber { margin-bottom: var(--s4); }
+
+  /* Who pays (apps/rider components/payment-row.tsx): a segmented control, shown only to a rider whose company is on account.
+     The billed-to line names the company; the reference field (reference-field.tsx) appears when the agreement asks for one. */
+  .billto { display: flex; flex-direction: column; gap: var(--s2); margin-bottom: var(--s3); }
+  /* «Ընկերություն · {name}» (pay.company) is set on two lines, so the company name is never cut. */
+  .billto .seg button { height: 52px; padding: 0 var(--s2); display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 18px; }
+  .billto .seg button small { font: var(--t-caption); color: var(--ink-2); }
+  .billed { display: flex; align-items: center; gap: var(--s2); font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; min-height: 20px; }
+  .billed svg { width: 16px; height: 16px; flex: none; }
+  .ref { height: 48px; border-radius: var(--r-control); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); display: flex; align-items: center; gap: var(--s2);
+    padding: 0 var(--s4); font: var(--t-body); color: var(--ink); }
+  .ref .rl { font: var(--t-caption); color: var(--ink-2); flex: none; }
+  .ref .rv { flex: 1; text-align: right; font-variant-numeric: tabular-nums; letter-spacing: .3px; }
+  .ref.miss { box-shadow: inset 0 0 0 2px var(--warn); }
+  .ref.miss .rv { color: var(--ink-3); }
+  .refmsg { font: var(--t-secondary); color: var(--warn); }
+  .refusal .body { font: var(--t-body); color: var(--ink-2); margin-bottom: var(--s4); }
   .cash { width: 28px; height: 28px; border-radius: 8px; background: var(--surface-2); display: grid; place-items: center; color: var(--ok); flex: none; }
   .cash svg { width: 18px; height: 18px; }
 
@@ -60,7 +80,7 @@
   .modal.kb { bottom: 251px; border-radius: var(--r-sheet); padding-bottom: var(--s4); }
 
   .seg { display: flex; gap: 4px; padding: 4px; border-radius: var(--r-control); background: var(--surface-2); }
-  .seg button { flex: 1; height: 40px; border-radius: 10px; font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; }
+  .seg button { flex: 1; height: 44px; border-radius: 10px; font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; }
   .seg button[aria-checked="true"] { background: var(--raised); color: var(--ink); box-shadow: var(--e1); }
   .wheel { position: relative; display: flex; justify-content: center; align-items: center; gap: var(--s2); height: 200px; margin: var(--s4) 0; }
   .wheel .band { position: absolute; left: 0; right: 0; top: 80px; height: 40px; border-radius: 10px; background: var(--surface-2); }
@@ -103,17 +123,28 @@
   const tiers = () => `<div class="tiers" role="radiogroup" aria-label="Դաս">${TIERS.map(([k, n, eta, seats, p], i) =>
     `<button class="tier ${i ? '' : 'on'}" role="radio" aria-checked="${!i}" ${i >= 2 ? 'data-peek' : ''}>
       ${i ? '' : `<span class="tick" aria-hidden="true">${R.i('leaf')}</span>`}
-      <span class="art">${carImg(k)}</span><span class="name">${n}</span>
-      <span class="meta"><span>${R.i('clock-3')}${eta} րոպե</span><span>${R.i('user-round')}${seats}</span></span>
+      <span class="art">${k === 'kids' ? carImg('city') + `<span class="seat" role="img" aria-label="Մանկական նստոցով">${R.i('baby')}</span>` : carImg(k)}</span><span class="name">${n}</span>
+      <span class="meta"><span aria-label="Մեքենան՝ ${eta} րոպեում">${R.i('car-front')}${eta} ր</span><span>${R.i('user-round')}${seats}</span></span>
       <span class="price">${R.amd(p)}</span></button>`).join('')}</div>`
-  const opts = (sched) => `<div class="opts">
+  const C = ECO.COMPANY
+  /* pay: 'cash' (personal) or 'company' — the opt chip says who pays. */
+  const opts = (sched, pay = 'cash') => `<div class="opts">
       <button class="opt grow ${sched ? 'set' : ''}" aria-label="Ե՞րբ՝ ${sched ? 'Վաղը, 08:30' : 'Հիմա'}">${R.i(sched ? 'calendar-clock' : 'clock-3')}${sched ? 'Վաղը, 08:30' : 'Հիմա'}${R.i('chevron-down', 'class="chev"')}</button>
       <button class="opt" aria-label="Նշում վարորդին${sched ? '՝ ավելացված' : ''}">${R.i('message-square-text')}Նշում${sched ? '<span class="dot" aria-hidden="true"></span>' : ''}</button>
-      <button class="opt" aria-label="Վճարում՝ Կանխիկ"><span class="cash">${R.i('banknote')}</span>Կանխիկ</button></div>`
+      ${pay === 'company'
+        ? `<button class="opt" aria-label="Վճարում՝ ${ECO.PAY.company.label}">${R.i('building-2')}${ECO.PAY.company.short}</button>`
+        : `<button class="opt" aria-label="Վճարում՝ ${ECO.PAY.cash.label}"><span class="cash">${R.i('banknote')}</span>${ECO.PAY.cash.label}</button>`}</div>`
+  const billTo = (choice, ref) => `<div class="billto" role="group" aria-label="Ով է վճարում։ Հպեք՝ փոխելու համար">
+      <div class="seg" role="radiogroup"><button role="radio" aria-checked="${choice === 'company'}" aria-label="Ընկերություն · ${C.name}">Ընկերություն<small>${C.short}</small></button><button role="radio" aria-checked="${choice !== 'company'}">Անձնական</button></div>
+      ${choice === 'company' ? `<div class="billed">${R.i('building-2')}Վճարում է՝ ${C.name}</div>` : ''}
+      ${ref === 'filled' ? `<label class="ref"><span class="rl">${C.refLabel}</span><span class="rv">${C.ref}</span></label>` : ''}
+      ${ref === 'missing' ? `<label class="ref miss" aria-describedby="refmsg"><span class="rl">${C.refLabel}</span><span class="rv"></span></label><div class="refmsg" id="refmsg">Ձեր ընկերությունը խնդրում է լրացնել այս դաշտը</div>` : ''}</div>`
+  const company = (choice, ref) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers()}${opts(false, choice)}${billTo(choice, ref)}
+      ${ref === 'missing' ? '<button class="btn" disabled>Պատվիրել</button>' : `<button class="btn btn-brand">Պատվիրել · Eco City · ${R.amd(800)}</button>`}</section>`)
   const base = (sheet, fab = true) => `<div class="map" id="map" aria-label="Քարտեզ"></div>
       ${fab ? `<button class="fab" style="top:62px;left:16px" aria-label="Հետ">${R.i('arrow-left')}</button>` : ''}${sheet}`
   const details = (sched) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers()}${opts(sched)}
-      <button class="btn btn-brand">Պատվիրել</button></section>`)
+      <button class="btn btn-brand">Պատվիրել · Eco City · ${R.amd(800)}</button></section>`)
   const modal = (title, body, cls = '') => base(`<div class="scrim" aria-hidden="true"></div>
       <section class="sheet r modal ${cls}" id="sheet" role="dialog" aria-label="${title}"><div class="grabber"></div>
       <div class="mhead"><h2 class="h-title">${title}</h2><button class="xbtn" aria-label="Փակել">${R.i('x')}</button></div>${body}</section>`, false)
@@ -134,7 +165,7 @@
     htmlMarker(m, b, '<div class="pin-b"></div>', [18, 18])
     if (tags) {
       htmlMarker(m, a, `<div class="maptag plain" style="position:absolute;right:20px;top:-18px">Հանրապետության հր.</div>`, [0, 0], [0, 0])
-      htmlMarker(m, b, `<div class="maptag" style="position:absolute;left:0;top:-22px;transform:translate(-50%,-100%)"><b>4 րոպե</b>Կասկադ</div>`, [0, 0], [0, 0])
+      htmlMarker(m, b, `<div class="maptag" style="position:absolute;left:0;top:-22px;transform:translate(-50%,-100%)"><b>2,1 կմ · 4 ր</b>Կասկադ</div>`, [0, 0], [0, 0])
     }
   }
   /* Today is Friday 9 October 2026: tomorrow is Saturday the 10th, then Sunday the 11th (i18n weekday./month. names). */
@@ -145,7 +176,7 @@
 
   Rider.page({
     title: 'Rider · Booking details',
-    sub: 'Extends the approved tier sheet: when, a note for the driver, and payment (cash; card shown as coming, not hidden)',
+    sub: 'Extends the approved tier sheet: when, a note for the driver, payment (cash; card «Շուտով»), and the company / personal choice for corporate riders',
     states: [
       { id: 'details', group: 'Sheet', label: 'Details', note: 'One compact line under the tiers: when · note · payment. Order stays the one accent',
         html: () => details(false), map: (s) => drawRide(s) },
@@ -159,11 +190,22 @@
       { id: 'when', group: 'Sheets', label: 'When', note: 'Day as a segment, time as a wheel in 5-minute steps; the chosen row sits in a band',
         html: () => modal('Ե՞րբ', `<div class="seg" role="radiogroup" aria-label="Օր"><button role="radio" aria-checked="false">Այսօր</button><button role="radio" aria-checked="true">Վաղը</button><button role="radio" aria-checked="false">Կիրակի, 11</button></div>
           <div class="when-sub">շաբաթ, 10 հոկտեմբերի</div>${wheel()}<button class="btn btn-brand">Հաստատել</button>`), map: (s) => drawRide(s, false) },
-      { id: 'pay', group: 'Sheets', label: 'Payment', note: 'Cash is first-class; card is listed and honestly marked “soon”, never hidden',
+      { id: 'pay', group: 'Sheets', label: 'Payment', note: 'Cash is the one live method (PaySheet.tsx); card is listed and honestly marked «Շուտով», never hidden. A company rider chooses Company / Personal on the sheet itself',
         html: () => modal('Վճարում', `<div class="paylist" role="radiogroup" aria-label="Վճարման եղանակ">
           <button class="choice" role="radio" aria-checked="true"><span class="ico cashc">${R.i('banknote')}</span><span class="t">Կանխիկ</span><span class="radio"></span></button>
           <div class="divider" style="margin-left:48px"></div>
-          <button class="choice" role="radio" aria-checked="false" aria-disabled="true"><span class="ico">${R.i('credit-card')}</span><span class="t">Բանկային քարտ</span><span class="soon">Շուտով</span></button></div>`), map: (s) => drawRide(s, false) },
+          <button class="choice" role="radio" aria-checked="false" aria-disabled="true"><span class="ico">${R.i('wallet')}</span><span class="t">Քարտով</span><span class="soon">Շուտով</span></button></div>`), map: (s) => drawRide(s, false) },
+
+
+      { id: 'company', group: 'Company', label: 'Company ride', note: 'Only for a rider whose company is on account (bill-to.ts): Company / Personal, remembered per rider. The billed-to line names the company; the agreement asks for a cost-centre code',
+        html: () => company('company', 'filled'), map: (s) => drawRide(s, false) },
+      { id: 'company-ref', group: 'Company', label: 'Code missing', note: 'Order stays dark until the code holds something; a server refusal focuses the field and says why under it, in amber (a refusal, not a failure)',
+        html: () => company('company', 'missing'), map: (s) => drawRide(s, false) },
+      { id: 'personal', group: 'Company', label: 'Personal', note: 'The same rider paying personally: the row stays, the billed-to line and the code go, payment is cash',
+        html: () => company('personal', ''), map: (s) => drawRide(s, false) },
+      { id: 'company-refused', group: 'Company', label: 'Over limit', note: 'The company cannot take this ride (409): the reason in plain words and one way forward, «Վճարել ինքս», which re-quotes and books personally. Never the company balance. Not red',
+        html: () => modal('Ընկերությունը չի կարող վճարել այս ուղևորության համար', `<div class="refusal"><p class="body">Ընկերության հաշվի սահմանաչափը սպառված է։ Կարող եք ինքներդ վճարել վարորդին։</p>
+          <div class="btns"><button class="btn btn-brand">Վճարել ինքս</button><button class="btn btn-quiet">Չեղարկել</button></div></div>`), map: (s) => drawRide(s, false) },
 
       { id: 'scheduled-ok', group: 'Done', label: 'Scheduled', note: 'The time is the one hero; the ride lives in Account → scheduled bookings',
         html: () => base(`<section class="sheet r ok" id="sheet"><div class="grabber"></div>

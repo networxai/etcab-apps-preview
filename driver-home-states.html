@@ -109,7 +109,7 @@
   <div class="spill" role="status" data-s="active"><span class="dot"></span>Պատվերով</div>
   <div class="spill demo" role="status" data-s="demo"><span class="dot"></span>Փորձնական</div>
   <button class="fab lg" style="top:60px;right:16px" aria-label="Հաշիվ"><i data-lucide="user-round"></i></button>
-  <img class="logo" src="assets/eco/logo-wide.png" alt="Eco Taxi" width="100" height="18" data-s="lost">
+  <img class="logo" id="logo" src="assets/eco/logo-wide.png" alt="Eco Taxi" width="100" height="18"><!-- hidden by script when the status pill grows into it («Կապ չկա»): two shapes, never one string -->
 
   <div class="connlost" role="alert" data-s="lost"><i data-lucide="wifi-off"></i>Վերականգնվում է<span class="tm">0:48</span></div>
 
@@ -129,16 +129,16 @@
 
     <!-- earnings hero: away, offline, lost -->
     <div class="earn" data-s="away lost">
-      <div><div class="lbl">Այսօր</div><div class="hero">9 800<small>֏</small></div></div>
-      <div class="side"><span class="count">7 պատվեր</span><button class="eye" aria-label="Թաքցնել գումարը"><i data-lucide="eye"></i></button></div>
+      <div><div class="lbl">Այսօր</div><div class="hero">1 200<small>֏</small></div></div>
+      <div class="side"><span class="count">1 պատվեր</span><button class="eye" aria-label="Թաքցնել գումարը"><i data-lucide="eye"></i></button></div>
     </div>
 
     <!-- away: why, in one line -->
     <div class="notice warn" data-s="away" style="margin:0 0 var(--s4)"><i data-lucide="phone-missed"></i><div><b>Բաց եք թողել 2 պատվեր</b>Սեղմե՛ք՝ վերադառնալու համար</div></div>
 
     <!-- active ride -->
-    <a class="ride" href="driver-ride.html?state=enroute" data-s="active" aria-label="Վերադառնալ պատվերին, Մաշտոցի պող. 40">
-      <span class="txt"><span class="ey"><i></i>Ճանապարհին</span><span class="t1">Մաշտոցի պող. 40</span><span class="t2">Անի · 1,4 կմ</span></span>
+    <a class="ride" href="driver-ride.html?state=enroute" data-s="active" aria-label="Վերադառնալ պատվերին, Մաշտոցի պող. 37">
+      <span class="txt"><span class="ey"><i></i>Ճանապարհին</span><span class="t1" data-eco="RIDE.pickup">Մաշտոցի պող. 37</span><span class="t2">Աննա · 1,4 կմ</span></span>
       <span class="hero">4<small>րոպե</small></span>
     </a>
 
@@ -155,13 +155,13 @@
     </div>
 
     <div class="today" data-s="offline active demo">
-      <span class="l">Այսօր · 7 պատվեր</span><span class="v">9 800 ֏</span>
+      <span class="l">Այսօր · 1 պատվեր</span><span class="v">1 200 ֏</span>
     </div>
 
     <a class="pre" href="driver-preorders.html" data-not="demo blocked" aria-label="Նախապես ամրագրված, 2">
       <span class="ic"><i data-lucide="calendar-clock"></i></span>
-      <span class="txt"><span class="t1">Նախապես ամրագրված</span><span class="t2">Վաղը, 07:40 · Զվարթնոց</span></span>
-      <span class="n">2</span><i class="chev" data-lucide="chevron-right"></i>
+      <span class="txt"><span class="t1">Նախապես ամրագրված</span><span class="t2">Այսօր, 10:05 · Կոմիտասի պող. 49</span></span>
+      <span class="n">3</span><i class="chev" data-lucide="chevron-right"></i>
     </a>
 
     <button class="go" data-s="away"><i data-lucide="power"></i>Վերադառնալ գիծ</button>
@@ -180,6 +180,9 @@
     ['active', 'Active ride card'], ['demo', 'Practice ride running'], ['blocked', 'Blocked (debt over limit)'],
   ])
   icons()
+  /* The logo stays only while the status pill keeps clear of it (12px). */
+  const pill = [...document.querySelectorAll('.spill')].find((e) => !e.hidden), logo = document.getElementById('logo')
+  if (pill && pill.getBoundingClientRect().right + 12 > logo.getBoundingClientRect().left) logo.hidden = true
   const sheetH = document.getElementById('sheet').offsetHeight
   document.getElementById('recentre').style.bottom = (sheetH + 12) + 'px'
   const me = [40.1823, 44.5072]

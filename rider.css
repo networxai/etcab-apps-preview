@@ -3,7 +3,7 @@
    as candidates for tokens.css. */
 :root {
   --t-large: 600 28px/36px var(--font);   /* full-screen page title (iOS large title, capped at 28 by BRIEF); 36 not 34: Armenian ascenders */
-  --scrim-modal: rgb(0 0 0 / .40);        /* behind a modal sheet */
+  --scrim-modal: rgb(0 0 0 / .48);        /* behind every modal sheet, the one scrim (review: «Երբ» and «Վճարում» dimmed differently) */
   --danger-soft: rgb(200 30 30 / .08);
   --key-board: #D4D6DC;                   /* iOS keyboard tray */
   --key: #FFFFFF;
@@ -60,7 +60,7 @@
 .sheet.modal { z-index: 16; padding-top: 8px; }
 .sheet .mhead { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); min-height: 44px; margin-bottom: var(--s2); }
 .sheet .mhead .h-title { flex: 1; }
-.xbtn { width: 36px; height: 36px; border-radius: var(--r-pill); background: var(--surface-2); display: grid; place-items: center; color: var(--ink); flex: none; }
+.xbtn { width: 44px; height: 44px; border-radius: var(--r-pill); background: var(--surface-2); display: grid; place-items: center; color: var(--ink); flex: none; }
 .xbtn svg { width: 18px; height: 18px; }
 .btn-danger { background: var(--danger-soft); color: var(--danger); }
 .btn:disabled, .btn[aria-disabled="true"] { background: var(--surface-3); color: var(--ink-2); }
@@ -76,7 +76,7 @@
 
 /* ── Chips that toggle ── */
 .chips { display: flex; flex-wrap: wrap; gap: var(--s2); }
-.chip.tog { height: 36px; padding: 0 14px; background: var(--surface-2); }
+.chip.tog { height: 44px; padding: 0 16px; background: var(--surface-2); }
 .chip.tog[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
 
 /* ── Plate: an Armenian plate is a physical object — white in both themes ── */
@@ -92,10 +92,10 @@
 .plate.lg .eu b { font-size: 7px; line-height: 7px; }
 .plate.lg .no { font-size: 24px; line-height: 40px; padding: 0 12px 0 10px; letter-spacing: 1px; }
 
-/* ── Driver photo placeholder (no photo asset: neutral, not a stock face) ── */
+/* ── Driver face: initials on a brand-tinted disc until the fleet uploads a photo (review: no grey glyph) ── */
 .avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--surface-3); color: var(--ink-3); display: grid; place-items: center; flex: none; position: relative; }
 .avatar svg { width: 24px; height: 24px; }
-.avatar.ini { font: var(--t-headline); color: var(--ink-2); }
+.avatar.ini { font: var(--t-headline); color: var(--brand-ink); background: var(--brand-soft); letter-spacing: .3px; }
 .avatar.lg { width: 64px; height: 64px; }
 .avatar.lg svg { width: 30px; height: 30px; }
 .avatar.lg.ini { font: var(--t-title); }
@@ -121,8 +121,12 @@
 .banner .bt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .banner .b1 { font: var(--t-secondary-strong); color: var(--surface); }
 .banner .b2 { font: var(--t-secondary); color: var(--surface); opacity: .82; }
-.banner .ba { font: var(--t-secondary-strong); color: var(--surface); height: 32px; padding: 0 10px; border-radius: 8px; background: rgb(127 127 127 / .28); flex: none; white-space: nowrap; }
+.banner .ba { font: var(--t-secondary-strong); color: var(--surface); height: 44px; margin: -8px -6px -8px 0; padding: 0 12px; border-radius: 8px; background: rgb(127 127 127 / .28); flex: none; white-space: nowrap; }
 .banner.warn { background: var(--warn); }
+/* Night: an inverted (white) banner is a glaring slab in the dark (review). Surface-3, ink text, amber icon. */
+:root[data-theme="dark"] .banner:not(.warn) { background: var(--surface-3); color: var(--ink); }
+:root[data-theme="dark"] .banner:not(.warn) svg { color: var(--warn); }
+:root[data-theme="dark"] .banner:not(.warn) .b1, :root[data-theme="dark"] .banner:not(.warn) .b2, :root[data-theme="dark"] .banner:not(.warn) .ba { color: var(--ink); }
 :root[data-theme="dark"] .banner.warn { color: #111113; }
 :root[data-theme="dark"] .banner.warn .b1, :root[data-theme="dark"] .banner.warn .b2, :root[data-theme="dark"] .banner.warn .ba { color: #111113; }
 .inline-note { display: flex; gap: var(--s2); align-items: flex-start; font: var(--t-secondary); color: var(--ink-2); }

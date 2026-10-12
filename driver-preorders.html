@@ -64,7 +64,7 @@
   .hu-top .txt { flex: 1; min-width: 0; }
   .hu-app { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
   .hu-app img { width: 14px; height: 14px; border-radius: 4px; }
-  .hu-t { font: var(--t-headline); color: var(--ink); white-space: nowrap; margin-top: 2px; }
+  .hu-t { font: var(--t-headline); color: var(--ink); white-space: nowrap; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; }
   .hu-s { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .hu-car { width: 64px; height: 34px; }
   .hwait { font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; display: flex; align-items: center; gap: var(--s2); }
@@ -110,6 +110,30 @@
   .err .ico svg { width: 28px; height: 28px; }
   .err .foot { width: 100%; margin-top: var(--s4); }
   .err .btn-quiet { background: var(--surface); box-shadow: var(--e1); } /* surface-2 vanishes on the parked ground */
+
+  /* Ring unit labels: 12px floor (review). */
+  .dring .u { font-size: 12px; line-height: 14px; }
+  /* In-window card: a small start chip; the card is the target, the details sheet holds the 76px action. */
+  .startchip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: var(--r-pill);
+    background: var(--brand); color: var(--on-brand); font: var(--t-secondary-strong); white-space: nowrap; }
+  .startchip svg { width: 16px; height: 16px; }
+  .startchip.off { background: var(--surface-2); color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--line); }
+  .pcard.now { box-shadow: var(--e1), inset 0 0 0 1.5px var(--brand-vivid); }
+  /* Start control */
+  .startctl { margin-top: var(--s2); }
+  .startctl .go { height: 76px; }
+  .startctl .go.outlined, .startctl .go[aria-disabled="true"] { background: transparent; color: var(--ink-2); box-shadow: inset 0 0 0 1.5px var(--line); font-variant-numeric: tabular-nums; }
+  .startctl .col { display: flex; flex-direction: column; gap: var(--s2); }
+  .startctl .notice div { font: var(--t-body-strong); }
+  .cant { margin-top: var(--s2); }
+  .cant .btn { height: 48px; }
+  .headsup .go { height: 76px; }
+  .eta { display: flex; align-items: center; gap: 8px; margin-top: var(--s3); font: var(--t-body-strong); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .eta svg { width: 18px; height: 18px; color: var(--brand-ink); }
+  .sheet .go.x { height: 76px; }
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
 </style>
 </head>
 <body>
@@ -121,10 +145,19 @@
   <section class="content" data-s="list offline empty error">
     <div class="ptitle">Նախապես ամրագրված</div>
     <div class="psub" data-s="list">3 պատվեր · բոլորը՝ Eco City</div>
-    <div class="psub stale" data-s="offline"><i data-lucide="history"></i>թարմացվել է 07:02</div>
+    <div class="psub stale" data-s="offline"><i data-lucide="history"></i>թարմացվել է 09:12</div>
 
     <div class="list" data-s="list offline">
-      <div class="sect"><span>Այսօր</span><span class="n">1</span></div>
+      <div class="sect"><span>Այսօր</span><span class="n">2</span></div>
+      <button class="card pcard now" aria-label="Այսօր 10:05, Կոմիտասի պողոտա 49 — Հանրապետության հրապարակ, 1 200 դրամ, կարող եք սկսել">
+        <span class="pc-l">
+          <span class="pc-top"><span data-ring="24|րոպե|.8|brand"></span><span><span class="pc-time" style="display:block">10:05</span><span class="pc-hold" style="display:block">սկսել՝ 09:35-ից</span></span></span>
+          <span class="pc-ad"><span class="d a"></span>Կոմիտասի պող. 49</span>
+          <span class="pc-ad"><span class="d b"></span>Հանրապետության հր.</span>
+          <span class="pc-bot"><span class="startchip" data-not="offline"><i data-lucide="navigation"></i>Սկսել</span><span class="startchip off" data-s="offline"><i data-lucide="wifi-off"></i>Կապ է պետք</span><span class="fare">1 200 ֏</span></span>
+        </span>
+        <span class="minimap pc-map" data-route="kom" aria-hidden="true"></span>
+      </button>
       <button class="card pcard" aria-label="Այսօր 18:30, Կասկադ — Ծիծեռնակաբերդ, 1 000 դրամ">
         <span class="pc-l">
           <span class="pc-top"><span data-ring="8|ժամ|.65"></span><span><span class="pc-time" style="display:block">18:30</span><span class="pc-hold" style="display:block">ազատ՝ մինչև 18:00</span></span></span>
@@ -136,7 +169,7 @@
       </button>
 
       <div class="sect"><span>Վաղը</span><span class="n">1</span></div>
-      <button class="card pcard" aria-label="Վաղը 07:40, Բաղրամյան 24 — Զվարթնոց, 2 000 դրամ">
+      <button class="card pcard" aria-label="Վաղը, շաբաթ, 07:40, Բաղրամյան 24 — Զվարթնոց, 2 000 դրամ">
         <span class="pc-l">
           <span class="pc-top"><span data-ring="21|ժամ|.12"></span><span><span class="pc-time" style="display:block">07:40</span><span class="pc-hold" style="display:block">ազատ՝ մինչև 07:10</span></span></span>
           <span class="pc-ad"><span class="d a"></span>Բաղրամյան պող. 24</span>
@@ -144,17 +177,6 @@
           <span class="pc-bot"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="fare">2 000 ֏</span></span>
         </span>
         <span class="minimap pc-map" data-route="air" aria-hidden="true"></span>
-      </button>
-
-      <div class="sect"><span>Ավելի ուշ</span><span class="n">1</span></div>
-      <button class="card pcard" aria-label="Ուրբաթ, 11 հոկտեմբերի 09:15, Կոմիտաս 49 — Հանրապետության հրապարակ, 1 200 դրամ">
-        <span class="pc-l">
-          <span class="pc-top"><span data-ring="2|օր|.02"></span><span><span class="pc-time" style="display:block">09:15</span><span class="pc-hold" style="display:block">ուրբ · 11 հոկտ.</span></span></span>
-          <span class="pc-ad"><span class="d a"></span>Կոմիտասի պող. 49</span>
-          <span class="pc-ad"><span class="d b"></span>Հանրապետության հր.</span>
-          <span class="pc-bot"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="fare">1 200 ֏</span></span>
-        </span>
-        <span class="minimap pc-map" data-route="kom" aria-hidden="true"></span>
       </button>
     </div>
 
@@ -172,44 +194,48 @@
   </section>
 
   <!-- ═════════ MAP STATES ═════════ -->
-  <div class="map" id="map" aria-label="Քարտեզ" data-s="details cantmake reminder activated"></div>
-  <button class="iconbtn back" aria-label="Ետ" data-s="details cantmake"><i data-lucide="arrow-left"></i></button>
+  <div class="map" id="map" aria-label="Քարտեզ" data-not="list offline empty error"></div>
+  <button class="iconbtn back" aria-label="Ետ" data-s="details startable starting refused noconn earlier cantmake"><i data-lucide="arrow-left"></i></button>
 
-  <!-- details + can't-make -->
-  <section class="sheet" data-s="details cantmake" data-sheet>
+  <!-- details: one booking, with its start control (StartControl: the commitment's startBlockedBy decides the button) -->
+  <section class="sheet" data-s="details startable starting refused noconn earlier cantmake" data-sheet>
     <div class="grabber"></div>
     <div class="dhead">
-      <div><div class="eyebrow"><i data-lucide="calendar-clock"></i>Վաղը · Զվարթնոց</div><div class="hero">07:40</div></div>
-      <div class="dfare">2 000 ֏</div>
+      <div><div class="eyebrow"><i data-lucide="calendar-clock"></i><span id="d-eyebrow"></span></div><div class="hero" id="d-time"></div></div>
+      <div class="dfare" id="d-fare"></div>
     </div>
     <div class="stops dstops">
-      <div class="stop"><span class="m a"></span><div><div class="t1">Բաղրամյան պող. 24</div><div class="t2">Արմեն · Կանխիկ</div></div></div>
-      <div class="stop"><span class="m b"></span><div><div class="t1">Զվարթնոց</div><div class="t2">13,1 կմ · 19 րոպե</div></div></div>
+      <div class="stop"><span class="m a"></span><div><div class="t1" id="d-a"></div><div class="t2" id="d-a2"></div></div></div>
+      <div class="stop"><span class="m b"></span><div><div class="t1" id="d-b"></div><div class="t2" id="d-b2"></div></div></div>
     </div>
-    <div class="tl">
-      <div class="tli done"><span class="k"></span><span class="l">Նշանակեց դիսպետչերը</span><span class="w">այսօր 08:52</span></div>
-      <div class="tli next"><span class="k"></span><span class="l">Նոր պատվերներ չեն գա</span><span class="w">07:10</span></div>
-      <div class="tli"><span class="k"></span><span class="l">Պատվերն ակտիվանում է</span><span class="w">07:25</span></div>
-      <div class="tli"><span class="k"></span><span class="l">Նստեցում</span><span class="w">07:40</span></div>
-    </div>
+    <div class="tl" id="d-tl"></div>
     <div class="tools">
       <button class="tool"><span class="b"><i data-lucide="phone"></i></span>Ուղևոր</button>
       <button class="tool"><span class="b"><i data-lucide="headset"></i></span>Դիսպետչեր</button>
       <button class="tool"><span class="b"><i data-lucide="navigation"></i></span>Երթուղի</button>
     </div>
-    <div data-s="details"><button class="btn btn-line"><i data-lucide="clock-alert"></i>Չեմ հասցնի</button><div class="ask-cap">Կխնդրենք դիսպետչերին · որոշումը նրանն է</div></div>
+    <!-- the start control, one per state -->
+    <div class="startctl">
+      <div class="go x outlined" role="button" aria-disabled="true" data-s="details">09:35-ից</div>
+      <div class="go x outlined" role="button" aria-disabled="true" data-s="earlier">Նախ՝ 10:05-ի պատվերը</div>
+      <button class="go x" data-s="startable"><i data-lucide="navigation"></i>Ճանապարհին եմ</button>
+      <div class="go x" role="button" aria-disabled="true" data-s="starting"><i data-lucide="loader-circle" class="spin"></i>Սկսում ենք</div>
+      <div class="go x" role="button" aria-disabled="true" data-s="noconn"><i data-lucide="wifi-off"></i>Կապ է պետք</div>
+      <div data-s="refused" class="col"><div class="notice warn" role="status"><i data-lucide="circle-pause"></i><div>Նախ անցե՛ք գիծ</div></div><button class="go x"><i data-lucide="power"></i>Գծում լինել</button></div>
+    </div>
+    <div data-s="details earlier" class="cant"><button class="btn btn-line"><i data-lucide="clock-alert"></i>Չեմ հասցնի</button><div class="ask-cap">Կխնդրենք դիսպետչերին · որոշումը նրանն է</div></div>
     <div class="notice warn" data-s="cantmake" role="status"><i data-lucide="hourglass"></i><div><b>Սպասում է դիսպետչերի որոշմանը</b>Պատվերը ձերն է, մինչև նա չազատի</div></div>
   </section>
 
-  <!-- reminder: heads-up at T−25 over the home screen -->
+  <!-- reminder: heads-up at T−25 over the home screen; inside the T−30 window it carries the start itself -->
   <div class="spill" data-s="reminder" role="status" style="top:auto" id="pill"><span class="dot"></span>Գծում</div>
   <div class="headsup" data-s="reminder" role="alert">
     <div class="hu-top">
       <span data-ring="25|րոպե|.83"></span>
-      <div class="txt"><div class="hu-app"><img src="assets/eco/mark.png" alt="">Eco Taxi · հիմա</div><div class="hu-t">25 րոպեից՝ Զվարթնոց</div><div class="hu-s">Բաղրամյան պող. 24 · 07:40</div></div>
+      <div class="txt"><div class="hu-app"><img src="assets/eco/mark.png" alt="">Eco Taxi · հիմա</div><div class="hu-t">25 րոպեից՝ նստեցում</div><div class="hu-s">Կոմիտասի պող. 49 · 10:05</div></div>
       <img class="carimg hu-car" src="assets/eco/cars/city.webp" alt="">
     </div>
-    <button class="btn btn-brand">Բացել</button>
+    <button class="go x"><i data-lucide="navigation"></i>Ճանապարհին եմ</button>
   </div>
   <section class="sheet" data-s="reminder" data-sheet>
     <div class="grabber"></div>
@@ -217,77 +243,103 @@
       <span class="mycar" aria-label="Volkswagen ID.3, 01 ET 001"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="plate">01 ET 001</span></span></div>
     <button class="pre" aria-label="Նախապես ամրագրված, 2">
       <span class="ic"><i data-lucide="calendar-clock"></i></span>
-      <span class="txt"><span class="t1">Նախապես ամրագրված</span><span class="t2">07:40 · Զվարթնոց</span></span>
+      <span class="txt"><span class="t1">Նախապես ամրագրված</span><span class="t2">10:05 · Հանրապետության հր.</span></span>
       <i class="chev" data-lucide="chevron-right"></i>
     </button>
-    <button class="drive"><i data-lucide="power"></i>Դուրս գալ գծից</button>
   </section>
 
-  <!-- activated: the pre-order is now the live ride -->
-  <section class="sheet" data-s="activated" data-sheet role="alertdialog" aria-label="Նախապես ամրագրվածը սկսվեց">
+  <!-- activated (T−15, by the fleet) or started (by the driver): the pre-order is now the live ride -->
+  <section class="sheet" data-s="activated started" data-sheet role="alertdialog" aria-label="Նախապես ամրագրվածը սկսվեց">
     <div class="grabber"></div>
     <span class="tag"><i data-lucide="calendar-check"></i>Նախապես ամրագրվածը սկսվեց</span>
     <div class="ahead">
-      <div><div class="addr">Բաղրամյան պող. 24</div><div class="meta">Արմեն · Eco City · <i data-lucide="banknote"></i>Կանխիկ</div></div>
-      <div class="big">07:40</div>
+      <div><div class="addr">Կոմիտասի պող. 49</div><div class="meta">Լուսինե · Eco City · <i data-lucide="banknote"></i>Կանխիկ</div></div>
+      <div class="big">10:05</div>
     </div>
+    <div class="eta" data-s="started"><i data-lucide="navigation"></i>Դեպի ուղևոր · 6 րոպե, 2,1 կմ</div>
     <div class="tools">
       <button class="tool"><span class="b"><i data-lucide="phone"></i></span>Զանգել</button>
       <button class="tool"><span class="b"><i data-lucide="navigation"></i></span>Երթուղի</button>
       <button class="tool"><span class="b"><i data-lucide="ellipsis"></i></span>Ավելին</button>
     </div>
-    <button class="go">Ճանապարհին եմ</button>
+    <button class="go x" data-s="activated"><i data-lucide="navigation"></i>Ճանապարհին եմ</button>
+    <button class="go x" data-s="started"><i data-lucide="map-pin"></i>Տեղում եմ</button>
   </section>
 </main>
 <script src="audit.js"></script>
 <script>
   const st = D.init([
-    ['list', 'My pre-orders'], ['details', 'Details sheet'], ['cantmake', '«Չեմ հասցնի» requested'], ['reminder', 'Reminder (T−25)'],
-    ['activated', 'Activated → live ride'], ['empty', 'Empty'], ['offline', 'Offline (cached)'], ['error', 'Error'],
+    ['list', 'My pre-orders'], ['details', 'Details · before T−30'], ['startable', 'Details · start (T−30)'], ['starting', 'Starting…'],
+    ['started', 'Started → en route'], ['refused', 'Start refused (offline)'], ['noconn', 'Start · no connection'], ['earlier', 'Blocked · earlier booking'],
+    ['cantmake', '«Չեմ հասցնի» requested'], ['reminder', 'Reminder (T−25) + start'],
+    ['activated', 'Activated by fleet (T−15)'], ['empty', 'Empty'], ['offline', 'Offline (cached)'], ['error', 'Error'],
   ])
-  statusBar(document.getElementById('s'), { reminder: '07:15', activated: '07:25' }[st])
+  statusBar(document.getElementById('s'), { details: '9:20', reminder: '9:40', activated: '9:50', started: '9:42', starting: '9:41' }[st])
+
+  /* Two bookings drive the sheet: today's 10:05 (inside its window from 09:35) and tomorrow's airport run. */
+  const BK = {
+    kom: { route: 'kom', eyebrow: 'Այսօր · Հանրապետության հր.', time: '10:05', fare: ECO.amd(1200), a: 'Կոմիտասի պող. 49', a2: 'Լուսինե · Կանխիկ', b: 'Հանրապետության հր.', b2: ECO.km(5.8) + ' · 8 րոպե',
+      tl: [['done', 'Նշանակեց դիսպետչերը', 'այսօր 08:52'], [st === 'details' ? 'next' : 'done', 'Նոր պատվերներ չեն գա', '09:35'], [st === 'details' ? '' : 'next', 'Պատվերն ակտիվանում է', '09:50'], ['', 'Նստեցում', '10:05']] },
+    air: { route: 'air', eyebrow: 'Վաղը · Զվարթնոց', time: '07:40', fare: ECO.amd(2000), a: 'Բաղրամյան պող. 24', a2: 'Արմեն · Կանխիկ', b: 'Զվարթնոց', b2: ECO.km(13.1) + ' · 19 րոպե',
+      tl: [['done', 'Նշանակեց դիսպետչերը', 'այսօր 08:52'], ['next', 'Նոր պատվերներ չեն գա', '07:10'], ['', 'Պատվերն ակտիվանում է', '07:25'], ['', 'Նստեցում', '07:40']] },
+  }
+  const bk = ['earlier', 'cantmake'].includes(st) ? BK.air : BK.kom
+  if (document.getElementById('d-time')) {
+    const set = (id, v) => (document.getElementById(id).textContent = v)
+    set('d-eyebrow', bk.eyebrow); set('d-time', bk.time); set('d-fare', bk.fare); set('d-a', bk.a); set('d-a2', bk.a2); set('d-b', bk.b); set('d-b2', bk.b2)
+    document.getElementById('d-tl').innerHTML = bk.tl.map(([c, l, w]) => `<div class="tli ${c}"><span class="k"></span><span class="l">${l}</span><span class="w">${w}</span></div>`).join('')
+  }
+
   document.querySelectorAll('[data-ring]').forEach((el) => {
-    const [v, u, f] = el.dataset.ring.split('|')
+    const [v, u, f, c] = el.dataset.ring.split('|')
     const big = el.closest('.headsup')
-    el.outerHTML = D.ring(big ? 52 : 48, 4, +f, `<span class="v">${v}</span><span class="u">${u}</span>`)
+    el.outerHTML = D.ring(big ? 52 : 48, 4, +f, `<span class="v">${v}</span><span class="u">${u}</span>`, c === 'brand' ? 'var(--brand-vivid)' : null)
   })
   icons()
 
-  /* Offline: no tiles — the card keeps a drawn sketch of the cached route instead of a blank map. */
-  const sketch = (el, pts) => {
+  /* Static route thumbnail (review: three live WebGL maps per list were noise). The real OSRM polyline projected into
+     the box over a faint street grid; one live map is kept for the details sheet. Offline draws it dotted and grey. */
+  const thumb = (el, pts, dim) => {
     const w = el.clientWidth, h = el.clientHeight, pad = 18
     const la = pts.map((p) => p[0]), lo = pts.map((p) => p[1])
     const k = Math.cos(40.18 * Math.PI / 180)
     const sx = (Math.max(...lo) - Math.min(...lo)) * k, sy = Math.max(...la) - Math.min(...la)
-    const s = Math.min((w - 2 * pad) / sx, (h - 2 * pad) / sy)
-    const ox = (w - sx * s) / 2, oy = (h - sy * s) / 2
-    const xy = (p) => [ox + (p[1] - Math.min(...lo)) * k * s, oy + (Math.max(...la) - p[0]) * s]
+    const sc = Math.min((w - 2 * pad) / sx, (h - 2 * pad) / sy)
+    const ox = (w - sx * sc) / 2, oy = (h - sy * sc) / 2
+    const xy = (p) => [ox + (p[1] - Math.min(...lo)) * k * sc, oy + (Math.max(...la) - p[0]) * sc]
     const d = pts.map((p, i) => (i ? 'L' : 'M') + xy(p).map((n) => n.toFixed(1)).join(' ')).join('')
     const [ax, ay] = xy(pts[0]), [bx, by] = xy(pts[pts.length - 1])
-    el.innerHTML = `<svg class="sketch" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${d}" fill="none" stroke="var(--ink-3)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 6"/>
+    let grid = ''
+    for (let g = 14; g < Math.max(w, h); g += 22) grid += `M${g} 0V${h}M0 ${g}H${w}`
+    const line = dim
+      ? `<path d="${d}" fill="none" stroke="var(--ink-3)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 6"/>`
+      : `<path d="${d}" fill="none" stroke="var(--surface)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="var(--route)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>`
+    el.innerHTML = `<svg class="sketch" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${grid}" stroke="var(--hairline)" stroke-width="1"/>${line}
       <circle cx="${ax}" cy="${ay}" r="6" fill="var(--ink)" stroke="var(--surface)" stroke-width="3"/><rect x="${bx - 6}" y="${by - 6}" width="12" height="12" rx="3" fill="var(--ink)" stroke="var(--surface)" stroke-width="3"/></svg>`
   }
 
-  if (st === 'list') document.querySelectorAll('.pc-map').forEach((el) => D.mini(el, DROUTES[el.dataset.route].pts, { padTL: [18, 18], padBR: [18, 36] }) /* bottom pad keeps the route clear of the 2GIS logo */)
-  else if (st === 'offline') { document.querySelectorAll('.pc-map').forEach((el) => sketch(el, DROUTES[el.dataset.route].pts)); D.noMap() }
+  if (st === 'list' || st === 'offline') { document.querySelectorAll('.pc-map').forEach((el) => thumb(el, DROUTES[el.dataset.route].pts, st === 'offline')); D.noMap() }
   else if (st === 'empty' || st === 'error') D.noMap()
   else {
     const sheet = document.querySelector('.sheet:not([hidden])')
     const sheetH = sheet.offsetHeight
-    const AIR = DROUTES.air.pts
     if (st === 'reminder') {
-      const me = [40.1823, 44.5072]
+      const me = [40.1990, 44.5040]
       document.getElementById('pill').style.bottom = (sheetH + 12) + 'px'
-      const map = makeMap(document.getElementById('map'), { sheetH, badge: { bottom: (sheetH + 70) + 'px', left: '16px' }, fit: [[me[0] - .0034, me[1] - .0046], [me[0] + .0034, me[1] + .0046]], padTL: [0, 260], padBR: [0, sheetH - 10] })
+      const hu = document.querySelector('.headsup').getBoundingClientRect().bottom
+      const map = makeMap(document.getElementById('map'), { sheetH, badge: { bottom: (sheetH + 70) + 'px', left: '16px' }, fit: [[me[0] - .0034, me[1] - .0046], [me[0] + .0034, me[1] + .0046]], padTL: [0, hu + 10], padBR: [0, sheetH - 10] })
       htmlMarker(map, me, `<div class="me">${carTop(-38, 'var(--brand)', 'rgb(255 255 255 / .75)')}</div>`, [64, 64])
     } else {
-      const CAR = [AIR[0][0] + .0042, AIR[0][1] + .0058]
-      const fit = st === 'activated' ? [CAR, ...AIR.slice(0, 7)] : AIR
-      const map = makeMap(document.getElementById('map'), { sheetH, badge: { top: '116px', left: '16px' }, fit, padTL: [48, st === 'activated' ? 100 : 110], padBR: [48, sheetH + 40] })
-      drawRoute(map, AIR, { weight: 5 })
-      htmlMarker(map, AIR[0], '<div class="pin a"></div>', [18, 18])
-      htmlMarker(map, AIR[AIR.length - 1], '<div class="pin b"></div>', [18, 18])
-      if (st === 'activated') htmlMarker(map, CAR, `<div class="me">${carTop(-140, 'var(--brand)', 'rgb(255 255 255 / .75)')}</div>`, [64, 64])
+      const R = DROUTES[bk.route].pts
+      const CAR = [R[0][0] + .0060, R[0][1] - .0090]
+      const withCar = st === 'activated' || st === 'started'
+      const fit = withCar ? [CAR, ...R.slice(0, 5)] : R
+      const map = makeMap(document.getElementById('map'), { sheetH, badge: { top: '116px', left: '16px' }, fit, padTL: [48, withCar ? 100 : 110], padBR: [48, sheetH + 40] })
+      drawRoute(map, R, { weight: 5 })
+      if (st === 'started') drawRoute(map, [CAR, [CAR[0] - .003, CAR[1] + .004], R[0]], { weight: 4, dash: true, color: cssVar('--approach') })
+      htmlMarker(map, R[0], '<div class="pin a"></div>', [18, 18])
+      htmlMarker(map, R[R.length - 1], '<div class="pin b"></div>', [18, 18])
+      if (withCar) htmlMarker(map, CAR, `<div class="me">${carTop(140, 'var(--brand)', 'rgb(255 255 255 / .75)')}</div>`, [64, 64])
     }
   }
 </script>

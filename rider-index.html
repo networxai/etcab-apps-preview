@@ -7,7 +7,11 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&display=swap">
 <style>
   :root { --bg: #E9E9E6; --card: #FFFFFF; --ink: #111113; --ink-2: #5E5E63; }
-  @media (prefers-color-scheme: dark) { :root { --bg: #0A0A0B; --card: #161618; --ink: #F2F2F3; --ink-2: #A1A1A6; } }
+  :root[data-theme="dark"] { --bg: #0A0A0B; --card: #161618; --ink: #F2F2F3; --ink-2: #A1A1A6; }
+  .en { display: block; font: 400 13px/18px 'Google Sans', sans-serif; color: var(--ink-2); margin-top: 4px; }
+  .bar { display: flex; gap: 8px; margin: 16px 0 0; flex-wrap: wrap; }
+  .bar a { flex-direction: row; padding: 6px 14px; border-radius: 999px; gap: 0; box-shadow: none; }
+  .bar a[aria-current="true"] { background: var(--ink); color: var(--bg); }
   * { box-sizing: border-box; margin: 0; }
   body { background: var(--bg); color: var(--ink); font: 400 15px/22px 'Google Sans', system-ui, sans-serif; padding: 40px 16px 64px; }
   header { max-width: 1200px; margin: 0 auto 28px; }
@@ -23,8 +27,9 @@
 </style>
 </head>
 <body>
-<header><h1>Rider app, v2: every screen</h1>
-  <p>Day and night for each state. Open a screen for its state switcher. The four approved heroes (home, tiers) are in <a href="index.html" style="display:inline;padding:0;box-shadow:none;background:none;text-decoration:underline">index.html</a>.</p></header>
+<script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light'</script>
+<header><h1>Ուղևորի հավելված․ բոլոր էկրանները<span class="en">Rider app, every screen: 12 screens, 77 states, day and night. Open a screen for its state switcher. Company billing: booking (company / personal, cost reference, over-limit), receipt, account.</span></h1>
+  <div class="bar" role="group" aria-label="Թեմա / Theme"><a data-t="light" href="?theme=light">Ցերեկ · Day</a><a data-t="dark" href="?theme=dark">Գիշեր · Night</a><a href="index.html">Գլխավոր · Hub</a></div></header>
 <div class="grid" id="g"></div>
 <script>
   const S = [
@@ -34,14 +39,19 @@
     ['rider-search', 'Address search', '2GIS suggest, saved, recent, pick on map', 'start'],
     ['rider-tiers', 'Tiers and fare', 'Approved hero', null],
     ['rider-book', 'Booking details', 'Note, Later, payment', 'details'],
+    ['rider-book', 'Company booking', 'Company / personal, «Ծախսերի կոդ», over-limit fallback', 'company'],
     ['rider-searching', 'Finding a car', 'Calm search, no cars, cancel', 'searching'],
     ['rider-ride', 'Driver and ride', 'Assigned, arriving, arrived, riding, cancel', 'assigned'],
     ['rider-done', 'Trip complete', 'Fare breakdown, rating, compliments', 'rate'],
+    ['rider-done', 'Receipt, company', '«Վճարում է՝ …» in place of the payment method', 'company'],
     ['rider-history', 'Ride history', 'List and detail', 'list'],
-    ['rider-account', 'Account', 'Profile, places, wallet, language, theme, delete', 'main'],
+    ['rider-account', 'Account', 'Profile, places, wallet, language, theme, help, legal, delete', 'main'],
+    ['rider-account', 'Account, company rider', 'Linked company in the wallet', 'main-company'],
     ['rider-offline', 'Offline and errors', 'Banner pattern, degraded, full-screen error', 'offline'],
   ]
-  document.getElementById('g').innerHTML = S.map(([f, t, s, st]) => `<a href="${f}.html"><div class="thumbs">${['light', 'dark'].map((th) =>
+  const T = document.documentElement.dataset.theme
+  document.querySelectorAll('.bar a[data-t]').forEach((a) => a.setAttribute('aria-current', String(a.dataset.t === T)))
+  document.getElementById('g').innerHTML = S.map(([f, t, s, st]) => `<a href="${f}.html${st ? "#" + st : ""}"><div class="thumbs">${['light', 'dark'].map((th) =>
     `<img loading="lazy" alt="" src="shots/${st ? `${f}-${st}-${th}` : `${f}-${th}`}.png">`).join('')}</div><b>${t}</b><span>${s}</span></a>`).join('')
 </script>
 </body>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Companies</title>
+<link rel="stylesheet" href="console.css">
+<link rel="stylesheet" href="corporate.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+</head>
+<body>
+<!-- Mirrors apps/operator components/admin/companies.tsx + company-row.tsx + company-create.tsx (corporate K1).
+     The list edits nothing: the name is the link to the company's page, where every edit lives. -->
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <span class="crumb">Ֆինանսներ <i data-lucide="chevron-right"></i></span><h1>Ընկերություններ</h1>
+      <span class="crumb num" id="count"></span>
+      <div class="live"></div>
+    </header>
+    <div class="content one">
+      <section class="card page" aria-label="Ընկերություններ" id="list"></section>
+    </div>
+  </div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search)
+  const adding = q.get('add') === '1'
+  shell('companies')
+  const C = ECO.COMPANY
+  /* name · mode · employees · rides (month) · owed · overdue · state · over limit · closed. Today = ECO.DAY (Fri 9 Oct 2026). */
+  const ROWS = [
+    [C.name, 'postpaid', 14, 7, C.used, 0, false, false],
+    ['Գլոբալ Լոջիսթիքս ՍՊԸ', 'postpaid', 22, 31, 412300, 96400, true, false],
+    ['Երևան Մեդիքալ Սենթր ՓԲԸ', 'postpaid', 9, 12, 121800, 0, false, false],
+    ['Սիթի Բանկ ՓԲԸ', 'prepaid', 31, 44, 0, 0, false, false],
+    ['Արմենիա Հոթել Գրուպ ՍՊԸ', 'postpaid', 6, 8, 88500, 41200, false, false],
+    ['Նոր Դիզայն Ստուդիո ՍՊԸ', 'postpaid', 4, 3, 23900, 0, false, false],
+    ['ԹեքՀաբ Արմենիա ՍՊԸ', 'postpaid', 11, 15, 152000, 0, false, false],
+    ['Վերնատուն Ռեստորան ՍՊԸ', 'prepaid', 5, 6, 0, 0, false, false],
+    ['Սևան Ագրո ՍՊԸ', 'reporting', 3, 0, 0, 0, false, false],
+    ['Կասկադ Կոնսալթինգ ՍՊԸ', 'postpaid', 0, 0, 0, 0, false, true],
+  ]
+  const MODE = { postpaid: 'Հետվճար', prepaid: 'Կանխավճար', reporting: 'Միայն հաշվետվություն' }
+  document.getElementById('count').textContent = ROWS.length
+  const n = (f) => ROWS.filter(f).length
+  const money = (v) => ECO.amd(v)
+
+  const head = `
+    <div class="toolrow">
+      <div class="input" style="width:280px"><i data-lucide="search"></i><span class="val ph">Անվանում, ՀՎՀՀ</span><span class="kbd">/</span></div>
+      <div role="group" aria-label="Զտել ընկերությունները" class="row-flex" style="gap:6px">
+        <span class="chip" role="button" aria-pressed="false">Ժամկետանց <span class="c num">${n((r) => r[5] > 0)}</span></span>
+        <span class="chip" role="button" aria-pressed="false">Սահմանաչափից վեր <span class="c num">${n((r) => r[6])}</span></span>
+        <span class="chip" role="button" aria-pressed="false">Փակված <span class="c num">${n((r) => r[7])}</span></span>
+      </div>
+      <span class="sp"></span>
+      <button class="btn secondary" aria-expanded="${adding}" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր ընկերություն <span class="kbd">N</span></button>
+    </div>
+    <p class="explain" style="padding-top:0;padding-bottom:10px">Հաշվի վրա վճարումը վերաբերում է հաջորդ պատվերին, ոչ թե արդեն կատարվածներին — պատվերը գրանցում է ընկերությունը ստեղծման պահին, և դա հետո չի փոխվում:</p>`
+
+  const add = adding ? `<tr class="addrow"><td colspan="7"><div class="inl">
+      <div class="input focus" role="textbox" aria-label="Ընկերության անվանում"><span class="val">Ալֆա Ֆարմ ՍՊԸ</span></div>
+      <button class="btn primary"><i data-lucide="check"></i>Ավելացնել ընկերություն <span class="kbd">↵</span></button>
+      <button class="btn ghost">Չեղարկել</button>
+      <span class="faint" style="font:var(--c-small)">Նոր ընկերությունը բացվում է հաշվով․ պայմանագիրը և աշխատակիցները՝ նրա էջում։</span></div></td></tr>` : ''
+
+  const rows = [...ROWS].sort((a, b) => Number(a[7]) - Number(b[7])).map(([name, mode, emp, rides, owed, over, ovLim, closed], i) => `
+    <tr class="ro${closed ? ' off' : ''}">
+      <td><span class="co-stack"><a class="nm" href="company.html?theme=${THEME}" title="${name}">${name}</a>${ovLim ? '<span class="pill warn" title="Սահմանաչափից վեր" aria-label="Սահմանաչափից վեր"><i data-lucide="triangle-alert"></i><span class="hide-s" aria-hidden="true">Սահմանաչափից վեր</span></span>' : ''}</span></td>
+      <td>${MODE[mode]}</td>
+      <td class="c">${emp}</td>
+      <td class="c">${rides}</td>
+      <td class="m">${money(owed)}</td>
+      <td class="m">${over > 0 ? `<span class="pill warn"><span class="mono">${money(over)}</span></span>` : '<span class="dash">—</span>'}</td>
+      <td><span class="pill ${closed ? '' : 'ok'}"><i class="d"></i>${closed ? 'Փակված' : 'Բաց'}</span></td>
+    </tr>`).join('')
+
+  document.getElementById('list').innerHTML = head + `<div class="scroll-y grow" data-truncate>
+    <table class="tbl" aria-label="Ընկերություններ"><colgroup><col><col style="width:180px"><col style="width:112px"><col style="width:172px"><col style="width:128px"><col style="width:128px"><col style="width:92px"></colgroup>
+      <thead><tr><th>Ընկերության անվանում</th><th>Վճարում</th><th class="c">Աշխատակիցներ</th><th class="c">Ուղևորություններ (ամիս)</th><th class="m">Պարտք</th><th class="m">Ժամկետանց</th><th>Վիճակ</th></tr></thead>
+      <tbody>${add}${rows}</tbody></table></div>`
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

@@ -112,7 +112,7 @@
     const p = pic[t.pic](t)
     return `<div class="tier"><i data-lucide="grip-vertical" class="grip"></i>
       <span class="slot ${p.cls}"><span class="car">${carImg(t.id, t.name)}</span>${p.slot}</span>
-      <span class="nm"><b>${t.name}</b><span>${t.blurb} · ${t.seats} տեղ</span><span><span class="tag" style="height:20px;font-family:var(--font)">${t.cls}</span></span></span>
+      <span class="nm"><b>${t.name}</b><span>${t.blurb} · ${t.seats} տեղ</span></span>
       <span class="tar">Գործող սակագին<b>${tariffName[t.id]}</b><span class="num">09.10-ից</span></span>
       <span class="pic">${p.acts}</span></div>`
   }).join('')

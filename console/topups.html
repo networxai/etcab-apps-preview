@@ -66,7 +66,7 @@
             <thead><tr><th>Վճարող · նպատակ</th><th class="r">Գումար</th><th>Համադրում՝ ըստ կոդի</th></tr></thead>
             <tbody id="bank"></tbody></table>
         </div>
-        <div style="padding:10px var(--inset);border-top:1px solid var(--line-soft)"><div class="notice neutral"><i data-lucide="info"></i><span>Յուրաքանչյուր գործընկեր ունի իր վճարման կոդը (P-xxxx)։ Կոդով փոխանցումը համընկնում է ինքնաշխատ, բայց մնացորդին ավելանում է միայն օպերատորի «Գրանցել»-ից հետո։</span></div></div>
+        <div style="padding:10px var(--inset);border-top:1px solid var(--line-soft)"><div class="notice neutral"><i data-lucide="info"></i><span>Յուրաքանչյուր գործընկեր ունի իր վեցանիշ վճարման կոդը (օր.՝ 000041), նույնը, ինչ հավելվածում։ Բացատները չեն խանգարում։ Կոդով փոխանցումը համընկնում է ինքնաշխատ, բայց մնացորդին ավելանում է միայն օպերատորի «Գրանցել»-ից հետո։</span></div></div>
       </section>
     </div>
   </div>
@@ -76,9 +76,9 @@
   const T = [
     ['13:52', 9, 'cash', 'ՔԳ-000412', 'Անի Դ.', 10000],
     ['12:30', 4, 'cash', 'ՔԳ-000411', 'Անի Դ.', 5000],
-    ['11:47', 0, 'bank', 'P-0034', 'Մարիամ Հ.', 20000],
+    ['11:47', 0, 'bank', '000034', 'Մարիամ Հ.', 20000],
     ['11:15', 6, 'cash', 'ՔԳ-000410', 'Մարիամ Հ.', 15000],
-    ['10:58', 3, 'bank', 'P-0042', 'Մարիամ Հ.', 10000],
+    ['10:58', 3, 'bank', '000042', 'Մարիամ Հ.', 10000],
     ['10:20', 5, 'cash', 'ՔԳ-000409', 'Անի Դ.', 3000],
     ['09:41', 1, 'cash', 'ՔԳ-000408', 'Անի Դ.', 13000],
     ['09:40', 1, 'cash', 'ՔԳ-000407', 'Անի Դ.', 13000, 'rev'],
@@ -90,11 +90,11 @@
       <td class="mono">${ref}</td><td>${who}</td><td class="r mono">${rev ? '<span class="pill" title="Հետարկված՝ կրկնակի գրանցում">հետարկված</span>' : `<span class="plus">+${amd(v)}</span>`}</td></tr>`
   }).join('')
   const B = [
-    ['ԳՈՌ ՄԱՐՏԻՐՈՍՅԱՆ', 'Լիցքավորում <mark>P-0052</mark>', 15000, 'match', 9],
-    ['ՆԱՐԵԿ ՀՈՎՀԱՆՆԻՍՅԱՆ', 'ETAXI <mark>P0035</mark> վճար', 8000, 'match', 1],
+    ['ԳՈՌ ՄԱՐՏԻՐՈՍՅԱՆ', 'Լիցքավորում <mark>000052</mark>', 15000, 'match', 9],
+    ['ՆԱՐԵԿ ՀՈՎՀԱՆՆԻՍՅԱՆ', 'ETAXI <mark>000 035</mark> վճար', 8000, 'match', 1],
     ['ԱՆԱՀԻՏ ՎԱՐԴԱՆՅԱՆ', 'Տաքսի դրամապանակ', 5000, 'none'],
-    ['ԳԱԳԻԿ ԱՎԵՏԻՍՅԱՆ', 'Լիցքավորում <mark>P-0034</mark>', 20000, 'done', 0],
-    ['ԴԱՎԻԹ ԿԱՐԱՊԵՏՅԱՆ', '<mark>P-0042</mark>', 10000, 'done', 3],
+    ['ԳԱԳԻԿ ԱՎԵՏԻՍՅԱՆ', 'Լիցքավորում <mark>000034</mark>', 20000, 'done', 0],
+    ['ԴԱՎԻԹ ԿԱՐԱՊԵՏՅԱՆ', '<mark>000042</mark>', 10000, 'done', 3],
   ]
   document.getElementById('bank').innerHTML = B.map(([payer, purpose, v, st, i]) => {
     const m = st === 'match' ? `<div class="match"><span class="pill brand" style="height:20px"><i data-lucide="link"></i>${PARTNERS[i].name.split(' ')[0]} ${PARTNERS[i].name.split(' ')[1][0]}.</span><button class="btn primary s">Գրանցել</button></div>`

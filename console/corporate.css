@@ -1,0 +1,106 @@
+/* Corporate (Companies · company page · invoice run · overdue): layout only, on top of console.css.
+   Mirrors apps/operator components/admin/companies.tsx, company-*.tsx, invoice-*.tsx, invoices-overdue.tsx.
+   Colours, type, controls and pills all come from console.css; nothing here adds a ground or a hue. */
+
+/* Full-width list page: one card that scrolls, header strip above it. */
+.content.one { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+.page { display: flex; flex-direction: column; min-height: 0; }
+.explain { font: var(--c-body); color: var(--ink-muted); padding: 10px var(--inset) 0; max-width: 980px; }
+.toolrow { display: flex; align-items: center; gap: 6px; padding: 10px var(--inset); flex: none; flex-wrap: wrap; }
+.toolrow .sp { flex: 1; }
+
+/* Money and count columns: mono, right-aligned, scanned down the column. */
+.tbl td.m, .tbl th.m { text-align: right; }
+.tbl td.m { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.tbl td.c, .tbl th.c { text-align: right; }
+.tbl td.c { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.tbl tr.off td { color: var(--ink-faint); }
+.tbl tr.off td a.nm { color: var(--ink-muted); }
+.tbl a.nm { color: var(--ink); font: var(--c-strong); text-decoration: none; }
+.tbl a.nm:hover { text-decoration: underline; }
+.tbl td.wrap { white-space: normal; }
+.co-stack { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.co-stack .pill { flex: none; }
+.co-stack .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.dash { color: var(--ink-faint); }
+.ro td { height: 44px; }
+
+/* The inline add row (company-create): a row inside the list, never a modal. */
+.addrow td { background: var(--surface-alt); height: 56px; }
+.addrow .inl { display: flex; align-items: center; gap: 8px; }
+.addrow .input { width: 360px; }
+
+/* Company page header (the partner record's frame: drd-who). */
+.cohead { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 14px var(--inset) 0; flex: none; }
+.cohead .ic { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-alt); box-shadow: inset 0 0 0 1px var(--line-soft); color: var(--ink-muted); }
+.cohead .ic svg { width: 20px; height: 20px; }
+.cohead h2 { font: var(--c-title); white-space: nowrap; }
+.cohead .meta { display: flex; align-items: center; gap: 8px; margin-top: 4px; flex-wrap: wrap; font: var(--c-body); color: var(--ink-muted); }
+.credit { display: grid; grid-template-columns: auto 220px; gap: 4px 12px; align-items: center; font: var(--c-small); color: var(--ink-muted); }
+.credit b { font: 600 15px/20px var(--font); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.credit .bar2 { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: var(--surface-3); overflow: hidden; }
+.credit .bar2 i { display: block; height: 100%; background: var(--ink-muted); border-radius: 3px; }
+.credit .r { text-align: right; white-space: nowrap; }
+
+/* Tab body: two columns at 1440, the right one narrows at 1366. */
+.tb { padding: 12px var(--inset) var(--inset); display: grid; gap: 12px; align-content: start; }
+.tb.two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+.tb.split { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; }
+.sec { border-radius: var(--r-card); box-shadow: inset 0 0 0 1px var(--line-soft); min-width: 0; overflow: hidden; }
+.sec > h3 { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px 0 var(--inset); font: var(--c-head); border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
+.sec > h3 .sub { font: var(--c-small); color: var(--ink-faint); }
+.sec > h3 .end { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+.sec .pad { padding: 12px var(--inset); }
+.sec.alt { background: var(--surface-alt); box-shadow: none; }
+.terms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 16px; }
+.terms dt { font: var(--c-label); color: var(--ink-muted); white-space: nowrap; }
+.terms dd { font: 500 15px/20px var(--font); font-variant-numeric: tabular-nums; margin-top: 2px; white-space: nowrap; }
+.terms dd small { font: var(--c-small); color: var(--ink-faint); }
+
+/* Forms laid out in a grid of labelled fields. */
+.fgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
+.fgrid .full { grid-column: 1 / -1; }
+.fgrid .input .val { overflow: hidden; text-overflow: ellipsis; }
+.hint { font: var(--c-small); color: var(--ink-faint); margin-top: 4px; }
+.formfoot { display: flex; align-items: center; justify-content: flex-end; gap: 6px; padding-top: 12px; border-top: 1px solid var(--line-soft); margin-top: 12px; }
+.formfoot .sp { flex: 1; }
+
+/* Under-row panel (invoice actions, payment, credit): opens beneath its row, one at a time. */
+.under td { background: var(--surface-alt); height: auto; padding-top: 12px; padding-bottom: 12px; white-space: normal; }
+.under .acts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.under .panel { margin-top: 12px; background: var(--surface); border-radius: var(--r-card); box-shadow: var(--e1); padding: 12px var(--inset); }
+.under .panel h4 { font: var(--c-head); display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.pgrid { display: grid; grid-template-columns: 160px 220px 200px 160px minmax(0, 1fr); gap: 12px; align-items: end; }
+.cl td { height: 40px; }
+.cl .input { height: var(--h-s); width: 120px; margin-left: auto; }
+
+/* Statement figures. */
+.figs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-radius: var(--r-card); box-shadow: inset 0 0 0 1px var(--line-soft); }
+.figs .kpi { border-right: 1px solid var(--line-soft); padding: 10px var(--inset); }
+.figs .kpi:last-child { border-right: 0; }
+.figs .kpi .v { font: 600 20px/28px var(--font); }
+
+/* Run bar: month stepper + Run. */
+.month { display: inline-flex; align-items: center; gap: 4px; }
+.month .lbl { font: 500 14px/20px var(--mono); min-width: 132px; text-align: center; white-space: nowrap; }
+.outc b { font: 600 13px/18px var(--mono); }
+.outc .amb { color: var(--warning); font: var(--c-body); }
+.warnn { color: var(--warning); font-weight: 600; }
+.dot-w { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--warning); margin-right: 6px; vertical-align: 1px; }
+.cb { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--line-control); background: var(--surface); }
+.cb.on { background: var(--brand-fill); box-shadow: none; }
+.cb.on::after { content: ''; width: 8px; height: 4px; border-left: 2px solid var(--brand-fill-ink); border-bottom: 2px solid var(--brand-fill-ink); transform: translateY(-1px) rotate(-45deg); }
+.cb.dis { opacity: .45; }
+.armed { background: var(--warning-surface); color: var(--warning); box-shadow: inset 0 0 0 1px currentColor; }
+
+/* Hover-revealed row action (Unlink): opacity only, so it stays in the keyboard's reach (console rule). */
+.rev-act { opacity: 0; }
+tr:hover .rev-act, tr:focus-within .rev-act, tr.on .rev-act { opacity: 1; }
+
+@media (max-width: 1400px) {
+  .tb.two, .tb.split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .credit { grid-template-columns: auto 160px; }
+  .pgrid { grid-template-columns: 140px 190px 170px 140px minmax(0, 1fr); }
+  .hide-s { display: none; }
+}
+#views a { text-decoration: none; height: 26px; }

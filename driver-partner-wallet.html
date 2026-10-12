@@ -46,22 +46,20 @@
   .flow .st.ok .b { background: var(--ok-soft); color: var(--ok); }
   .flow .ar { color: var(--ink-3); width: 16px; height: 16px; margin-top: 14px; }
   .meth .row { min-height: 64px; }
-  .meth .det { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 6px var(--s3); padding: 0 0 var(--s4) 52px; }
-  .meth .det .k { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
-  .meth .det .v { font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .meth .det .mini { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-2); }
-  .meth .det .mini svg { width: 18px; height: 18px; }
+  .meth .det { padding: 0 0 var(--s2) 52px; }
+  /* Each detail is one row button: the whole row copies on tap (48px), the icon only says so. */
+  .meth .cp { display: grid; grid-template-columns: 64px 1fr 24px; align-items: center; gap: var(--s3); width: 100%; min-height: 48px; text-align: left; }
+  .meth .cp + .cp { border-top: 1px solid var(--hairline); }
+  .meth .cp .k { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .meth .cp .v { font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; }
+  .meth .cp svg { width: 18px; height: 18px; color: var(--ink-2); }
   .row .end.ok { color: var(--ok); }
-  .soon { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2); }
-  .soon .tile { background: var(--surface); border-radius: var(--r-card); box-shadow: var(--e1); padding: var(--s3) var(--s2); display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .soon .tile .lg { width: 40px; height: 40px; border-radius: 10px; background: var(--surface-2); color: var(--ink-2); display: grid; place-items: center; font: 700 15px/1 var(--font); }
-  .soon .tile .lg svg { width: 20px; height: 20px; }
-  .soon .tile .n { font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; }
-  .soon .tile .p-tag { height: 22px; font-size: 11px; padding: 0 8px; }
+  .soonline { display: flex; align-items: center; gap: var(--s2); margin-top: var(--s4); font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .soonline svg { width: 16px; height: 16px; color: var(--ink-3); }
 
   /* Ledger */
   .filters { display: flex; gap: var(--s2); margin: var(--s2) 0 0; }
-  .filters .chip { height: 36px; }
+  .filters .chip { height: 48px; padding: 0 16px; }
   .filters .chip[aria-pressed="true"] { background: var(--ink) !important; color: var(--surface); }
   .day { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; margin: var(--s4) 0 var(--s1); display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
   .more-r .t1 { color: var(--ink-2); }
@@ -75,7 +73,7 @@
   .split .bar i { display: block; height: 100%; }
   .split .bar i:first-child { border-radius: 4px 0 0 4px; }
   .split .bar i.tax { width: 14px; border-radius: 0 4px 4px 0; background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink-3); background-image: repeating-linear-gradient(135deg, transparent 0 3px, var(--surface-3) 3px 5px); }
-  .k-keep { background: var(--brand); } .k-fee { background: var(--ink); }
+  .k-keep { background: var(--brand); } .k-fee { background: var(--ink-2); }
   .legend { display: flex; gap: var(--s4); margin-top: var(--s2); }
   .legend span { display: inline-flex; align-items: center; gap: 6px; font: var(--t-caption); color: var(--ink-2); white-space: nowrap; }
   .legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
@@ -96,7 +94,11 @@
   .wf .c { position: relative; height: 100%; }
   .wf .c .b { position: absolute; left: 50%; transform: translateX(-50%); width: 36px; border-radius: 4px; }
   .wf .c .v { position: absolute; left: 0; right: 0; text-align: center; font: var(--t-caption); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .wf .b.n { background: var(--ink-3); } .wf .b.in { background: var(--brand); } .wf .b.out { background: var(--ink); }
+  .wf .b.n { background: var(--ink-3); } .wf .b.in { background: var(--brand); } .wf .b.out { background: var(--ink-2); }
+  .wf .key { display: flex; gap: var(--s4); margin-top: var(--s3); }
+  .wf .key span { display: inline-flex; align-items: center; gap: 6px; font: var(--t-caption); color: var(--ink-2); white-space: nowrap; }
+  .wf .key i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .wf .key i.bal { background: var(--ink-3); } .wf .key i.in { background: var(--brand); } .wf .key i.out { background: var(--ink-2); } .wf .key i.tax { box-shadow: inset 0 0 0 1.5px var(--ink-3); }
   .wf .b.tax { height: 4px; border-radius: 2px; background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink-3); }
   .wf .labs { display: grid; grid-template-columns: repeat(5, 1fr); margin-top: var(--s2); }
   .wf .labs span { text-align: center; font: var(--t-caption); color: var(--ink-2); white-space: nowrap; }
@@ -139,7 +141,7 @@
         <span id="ring"></span>
         <div class="r">
           <div class="p-lbl">Մնացորդ</div>
-          <div class="p-hero" data-s="main offline">18 450<small>֏</small></div>
+          <div class="p-hero" data-s="main offline">18 450<small>֏</small></div>
           <div class="p-hero" data-s="empty">0<small>֏</small></div>
           <span class="p-tag ok" data-s="main"><i data-lucide="check"></i>Պատվերներ՝ այո</span>
           <span class="p-tag" data-s="offline"><i data-lucide="history"></i>09:40-ի դրությամբ</span>
@@ -147,8 +149,8 @@
         </div>
       </div>
       <div class="stats" data-s="main offline">
-        <div class="stat"><span class="l">Այսօր<i data-lucide="percent"></i></span><b>−1 470 ֏</b><span class="s">7 պատվեր · 15%</span></div>
-        <a class="stat" href="?state=week"><span class="l">Շաբաթ<i data-lucide="chevron-right"></i></span><b>−14 100 ֏</b><span class="s">47 պատվեր</span></a>
+        <div class="stat"><span class="l">Այսօր<i data-lucide="percent"></i></span><b>−1 470 ֏</b><span class="s">7 պատվեր · 15%</span></div>
+        <a class="stat" href="?state=week"><span class="l">Շաբաթ<i data-lucide="chevron-right"></i></span><b>−14 100 ֏</b><span class="s">47 պատվեր</span></a>
       </div>
       <div class="notice" data-s="empty"><i data-lucide="info"></i><div><b>Նախ՝ լիցքավորում</b>Վճարը՝ 15% ամեն պատվերից</div></div>
       <button class="btn btn-brand topbtn" data-s="main offline empty"><i data-lucide="plus"></i>Լիցքավորել</button>
@@ -156,10 +158,10 @@
       <div data-s="main offline">
         <div class="sect">Վերջին</div>
         <div class="group">
-          <button class="p-led"><span class="ic"><i data-lucide="car-front"></i></span><span class="txt"><span class="t1">Պատվեր · 1 300 ֏</span><span class="t2">14:52 · 15% վճար</span></span><span class="amt">−195 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
-          <button class="p-led"><span class="ic"><i data-lucide="car-front"></i></span><span class="txt"><span class="t1">Պատվեր · 1 200 ֏</span><span class="t2">13:25 · 15% վճար</span></span><span class="amt">−180 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
-          <button class="p-led"><span class="ic in"><i data-lucide="building-2"></i></span><span class="txt"><span class="t1">Լիցքավորում</span><span class="t2">Գրասենյակ · երեկ, 18:30</span></span><span class="amt plus">+10 000 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
-          <button class="p-led"><span class="ic"><i data-lucide="pencil-line"></i></span><span class="txt"><span class="t1">Ճշգրտում</span><span class="t2">Երեկ, 16:05 · սպասման վճար</span></span><span class="amt plus">+300 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
+          <button class="p-led"><span class="ic"><i data-lucide="car-front"></i></span><span class="txt"><span class="t1">Պատվեր · 1 300 ֏</span><span class="t2">14:52 · 15% վճար</span></span><span class="amt">−195 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
+          <button class="p-led"><span class="ic"><i data-lucide="car-front"></i></span><span class="txt"><span class="t1">Պատվեր · 1 200 ֏</span><span class="t2">13:25 · 15% վճար</span></span><span class="amt">−180 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
+          <button class="p-led"><span class="ic in"><i data-lucide="building-2"></i></span><span class="txt"><span class="t1">Լիցքավորում</span><span class="t2">Գրասենյակ · երեկ, 18:30</span></span><span class="amt plus">+10 000 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
+          <button class="p-led"><span class="ic"><i data-lucide="pencil-line"></i></span><span class="txt"><span class="t1">Ճշգրտում</span><span class="t2">Երեկ, 16:05 · սպասման վճար</span></span><span class="amt plus">+300 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
         </div>
       </div>
 
@@ -174,7 +176,7 @@
     <section data-s="topup">
       <div class="card code" style="margin-top:var(--s2)">
         <div class="p-lbl">Ձեր վճարման կոդը</div>
-        <div class="h"><span class="big">ET 4127</span><button class="copy"><i data-lucide="copy"></i>Պատճենել</button></div>
+        <div class="h"><span class="big" data-eco="ref">000041</span><button class="copy"><i data-lucide="copy"></i>Պատճենել</button></div>
         <div class="flow" role="img" aria-label="Պատճենեք կոդը, փոխանցեք կոդով, գումարը կմտնի դրամապանակ">
           <span class="st"><span class="b"><i data-lucide="copy"></i></span>Կոդը</span><i class="ar" data-lucide="arrow-right"></i>
           <span class="st"><span class="b"><i data-lucide="landmark"></i></span>Փոխանցում</span><i class="ar" data-lucide="arrow-right"></i>
@@ -184,59 +186,55 @@
 
       <div class="sect">Այսօր հասանելի</div>
       <div class="group meth">
-        <div class="row"><span class="ic"><i data-lucide="landmark"></i></span><span class="txt"><span class="t1">Բանկային փոխանցում</span><span class="t2">1 աշխատանքային օրում</span></span></div>
+        <div class="row"><span class="ic"><i data-lucide="landmark"></i></span><span class="txt"><span class="t1">Բանկային փոխանցում</span><span class="t2"><span data-eco="bankname">Ամերիաբանկ</span> · 1 աշխատանքային օրում</span></span></div>
         <div class="det">
-          <span class="k">Ստացող</span><span class="v"><span class="p-ph">ընկերություն</span></span><span></span>
-          <span class="k">Հաշիվ</span><span class="v"><span class="p-ph">հաշվեհամար</span></span><button class="mini" aria-label="Պատճենել հաշվեհամարը"><i data-lucide="copy"></i></button>
-          <span class="k">Նպատակ</span><span class="v">ET 4127</span><button class="mini" aria-label="Պատճենել կոդը"><i data-lucide="copy"></i></button>
+          <button class="cp" aria-label="Պատճենել ստացողին"><span class="k">Ստացող</span><span class="v" data-eco="holder">Էկո Տաքսի ՍՊԸ</span><i data-lucide="copy"></i></button>
+          <button class="cp" aria-label="Պատճենել հաշվեհամարը"><span class="k">Հաշիվ</span><span class="v" data-eco="account">1570 •••• 4417</span><i data-lucide="copy"></i></button>
+          <button class="cp" aria-label="Պատճենել վճարման կոդը"><span class="k">Նպատակ</span><span class="v" data-eco="ref">000041</span><i data-lucide="copy"></i></button>
         </div>
-        <div class="row" style="border-top:1px solid var(--hairline)"><span class="ic"><i data-lucide="building-2"></i></span><span class="txt"><span class="t1">Կանխիկ գրասենյակում</span><span class="t2"><span class="p-ph">հասցե</span> · <span class="p-ph">ժամեր</span></span></span><span class="end ok">Անմիջապես</span></div>
+        <div class="row" style="border-top:1px solid var(--hairline)"><span class="ic"><i data-lucide="building-2"></i></span><span class="txt"><span class="t1">Կանխիկ գրասենյակում</span><span class="t2" data-eco="address">Կոմիտասի պող. 38</span><span class="t2" data-eco="hours">Երկ–Շբթ · 09:00–20:00</span></span><span class="end ok">Անմիջապես</span></div>
       </div>
 
-      <div class="sect">Շուտով</div>
-      <div class="soon">
-        <div class="tile" aria-disabled="true"><span class="lg">Id</span><span class="n">Idram</span><span class="p-tag">Շուտով</span></div>
-        <div class="tile" aria-disabled="true"><span class="lg">Tc</span><span class="n">Telcell</span><span class="p-tag">Շուտով</span></div>
-        <div class="tile" aria-disabled="true"><span class="lg"><i data-lucide="credit-card"></i></span><span class="n">Քարտ</span><span class="p-tag">Շուտով</span></div>
-      </div>
+      <div class="soonline"><i data-lucide="clock"></i>Շուտով՝ Idram, Telcell, քարտ</div>
     </section>
 
     <!-- ── ledger (also behind the breakdown sheet) ── -->
     <section data-s="ledger breakdown">
       <div class="filters"><button class="chip on-ground" aria-pressed="true">Բոլորը</button><button class="chip on-ground">Լիցքավորում</button><button class="chip on-ground">Վճարներ</button></div>
-      <div class="day"><span>Այսօր, 9 հոկտ.</span><span>−1 470 ֏</span></div>
+      <div class="day"><span>Այսօր, ուրբաթ, 9 հոկտ.</span><span>−1 470 ֏</span></div>
       <div class="group">
-        <button class="p-led"><span class="ic"><i data-lucide="car-front"></i></span><span class="txt"><span class="t1">Պատվեր · 1 300 ֏</span><span class="t2">14:52 · Eco Comfort 15%</span></span><span class="amt">−195 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
-        <button class="p-led"><span class="ic"><i data-lucide="car-front"></i></span><span class="txt"><span class="t1">Պատվեր · 1 200 ֏</span><span class="t2">13:25 · Eco Comfort 15%</span></span><span class="amt">−180 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
-        <button class="p-led"><span class="ic"><i data-lucide="car-front"></i></span><span class="txt"><span class="t1">Պատվեր · 1 000 ֏</span><span class="t2">12:40 · Eco Comfort 15%</span></span><span class="amt">−150 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
-        <button class="p-led more-r"><span class="ic"><i data-lucide="ellipsis"></i></span><span class="txt"><span class="t1">Եվս 4 պատվեր</span></span><span class="amt">−945 ֏</span><i class="chev" data-lucide="chevron-down"></i></button>
+        <button class="p-led"><span class="ic"><i data-lucide="car-front"></i></span><span class="txt"><span class="t1">Պատվեր · 1 300 ֏</span><span class="t2">14:52 · Eco Comfort 15%</span></span><span class="amt">−195 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
+        <button class="p-led"><span class="ic"><i data-lucide="car-front"></i></span><span class="txt"><span class="t1">Պատվեր · 1 200 ֏</span><span class="t2">13:25 · Eco Comfort 15%</span></span><span class="amt">−180 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
+        <button class="p-led"><span class="ic"><i data-lucide="car-front"></i></span><span class="txt"><span class="t1">Պատվեր · 1 000 ֏</span><span class="t2">12:40 · Eco Comfort 15%</span></span><span class="amt">−150 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
+        <button class="p-led more-r"><span class="ic"><i data-lucide="ellipsis"></i></span><span class="txt"><span class="t1">Եվս 4 պատվեր</span></span><span class="amt">−945 ֏</span><i class="chev" data-lucide="chevron-down"></i></button>
       </div>
-      <div class="day"><span>Երեկ, 8 հոկտ.</span><span>+6 880 ֏</span></div>
+      <div class="day"><span>Երեկ, 8 հոկտ.</span><span>+6 880 ֏</span></div>
       <div class="group">
-        <button class="p-led"><span class="ic in"><i data-lucide="building-2"></i></span><span class="txt"><span class="t1">Լիցքավորում</span><span class="t2">18:30 · գրասենյակ</span></span><span class="amt plus">+10 000 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
-        <button class="p-led"><span class="ic"><i data-lucide="pencil-line"></i></span><span class="txt"><span class="t1">Ճշգրտում</span><span class="t2">16:05 · սպասման վճար</span></span><span class="amt plus">+300 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
-        <button class="p-led"><span class="ic"><i data-lucide="car-front"></i></span><span class="txt"><span class="t1">22 պատվեր</span><span class="t2">22 800 ֏ · Eco Comfort 15%</span></span><span class="amt">−3 420 ֏</span><i class="chev" data-lucide="chevron-down"></i></button>
+        <button class="p-led"><span class="ic in"><i data-lucide="building-2"></i></span><span class="txt"><span class="t1">Լիցքավորում</span><span class="t2">18:30 · գրասենյակ</span></span><span class="amt plus">+10 000 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
+        <button class="p-led"><span class="ic"><i data-lucide="pencil-line"></i></span><span class="txt"><span class="t1">Ճշգրտում</span><span class="t2">16:05 · սպասման վճար</span></span><span class="amt plus">+300 ֏</span><i class="chev" data-lucide="chevron-right"></i></button>
+        <button class="p-led"><span class="ic"><i data-lucide="car-front"></i></span><span class="txt"><span class="t1">22 պատվեր</span><span class="t2">22 800 ֏ · Eco Comfort 15%</span></span><span class="amt">−3 420 ֏</span><i class="chev" data-lucide="chevron-down"></i></button>
       </div>
     </section>
 
     <!-- ── week statement ── -->
     <section data-s="week">
       <div class="psub">5–11 հոկտեմբերի · մինչ այսօր</div>
-      <div class="wf" role="img" aria-label="Սկիզբ 12 550, լիցքավորում +20 000, վճարներ −14 100, հարկ՝ առաջարկ, վերջ 18 450 ֏">
+      <div class="wf" role="img" aria-label="Սկիզբ 12 550, լիցքավորում +20 000, վճարներ −14 100, հարկ՝ առաջարկ, վերջ 18 450 ֏">
         <div class="cols">
-          <div class="c"><span class="v" style="bottom:82px">12 550</span><span class="b n" style="bottom:0;height:76px"></span></div>
-          <div class="c"><span class="v" style="bottom:202px">+20 000</span><span class="b in" style="bottom:76px;height:120px"></span></div>
-          <div class="c"><span class="v" style="bottom:202px">−14 100</span><span class="b out" style="bottom:111px;height:85px"></span></div>
+          <div class="c"><span class="v" style="bottom:82px">12 550</span><span class="b n" style="bottom:0;height:76px"></span></div>
+          <div class="c"><span class="v" style="bottom:202px">+20 000</span><span class="b in" style="bottom:76px;height:120px"></span></div>
+          <div class="c"><span class="v" style="bottom:202px">−14 100</span><span class="b out" style="bottom:111px;height:85px"></span></div>
           <div class="c"><span class="v" style="bottom:121px">—</span><span class="b tax" style="bottom:111px"></span></div>
-          <div class="c"><span class="v" style="bottom:117px">18 450</span><span class="b n" style="bottom:0;height:111px"></span></div>
+          <div class="c"><span class="v" style="bottom:117px">18 450</span><span class="b n" style="bottom:0;height:111px"></span></div>
         </div>
         <div class="labs"><span>Սկիզբ</span><span>Լիցք</span><span>Վճար</span><span>Հարկ</span><span>Այսօր</span></div>
+        <div class="key" aria-hidden="true"><span><i class="bal"></i>Մնացորդ</span><span><i class="in"></i>Լիցքավորում</span><span><i class="out"></i>Վճար</span><span><i class="tax"></i>Հարկ</span></div>
       </div>
       <div class="group grp2">
-        <div class="row"><span class="txt"><span class="t1">Լիցքավորումներ</span><span class="t2">2 · գրասենյակ, բանկ</span></span><span class="end plus">+20 000 ֏</span></div>
-        <div class="row"><span class="txt"><span class="t1">Վճար 15%</span><span class="t2">47 պատվեր · 94 000 ֏</span></span><span class="end">−14 100 ֏</span></div>
+        <div class="row"><span class="txt"><span class="t1">Լիցքավորումներ</span><span class="t2">2 · գրասենյակ, բանկ</span></span><span class="end plus">+20 000 ֏</span></div>
+        <div class="row"><span class="txt"><span class="t1">Վճար 15%</span><span class="t2">47 պատվեր · 94 000 ֏</span></span><span class="end">−14 100 ֏</span></div>
         <div class="row"><span class="txt"><span class="t1">Հարկ<span class="p-prop">առաջարկ</span></span><span class="t2">անջատված է</span></span><span class="end dim">—</span></div>
-        <div class="row tot"><span class="txt"><span class="t1">Մնացորդ</span></span><span class="end">18 450 ֏</span></div>
+        <div class="row tot"><span class="txt"><span class="t1">Մնացորդ</span></span><span class="end">18 450 ֏</span></div>
       </div>
       <button class="btn btn-quiet on-ground pdf"><i data-lucide="file-down"></i>PDF</button>
     </section>
@@ -247,15 +245,15 @@
   <section class="sheet top" data-s="breakdown" role="dialog" aria-label="Պատվերի վճարը">
     <div class="grabber"></div>
     <div class="bt"><div><div class="t">Պատվեր · 14:52</div><div class="s">Կոմիտասի 49 → Հանրապետության հր.</div></div><span class="p-tag"><i data-lucide="banknote"></i>Կանխիկ</span></div>
-    <div class="split" role="img" aria-label="1 300 ֏-ից ձեզ 1 105, վճար 195, հարկ՝ առաջարկ">
+    <div class="split" role="img" aria-label="1 300 ֏-ից ձեզ 1 105, վճար 195, հարկ՝ առաջարկ">
       <div class="bar"><i class="k-keep" style="width:85%"></i><i class="k-fee" style="width:15%"></i><i class="tax"></i></div>
       <div class="legend"><span><i class="k-keep"></i>Ձեզ</span><span><i class="k-fee"></i>Վճար</span><span><i class="tax"></i>Հարկ</span></div>
     </div>
     <div class="lines">
-      <div class="ln"><span class="txt"><span class="t1">Ուղեվարձ</span><span class="t2">ուղևորը վճարեց ձեզ</span></span><span class="v">1 300 ֏</span></div>
-      <div class="ln"><span class="txt"><span class="t1">Վճար · Eco Comfort</span><span class="t2">15%</span></span><span class="v">−195 ֏</span></div>
+      <div class="ln"><span class="txt"><span class="t1">Ուղեվարձ</span><span class="t2">ուղևորը վճարեց ձեզ</span></span><span class="v">1 300 ֏</span></div>
+      <div class="ln"><span class="txt"><span class="t1">Վճար · Eco Comfort</span><span class="t2">15%</span></span><span class="v">−195 ֏</span></div>
       <div class="ln"><span class="txt"><span class="t1">Հարկ<span class="p-prop">առաջարկ</span></span><span class="t2">անջատված է</span></span><span class="v dim">—</span></div>
-      <div class="ln tot"><span class="txt"><span class="t1">Դրամապանակից</span></span><span class="v">−195 ֏</span></div>
+      <div class="ln tot"><span class="txt"><span class="t1">Դրամապանակից</span></span><span class="v">−195 ֏</span></div>
     </div>
   </section>
 </main>
@@ -267,6 +265,9 @@
     ['breakdown', 'Per-ride fee breakdown'], ['week', 'Weekly statement'], ['empty', 'Empty (new partner)'], ['offline', 'Offline (cached)'],
   ])
   D.partnerNav()
+  /* Shared facts come from kit.js ECO, so the console and this app cannot disagree on the code or the bank. */
+  const P = ECO.PARTNER, F = { ref: P.ref, holder: P.bank.holder, bankname: P.bank.name, account: P.bank.accountMasked, address: P.office.address, hours: P.office.hours }
+  document.querySelectorAll('[data-eco]').forEach((el) => { el.textContent = F[el.dataset.eco] })
   if (st === 'breakdown') document.querySelectorAll('.content, .appbar').forEach((el) => el.setAttribute('data-overlay', ''))  /* under the modal sheet on purpose */
   const ringIn = (d) => '<span class="v">' + d + '</span><span class="u">օր</span>'
   const r = document.getElementById('ring')

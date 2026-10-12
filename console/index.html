@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Console v2</title>
+<title>Eco Taxi · վահանակ</title>
 <link rel="stylesheet" href="console.css">
 <script src="../kit.js"></script>
 <style>
@@ -12,15 +12,21 @@
   header { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
   header img { height: 22px; }
   h1 { font: var(--t-title); }
-  .lead { font: var(--c-body); color: var(--ink-muted); max-width: 820px; margin-bottom: 24px; }
-  .sw { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+  h1 small, .scr h2 small, .grp small { display: block; font: var(--c-small); color: var(--ink-faint); font-weight: 400; }
+  .lead { font: var(--c-body); color: var(--ink-muted); max-width: 860px; margin-bottom: 24px; }
+  .lead a { color: var(--brand-text); }
+  .tgl { margin-left: auto; display: flex; gap: 4px; padding: 4px; border-radius: var(--r-pill); background: var(--surface); box-shadow: var(--e1); }
+  .tgl a { font: var(--c-label); color: var(--ink-muted); text-decoration: none; padding: 4px 12px; border-radius: var(--r-pill); }
+  .tgl a.on { background: var(--ink); color: var(--surface); }
+  .sw { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
   .sw div { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px 0 4px; border-radius: var(--r-pill); background: var(--surface); box-shadow: var(--e1); font: var(--c-label); white-space: nowrap; }
   .sw i { width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--line-soft); }
+  .grp { font: var(--c-title); margin: 40px 0 16px; }
   .scr { margin-bottom: 36px; }
   .scr h2 { font: var(--c-head); margin-bottom: 4px; }
   .scr p { font: var(--c-body); color: var(--ink-muted); margin-bottom: 10px; max-width: 900px; }
   .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .pair a { display: block; border-radius: var(--r-card); overflow: hidden; box-shadow: var(--e2); }
+  .pair a { display: block; border-radius: var(--r-card); overflow: hidden; box-shadow: var(--e2); background: var(--surface); }
   .pair img { display: block; width: 100%; height: auto; }
   .links { display: flex; gap: 12px; margin-top: 8px; font: var(--c-small); }
   .links a { color: var(--brand-text); }
@@ -28,8 +34,9 @@
 </head>
 <body>
 <div class="wrap">
-  <header><img src="../assets/eco/logo-wide.png" alt="Eco Taxi"><h1>Operator console v2 · Phase 1</h1></header>
-  <p class="lead">The apps v2 system (Google Sans, Eco green, warm neutral grounds, 12px cards with soft shadows, Lucide 1.75) re-tuned for a dense control room: 13–14px body, 40–52px rows, mono tabular numbers in fixed columns, the console's three grounds and guarded colours. Every screen at 1440×900, light and dark, Armenian first. Click a shot to open the live mock (2GIS MapGL needs <code>v2/mapgl.local.js</code>). Notes: <a href="NOTES.md">NOTES.md</a>.</p>
+  <header><img src="../assets/eco/logo-wide.png" alt="Eco Taxi"><h1>Օպերատորի վահանակ<small>Operator console v2 · dispatch, fleet, partner drivers, corporate clients</small></h1>
+    <nav class="tgl" aria-label="Թեմա"><a id="t-light" href="?theme=light">Ցերեկ</a><a id="t-dark" href="?theme=dark">Գիշեր</a></nav></header>
+  <p class="lead">Կառավարման սենյակ՝ հավելվածների նույն դիզայն-համակարգով։ The apps' system re-tuned for a dense control room: 13–14px body, mono tabular numbers in fixed columns, the console's three grounds and guarded colours. Every screen at 1440×900 in day and night (1366×768 under each pair), Armenian first, live 2GIS map with Armenian labels. Click a shot to open the live mock. <a href="../index.html">← Բոլոր էկրանները · all screens</a></p>
   <div class="sw">
     <div><i style="background:var(--ground)"></i>ground</div><div><i style="background:var(--surface)"></i>surface</div><div><i style="background:var(--surface-alt)"></i>surface-alt</div>
     <div><i style="background:var(--brand-fill)"></i>brand-fill</div><div><i style="background:var(--brand-vivid)"></i>brand-vivid</div><div><i style="background:var(--lime)"></i>lime</div>
@@ -38,25 +45,50 @@
   <div id="list"></div>
 </div>
 <script>
-  const S = [
-    ['dispatch', '1 · Dispatch', 'Queue (centrepiece, lanes ordered by who needs a human: problems, unassigned, searching, active), keyboard intake with real Eco tiers and route prices, 2GIS map with cars and queue ages, driver strip (free first, longest idle first). 9 queue rows fully visible at 1440×900, 7 at 1366×768.'],
-    ['rides', '2 · Rides + ride detail', 'New route: today\'s rides, 52px two-line rows (14 visible), docked detail panel (never a modal) with the actions one click deep, mini map, driver and car, upfront fare breakdown, timeline.'],
-    ['drivers', '3 · Drivers (fleet only) + driver detail', 'Fleet drivers only since phase 2: shift car, documents, settlement by billing plan, «Ավարտել հերթապահությունը» visible. Partners moved to their own section.'],
-    ['tariffs', '4 · Tariffs and tiers', 'Tier rows with the picture slot at the rider card size and every picture state: uploaded (Replace / Remove), bundled icon (Upload), uploading, refused (field error, focus). Tariff matrix. Right: the rider app\'s own tier row as the preview.'],
-    ['partners', '6 · Partners list + partner overview', 'Phase 2. Own nav group. Balance column with low (amber, triangle) and blocked (red, lock) markers, car approval, documents, online state; filters all / blocked / low balance / pending approval / documents expiring; «Նոր գործընկեր». Panel: blocked notice, wallet with payment code, car with class, fee plan, documents.'],
-    ['partners?tab=wallet', '7 · Partner wallet: record a top-up + ledger', 'The list narrows and the panel takes the room; no modal. Top-up inline: office cash or bank transfer, amount, receipt number (automatic), who received it, SMS receipt and print, the resulting balance and the unblock it causes. Ledger with running balance: top-ups, per-ride fees, adjustment with its reason, a reversal. Statement export.'],
-    ['approvals', '8 · Approvals queue', 'Partner cars pending approval, oldest first, with all documents side by side and a per-document check. The operator sets the class (and so the tier); Reject needs a reason, which goes to the partner.'],
-    ['topups', '9 · Top-ups today + bank matching', 'Every top-up recorded today with method, receipt or reference and who recorded it (a reversed one is struck). Till close against cash counted. Bank statement lines matched by personal payment reference P-xxxx; a match still needs an operator\'s «Գրանցել».'],
-    ['feeplans', '10 · Partner fee plans', 'Standard plan as % per tier with the example fare split (us / partner), individual plans, balance rules (block below 0, warn below 3 000 ֏), tax lines present and switched off, effective-dated versions.'],
-    ['overview', '5 · Overview', 'KPI strip, rides per hour against the same weekday last week (bars versus a dashed step line), tier and payment mix with car renders, live fleet map, and a «needs a decision» list that feeds the Requests inbox.'],
+  /* [file?query, Armenian title, English sub-line, description]; numbered in order, grouped as the console's nav. */
+  const G = [
+    ['Գործառնություններ', 'Operations', [
+      ['dispatch', 'Դիսպետչեր', 'Dispatch', 'Queue (the centrepiece; lanes ordered by who needs a human: problems, unassigned, searching, active), keyboard intake with real Eco tiers and route prices, 2GIS map with cars and queue ages, driver strip (free first, longest idle first). At 9:41 the walkthrough ride (Մաշտոցի պող. 37 → Կոմիտասի պող. 22) is in the Searching lane, offered to Արամ Պ. The shortcut legend is the queue card\'s own footer, outside the scroll box. 9 queue rows fully visible at 1440×900, 7 at 1366×768.'],
+      ['rides', 'Պատվերներ', 'Rides + ride detail', 'Today\'s rides, two-line rows, docked detail panel (never a modal) with the actions one click deep, mini map, driver and car, upfront fare breakdown, timeline. The walkthrough ride is #R-2417, 1 100 ֏.'],
+      ['overview', 'Ընդհանուր', 'Overview', 'KPI strip, rides per hour against the same weekday last week (bars versus a dashed step line), tier mix and the launch payment mix (cash and company account only), live fleet map, and «needs a decision».'],
+    ]],
+    ['Ավտոպարկ', 'Fleet', [
+      ['drivers', 'Վարորդներ', 'Fleet drivers + driver detail', 'Fleet drivers only: shift car, documents (titles wrap, validity on its own line), settlement by billing plan, «Ավարտել հերթապահությունը» visible.'],
+      ['tariffs', 'Սակագներ', 'Tariffs and tiers', 'Tier rows with the picture slot at the rider card size and every picture state; tariff matrix; the rider app\'s own tier row as the preview.'],
+    ]],
+    ['Գործընկերներ', 'Partner drivers', [
+      ['partners', 'Գործընկերներ', 'Partners list + partner overview', 'Balance column with low (amber, triangle) and blocked (amber, lock) markers, car approval, documents, online state. Panel: blocked notice, wallet with the six-digit «Վճարման կոդ» (000041, the same code the partner app shows), car with its tier, fee plan, documents.'],
+      ['partners?tab=wallet', 'Դրամապանակ', 'Partner wallet: record a top-up + ledger', 'The list narrows to name and balance and the panel takes the room; no modal. Inline top-up (office cash or bank transfer) and a running-balance ledger.'],
+      ['approvals', 'Հաստատումներ', 'Approvals queue', 'Partner cars pending approval, oldest first, all documents side by side. The operator picks the tier (Eco City … Eco Vip, the names used everywhere); Reject needs a reason.'],
+      ['topups', 'Լիցքավորումներ', 'Top-ups today + bank matching', 'Every top-up recorded today; till close; bank statement lines matched by «Վճարման կոդ» (spaces tolerated); a match still needs the operator\'s «Գրանցել».'],
+      ['feeplans', 'Վճարի պլաններ', 'Partner fee plans', 'Standard plan as % per tier with the fare split, balance rules (block below 0 ֏, warn below 3 000 ֏: the threshold the partner app uses), tax lines present and off.'],
+    ]],
+    ['Ընկերություններ', 'Corporate clients', [
+      ['companies', 'Ընկերություններ', 'Companies list', 'Every corporate client; «Նոր ընկերություն» adds inline.'],
+      ['company', 'Պայմանագիր և գներ', 'Company: agreement and pricing', 'Version in force, fixed routes, all versions.'],
+      ['company?tab=routes', 'Նոր տարբերակ', 'Company: new agreement version with the fixed-routes editor', 'Fixed routes are edited inside an agreement version, as in the real console.'],
+      ['company?tab=employees', 'Աշխատակիցներ', 'Company: employees', 'Riders linked to the company.'],
+      ['company?tab=rides', 'Ուղևորություններ', 'Company: rides', 'Rides billed to the company.'],
+      ['company?tab=invoices', 'Հաշիվներ', 'Company: invoices', 'Issued invoices, payments and credits.'],
+      ['company?tab=invoices&panel=credit', 'Կրեդիտ', 'Company: invoice credit note', 'A credit against an issued invoice, inline.'],
+      ['company?tab=statement', 'Քաղվածք', 'Company: statement', 'Running statement of invoices and payments.'],
+      ['company?tab=settings', 'Կարգավորումներ', 'Company: settings', 'Billing and booking settings.'],
+      ['invoices', 'Հաշիվների ձևավորում', 'Month-end invoice run', 'September 2026 drafts preview before issuing.'],
+      ['invoices?run=1', 'Թողարկված', 'Month-end run, issued', 'After «Թողարկել ընտրվածները»: invoice numbers written per row.'],
+      ['invoices?view=overdue', 'Ժամկետանց հաշիվներ', 'Overdue invoices', 'Overdue list with «Գրանցել վճարում» open under a row.'],
+    ]],
   ]
-  document.getElementById('list').innerHTML = S.map(([f, t, p]) => {
+  const T = window.THEME, other = T === 'dark' ? 'light' : 'dark'
+  document.getElementById('t-' + T).classList.add('on')
+  let n = 0
+  document.getElementById('list').innerHTML = G.map(([g, ge, items]) => `<h2 class="grp">${g}<small>${ge}</small></h2>` + items.map(([f, t, te, p]) => {
     const [fn, q] = f.split('?'), tag = q ? '-' + q.replace(/[^a-z0-9]/g, '') : '', qs = q ? '&' + q : ''
-    return `<section class="scr"><h2>${t}</h2><p>${p}</p><div class="pair">
-      <a href="${fn}.html?theme=light${qs}"><img src="shots/${fn}${tag}-light.png" alt="${t}, light" loading="lazy"></a>
-      <a href="${fn}.html?theme=dark${qs}"><img src="shots/${fn}${tag}-dark.png" alt="${t}, dark" loading="lazy"></a></div>
-      <div class="links"><a href="shots/${fn}${tag}-light-1366.png">1366×768 light</a><a href="shots/${fn}${tag}-dark-1366.png">1366×768 dark</a></div></section>`
-  }).join('')
+    n++
+    return `<section class="scr"><h2>${n} · ${t}<small>${te}</small></h2><p>${p}</p><div class="pair">
+      <a href="${fn}.html?theme=${T}${qs}"><img src="shots/${fn}${tag}-${T}.png" alt="${t}, ${T}" loading="lazy"></a>
+      <a href="${fn}.html?theme=${other}${qs}"><img src="shots/${fn}${tag}-${other}.png" alt="${t}, ${other}" loading="lazy"></a></div>
+      <div class="links"><a href="shots/${fn}${tag}-light-1366.png">1366×768 ցերեկ</a><a href="shots/${fn}${tag}-dark-1366.png">1366×768 գիշեր</a></div></section>`
+  }).join('')).join('')
 </script>
 </body>
 </html>

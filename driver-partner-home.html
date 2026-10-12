@@ -16,7 +16,8 @@
 <script src="driver.js"></script>
 <style>
   /* Partner home: the fleet home's frame, with the wallet where the fleet shows today's earnings and no car picker.
-     Numbers: Eco Comfort tier, fee 15 %; today 7 rides 9 800 ֏ → fee 1 470 ֏; one day of fees ≈ 2 300 ֏, warnBelow 2 500 ֏. */
+     Numbers: Eco Comfort tier, fee 15 %; today 7 rides 9 800 ֏ → fee 1 470 ֏; one day of fees ≈ 2 300 ֏, warnBelow 3 000 ֏ (ECO.PARTNER.warnBelow, the Standard fee plan; the console warns at the same value).
+     Runway scale = 14 days of fees (32 200 ֏), so the warnBelow tick sits at 9 %. */
   .sheet { padding-bottom: 34px; }
   .fab.lg { width: 48px; height: 48px; }
   .logo { position: absolute; z-index: 20; top: 75px; left: 50%; transform: translateX(-50%); width: 100px; height: 18px; }
@@ -111,43 +112,43 @@
       <div class="line" data-s="finish"><i data-lucide="navigation"></i>Ընթացիկ պատվեր</div>
       <div class="line warn" data-s="blocked"><i data-lucide="lock"></i>Նոր պատվերներ՝ ոչ</div>
       <div class="line" data-s="offline"><i data-lucide="history"></i>09:40-ի դրությամբ</div>
-      <span class="mycar" aria-label="Tesla Model 3, 34 XL 518, ձեր մեքենան"><img class="carimg" src="assets/eco/cars/partner.webp" alt=""><span class="plate">34 XL 518</span></span>
+      <span class="mycar" aria-label="Tesla Model 3, 44 KM 771, ձեր մեքենան"><img class="carimg" src="assets/eco/cars/partner.webp" alt=""><span class="plate">44 KM 771</span></span>
     </div>
 
     <!-- Wallet leads: balance hero + today's fees. Tapping it opens the wallet. -->
     <a class="wal" href="driver-partner-wallet.html" data-not="finish" aria-label="Դրամապանակ">
       <div>
         <div class="p-lbl lbl"><i data-lucide="wallet"></i>Դրամապանակ</div>
-        <div class="p-hero" data-s="normal online offline">18 450<small>֏</small></div>
-        <div class="p-hero warn" data-s="low">1 850<small>֏</small></div>
+        <div class="p-hero" data-s="normal online offline">18 450<small>֏</small></div>
+        <div class="p-hero warn" data-s="low">1 850<small>֏</small></div>
         <div class="p-hero warn" data-s="blocked">−320<small>֏</small></div>
       </div>
-      <div class="fee"><span class="p-lbl">Այսօր՝ վճար</span><b>−1 470 ֏</b></div>
+      <div class="fee"><span class="p-lbl">Այսօր՝ վճար</span><b>−1 470 ֏</b></div>
     </a>
 
     <div data-s="normal online offline" role="img" aria-label="Մոտ 8 օրվա վճար">
-      <div class="p-run"><i style="width:57%"></i><b style="left:7%"></b></div>
-      <div class="p-run-l"><span><b>≈ 8 օր</b> վճարների համար</span><span>7 պատվեր · 9 800 ֏</span></div>
+      <div class="p-run"><i style="width:57%"></i><b style="left:9%"></b></div>
+      <div class="p-run-l"><span><b>≈ 8 օր</b> վճարների համար</span><span>7 պատվեր · 9 800 ֏</span></div>
     </div>
     <div data-s="low" role="img" aria-label="Մոտ 1 օրվա վճար">
-      <div class="p-run warn"><i style="width:6%"></i><b style="left:7%"></b></div>
-      <div class="p-run-l"><span><b>≈ 1 օր</b> վճարների համար</span><span>7 պատվեր · 9 800 ֏</span></div>
+      <div class="p-run warn"><i style="width:6%"></i><b style="left:9%"></b></div>
+      <div class="p-run-l"><span><b>≈ 1 օր</b> վճարների համար</span><span>7 պատվեր · 9 800 ֏</span></div>
     </div>
-    <div data-s="blocked" role="img" aria-label="Պակաս է 320 ֏">
+    <div data-s="blocked" role="img" aria-label="Պակաս է 320 ֏">
       <div class="neg"><span class="debt"></span><span class="zero"></span><span class="rest"></span></div>
-      <div class="p-run-l neg-l"><span style="width:calc(18% + 6px)"><b>−320 ֏</b></span><span>0 ֏</span></div>
+      <div class="p-run-l neg-l"><span style="width:calc(18% + 6px)"><b>−320 ֏</b></span><span>0 ֏</span></div>
     </div>
 
-    <div class="notice warn" data-s="low"><i data-lucide="battery-low"></i><div class="tx"><b>Մնացել է ≈ 1 օր</b><span>0 ֏-ից ցածր՝ կանգ</span></div>
+    <div class="notice warn" data-s="low"><i data-lucide="battery-low"></i><div class="tx"><b>Մնացել է ≈ 1 օր</b><span>0 ֏-ից ցածր՝ կանգ</span></div>
       <a class="act" href="driver-partner-wallet.html?state=topup"><i data-lucide="plus"></i>Լիցքավորել</a></div>
-    <div class="notice warn" data-s="blocked"><i data-lucide="wallet"></i><div class="tx"><b>Լիցքավորեք գիծ դուրս գալու համար</b><span>Նվազագույնը՝ 320 ֏</span></div></div>
+    <div class="notice warn" data-s="blocked"><i data-lucide="wallet"></i><div class="tx"><b>Լիցքավորեք գիծ դուրս գալու համար</b><span>Նվազագույնը՝ 320 ֏</span></div></div>
 
     <!-- finish: balance went below 0 during the ride; the ride finishes, new offers stop after it -->
-    <a class="ride" href="driver-ride.html?state=inprogress" data-s="finish" aria-label="Վերադառնալ պատվերին, Կոմիտասի պող. 49">
-      <span class="txt"><span class="ey"><i></i>Ընթացքում</span><span class="t1">Կոմիտասի պող. 49</span><span class="t2">2,1 կմ · կանխիկ</span></span>
+    <a class="ride" href="driver-ride.html?state=inprogress" data-s="finish" aria-label="Վերադառնալ պատվերին, Կոմիտասի պող. 22">
+      <span class="txt"><span class="ey"><i></i>Ընթացքում</span><span class="t1">Կոմիտասի պող. 22</span><span class="t2">2,1 կմ · կանխիկ</span></span>
       <span class="eta">4<small>րոպե</small></span>
     </a>
-    <div class="cbal" data-s="finish"><span class="p-lbl">Դրամապանակ</span><span class="v">−45 ֏</span></div>
+    <div class="cbal" data-s="finish"><span class="p-lbl">Դրամապանակ</span><span class="v">−45 ֏</span></div>
     <div class="notice" data-s="finish" style="margin-top:0"><i data-lucide="flag"></i><div class="tx"><b>Պատվերը կավարտեք</b><span>Հաջորդը՝ լիցքավորումից հետո</span></div></div>
 
     <a class="pre" href="driver-preorders.html" data-s="normal online offline" aria-label="Նախապես ամրագրված, 1">

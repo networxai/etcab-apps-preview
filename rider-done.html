@@ -39,6 +39,9 @@
   .bd .l span:last-child { color: var(--ink); font-variant-numeric: tabular-nums; }
   .bd .l.tot { border-top: 1px solid var(--hairline); margin-top: var(--s1); min-height: 40px; }
   .bd .l.tot span { font: var(--t-body-strong); color: var(--ink); }
+  .paid.co svg { color: var(--ink-2); }
+  .billed { display: flex; align-items: center; gap: var(--s2); margin-top: var(--s2); font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .billed svg { width: 16px; height: 16px; flex: none; }
   .bdrow { display: flex; align-items: center; justify-content: space-between; min-height: 44px; margin-top: var(--s2); font: var(--t-body); color: var(--ink-2); width: 100%; white-space: nowrap; }
   .bdrow svg { width: 20px; height: 20px; color: var(--ink-3); }
   .who { display: flex; align-items: center; gap: var(--s3); margin-top: var(--s5); }
@@ -67,19 +70,26 @@
 <script>
   const S = R.i('star')
   const nav = `<nav class="nav"><span class="navend"></span><span class="navttl">Ուղևորությունն ավարտված է</span><button class="navbtn" aria-label="Փակել">${R.i('x')}</button></nav>`
-  const tripHead = () => `<div class="trip">${R.trace('pickupToDrop', 96, 96, { pad: 14, sw: 3.5, r: 4.5, grid: false })}
-    <div class="stops"><div class="st"><span class="m"><span class="dot"></span></span><span class="tx"><span class="t1">Մաշտոցի պող. 37</span><span class="t2">9:47</span></span></div>
-      <div class="st"><span class="m"><span class="sq"></span></span><span class="tx"><span class="t1">Կոմիտասի պող. 22</span><span class="t2">9:53 · 4.3 կմ · 6 րոպե</span></span></div></div></div>
-    <div class="fare"><span class="n">${R.amd(1100)}</span><span class="paid">${R.i('banknote')}Կանխիկ</span></div>`
-  /* Eco City, fixed_upfront: 600 + 90·4.3 + 12·6 = 1 059 → rounded to 100 ֏ */
-  const breakdown = () => `<div class="bd" aria-label="Վճարի մանրամասները">
-    <div class="l"><span>Նստավարձ</span><span>${R.amd(600)}</span></div>
-    <div class="l"><span>Ճանապարհ · 4.3 կմ</span><span>${R.amd(387)}</span></div>
-    <div class="l"><span>Ժամանակ · 6 րոպե</span><span>${R.amd(72)}</span></div>
+  /* The one ride (kit.js ECO.RIDE): picked up 9:45, dropped 9:51, 4,3 km, 6 min, 1 100 ֏. */
+  const RD = ECO.RIDE, DV = RD.driver, C = ECO.COMPANY
+  /* pay: 'cash' or 'company' — a company ride names the company where the method would be (receipt.tsx). */
+  const paidChip = (pay) => pay === 'company'
+    ? `<span class="paid co">${R.i('building-2')}${C.short}</span>`
+    : `<span class="paid">${R.i('banknote')}${ECO.PAY.cash.label}</span>`
+  const tripHead = (pay = 'cash') => `<div class="trip">${R.trace('pickupToDrop', 96, 96, { pad: 14, sw: 3.5, r: 4.5, grid: false })}
+    <div class="stops"><div class="st"><span class="m"><span class="dot"></span></span><span class="tx"><span class="t1">${RD.pickup}</span><span class="t2">${RD.pickupAt}</span></span></div>
+      <div class="st"><span class="m"><span class="sq"></span></span><span class="tx"><span class="t1">${RD.drop}</span><span class="t2">${RD.dropAt} · ${ECO.km(RD.km)} · ${RD.min} րոպե</span></span></div></div></div>
+    <div class="fare"><span class="n">${R.amd(RD.fare)}</span>${paidChip(pay)}</div>`
+  /* Eco City, fixed_upfront: 600 + 90·4,3 + 12·6 = 1 059 → rounded to 100 ֏. Line names are the app's fare.* strings. */
+  const breakdown = (pay = 'cash') => `<div class="bd" aria-label="Վճարի մանրամասները">
+    <div class="l"><span>Նստելու վճար</span><span>${R.amd(600)}</span></div>
+    <div class="l"><span>Ըստ կիլոմետրի · ${ECO.km(RD.km)}</span><span>${R.amd(387)}</span></div>
+    <div class="l"><span>Ըստ րոպեի · ${RD.min} րոպե</span><span>${R.amd(72)}</span></div>
     <div class="l"><span>Կլորացում</span><span>+${R.amd(41)}</span></div>
-    <div class="l tot"><span>Ընդամենը</span><span>${R.amd(1100)}</span></div></div>`
+    <div class="l tot"><span>Ընդամենը</span><span>${R.amd(RD.fare)}</span></div></div>
+    ${pay === 'company' ? `<div class="billed">${R.i('building-2')}<span>Վճարում է՝ ${C.name}</span></div>` : ''}`
   const collapsed = `<button class="bdrow"><span>Վճարի մանրամասները</span>${R.i('chevron-down')}</button>`
-  const who = `<div class="who">${R.avatar()}<span class="nm"><span class="n1">Արամ</span><span class="n2">Volkswagen ID.3 · 01 ET 001</span></span></div>`
+  const who = `<div class="who">${R.avatar()}<span class="nm"><span class="n1">${DV.first}</span><span class="n2">${DV.car} · ${DV.plate}</span></span></div>`
   const stars = (n) => `<div class="stars" role="radiogroup" aria-label="Գնահատեք վարորդին">${[1, 2, 3, 4, 5].map((i) =>
     `<button class="${i <= n ? 'on' : ''}" role="radio" aria-checked="${i === n}" aria-label="${i} աստղ">${S}</button>`).join('')}</div>`
   const chips = (list, on) => `<div class="chips">${list.map((c, i) => `<button class="chip tog" aria-pressed="${on.includes(i)}">${c}</button>`).join('')}</div>`
@@ -89,20 +99,23 @@
     title: 'Rider · Trip complete',
     sub: 'The fare is the hero, broken down from the real Eco City tariff. Stars, then compliments or a reason. Close is always there',
     states: [
-      { id: 'rate', label: 'Fare + rate', note: 'Base 600 + 4.3 km × 90 + 6 min × 12 = 1 059, rounded to 1 100 ֏ (fixed upfront)',
+      { id: 'rate', label: 'Fare + rate', time: '9:51', note: 'Base 600 + 4,3 km × 90 + 6 min × 12 = 1 059, rounded to 1 100 ֏ (fixed upfront). «Ուղարկել» is pinned, disabled until a star is chosen, so the layout does not jump',
         html: () => page(`${tripHead()}${breakdown()}${who}<div class="ask">Գնահատեք վարորդին</div>${stars(0)}`,
-          '<button class="btn-text">Բաց թողնել</button>') },
+          '<button class="btn" disabled>Ուղարկել</button><button class="btn-text">Բաց թողնել</button>') },
+      { id: 'company', label: 'Company ride', time: '9:51', note: 'Billed to the rider\'s company (receipt.tsx): «Վճարում է՝ …» stands where the method would; never a balance or a limit. Nothing is paid to the driver',
+        html: () => page(`${tripHead('company')}${breakdown('company')}${who}<div class="ask">Գնահատեք վարորդին</div>${stars(0)}`,
+          '<button class="btn" disabled>Ուղարկել</button><button class="btn-text">Բաց թողնել</button>') },
       { id: 'rated', label: 'Five stars', note: 'Compliments are optional; two picked',
         html: () => page(`${tripHead()}${collapsed}${who}${stars(5)}<div class="q" style="text-align:center">Ի՞նչը դուր եկավ</div>
           ${chips(['Մաքուր մեքենա', 'Զգույշ վարում', 'Հաճելի զրույց', 'Ճշտապահ', 'Լավ երաժշտություն'], [0, 1])}`,
-          '<button class="btn btn-brand">Ուղարկել</button>') },
+          '<button class="btn btn-brand">Ուղարկել</button><button class="btn-text">Բաց թողնել</button>') },
       { id: 'low', label: 'Low rating', note: 'Under five: what went wrong, one tap each. Goes to the dispatcher, not only to a score',
         html: () => page(`${tripHead()}${collapsed}${who}${stars(3)}<div class="q" style="text-align:center">Ի՞նչը չստացվեց</div>
           ${chips(['Ուշացավ', 'Անզգույշ վարում', 'Մեքենան մաքուր չէր', 'Երկար երթուղի', 'Անհարմար զրույց'], [1])}`,
-          '<button class="btn btn-brand">Ուղարկել</button>') },
+          '<button class="btn btn-brand">Ուղարկել</button><button class="btn-text">Բաց թողնել</button>') },
       { id: 'thanks', label: 'Thanks', note: 'Calm close; the next ride is one tap',
         html: () => page(`<div class="thanks"><span class="ok">${R.i('check')}</span><h1 class="large">Շնորհակալություն</h1>
-          <span class="sum">${R.amd(1100)} · Կանխիկ · Արամ</span></div>`,
+          <span class="sum">${R.amd(RD.fare)} · ${ECO.PAY.cash.label} · ${DV.first}</span></div>`,
           `<button class="btn btn-brand">Պատվիրել մեքենա</button><button class="btn btn-quiet">${R.i('receipt')}Ստացական</button>`) },
     ],
   })

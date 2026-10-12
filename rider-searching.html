@@ -18,13 +18,14 @@
 <style>
   /* Matching: the map stays, our real cars stay on it, a calm pulse from the pickup. No full-screen spinner. */
   .pulse { position: absolute; inset: 0; display: grid; place-items: center; }
-  .pulse i { position: absolute; width: 200px; height: 200px; border-radius: 50%; background: var(--brand-soft);
-    box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--brand-vivid) 40%, transparent); transform: scale(.12); opacity: 0;
-    animation: ring 3.6s cubic-bezier(.2, .6, .3, 1) infinite; }
-  .pulse i:nth-child(2) { animation-delay: 1.2s; }
-  .pulse i:nth-child(3) { animation-delay: 2.4s; }
-  @keyframes ring { 0% { transform: scale(.12); opacity: 0; } 15% { opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
-  @media (prefers-reduced-motion: reduce) { .pulse i { animation: none; opacity: .6; transform: scale(.5); } .pulse i:nth-child(n+2) { display: none; } }
+  /* Two rings in --brand at 24% with a 1px brand edge: visible on the light basemap (review: the faint green disc vanished). */
+  .pulse i { position: absolute; width: 200px; height: 200px; border-radius: 50%; background: color-mix(in srgb, var(--brand) 24%, transparent);
+    box-shadow: inset 0 0 0 1px var(--brand); transform: scale(.12); opacity: 0;
+    animation: ring 2.8s cubic-bezier(.2, .6, .3, 1) infinite; }
+  .pulse i:nth-child(2) { animation-delay: 1.4s; }
+  @keyframes ring { 0% { transform: scale(.12); opacity: 0; } 12% { opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+  /* Reduce Motion: one still ring at mid size, edge kept. */
+  @media (prefers-reduced-motion: reduce) { .pulse i { animation: none; opacity: 1; transform: scale(.55); } .pulse i:nth-child(n+2) { display: none; } }
   .pulse .pin-a { position: relative; z-index: 1; }
 
   .bar { height: 3px; border-radius: 2px; background: var(--surface-3); overflow: hidden; margin: var(--s3) 0 var(--s4); position: relative; }
@@ -66,9 +67,10 @@
   /* Our real nearby cars (the fleet is small: showing them is the trust signal). */
   const CARS = [[[.0024, -.0031], 58], [[-.0019, .0027], 214], [[.0029, .0022], 140], [[-.0026, -.0024], 322]]
 
-  const order = () => `<div class="order"><div class="top">${R.car('city', 64, 32, '')}<span class="tn"><span class="t1">Eco City</span>
-      <span class="t2">${R.i('banknote')}Կանխիկ</span></span><span class="price">${R.amd(1100)}</span></div>
-    <div class="legs"><div class="leg"><span class="m"><span class="dot"></span></span>Մաշտոցի պող. 37</div><div class="leg"><span class="m"><span class="sq"></span></span>Կոմիտասի պող. 22</div></div></div>`
+  const RD = ECO.RIDE
+  const order = () => `<div class="order"><div class="top">${R.car('city', 64, 32, '')}<span class="tn"><span class="t1">${RD.tier}</span>
+      <span class="t2">${R.i('banknote')}${ECO.PAY.cash.label}</span></span><span class="price">${R.amd(RD.fare)}</span></div>
+    <div class="legs"><div class="leg"><span class="m"><span class="dot"></span></span>${RD.pickup}</div><div class="leg"><span class="m"><span class="sq"></span></span>${RD.drop}</div></div></div>`
 
   const sheet = (title, sub, extra = '') => `<div class="map" id="map" aria-label="Քարտեզ"></div>
     <section class="sheet r" id="sheet"><div class="grabber"></div>
@@ -78,7 +80,7 @@
 
   const searchMap = ({ cars = CARS, pulse = true, offer = false } = {}) => (s) => {
     const m = R.map(s, { fit: R.bbox(PICK, .0034, .0044), padTL: [24, 96], padBR: [24, s.querySelector('#sheet').offsetHeight + 16] })
-    if (pulse) htmlMarker(m, PICK, '<div class="pulse"><i></i><i></i><i></i><div class="pin-a"></div></div>', [200, 200])
+    if (pulse) htmlMarker(m, PICK, '<div class="pulse"><i></i><i></i><div class="pin-a"></div></div>', [200, 200])
     else htmlMarker(m, PICK, '<div class="pin-a"></div>', [18, 18])
     if (offer) {
       const rest = P.slice(Math.floor(P.length * .45))

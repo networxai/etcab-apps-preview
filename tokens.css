@@ -29,7 +29,7 @@
 
   /* ── Sizes ── */
   --h-button: 52px;     /* rider primary */
-  --h-drive: 64px;      /* driver at-speed primary (one per screen) */
+  --h-drive: 76px;      /* driver at-speed primary (one per screen): the owner floor, DEC-13 «76, not 96» */
   --h-slide: 72px;      /* driver slide-to-accept track */
   --h-row: 56px;
   --tap: 44px;          /* floating map controls, min target */

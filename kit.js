@@ -5,6 +5,61 @@
   document.documentElement.dataset.theme = theme
   window.THEME = theme
 
+  /* ── ECO: the one canonical data set (review X4–X7). Rider, driver, partner and console pages read their shared facts
+     from here, so the same ride, day, money format, payment roster and partner rules cannot drift between surfaces.
+     A page may invent its own local rows (history, queue), but anything that appears on two surfaces comes from ECO. ── */
+  const NB = ' ' /* no-break space: thousands, and before ֏ (U+202F measured 2 px at 16 px in Google Sans and read as «1100») */
+  const grp = (n) => String(Math.round(Math.abs(n))).replace(/\B(?=(\d{3})+(?!\d))/g, NB)
+  window.ECO = {
+    NB,
+    /* Money: «1 100 ֏», negative «−3 400 ֏» (U+2212). Never «1100 ֏», never a comma or dot for thousands. */
+    amd: (n) => (n < 0 ? '−' : '') + grp(n) + NB + '֏',
+    /* A plain number with grouping: «9 800». */
+    num: (n) => (Number.isInteger(n) ? (n < 0 ? '−' : '') + grp(n) : ECO.dec(n)),
+    /* Decimals use the Armenian/Russian comma: «4,3». */
+    dec: (x, d = 1) => (x < 0 ? '−' : '') + Math.abs(x).toFixed(d).replace('.', ','),
+    km: (x) => ECO.dec(x) + ' կմ',
+    pct: (x) => grp(x) + NB + '%',
+
+    /* The demo day: Friday 9 October 2026, the status bar reads 9:41. */
+    DAY: { iso: '2026-10-09', now: '9:41', today: 'Ուրբաթ, 9 հոկտ.', todayLong: 'Ուրբաթ, 9 հոկտեմբերի', short: '9 հոկտ.',
+      tomorrow: 'Վաղը, շաբաթ, 10 հոկտ.', yesterday: 'Երեկ, հինգշաբթի, 8 հոկտ.', ru: 'Пятница, 9 окт.' },
+
+    /* «One ride everywhere»: the walkthrough trip, seen by the rider (rider-*), the driver (driver-offer/ride) and the
+       console (dispatch, rides). Route geometry is routes.js pickupToDrop (4 289 m, 375 s) and driverToPickup (1,4 km). */
+    RIDE: {
+      no: '2417', tier: 'Eco City', tierId: 'city',
+      pickup: 'Մաշտոցի պող. 37', pickupNote: 'Մատենադարանի դիմաց', drop: 'Կոմիտասի պող. 22',
+      requested: '9:40', assigned: '9:41', pickupAt: '9:45', dropAt: '9:51',
+      approachMin: 4, approachKm: 1.4, km: 4.3, min: 6, fare: 1100, pay: 'cash',
+      riding: { clock: '9:47', left: 4 }, /* the riding state: status bar 9:47, «4 րոպե · ժամանում 9:51» */
+      driver: { name: 'Արամ Պետրոսյան', short: 'Արամ Պ.', first: 'Արամ', ini: 'ԱՊ', phone: '093 44-55-66', plate: '01 ET 001',
+        car: 'Volkswagen ID.3', carHy: 'Volkswagen ID.3 · սպիտակ', rating: '4,9' },
+      rider: { name: 'Աննա', phone: '091 23-45-67', rating: '4,8' },
+    },
+
+    /* Payment roster at launch: cash and company account are live; card, Idram and Telcell are «Շուտով» everywhere.
+       Driver earnings and the console's mix therefore split cash / company only. Strings from apps/rider i18n. */
+    PAY: {
+      cash: { label: 'Կանխիկ', icon: 'banknote', live: true },
+      company: { label: 'Ընկերության հաշվին', short: 'Ընկերություն', icon: 'building-2', live: true },
+      card: { label: 'Քարտով', icon: 'credit-card', live: false },
+      idram: { label: 'Idram', live: false }, telcell: { label: 'Telcell', live: false },
+      soon: 'Շուտով',
+    },
+
+    /* Corporate client used on every surface (rider booking, receipt, console Companies). */
+    COMPANY: { name: 'Արարատ Սոֆթ ՍՊԸ', short: 'Արարատ Սոֆթ', tin: '02612345', refLabel: 'Ծախսերի կոդ', ref: 'MKT-204',
+      rider: 'Աննա Հակոբյան', limit: 300000, used: 184600, invoice: 'INV-2026-00065', due: '24 հոկտ.' },
+
+    /* Partner (own car, prepaid wallet). Reference = the API's driver.paymentReference: six digits, zero-padded
+       (migration 20261011100000_driver_payment_reference), labelled «Վճարման կոդ» in both the app and the console.
+       Blocked below 0 ֏, warned below 3 000 ֏ (the Standard fee plan), and both are amber: a domain refusal, not a failure. */
+    PARTNER: { name: 'Կարեն Մելքոնյան', ref: '000041', refLabel: 'Վճարման կոդ', warnBelow: 3000, blockBelow: 0,
+      bank: { name: 'Ամերիաբանկ', holder: 'Էկո Տաքսի ՍՊԸ', account: '1570 0412 3456 4417', accountMasked: '1570 •••• 4417' },
+      office: { address: 'Կոմիտասի պող. 38', hours: 'Երկ–Շբթ · 09:00–20:00' } },
+  }
+
   /* iOS status bar. */
   window.statusBar = function (host, time) {
     const el = document.createElement('div')
@@ -41,6 +96,21 @@
      (apps/operator/components/map/mapgl.ts → MAP_STYLE), so night is a real dark map, not a dimmed one. */
   const MAPGL_URL = 'https://mapgl.2gis.com/api/js/v1'
   const MAP_STYLE = { light: 'c080bb6a-8134-4993-93a1-5b4d8c36a59b', dark: 'e05ac437-fcc2-4845-ad74-b1de9ce07555' }
+  /* Map language = the app's language (review X2). Armenian first; 2GIS renders hy labels («Մեսրոպ Մաշտոցի պողոտա»).
+     ?lang=ru / ?lang=en switch it with the UI; anything else is hy. */
+  const MAP_LANG = ({ ru: 'ru', en: 'en' })[q.get('lang')] || 'hy'
+  /* The "ride" basemap (review X3): 2GIS's own day/night style, minus the groups that compete with our pins —
+     POI icons and their labels, landmark and park 3D models, 3D trees, parking and traffic-light glyphs.
+     Streets, house numbers, metro and district labels stay: a pickup is read against them. graphicsPreset 'light'
+     also drops the remaining 3D props. Built at runtime from the public style (same request MapGL makes), so the
+     filter is the whole spec: in the RN WebView it is one constant list. If the fetch fails the full style stays. */
+  const CALM_DROP = /^(POI icons New|Non-unique icons POI|Sights|Mega POI|Zoo|Parking lots|Parking lots layer|Parking roof|Traffic lights|3D Models Animated|Immersive Model 3D|Immersive Model 3D 2GIS|Model 3D|3D trees (summer|autumn|winter)|Point 3D Entity\. Immersive park|3D Models\. Immersive park)$/
+  const STYLE_PATHS = { fontsPath: 'https://mapgl.2gis.com/api/fonts', iconsPath: 'https://disk.2gis.com/styles/assets/icons', modelsPath: 'https://disk.2gis.com/styles/assets/models' }
+  const calmStyles = {}
+  const calmStyle = (id, key) => calmStyles[id] || (calmStyles[id] = fetch('https://styles.api.2gis.com/styles/' + id + '?key=' + encodeURIComponent(key))
+    .then((r) => (r.ok ? r.json() : Promise.reject(new Error('style ' + r.status))))
+    .then((j) => { const s = j.result || j; s.layers = (s.layers || []).filter((l) => !CALM_DROP.test(String(l.name || '').trim())); return s })
+    .catch((e) => { console.warn('[v2] map: calm style unavailable, using the full 2GIS style', e); return null }))
   const mapglKey = () => {
     if (typeof window.MAPGL_KEY === 'string' && window.MAPGL_KEY) return window.MAPGL_KEY
     const q = new URLSearchParams(location.search).get('mapglKey')
@@ -96,9 +166,34 @@
     const sw = [Math.min(...lons), Math.min(...lats)], ne = [Math.max(...lons), Math.max(...lats)]
     const map = new mapgl.Map(node, {
       key, center: [(sw[0] + ne[0]) / 2, (sw[1] + ne[1]) / 2], zoom: 16,
-      style: MAP_STYLE[theme], zoomControl: false,
+      style: MAP_STYLE[theme], zoomControl: false, lang: MAP_LANG, graphicsPreset: 'light',
     })
+    if (opts.calm) map.setStyle(opts.calm, STYLE_PATHS)
     map.on('error', (ev) => { if (ev && ev.type === 'invalidtilekey') onRefused() })
+    /* 2GIS attribution must stay visible (2GIS terms; review X1). Whatever sits over the map's bottom edge — a sheet,
+       a card, a button bar — the logo is lifted until nothing in the page covers it: elementFromPoint at its corners. */
+    let logoPad = 0
+    const keepLogo = () => {
+      const a = el.querySelector('a[href*="2gis"]')
+      if (!a) return
+      for (let i = 0; i < 6; i++) {
+        const r = a.getBoundingClientRect()
+        if (r.width < 2) return
+        const hit = [[r.left + 2, r.top + 2], [r.right - 2, r.top + 2], [r.left + 2, r.bottom - 2], [r.right - 2, r.bottom - 2]]
+          .map(([x, y]) => document.elementFromPoint(x, y)).find((t) => t && !el.contains(t))
+        if (!hit) return
+        const ht = hit.getBoundingClientRect()
+        if (ht.top <= el.getBoundingClientRect().top + 80) return /* a full-screen scrim or modal: the logo is dimmed with the map, not hidden by a sheet */
+        logoPad += Math.ceil(r.bottom - ht.top) + 6
+        /* MapGL's setControlsLayoutPadding does not move the copyright, so its control pane is lifted directly. */
+        let pane = a.parentElement
+        while (pane && pane !== el && getComputedStyle(pane).position !== 'absolute') pane = pane.parentElement
+        if (!pane || pane === el) return
+        pane.style.setProperty('bottom', logoPad + 'px', 'important')
+      }
+    }
+    map.on('idle', keepLogo)
+    window.addEventListener('resize', keepLogo)
     /* 'idle' = style, tiles and overlays all drawn. Screenshots and the index wait on this flag. */
     let settled = false
     map.on('idle', () => {
@@ -150,7 +245,8 @@
     const key = mapglKey()
     if (!key) { fallback('2GIS key missing — add v2/mapgl.local.js'); return adapter }
     el.dataset.provider = '2gis'
-    loadMapGL().then((mapgl) => {
+    Promise.all([loadMapGL(), opts.calm === false ? null : calmStyle(MAP_STYLE[theme], key)]).then(([mapgl, calm]) => {
+      opts = { ...opts, calm }
       let refused = false
       const glHost = host()
       replay(mapglBackend(mapgl, el, glHost, opts, key, () => {

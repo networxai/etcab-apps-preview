@@ -1,7 +1,7 @@
 /* Driver screens beyond the two heroes. Everything here composes tokens.css; nothing sets a raw size or colour
    except the plate (a physical object: white, black ink) and the "sun" overrides below.
    Two density tiers (research/driver-apps.md move 1):
-     moving  – offer, ride, home online: one primary 72px, secondaries 56px, hero 40/48
+     moving  – offer, ride, home online: one primary 76px (owner floor, DEC-13), secondaries 56px, hero 40/48
      parked  – login, shift, pre-orders, earnings, account: 52px buttons, 48px targets */
 
 [hidden] { display: none !important; }
@@ -21,7 +21,7 @@
 :root[data-theme="dark"] { --warn-soft: #31291E; --ok-soft: #1A2924; --danger-soft: #2C1F20; }
 :root[data-sun] { --warn-soft: #F7EDE5; --ok-soft: #E6F0EB; --danger-soft: #F6E8E8; }
 /* Soft status grounds are flat hex, not color-mix(): text sits on them, and the contrast audit reads computed rgb. */
-:root { --t-large: 600 28px/34px var(--font); --t-act: 600 20px/24px var(--font); --h-go: 72px; --h-sec: 56px; }
+:root { --t-large: 600 28px/34px var(--font); --t-act: 600 20px/24px var(--font); --h-go: 76px; --h-slide: 76px; --h-sec: 56px; }
 
 /* ── State switcher: lives OUTSIDE the 390px screen, so screenshots and audits never see it ── */
 .dswitch { position: fixed; top: 16px; left: 414px; width: 220px; font: var(--t-secondary); color: var(--ink); z-index: 99; }
@@ -80,7 +80,7 @@
 
 .slide { position: relative; height: var(--h-slide); border-radius: var(--r-pill); background: var(--brand); color: var(--on-brand);
   display: flex; align-items: center; justify-content: center; font: var(--t-act); width: 100%; padding-left: 40px; white-space: nowrap; }
-.slide .knob { position: absolute; left: 6px; top: 6px; width: 60px; height: 60px; border-radius: 50%; background: #fff; color: #2F7D0A;
+.slide .knob { position: absolute; left: 6px; top: 6px; width: 64px; height: 64px; border-radius: 50%; background: #fff; color: #2F7D0A;
   display: grid; place-items: center; box-shadow: 0 2px 8px rgb(0 0 0 / .2); }
 .slide .knob svg { width: 26px; height: 26px; stroke-width: 2; }
 .slide .hint { position: absolute; right: 22px; display: flex; opacity: .6; }
@@ -214,3 +214,57 @@
 
 /* Partner screens in the state switcher */
 .dswitch .p-nav a { padding-left: 18px; }
+
+/* ── Night: nothing full-width and white at the top of a dark car (review, driver-ride). Inverted ink cards
+      (guidance, offline strip) invert by day and in sun only; at night they are a raised dark surface. ── */
+:root[data-theme="dark"] .guide, :root[data-theme="dark"] .offstrip { background: var(--surface-3); color: var(--ink); }
+
+/* ── ECO-bound text: [data-eco="RIDE.pickup"] is filled from kit.js window.ECO by D.eco(); the static text is the same value. ── */
+
+/* ── Offer: the full-screen, call-like moment (§10.1; review «Offer» P1). Shared by driver-offer and driver-offer-states.
+      Order on screen = order of reading: it is ringing → what it pays → how far the pickup is → where → accept.
+      The map is a strip card (≈28 % of the screen) that carries the route only; nothing on it must be read. ── */
+.offer { position: absolute; inset: 0; background: var(--ground); }
+.offer .oh { position: absolute; top: 58px; left: var(--margin); right: var(--margin); height: 48px; display: flex; align-items: center; gap: var(--s3); }
+.offer .bell { position: relative; width: 48px; height: 48px; border-radius: 50%; background: var(--brand); color: var(--on-brand); display: grid; place-items: center; flex: none; }
+.offer .bell svg { width: 24px; height: 24px; stroke-width: 2; position: relative; z-index: 1; }
+/* Ringing: two halos breathe out of the bell (static mid-frame under reduced motion and in screenshots). */
+.offer .bell::before, .offer .bell::after { content: ''; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px var(--brand-vivid); opacity: .55; transform: scale(1.28); }
+.offer .bell::after { opacity: .25; transform: scale(1.56); }
+@media (prefers-reduced-motion: no-preference) {
+  .offer .bell::before, .offer .bell::after { animation: ring-out 1.4s ease-out infinite; }
+  .offer .bell::after { animation-delay: .7s; }
+  @keyframes ring-out { 0% { transform: scale(1); opacity: .7; } 100% { transform: scale(1.7); opacity: 0; } }
+}
+.offer .bell.done { background: var(--surface-3); color: var(--ink); }
+.offer .bell.done::before, .offer .bell.done::after { display: none; }
+.offer .ot { font: var(--t-title); color: var(--ink); white-space: nowrap; flex: 1; min-width: 0; }
+.offer .ochip { height: 48px; padding: 0 16px 0 12px; border-radius: var(--r-pill); background: var(--surface); box-shadow: var(--e1);
+  display: inline-flex; align-items: center; gap: 6px; font: var(--t-body-strong); color: var(--ink); white-space: nowrap; flex: none; }
+.offer .ochip svg { width: 20px; height: 20px; }
+.offer .ocard { position: absolute; top: 118px; left: var(--margin); right: var(--margin); height: 256px; border-radius: 16px; overflow: hidden; box-shadow: var(--e1); background: var(--surface-2); }
+.offer .ocard #map { position: absolute; inset: 0; }
+.offer .ocard #map::after { display: none; }
+.offer .obody { position: absolute; left: var(--margin); right: var(--margin); top: 390px; bottom: 34px; display: flex; flex-direction: column; }
+.offer .orow { display: flex; align-items: center; justify-content: space-between; gap: var(--s4); }
+.offer .fare { font: var(--t-hero); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -.5px; }
+.offer .tags { display: flex; gap: 6px; margin-top: 6px; }
+.offer .pick { display: flex; align-items: center; gap: 10px; margin-top: var(--s4); font: 600 22px/28px var(--font); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.offer .pick svg { width: 24px; height: 24px; flex: none; }
+.offer .pick small, .offer .trip small { font: var(--t-secondary); color: var(--ink-2); }
+.offer .trip { display: flex; align-items: center; gap: 10px; margin-top: 4px; font: 500 17px/24px var(--font); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.offer .trip svg { width: 24px; height: 24px; flex: none; color: var(--ink-2); }
+.offer .stops { margin-top: var(--s5); }
+.offer .stops::before { top: 20px; bottom: 26px; }
+.offer .grow { flex: 1; min-height: 0; }
+.offer.quiet .fare, .offer.quiet .pick, .offer.quiet .trip { color: var(--ink-2); }
+.offer.quiet .stop .m { background: var(--ink-3); }
+.offer.quiet .stop .t1 { color: var(--ink-2); }
+/* Countdown: seconds, unit inline («9 վրկ»), drains the accept window. Warn tone from 5 s (real app: Ring tone='warn'). */
+.oring { position: relative; width: 96px; height: 96px; flex: none; }
+.oring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.oring .in { position: absolute; inset: 0; display: flex; align-items: baseline; justify-content: center; gap: 3px; padding-top: 30px; white-space: nowrap; }
+.oring .sec { font: 600 30px/34px var(--font); color: var(--ink); font-variant-numeric: tabular-nums; }
+.oring .u { font: var(--t-secondary-strong); color: var(--ink-2); }
+.oring .gl { padding-top: 0; align-items: center; }
+.oring .gl svg { position: static; transform: none; width: 32px; height: 32px; color: var(--ink-2); }

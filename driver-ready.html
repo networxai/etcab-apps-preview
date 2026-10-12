@@ -72,6 +72,7 @@
 
   .done-ic { width: 72px; height: 72px; border-radius: 50%; background: var(--ok-soft); color: var(--ok); display: grid; place-items: center; margin: var(--s2) 0 var(--s4); }
   .done-ic svg { width: 36px; height: 36px; stroke-width: 2.25; }
+  .seg.oem button { height: 48px; } /* 48dp floor (review) */
 </style>
 </head>
 <body>
@@ -112,7 +113,7 @@
   <!-- ── battery: OEM whitelist ── -->
   <div class="content" data-s="battery">
     <div class="ptitle">Մարտկոց</div>
-    <div class="seg" role="group" aria-label="Հեռախոս" style="margin-top:var(--s4)"><button aria-pressed="true">Xiaomi</button><button aria-pressed="false">Samsung</button><button aria-pressed="false">Այլ</button></div>
+    <div class="seg oem" role="group" aria-label="Հեռախոս" style="margin-top:var(--s4)"><button aria-pressed="true">Xiaomi</button><button aria-pressed="false">Samsung</button><button aria-pressed="false">Այլ</button></div>
     <div class="card mock" aria-label="Կարգավորումների օրինակ">
       <div class="app"><img src="assets/eco/mark.png" alt=""><div><div class="t1">Eco Taxi</div><div class="h" style="margin:0">Մարտկոցի խնայողություն</div></div></div>
       <div class="opts">

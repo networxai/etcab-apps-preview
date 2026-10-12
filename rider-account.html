@@ -24,7 +24,7 @@
   .prof .ph { font: var(--t-secondary); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; margin-top: 2px; }
   .prof .edit { width: var(--tap); height: var(--tap); border-radius: var(--r-pill); background: var(--surface); box-shadow: var(--e1); display: grid; place-items: center; color: var(--ink); flex: none; }
   .prof .edit svg { width: 18px; height: 18px; }
-  .gap { height: var(--s5); }
+  .gap { height: var(--s4); }
   .row .val { font-variant-numeric: tabular-nums; }
   .row .t2.warn { color: var(--warn); }
   .count { min-width: 24px; height: 24px; padding: 0 7px; border-radius: var(--r-pill); background: var(--ink); color: var(--surface); font: 600 13px/24px var(--font); text-align: center; font-variant-numeric: tabular-nums; flex: none; }
@@ -46,8 +46,8 @@
   .rm svg { width: 20px; height: 20px; }
   .row.add .ic { background: var(--brand-soft); color: var(--brand-ink); }
   .row.add .t1 { color: var(--brand-ink); }
-  .page .toast { bottom: 50px; padding-right: 6px; }
-  .toast .undo { height: 32px; padding: 0 12px; border-radius: var(--r-pill); background: rgb(127 127 127 / .28); color: var(--surface); font: var(--t-secondary-strong); margin-left: var(--s2); }
+  .page .toast { bottom: 50px; height: 52px; padding-right: 4px; }
+  .toast .undo { height: 44px; margin-left: var(--s2); padding: 0 12px; border-radius: var(--r-pill); background: rgb(127 127 127 / .28); color: var(--surface); font: var(--t-secondary-strong); }
 
   /* Wallet */
   .bal { margin: var(--s4) var(--margin) 0; background: var(--surface); border-radius: var(--r-card); padding: var(--s5) var(--s4) var(--s4); }
@@ -98,17 +98,19 @@
   const back = (t = '') => `<nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl">${t}</span><span class="navend"></span></nav>`
 
   const main = (debt = true) => `<div class="page">${back()}
-    <div class="prof"><span class="avatar lg ini" aria-hidden="true">Ա</span><span class="txt"><span class="nm">Անի Հակոբյան</span><span class="ph">+374 77 123 456</span></span>
+    <div class="prof"><span class="avatar lg ini" aria-hidden="true">Ա</span><span class="txt"><span class="nm">${ECO.COMPANY.rider}</span><span class="ph">+374 ${ECO.RIDE.rider.phone.replace(/^0/, '')}</span></span>
       <button class="edit" aria-label="Խմբագրել անունը">${R.i('pencil')}</button></div>
     <div class="gap"></div>
     ${grp([
       r('history', 'Ուղևորություններ'),
       r('calendar-clock', 'Նախնական պատվերներ', '<span class="count">1</span>'),
       r('map-pin', 'Հասցեներ', '<span class="val">3</span>'),
-      r('wallet', 'Հաշվեկշիռ', `<span class="val">${debt ? A(DEBT) : A(0)}</span>`, debt ? { t2: 'Չմարված պարտք', t2c: 'warn' } : {}),
+      r('wallet', 'Հաշվեկշիռ', `<span class="val">${debt ? A(DEBT) : A(0)}</span>`, debt ? { t2: 'Չմարված պարտք', t2c: 'warn' } : { t2: ECO.COMPANY.name }),
     ])}
     <div class="gap"></div>
     ${grp([r('languages', 'Լեզու', '<span class="val">Հայերեն</span>'), r('sun-moon', 'Թեմա', '<span class="val">Ավտոմատ</span>')])}
+    <div class="gap"></div>
+    ${grp([r('headset', 'Օգնություն', '', { t2: 'Զանգել գրասենյակ · Հարցեր' }), r('scale', 'Իրավական', '', { t2: 'Պայմաններ · Գաղտնիություն' })])}
     <div class="gap"></div>
     ${grp([r('log-out', 'Դուրս գալ', '', { chev: false }), r('trash-2', 'Ջնջել հաշիվը', '', { chev: false, cls: 'danger' })])}
   </div>`
@@ -121,7 +123,7 @@
   const places = (all) => `<div class="page">${back()}<h1 class="large">Հասցեներ</h1><div class="gap"></div>
     ${grp([
       r('house', 'Տուն', `<button class="rm" aria-label="Հեռացնել Տուն">${R.i('circle-minus')}</button>`, { t2: 'Կոմիտասի պող. 22', chev: false, btn: false }),
-      r('briefcase', 'Աշխատանք', `<button class="rm" aria-label="Հեռացնել Աշխատանք">${R.i('circle-minus')}</button>`, { t2: 'Հյուսիսային պող. 1', chev: false, btn: false }),
+      r('briefcase', 'Աշխատանք', `<button class="rm" aria-label="Հեռացնել Աշխատանք">${R.i('circle-minus')}</button>`, { t2: 'Վազգեն Սարգսյան 10', chev: false, btn: false }),
       ...(all ? [r('heart', 'Մայրիկի մոտ', `<button class="rm" aria-label="Հեռացնել Մայրիկի մոտ">${R.i('circle-minus')}</button>`, { t2: 'Դավթաշեն, 3-րդ թաղ. 14', chev: false, btn: false })] : []),
       r('plus', 'Ավելացնել հասցե', '', { chev: false, cls: 'add' }),
     ])}
@@ -134,25 +136,32 @@
       : `<div class="k ok">${R.i('circle-check')}Պարտք չկա</div><div class="hero">${A(0)}</div><div class="from">Բոլոր ուղևորությունները վճարված են</div>`}</div>
     <div class="sect">Վճարման եղանակ</div>
     ${grp([
-      r('banknote', 'Կանխիկ', `<span class="def">${R.i('check')}Հիմնական</span>`, { chev: false, btn: false, cls: 'cash' }),
-      r('credit-card', 'Քարտ', '<span class="soon">Շուտով</span>', { chev: false, btn: false, cls: 'off', t2: 'Քարտով վճարումը կավելանա' }),
+      r('banknote', ECO.PAY.cash.label, `<span class="def">${R.i('check')}Հիմնական</span>`, { chev: false, btn: false, cls: 'cash' }),
+      r('building-2', ECO.COMPANY.name, '', { chev: false, btn: false, t2: 'Ընկերության հաշիվ · ընտրվում է պատվիրելիս' }),
+      r('wallet', ECO.PAY.card.label, `<span class="soon">${ECO.PAY.soon}</span>`, { chev: false, btn: false, cls: 'off' }),
     ])}</div>`
 
   Rider.page({
     title: 'Rider · Account',
     sub: 'Profile, saved places, balance with an honest “card payments coming”, language, theme, sign out and deletion — all one tap from the list',
     states: [
-      { id: 'main', group: 'Account', label: 'Account', note: 'Delete is a visible row. Debt is a word plus colour, never colour alone', html: () => main() },
+      { id: 'main', group: 'Account', label: 'Account', note: 'Delete is a visible row. Debt is a word plus colour, never colour alone. Help (call the office, questions) and Legal (terms, privacy) sit above sign-out, as both stores expect', html: () => main() },
+      { id: 'main-company', group: 'Account', label: 'Company rider', note: 'A rider linked to a company on account: the balance row names the company. The choice itself is made per ride on the order sheet', html: () => main(false) },
+      { id: 'help', group: 'Account', label: 'Help', note: 'A person first: the office phone is one tap. Questions and legal pages open in the browser',
+        html: () => `<div class="page">${back('Օգնություն')}<div class="gap"></div>
+          ${grp([r('phone', 'Զանգել գրասենյակ', '<span class="val">010 55-55-55</span>', { chev: false }), r('circle-help', 'Հաճախ տրվող հարցեր')])}
+          <div class="sect">Իրավական</div>
+          ${grp([r('file-text', 'Օգտագործման պայմաններ'), r('shield', 'Գաղտնիության քաղաքականություն')])}</div>` },
       { id: 'name', group: 'Account', label: 'Edit name', note: 'One field; the driver greets the rider by it',
         html: () => `<div class="page on-surface">${back('Անուն')}<div class="form">
           <div class="field focus"><span class="num"><span class="lbl">Անուն</span><span class="v">Անի Հակոբյան<span class="caret"></span></span></span></div>
           <button class="btn btn-brand">Պահպանել</button></div>${R.keyboard()}</div>` },
       { id: 'places', group: 'Places', label: 'Saved places', note: 'Remove is visible on every row (44pt), not a hidden swipe', html: () => places(true) },
       { id: 'place-removed', group: 'Places', label: 'Removed + undo', note: 'No confirm dialog: the undo is the safety net', html: () => places(false) },
-      { id: 'wallet', group: 'Balance', label: 'Debt', note: 'account.debtNote said plainly; card is shown as coming, not hidden', html: () => wallet(true) },
+      { id: 'wallet', group: 'Balance', label: 'Debt', note: 'account.debtNote said plainly; the linked company is listed (AccountSheets.tsx WalletSheet), card is shown as «Շուտով», not hidden', html: () => wallet(true) },
       { id: 'wallet-clear', group: 'Balance', label: 'Clear', html: () => wallet(false) },
-      { id: 'language', group: 'Settings', label: 'Language', note: 'Each language named in its own script; applies on tap',
-        html: () => over(`${mhead('Լեզու')}${choice('Հայերեն', true, '', 'HY')}${choice('Русский', false, '', 'RU')}${choice('English', false, '', 'EN')}`) },
+      { id: 'language', group: 'Settings', label: 'Language', note: 'Each language named, and coded, in its own script (ՀՅ / РУ / EN, as the driver app); applies on tap',
+        html: () => over(`${mhead('Լեզու')}${choice('Հայերեն', true, '', 'ՀՅ')}${choice('Русский', false, '', 'РУ')}${choice('English', false, '', 'EN')}`) },
       { id: 'theme', group: 'Settings', label: 'Theme', note: 'Follows the phone by default (rider research §5.5)',
         html: () => over(`${mhead('Թեմա')}${choice('Ավտոմատ', true, 'Ինչպես հեռախոսում')}${choice('Լուսավոր', false)}${choice('Մութ', false)}`) },
       { id: 'signout', group: 'Leave', label: 'Sign out',

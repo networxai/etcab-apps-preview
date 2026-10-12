@@ -28,12 +28,12 @@
   .kpi svg { width: 16px; height: 16px; }
   .kpi b { font-weight: 600; color: var(--ink); }
 
-  /* Cash vs card: one stacked bar, 2px surface gap, legend + direct values (dataviz) */
+  /* Cash vs company account (the launch roster, ECO.PAY): one stacked bar, 2px surface gap, legend + direct values (dataviz) */
   .split { margin-top: var(--s5); }
   .split .bar { display: flex; gap: 2px; height: 12px; }
   .split .bar i { display: block; height: 100%; }
   .split .bar i:first-child { border-radius: 4px 0 0 4px; } .split .bar i:last-child { border-radius: 0 4px 4px 0; }
-  .c-cash { background: var(--ink); } .c-card { background: var(--brand-vivid); }
+  .c-cash { background: var(--ink); } .c-company { background: var(--brand-vivid); }
   .legend { display: flex; justify-content: space-between; margin-top: var(--s2); }
   .legend span { display: inline-flex; align-items: center; gap: 6px; font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .legend b { color: var(--ink); font-weight: 600; }
@@ -105,7 +105,9 @@
   .amount .caret { width: 2px; height: 40px; background: var(--brand-vivid); margin-left: 4px; border-radius: 1px; }
   .amount .avail { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; margin-top: var(--s1); }
   .quick { display: flex; gap: var(--s2); justify-content: center; margin-bottom: var(--s5); }
-  .quick .chip { height: 40px; padding: 0 16px; }
+  .quick .chip { height: 48px; padding: 0 18px; }
+  /* Tabs: 48px floor (review). */
+  .seg button { height: 48px; }
   .quick .chip[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
   .cardchip { width: 40px; height: 28px; border-radius: 5px; background: var(--ink); color: var(--surface); display: grid; place-items: center; font: 600 10px/1 var(--font); flex: none; }
 
@@ -156,17 +158,17 @@
     <section data-s="today">
       <div class="lbl">Ուրբաթ, 9 հոկտեմբերի</div>
       <div class="hero">9 800<small>֏</small></div>
-      <div class="kpis"><span class="kpi"><i data-lucide="car-front"></i><b>7</b>պատվեր</span><span class="kpi"><i data-lucide="clock"></i><b>6 ժ 40 ր</b>գծում</span></div>
-      <div class="split" role="img" aria-label="Կանխիկ 6 300 ֏, քարտ 3 500 ֏">
-        <div class="bar"><i class="c-cash" style="width:64.3%"></i><i class="c-card" style="width:35.7%"></i></div>
-        <div class="legend"><span><i class="c-cash"></i>Կանխիկ <b>6 300 ֏</b></span><span><i class="c-card"></i>Քարտ <b>3 500 ֏</b></span></div>
+      <div class="kpis"><span class="kpi"><i data-lucide="car-front"></i><b>7</b>պատվեր</span><span class="kpi"><i data-lucide="clock"></i><b>5 ժ 58 ր</b>գծում</span></div>
+      <div class="split" role="img" aria-label="Կանխիկ 7 600 ֏, ընկերության հաշվին 2 200 ֏">
+        <div class="bar"><i class="c-cash" style="width:77.6%"></i><i class="c-company" style="width:22.4%"></i></div>
+        <div class="legend"><span><i class="c-cash"></i>Կանխիկ <b>7 600 ֏</b></span><span><i class="c-company"></i>Ընկերություն <b>2 200 ֏</b></span></div>
       </div>
       <div class="sect">Վերջին պատվերներ</div>
       <div class="group">
-        <div class="ride"><span class="tm">14:52</span><span class="txt"><span class="t1">Կոմիտասի պող. 49</span><span class="t2"><i data-lucide="credit-card"></i>Քարտ · 4,3 կմ</span></span><span class="amt">1 100 ֏</span></div>
+        <div class="ride"><span class="tm">14:52</span><span class="txt"><span class="t1">Կոմիտասի պող. 49</span><span class="t2"><i data-lucide="building-2"></i>Ընկերություն · 4,3 կմ</span></span><span class="amt">1 100 ֏</span></div>
         <div class="ride"><span class="tm">14:10</span><span class="txt"><span class="t1">Զվարթնոց</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 13,1 կմ</span></span><span class="amt">2 000 ֏</span></div>
         <div class="ride"><span class="tm">13:25</span><span class="txt"><span class="t1">Ամիրյան փ. 4</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 5,8 կմ</span></span><span class="amt">1 200 ֏</span></div>
-        <div class="ride"><span class="tm">12:40</span><span class="txt"><span class="t1">Ծիծեռնակաբերդ</span><span class="t2"><i data-lucide="credit-card"></i>Քարտ · 3,8 կմ</span></span><span class="amt">1 000 ֏</span></div>
+        <div class="ride"><span class="tm">12:40</span><span class="txt"><span class="t1">Ծիծեռնակաբերդ</span><span class="t2"><i data-lucide="building-2"></i>Ընկերություն · 4,1 կմ</span></span><span class="amt">1 100 ֏</span></div>
       </div>
       <div class="group more"><div class="row"><span class="ic"><i data-lucide="list"></i></span><span class="txt"><span class="t1">Բոլոր գործարքները</span></span><i class="chev" data-lucide="chevron-right"></i></div></div>
     </section>
@@ -203,7 +205,7 @@
         <div class="top">
           <span class="lbl" data-s="owed blocked">Դուք պարտք եք</span><span class="lbl" data-s="credit">Ձեզ հասանելիք</span>
           <span class="tag warn" data-s="owed"><i data-lucide="triangle-alert"></i>Մոտ է սահմանին</span>
-          <span class="tag danger" data-s="blocked"><i data-lucide="octagon-x"></i>Կանխիկը կանգնած է</span>
+          <span class="tag warn" data-s="blocked"><i data-lucide="lock"></i>Կանխիկը կանգնած է</span>
           <span class="tag ok" data-s="credit"><i data-lucide="calendar-check"></i>Երկ, 12.10</span>
         </div>
         <div class="hero" data-s="owed">−3 850<small>֏</small></div>
@@ -213,22 +215,22 @@
           <div class="track"><div class="fill" style="width:77%"></div></div>
           <div class="ends"><span>0 ֏</span><span>Սահմանաչափ՝ −5 000 ֏</span></div>
         </div>
-        <div class="meter danger" data-s="blocked" role="meter" aria-label="Պարտքը սահմանաչափից" aria-valuemin="0" aria-valuemax="5000" aria-valuenow="5200">
+        <div class="meter" data-s="blocked" role="meter" aria-label="Պարտքը սահմանաչափից" aria-valuemin="0" aria-valuemax="5000" aria-valuenow="5200">
           <div class="track"><div class="fill" style="width:100%"></div></div>
           <div class="ends"><span>0 ֏</span><span>Սահմանաչափ՝ −5 000 ֏</span></div>
         </div>
-        <div class="why" data-s="owed">Քարտով պատվերները նվազեցնում են պարտքը։</div>
+        <div class="why" data-s="owed">Ընկերության հաշվին պատվերները նվազեցնում են պարտքը։</div>
         <div class="why" data-s="blocked">Կանխիկ պատվերները դադարեցվել են։ Սահմանաչափը՝ −5 000 ֏։</div>
         <div class="why" data-s="credit">Փոխանցում քարտին՝ ամեն երկուշաբթի։</div>
       </div>
       <div class="group how" data-s="owed blocked">
-        <div class="row"><span class="ic"><i data-lucide="building-2"></i></span><span class="txt"><span class="t1">Մարել գրասենյակում</span><span class="t2">Կոմիտասի 38 · 09:00–20:00</span></span><i class="chev" data-lucide="chevron-right"></i></div>
+        <div class="row"><span class="ic"><i data-lucide="building-2"></i></span><span class="txt"><span class="t1">Մարել գրասենյակում</span><span class="t2">Կոմիտասի պող. 38 · 09:00–20:00</span></span><i class="chev" data-lucide="chevron-right"></i></div>
         <div class="row"><span class="ic"><i data-lucide="headset"></i></span><span class="txt"><span class="t1">Զանգել դիսպետչերին</span></span><i class="chev" data-lucide="chevron-right"></i></div>
       </div>
       <button class="btn btn-brand how" data-s="credit"><i data-lucide="arrow-down-to-line"></i>Կանխիկացնել</button>
       <div class="sect">Վերջին գործարքներ</div>
       <div class="group">
-        <div class="led"><span class="ic"><i data-lucide="credit-card"></i></span><span class="txt"><span class="t1">Պատվեր · քարտ</span><span class="t2">Այսօր, 14:52</span></span><span class="amt plus">+1 100 ֏</span></div>
+        <div class="led"><span class="ic"><i data-lucide="building-2"></i></span><span class="txt"><span class="t1">Պատվեր · ընկերություն</span><span class="t2">Այսօր, 14:52</span></span><span class="amt plus">+1 100 ֏</span></div>
         <div class="led"><span class="ic"><i data-lucide="percent"></i></span><span class="txt"><span class="t1">Միջնորդավճար 15%</span><span class="t2">Այսօր, 14:52</span></span><span class="amt">−165 ֏</span></div>
         <div class="led" data-not="credit"><span class="ic"><i data-lucide="calendar-days"></i></span><span class="txt"><span class="t1">Օրական վճար</span><span class="t2">Այսօր, 08:02</span></span><span class="amt">−1 000 ֏</span></div>
       </div>
@@ -238,7 +240,7 @@
     <section data-s="ledger">
       <div class="day"><span>Այսօր, 9 հոկտ.</span><span>−65 ֏</span></div>
       <div class="group">
-        <div class="led"><span class="ic"><i data-lucide="credit-card"></i></span><span class="txt"><span class="t1">Պատվեր · քարտ</span><span class="t2">14:52 · Կոմիտասի պող. 49</span></span><span class="amt plus">+1 100 ֏</span></div>
+        <div class="led"><span class="ic"><i data-lucide="building-2"></i></span><span class="txt"><span class="t1">Պատվեր · ընկերություն</span><span class="t2">14:52 · Կոմիտասի պող. 49</span></span><span class="amt plus">+1 100 ֏</span></div>
         <div class="led"><span class="ic"><i data-lucide="percent"></i></span><span class="txt"><span class="t1">Միջնորդավճար 15%</span><span class="t2">14:52 · նույն պատվերից</span></span><span class="amt">−165 ֏</span></div>
         <div class="led"><span class="ic"><i data-lucide="calendar-days"></i></span><span class="txt"><span class="t1">Օրական վճար</span><span class="t2">08:02 · հերթապահության օր</span></span><span class="amt">−1 000 ֏</span></div>
       </div>
@@ -259,7 +261,7 @@
       </div>
       <div class="quick"><button class="chip on-ground">5 000</button><button class="chip on-ground">10 000</button><button class="chip on-ground" aria-pressed="true">Ամբողջը</button></div>
       <div class="group">
-        <div class="row"><span class="cardchip">VISA</span><span class="txt"><span class="t1">Քարտ •• 4417</span><span class="t2">Ameriabank</span></span><i class="chev" data-lucide="chevron-right"></i></div>
+        <div class="row"><span class="ic"><i data-lucide="landmark"></i></span><span class="txt"><span class="t1">Բանկային քարտ •• 2093</span><span class="t2">Ամերիաբանկ</span></span><i class="chev" data-lucide="chevron-right"></i></div>
         <div class="row"><span class="ic"><i data-lucide="receipt"></i></span><span class="txt"><span class="t1">Միջնորդավճար</span></span><span class="end">0 ֏</span></div>
         <div class="row"><span class="ic"><i data-lucide="clock"></i></span><span class="txt"><span class="t1">Ժամկետ</span></span><span class="end">1–2 աշխ. օր</span></div>
       </div>
@@ -272,7 +274,7 @@
       <div class="center">
         <span class="done-ic"><i data-lucide="check"></i></span>
         <div class="hero">12 300<small>֏</small></div>
-        <div class="psub" style="margin-top:4px">Քարտ •• 4417</div>
+        <div class="psub" style="margin-top:4px">Բանկային քարտ •• 2093</div>
       </div>
       <div class="card tl">
         <div class="tli done"><span class="d"><i data-lucide="check"></i></span><div><div class="t1">Հայցն ուղարկված է</div><div class="t2">Այսօր, 15:04</div></div></div>
@@ -294,9 +296,9 @@
 </main>
 <script src="audit.js"></script>
 <script>
-  statusBar(document.getElementById('s'))
+  statusBar(document.getElementById('s'), '15:10') /* the same Friday, later: the shift's rides are behind us */
   const st = D.init([
-    ['today', 'Today · cash/card split'], ['week', 'Week · daily bars'], ['ledger', 'Ledger with reasons'],
+    ['today', 'Today · cash/company split'], ['week', 'Week · daily bars'], ['ledger', 'Ledger with reasons'],
     ['owed', 'Balance · owed (offset_cash)'], ['blocked', 'Balance · blocked at limit'], ['credit', 'Balance · credit'],
     ['withdraw', 'Withdrawal (driver_withdrawal)'], ['withdrawsent', 'Withdrawal requested'], ['unavailable', 'Unavailable · retry'],
   ])

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoices</title>
+<link rel="stylesheet" href="console.css">
+<link rel="stylesheet" href="corporate.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+</head>
+<body>
+<!-- Mirrors apps/operator /admin/invoices (invoice-run.tsx, corporate K7) and /admin/invoices/overdue
+     (invoices-overdue.tsx + invoice-payment.tsx). The real sidebar has both as Money items; here they are one page
+     with a two-way switch.
+     invoices.html            the run for September 2026: one draft per company, selected, ready to issue
+     invoices.html?run=1      after «Թողարկել ընտրվածները»: each row carries its number, or its amber refusal
+     invoices.html?view=overdue  issued invoices past due, oldest first, «Գրանցել վճարում» open under a row -->
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <span class="crumb">Ֆինանսներ <i data-lucide="chevron-right"></i></span><h1 id="title"></h1>
+      <div class="seg" role="tablist" aria-label="Հաշիվներ" id="views" style="margin-left:8px;padding:2px"></div>
+      <div class="live"></div>
+    </header>
+    <div class="content one">
+      <section class="card page" id="page"></section>
+    </div>
+  </div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search)
+  const view = q.get('view') === 'overdue' ? 'overdue' : 'run'
+  const done = q.get('run') === '1'
+  shell('invoices')
+  const C = ECO.COMPANY, amd = ECO.amd
+
+  /* Overdue (corporate K7): oldest due first; today = Fri 9 Oct 2026. Same figures as companies.html. */
+  const OVER = [
+    ['Գլոբալ Լոջիսթիքս ՍՊԸ', 'INV-2026-00058', '16.09.2026', 23, 96400, '18.09.2026'],
+    ['Արմենիա Հոթել Գրուպ ՍՊԸ', 'INV-2026-00064', '01.10.2026', 8, 41200, null],
+  ]
+  document.getElementById('title').textContent = view === 'overdue' ? 'Ժամկետանց հաշիվներ' : 'Հաշիվների ձևավորում'
+  document.getElementById('views').innerHTML = `<a role="tab" aria-selected="${view === 'run'}" class="btn s ${view === 'run' ? 'secondary' : 'ghost'}" href="?theme=${THEME}">Հաշիվների ձևավորում</a>
+    <a role="tab" aria-selected="${view === 'overdue'}" class="btn s ${view === 'overdue' ? 'secondary' : 'ghost'}" href="?theme=${THEME}&view=overdue">Ժամկետանց <span class="num" style="color:var(--warning);font-weight:600">${OVER.length}</span></a>`
+
+  /* ── The run: September 2026 (the previous month by default). Lines = settled on-account rides not on a live invoice. ── */
+  const DRAFTS = [
+    [C.name, 58, 58, 172300, 1, 'INV-2026-00065'],
+    ['Արմենիա Հոթել Գրուպ ՍՊԸ', 23, 23, 81200, 0, 'INV-2026-00066'],
+    ['Գլոբալ Լոջիսթիքս ՍՊԸ', 91, 91, 318700, 0, 'INV-2026-00067'],
+    ['Երևան Մեդիքալ Սենթր ՓԲԸ', 35, 35, 109400, 0, 'INV-2026-00068'],
+    ['ԹեքՀաբ Արմենիա ՍՊԸ', 44, 3, 140100, 0, null],
+    ['Նոր Դիզայն Ստուդիո ՍՊԸ', 11, 11, 21600, 0, 'INV-2026-00069'],
+    ['Սիթի Բանկ ՓԲԸ', 132, 132, 402800, 0, 'INV-2026-00070'],
+    ['Վերնատուն Ռեստորան ՍՊԸ', 17, 17, 51300, 0, 'INV-2026-00071'],
+  ]
+  const total = DRAFTS.reduce((a, d) => a + d[3], 0)
+  const run = `<div class="scroll-y grow">
+    <p class="explain">Կրկին գործարկելն անվտանգ է․ արդեն հաշվում եղած ուղևորությունները բաց են թողնվում, իսկ սևագիրը համալրվում է, ոչ թե կրկնվում։</p>
+    <div class="tb">
+      <section class="sec"><h3>Ամիս</h3><div class="pad row-flex" style="gap:12px">
+        <span class="month" role="group" aria-label="Ամիս"><button class="btn ghost icon s" aria-label="Նախորդ ամիս"><i data-lucide="chevron-left"></i></button><span class="lbl">2026-09</span><button class="btn ghost icon s" aria-label="Հաջորդ ամիս"><i data-lucide="chevron-right"></i></button></span>
+        <button class="btn primary"><i data-lucide="receipt-text"></i>Գործարկել</button>
+        <span class="faint" style="font:var(--c-small)">Վերջին գործարկում՝ <span class="mono">09.10.2026 09:12</span> · Անի Դ.</span></div></section>
+      <section class="sec"><h3>Սևագրեր · <span class="mono">2026-09</span><span class="sub num">${DRAFTS.length} · ${amd(total)}</span>
+          <span class="end">${done ? `<button class="btn secondary s"><i data-lucide="check"></i>Թողարկել ընտրվածները (${DRAFTS.length})</button>` : `<button class="btn primary s"><i data-lucide="check"></i>Թողարկել ընտրվածները (${DRAFTS.length})</button>`}</span></h3>
+        <div class="pad" style="padding-bottom:0"><div class="notice neutral"><i data-lucide="clock"></i><span>4 հաշվով ուղևորություն դեռ հաշվարկված չէ․ հաջորդ ձևավորումը դրանք կներառի։</span></div></div>
+        <table class="tbl" style="margin-top:8px"><colgroup><col style="width:56px"><col><col style="width:90px"><col style="width:110px"><col style="width:150px"><col style="width:130px"><col style="width:300px"></colgroup>
+          <thead><tr><th aria-label="Ընտրել"></th><th>Ընկերություն</th><th class="c">Տողեր</th><th class="c">Ավելացված</th><th class="m">Ընդամենը</th><th class="c">Առանց հղման</th><th>Արդյունք</th></tr></thead>
+          <tbody>${DRAFTS.map(([n, lines, added, tot, miss, num]) => {
+            const issued = done && num, refused = done && !num
+            return `<tr class="ro"><td><span class="cb ${issued ? 'on dis' : 'on'}" role="checkbox" aria-checked="true" aria-disabled="${!!issued}" aria-label="Ընտրել — ${n}"></span></td>
+              <td><a class="nm" href="company.html?theme=${THEME}">${n}</a></td><td class="c">${lines}</td><td class="c">${added}</td><td class="m">${amd(tot)}</td>
+              <td class="c">${miss ? `<span class="warnn">${miss}</span>` : '0'}</td>
+              <td class="outc">${issued ? `<b>${num}</b>` : refused ? '<span class="amb"><i data-lucide="triangle-alert" style="width:14px;height:14px;vertical-align:-2px"></i> Այս հաշիվն այլևս սևագիր չէ։</span>' : ''}</td></tr>`
+          }).join('')}</tbody></table>
+        ${done ? `<div class="pad"><div class="notice neutral"><i data-lucide="circle-check"></i><span>7 հաշիվ թողարկվեց՝ <span class="mono">INV-2026-00065 – 00071</span>։ PDF-ը և CSV-ն ուղարկվում են ընկերությունների հաշիվների էլ․ հասցեներին։ ԹեքՀաբ Արմենիայի սևագիրն արդեն թողարկվել էր նրա էջից։</span></div></div>`
+               : `<div class="pad"><span class="faint" style="font:var(--c-small)"><span class="dot-w"></span>${C.name}-ի 1 տող չունի պարտադիր «${C.refLabel}»-ը․ այն կարելի է լրացնել մինչև թողարկումը, կամ թողարկել առանց դրա։</span></div>`}
+      </section></div></div>`
+
+  /* ── Overdue: «Գրանցել վճարում» opens the payment form under the row (invoice-payment.tsx), never a modal. ── */
+  const overdue = `<div class="scroll-y grow"><div class="tb"><section class="sec">
+      <table class="tbl"><colgroup><col><col style="width:170px"><col style="width:130px"><col style="width:90px"><col style="width:150px"><col style="width:150px"><col style="width:190px"></colgroup>
+        <thead><tr><th>Ընկերություն</th><th>Համար</th><th>Ժամկետ</th><th class="c">Օր</th><th class="m">Մնացորդ</th><th>Վերջին վճարում</th><th aria-label="Գործողություններ"></th></tr></thead>
+        <tbody>${OVER.map(([n, num, due, days, out, last], i) => `<tr class="ro${i === 0 ? ' on' : ''}"><td><a class="nm" href="#">${n}</a></td><td class="mono">${num}</td><td class="mono">${due}</td>
+            <td class="c"><span class="warnn">${days}</span></td><td class="m">${amd(out)}</td><td class="mono">${last || '<span class="dash">—</span>'}</td>
+            <td style="text-align:right"><button class="btn ${i === 0 ? 'primary' : 'secondary'} s" aria-expanded="${i === 0}"><i data-lucide="landmark"></i>Գրանցել վճարում</button></td></tr>
+          ${i === 0 ? `<tr class="under"><td colspan="7"><div class="panel" style="margin-top:0" aria-label="Վճարման գրանցում"><h4><i data-lucide="landmark"></i>Վճարման գրանցում<span class="faint" style="font:var(--c-small);font-weight:400">${num} · մնացորդ ${amd(out)}</span></h4>
+            <div class="pgrid">
+              <div><label class="label">Գումար</label><div class="input focus"><span class="val mono">50 000</span><span class="faint">֏</span></div></div>
+              <div><label class="label">Եղանակ</label><div class="input"><span class="val">Բանկային փոխանցում</span><i data-lucide="chevron-down"></i></div></div>
+              <div><label class="label">Հղում</label><div class="input"><span class="val mono">AMB 1009 5531 08</span></div></div>
+              <div><label class="label">Ստացման օր</label><div class="input"><i data-lucide="calendar"></i><span class="val mono">09.10.2026</span></div></div>
+              <div style="display:flex;gap:6px;justify-content:flex-end"><button class="btn ghost">Չեղարկել</button><button class="btn primary">Գրանցել վճարումը</button></div>
+            </div>
+            <p class="hint" style="margin-top:8px">Գրանցելուց հետո՝ «Գրանցված է։ Մնացորդ՝ ${amd(out - 50000)}»։ Մնացորդից ավելին մերժվում է։</p></div></td></tr>` : ''}`).join('')}</tbody></table></section>
+      <p class="faint" style="font:var(--c-small)">Ժամկետանց են թողարկված հաշիվները, որոնց վճարման օրն անցել է, և մնացորդ ունեն․ հնագույնը՝ վերևում։</p></div></div>`
+
+  document.getElementById('page').innerHTML = view === 'overdue' ? overdue : run
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

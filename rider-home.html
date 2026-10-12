@@ -17,7 +17,7 @@
     background: var(--surface-2); padding: 0 6px 0 var(--s4); width: 100%; text-align: left; }
   .where > svg { width: 20px; height: 20px; color: var(--ink); }
   .where .lbl { flex: 1; font: var(--t-headline); color: var(--ink); white-space: nowrap; }
-  .later { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border-radius: 10px;
+  .later { display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px; border-radius: 10px;
     background: var(--raised); box-shadow: var(--e1); font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; }
   .later svg { width: 16px; height: 16px; }
   .places { margin-top: var(--s2); }
@@ -26,11 +26,15 @@
   .row.soon .t2 { color: var(--ink-2); }
 
   .partners { margin: var(--s3) calc(-1 * var(--margin)) 0; overflow: hidden; }
-  .track { display: flex; gap: var(--s2); padding: 0 var(--margin); }
+  /* Three cards, three dots: the strip snap-scrolls, the second card peeks (one dot per reachable card). */
+  .track { display: flex; gap: var(--s2); padding: 0 var(--margin); overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 var(--margin); scrollbar-width: none; }
+  .track::-webkit-scrollbar { display: none; }
+  .ad { scroll-snap-align: start; }
   .ad { position: relative; flex: none; width: 318px; height: 156px; border-radius: var(--r-card); overflow: hidden; background: var(--surface-3); }
   .ad img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .ad::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgb(0 0 0 / 0) 0%, rgb(0 0 0 / 0) 20%, rgb(0 0 0 / .6) 55%, rgb(0 0 0 / .82) 100%); }
-  .ad .copy { position: absolute; left: var(--s4); right: var(--s4); bottom: 14px; z-index: 1; color: #fff; }
+  /* The scrim is the text's own background (not a pseudo-element), so the copy always sits on it: white on ≥ .6 black. */
+  .ad .copy { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; color: #fff; padding: 56px var(--s4) 14px;
+    background: linear-gradient(180deg, rgb(0 0 0 / .02) 0%, rgb(0 0 0 / .6) 45%, rgb(0 0 0 / .82) 100%); }
   .ad .who { font: var(--t-secondary-strong); color: rgb(255 255 255 / .86); white-space: nowrap; }
   .ad .offer { font: var(--t-title); color: #fff; white-space: nowrap; letter-spacing: -.1px; }
   .ad .tag { position: absolute; top: 10px; left: 10px; z-index: 1; height: 22px; padding: 0 8px; border-radius: var(--r-pill);
@@ -60,17 +64,22 @@
 
     <div class="places" id="places"></div>
 
-    <div class="partners" aria-label="Գործընկերներ">
+    <div class="partners" aria-label="Առաջարկներ">
       <div class="track">
         <article class="ad" data-photo data-scrim="0:0,0.2:0,0.55:0.6,1:0.82">
           <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=700&h=340&q=80&auto=format&fit=crop" alt="">
-          <span class="tag">Գործընկեր</span>
+          <span class="tag">Գովազդ</span>
           <div class="copy"><div class="who">Լյումեն սրճարան</div><div class="offer">−15% ուղևորներին</div></div>
         </article>
         <article class="ad" data-photo data-peek data-scrim="0:0,0.2:0,0.55:0.6,1:0.82">
           <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=700&h=340&q=80&auto=format&fit=crop" alt="">
-          <span class="tag">Գործընկեր</span>
+          <span class="tag">Գովազդ</span>
           <div class="copy"><div class="who">Տարոն ռեստորան</div><div class="offer">Աղանդեր՝ նվեր</div></div>
+        </article>
+        <article class="ad" data-photo data-peek data-scrim="0:0,0.2:0,0.55:0.6,1:0.82">
+          <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=700&h=340&q=80&auto=format&fit=crop" alt="">
+          <span class="tag">Գովազդ</span>
+          <div class="copy"><div class="who">Արաքս սպա</div><div class="offer">Մերսում՝ −20%</div></div>
         </article>
       </div>
       <div class="dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>

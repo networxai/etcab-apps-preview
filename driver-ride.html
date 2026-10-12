@@ -117,8 +117,8 @@
   <section class="sheet" data-s="assigned" data-sheet>
     <div class="grabber"></div>
     <div class="head">
-      <div><div class="eyebrow">Դեպի ուղևոր</div><div class="addr">Մաշտոցի պող. 40</div><div class="meta">Անի · Eco City · <i data-lucide="banknote"></i>Կանխիկ</div></div>
-      <div class="big">6<small>րոպե</small></div>
+      <div><div class="eyebrow">Դեպի ուղևոր</div><div class="addr" data-eco="RIDE.pickup">Մաշտոցի պող. 37</div><div class="meta">Աննա · Eco City · <i data-lucide="banknote"></i>Կանխիկ</div></div>
+      <div class="big">4<small>րոպե</small></div>
     </div>
     <div class="tools">
       <button class="tool"><span class="b"><i data-lucide="phone"></i></span>Զանգել</button>
@@ -132,7 +132,7 @@
   <section class="sheet" data-s="enroute" data-sheet>
     <div class="grabber"></div>
     <div class="head">
-      <div><div class="eyebrow"><span class="d"></span>4 րոպե · 1,4 կմ · 09:47</div><div class="addr">Մաշտոցի պող. 40</div></div>
+      <div><div class="eyebrow"><span class="d"></span>4 րոպե · 1,4 կմ · 9:45</div><div class="addr" data-eco="RIDE.pickup">Մաշտոցի պող. 37</div></div>
       <button class="tool" aria-label="Զանգել ուղևորին"><span class="b"><i data-lucide="phone"></i></span></button>
     </div>
     <button class="go" style="margin-top:var(--s4)">Տեղում եմ</button>
@@ -142,8 +142,8 @@
   <section class="sheet" data-s="arrived noshow noshowsent offline" data-sheet>
     <div class="grabber"></div>
     <div class="head">
-      <div><div class="eyebrow">Սպասում եք ուղևորին</div><div class="addr">Մաշտոցի պող. 40</div>
-        <div class="meta" data-not="offline">Անի · Eco City · <i data-lucide="banknote"></i>Կանխիկ</div>
+      <div><div class="eyebrow">Սպասում եք ուղևորին</div><div class="addr" data-eco="RIDE.pickup">Մաշտոցի պող. 37</div>
+        <div class="meta" data-not="offline">Աննա · Eco City · <i data-lucide="banknote"></i>Կանխիկ</div>
         <div class="meta" data-s="offline"><span class="synced"><i data-lucide="clock-arrow-up"></i>«Տեղում եմ» · հերթում</span></div></div>
       <div class="big"><span data-s="arrived offline">02:14</span><span data-s="noshow noshowsent">05:12</span></div>
     </div>
@@ -169,8 +169,8 @@
   <section class="sheet" data-s="inprogress" data-sheet>
     <div class="grabber"></div>
     <div class="head">
-      <div><div class="eyebrow"><span class="d"></span>9 րոպե · 3,1 կմ · 10:02</div><div class="addr">Կոմիտասի պող. 49</div></div>
-      <div class="big" style="font:var(--t-title)">1 100 ֏</div>
+      <div><div class="eyebrow"><span class="d"></span>4 րոպե · 2,9 կմ · 9:51</div><div class="addr" data-eco="RIDE.drop">Կոմիտասի պող. 22</div></div>
+      <div class="big" style="font:var(--t-title)" data-eco="RIDE.fare|amd">1 100 ֏</div>
     </div>
     <div class="tools" style="justify-content:flex-start;gap:var(--s4)">
       <button class="tool"><span class="b"><i data-lucide="phone"></i></span>Զանգել</button>
@@ -187,11 +187,11 @@
     <div class="grabber"></div>
     <div class="done-top">
       <span class="ok"><i data-lucide="check"></i></span>
-      <div class="l">Կոմիտասի պող. 49 · ավարտված</div>
+      <div class="l">Կոմիտասի պող. 22 · 9:51</div>
       <div class="big">1 100<small>֏</small></div>
     </div>
-    <div class="cash"><i data-lucide="banknote"></i><div><div class="t1">Վերցրե՛ք կանխիկ</div><div class="t2">Անի · Eco City</div></div></div>
-    <div class="facts"><div><b>4,3 կմ</b><span>Ճանապարհ</span></div><div><b>11 րոպե</b><span>Տևողություն</span></div><div><b>2:14</b><span>Սպասում</span></div></div>
+    <div class="cash"><i data-lucide="banknote"></i><div><div class="t1">Վերցրե՛ք կանխիկ</div><div class="t2">Աննա · Eco City · 1 100 ֏</div></div></div>
+    <div class="facts"><div><b>4,3 կմ</b><span>Ճանապարհ</span></div><div><b>6 րոպե</b><span>Տևողություն</span></div><div><b>1:20</b><span>Սպասում</span></div></div>
     <button class="go">Պատրաստ եմ</button>
   </section>
 
@@ -200,8 +200,8 @@
     <div class="grabber"></div>
     <div class="forced-h"><span class="ic"><i data-lucide="headset"></i></span><div><div class="t1">Դիսպետչերը ձեզ նշանակել է այս պատվերը</div></div></div>
     <div class="stops">
-      <div class="stop"><span class="m a"></span><div><div class="t1">Մաշտոցի պող. 40</div><div class="t2">1,4 կմ · 6 րոպե</div></div></div>
-      <div class="stop"><span class="m b"></span><div><div class="t1">Կոմիտասի պող. 49</div><div class="t2">Eco City · 1 100 ֏ · Կանխիկ</div></div></div>
+      <div class="stop"><span class="m a"></span><div><div class="t1">Մաշտոցի պող. 37</div><div class="t2">1,4 կմ · 4 րոպե</div></div></div>
+      <div class="stop"><span class="m b"></span><div><div class="t1">Կոմիտասի պող. 22</div><div class="t2">Eco City · 1 100 ֏ · Կանխիկ</div></div></div>
     </div>
     <div class="answer"><span id="fring"></span>պատասխանե՛ք 0:12</div>
     <button class="go">Հասկացա</button>
@@ -212,7 +212,7 @@
   <section class="sheet top" data-s="call" data-sheet="modal" role="dialog" aria-label="Զանգել">
     <div class="grabber"></div>
     <div class="stitle">Զանգել</div>
-    <button class="callrow"><span class="av">Ա</span><span class="txt"><span class="t1">Անի · ուղևոր</span><span class="t2">+374 91 23 45 67</span></span><span class="ph"><i data-lucide="phone"></i></span></button>
+    <button class="callrow"><span class="av">Ա</span><span class="txt"><span class="t1">Աննա · ուղևոր</span><span class="t2">091 23-45-67</span></span><span class="ph"><i data-lucide="phone"></i></span></button>
     <button class="callrow"><span class="av"><i data-lucide="headset"></i></span><span class="txt"><span class="t1">Դիսպետչեր</span><span class="t2">Eco Taxi · 24/7</span></span><span class="ph q"><i data-lucide="phone"></i></span></button>
     <button class="btn btn-quiet" style="margin-top:var(--s4)">Փակել</button>
   </section>
@@ -222,20 +222,22 @@
     <div class="grabber"></div>
     <div class="stitle">Չեղարկե՞լ պատվերը</div>
     <div role="radiogroup">
-      <button class="reason" role="radio" aria-checked="true"><span class="rd"></span><span>Ուղևորը խնդրեց</span></button>
+      <button class="reason" role="radio" aria-checked="false"><span class="rd"></span><span>Ուղևորը խնդրեց</span></button>
       <button class="reason" role="radio" aria-checked="false"><span class="rd"></span><span>Մեքենան անսարք է</span></button>
       <button class="reason" role="radio" aria-checked="false"><span class="rd"></span><span>Ճանապարհը փակ է</span></button>
       <button class="reason" role="radio" aria-checked="false"><span class="rd"></span><span>Այլ պատճառ</span></button>
     </div>
     <div class="foot" style="margin-top:var(--s5)">
-      <button class="btn btn-danger-quiet">Չեղարկել պատվերը</button>
+      <button class="btn btn-danger-quiet" disabled aria-disabled="true" style="opacity:.55">Չեղարկել պատվերը</button><!-- enabled once a reason is chosen; nothing is preselected -->
       <button class="btn btn-quiet">Ետ</button>
     </div>
   </section>
 </main>
 <script src="audit.js"></script>
 <script>
-  statusBar(document.getElementById('s'))
+  const st0 = new URLSearchParams(location.search).get('state') || 'assigned'
+  /* The clock follows ECO.RIDE: assigned 9:41, at the pickup 9:45, riding 9:47, dropped 9:51. */
+  statusBar(document.getElementById('s'), { enroute: '9:43', arrived: '9:45', noshow: '9:50', noshowsent: '9:51', offline: '9:45', call: '9:45', cancel: '9:45', inprogress: '9:47', done: '9:51' }[st0] || '9:41')
   const st = D.init([
     ['assigned', 'Assigned · On my way'], ['enroute', 'En route · Arrived (guidance)'], ['arrived', 'Arrived · wait, slide Start'],
     ['noshow', 'No-show available (5:00+)'], ['noshowsent', 'No-show raised'], ['inprogress', 'In progress · slide Complete'],

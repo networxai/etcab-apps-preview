@@ -45,8 +45,20 @@
         '<div class="themes"><a href="' + link({ theme: 'light', sun: null }) + '">Day</a><a href="' + link({ theme: 'dark', sun: null }) + '">Night</a><a href="' + link({ theme: 'light', sun: '1' }) + '">Sun</a></div>' +
         '<h2>Screens</h2>' + SCREENS.map(([f, l]) => '<a href="' + f + '.html?theme=' + window.THEME + '"' + (f === here ? ' aria-current="true"' : '') + '>' + l + '</a>').join('')
       document.body.appendChild(sw)
+      this.eco()
       if (onState) onState(st)
       return st
+    },
+    /* Shared facts come from kit.js ECO (one ride everywhere). data-eco="RIDE.fare|amd" → ECO.amd(ECO.RIDE.fare). */
+    eco(root) {
+      if (!window.ECO) return
+      (root || document).querySelectorAll('[data-eco]').forEach((el) => {
+        const [path, fmt] = el.dataset.eco.split('|')
+        let v = path.split('.').reduce((o, k) => (o == null ? o : o[k]), ECO)
+        if (v == null) { console.warn('[driver] ECO has no ' + path); return }
+        if (fmt) v = ECO[fmt](v)
+        el.textContent = v
+      })
     },
     /* A state with no map: report ready once fonts are in, so the shooter does not wait on a map. */
     noMap() { document.fonts.ready.then(() => setTimeout(() => { if (!root.dataset.mapReady) root.dataset.mapReady = 'none' }, 300)) },
@@ -78,4 +90,56 @@ window.D && (window.D.partnerNav = function () {
   box.className = 'p-nav'
   box.innerHTML = '<h2>Partner</h2>' + P.map(([f, l]) => '<a href="' + f + '.html?theme=' + window.THEME + '"' + (f === here ? ' aria-current="true"' : '') + '>' + l + '</a>').join('')
   sw.appendChild(box)
+})
+
+/* ── The call-like offer (§10.1), one builder for driver-offer and driver-offer-states so the two cannot drift.
+   o.secs: seconds left (window 12 s); o.result: { glyph, title, sub } for a resolved offer (taken/expired/declined);
+   o.decline: false hides the decline chip. Facts are ECO.RIDE (kit.js). ── */
+window.D && (window.D.offer = function (o) {
+  o = o || {}
+  const R = ECO.RIDE, W = 12, secs = o.secs == null ? 9 : o.secs
+  const size = 96, sw = 7, r = (size - sw) / 2, c = 2 * Math.PI * r, frac = o.result ? 0 : secs / W
+  const tone = !o.result && secs <= 5 ? 'var(--warn)' : 'var(--ring)'
+  const inner = o.result ? `<div class="in gl"><i data-lucide="${o.result.glyph}"></i></div>` : `<div class="in"><span class="sec">${secs}</span><span class="u">վրկ</span></div>`
+  const ring = `<div class="oring" role="timer" aria-label="${o.result ? o.result.title : 'Մնաց ' + secs + ' վայրկյան'}"><svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-hidden="true">
+      <circle cx="48" cy="48" r="${r}" fill="none" stroke="var(--surface-3)" stroke-width="${sw}"/>
+      <circle cx="48" cy="48" r="${r}" fill="none" stroke="${tone}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${(c * (1 - frac)).toFixed(1)}"/></svg>${inner}</div>`
+  const pay = ECO.PAY[R.pay]
+  return `<section class="offer${o.result ? ' quiet' : ''}" ${o.result ? 'role="status"' : `role="alertdialog" aria-label="Նոր պատվեր, ${ECO.amd(R.fare)}"`}>
+    <div class="oh">
+      <span class="bell${o.result ? ' done' : ''}" aria-hidden="true"><i data-lucide="${o.result ? o.result.glyph : 'bell-ring'}"></i></span>
+      <span class="ot">${o.result ? o.result.title : 'Նոր պատվեր'}</span>
+      ${o.result || o.decline === false ? '' : `<button class="ochip" id="dbtn" aria-label="Հրաժարվել"${o.declineHref ? ` onclick="location.href='${o.declineHref}'"` : ''}><i data-lucide="x"></i>Հրաժարվել</button>`}
+    </div>
+    <div class="ocard"><div class="map" id="map" aria-label="Երթուղին քարտեզի վրա"></div></div>
+    <div class="obody">
+      <div class="orow">
+        <div><div class="fare">${ECO.amd(R.fare)}</div>
+          <div class="tags"><span class="chip">${R.tier}</span><span class="chip"><i data-lucide="${pay.icon}"></i>${pay.label}</span></div></div>
+        ${ring}
+      </div>
+      ${o.result ? `<div class="pick" style="font:var(--t-body-strong)"><small style="font:var(--t-secondary-strong);color:var(--ink-2)">${o.result.sub}</small></div>`
+        : `<div class="pick"><i data-lucide="car-front"></i>${R.approachMin} րոպե · ${ECO.km(R.approachKm)}<small>մինչև ուղևորը</small></div>
+      <div class="trip"><i data-lucide="route"></i>${ECO.km(R.km)} · ${R.min} րոպե<small>ուղևորություն</small></div>`}
+      <div class="stops">
+        <div class="stop"><span class="m a"></span><div><div class="t1">${R.pickup}</div><div class="t2">${R.pickupNote}</div></div></div>
+        <div class="stop"><span class="m b"></span><div><div class="t1">${R.drop}</div><div class="t2">Արաբկիր</div></div></div>
+      </div>
+      <div class="grow"></div>
+      ${o.foot || `<div class="slide" role="slider" aria-label="Ընդունել" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+        <span class="knob"><i data-lucide="arrow-right"></i></span>Ընդունել<span class="hint" aria-hidden="true"><i data-lucide="chevron-right"></i><i data-lucide="chevron-right"></i></span></div>`}
+    </div>
+  </section>`
+})
+
+/* The offer's strip map: approach (dashed ink) and trip (route green), both fitted inside the card. */
+window.D && (window.D.offerMap = function (quiet) {
+  const A = ROUTES.driverToPickup.pts, B = ROUTES.pickupToDrop.pts
+  const map = makeMap(document.getElementById('map'), { fit: [...A, ...B], padTL: [28, 28], padBR: [28, 36], badge: { top: '8px', left: '8px' } })
+  drawRoute(map, A, { color: cssVar(quiet ? '--ink-3' : '--approach'), weight: 4, dash: '1 8' })
+  drawRoute(map, B, { weight: 5, color: quiet ? cssVar('--ink-3') : undefined })
+  htmlMarker(map, B[B.length - 1], '<div class="pin b"></div>', [18, 18])
+  htmlMarker(map, B[0], '<div class="pin a"></div>', [18, 18])
+  htmlMarker(map, A[0], carTop(-60, quiet ? 'var(--ink-3)' : 'var(--brand)', 'rgb(255 255 255 / .75)'), [18, 34])
+  return map
 })

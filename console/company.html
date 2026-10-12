@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Company</title>
+<link rel="stylesheet" href="console.css">
+<link rel="stylesheet" href="corporate.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+</head>
+<body>
+<!-- Mirrors apps/operator components/admin/company-detail.tsx and its tabs: company-agreement (+ agreement-form,
+     company-fixed-routes), company-employees, company-rides, company-invoices (+ invoice-actions, invoice-payment,
+     invoice-credit), company-statement, company-settings. Corporate K2–K6. Every confirmation is an armed button
+     or a panel under its row; nothing is a modal (§9.8). -->
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <a class="btn ghost icon s" href="companies.html" aria-label="Վերադառնալ — Ընկերություններ" id="back"><i data-lucide="arrow-left"></i></a>
+      <span class="crumb"><a href="companies.html" id="crumb" style="color:inherit;text-decoration:none">Ընկերություններ</a> <i data-lucide="chevron-right"></i></span><h1 id="title"></h1>
+      <div class="live"></div>
+    </header>
+    <div class="content one">
+      <section class="card page" id="page"></section>
+    </div>
+  </div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search)
+  const TABQ = q.get('tab') || 'agreement'
+  const tab = TABQ === 'routes' ? 'agreement' : TABQ      /* fixed routes are edited inside the agreement form (real UI) */
+  shell('companies')
+  const C = ECO.COMPANY, R = ECO.RIDE, amd = ECO.amd
+  const T = (s) => `?theme=${THEME}&tab=${s}`
+  document.getElementById('title').textContent = C.name
+  document.getElementById('back').href = 'companies.html?theme=' + THEME
+  document.getElementById('crumb').href = 'companies.html?theme=' + THEME
+
+  /* ── Header: who + credit use (owed against the agreement's limit) ── */
+  const pctUsed = Math.round(C.used / C.limit * 100)
+  const TABS = [['agreement', 'Պայմանագիր և գներ'], ['employees', 'Աշխատակիցներ'], ['rides', 'Ուղևորություններ'], ['invoices', 'Հաշիվներ'], ['statement', 'Քաղվածք'], ['settings', 'Կարգավորումներ']]
+  const head = `
+    <div class="cohead">
+      <span class="ic" aria-hidden="true"><i data-lucide="building-2"></i></span>
+      <div style="min-width:0"><h2>${C.name}</h2>
+        <div class="meta"><span>«Արարատ Սոֆթ» ՍՊԸ</span><span class="mono">${C.tin}</span><span class="pill info">Հաշվով</span><span class="pill ok"><i class="d"></i>Բաց</span></div></div>
+      <div class="credit" aria-label="Վարկային սահմանաչափ">
+        <span>Պարտք / Վարկային սահմանաչափ</span><span class="r"><b>${amd(C.used)}</b> <span class="faint">/ ${amd(C.limit)}</span></span>
+        <span class="bar2" role="img" aria-label="${pctUsed}% օգտագործված"><i style="width:${pctUsed}%"></i></span>
+      </div>
+    </div>
+    <div class="tabsl" role="tablist" aria-label="Ընկերության բաժիններ">${TABS.map(([k, l]) => `<a href="${T(k)}" role="tab" aria-selected="${k === tab}" class="${k === tab ? 'on' : ''}">${l}</a>`).join('')}</div>`
+
+  /* ── Agreement & pricing (company-agreement.tsx). Append-only versions; a future one can be withdrawn. ── */
+  const ROUTES_FIXED = [
+    ['Վազգեն Սարգսյանի 26/1 · 300 մ', 'Զվարթնոց օդանավակայան · 500 մ', 'Ցանկացած դաս', 4500, true],
+    ['Վազգեն Սարգսյանի 26/1 · 300 մ', 'Գոտի՝ Կենտրոն', 'Eco City', 1200, false],
+    ['Գոտի՝ Դավթաշեն', 'Վազգեն Սարգսյանի 26/1 · 300 մ', 'Eco City', 1600, false],
+  ]
+  const routesTable = (edit) => `<table class="tbl" aria-label="Ֆիքսված երթուղիներ"><colgroup><col><col><col style="width:${edit ? 172 : 120}px"><col style="width:${edit ? 130 : 110}px"><col style="width:${edit ? 150 : 170}px">${edit ? '<col style="width:64px">' : ''}</colgroup>
+      <thead><tr><th>Որտեղից</th><th>Ուր</th><th>Դաս</th><th class="m">Գումար</th><th>Երկու ուղղությամբ</th>${edit ? '<th aria-label="Հեռացնել"></th>' : ''}</tr></thead>
+      <tbody>${ROUTES_FIXED.map(([a, b, t, v, both], i) => edit
+        ? `<tr><td><div class="input" style="height:28px"><i data-lucide="${a.startsWith('Գոտի') ? 'map' : 'map-pin'}"></i><span class="val">${a}</span></div></td><td><div class="input" style="height:28px"><i data-lucide="${b.startsWith('Գոտի') ? 'map' : 'map-pin'}"></i><span class="val">${b}</span></div></td><td><div class="input" style="height:28px"><span class="val">${t}</span><i data-lucide="chevron-down"></i></div></td><td><div class="input" style="height:28px"><span class="val mono" style="text-align:right">${ECO.num(v)}</span><span class="faint">֏</span></div></td><td><span class="switch${both ? ' on' : ''}"><i class="t"></i>${both ? 'այո' : 'ոչ'}</span></td><td><button class="btn ghost icon s" aria-label="Հեռացնել երթուղին"><i data-lucide="trash-2"></i></button></td></tr>`
+        : `<tr><td class="wrap">${a}</td><td class="wrap">${b}</td><td class="wrap">${t}</td><td class="m">${amd(v)}</td><td>${both ? '<span class="pill"><i data-lucide="arrow-left-right"></i>այո</span>' : '<span class="dash">ոչ</span>'}</td></tr>`).join('')}
+      ${edit ? `<tr><td colspan="6"><button class="btn ghost s"><i data-lucide="plus"></i>Ավելացնել երթուղի</button></td></tr>` : ''}</tbody></table>`
+  const VERS = [
+    ['01.11.2026', 'Հետվճար', 15, 400000, '5', 'future', '2027-ի բյուջե'],
+    ['01.09.2026', 'Հետվճար', 15, 300000, '5', 'in', 'Ծախսերի կոդը պարտադիր է'],
+    ['01.03.2026', 'Հետվճար', 30, 200000, '0', 'past', 'Առաջին պայմանագիր'],
+  ]
+  const STATE = { future: ['info', 'Առաջիկա'], in: ['ok', 'Գործում է'], past: ['', 'Նախկին'] }
+  const history = `<section class="sec"><h3>Բոլոր տարբերակները<span class="sub num">${VERS.length}</span></h3>
+      <table class="tbl"><colgroup><col style="width:150px"><col><col style="width:140px"><col style="width:110px"><col style="width:260px"></colgroup>
+        <thead><tr><th>Ուժի մեջ է սկսած</th><th>Վարկային սահմանաչափ</th><th class="c">Ժամկետ</th><th class="c">Զեղչ</th><th>Վիճակ</th></tr></thead>
+        <tbody>${VERS.map(([d, m, t, l, disc, st, note]) => `<tr><td class="mono">${d}</td><td class="wrap" style="padding-top:6px;padding-bottom:6px"><span class="mono">${amd(l)}</span><br><span class="faint" style="font:var(--c-small)">${note}</span></td><td class="c">${t} օր</td><td class="c">${disc} %</td>
+          <td><span class="row-flex" style="gap:6px"><span class="pill ${STATE[st][0]}"><i class="d"></i>${STATE[st][1]}</span>${st === 'future' ? '<button class="btn ghost s">Հետ կանչել</button>' : ''}</span></td></tr>`).join('')}</tbody></table></section>`
+  const current = `<section class="sec"><h3>Գործող պայմաններ<span class="sub">սկսած <span class="mono">01.09.2026</span></span><span class="end"><a class="btn secondary s" href="${T('routes')}"><i data-lucide="plus"></i>Նոր տարբերակ</a></span></h3>
+      <div class="pad"><dl class="terms" style="grid-template-columns:repeat(6,minmax(0,1fr))">
+        <div><dt>Վճարման ձև</dt><dd>Հետվճար</dd></div>
+        <div><dt>Վճարման ժամկետ</dt><dd>15 <small>օր</small></dd></div>
+        <div><dt>Վարկային սահմանաչափ</dt><dd class="mono">${amd(C.limit)}</dd></div>
+        <div><dt>Զեղչ</dt><dd>5 %</dd></div>
+        <div><dt>Հղման անվանում</dt><dd style="white-space:normal">${C.refLabel} <span class="pill warn" style="vertical-align:1px">պարտադիր</span></dd></div>
+        <div><dt>Նշում</dt><dd style="white-space:normal">Ծախսերի կոդը պարտադիր է</dd></div>
+      </dl></div>
+      <h3 style="border-top:1px solid var(--line-soft)">Ֆիքսված երթուղիներ<span class="sub num">${ROUTES_FIXED.length}</span></h3>
+      <p class="explain" style="padding:10px var(--inset) 4px">Համընկնող երթուղին փոխարինում է սակագինը համաձայնեցված գումարով․ այն երբեք չի զեղչվում։</p>
+      ${routesTable(false)}</section>`
+  /* ?tab=routes: «Նոր տարբերակ» open inline (agreement-form.tsx), prefilled from the version in force; routes editable. */
+  const form = `<section class="sec alt" aria-label="Նոր տարբերակ"><h3>Նոր տարբերակ<span class="sub">լրացված գործող պայմաններից</span></h3>
+      <div class="pad"><div class="fgrid" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+        <div><label class="label">Ուժի մեջ է սկսած</label><div class="input"><i data-lucide="calendar"></i><span class="val mono">01.11.2026 00:00</span></div></div>
+        <div><label class="label">Վճարման ձև</label><div class="seg" role="radiogroup" aria-label="Վճարման ձև"><button class="on" role="radio" aria-checked="true">Հետվճար</button><button role="radio" aria-checked="false">Կանխավճար</button></div></div>
+        <div><label class="label">Վճարման ժամկետ</label><div class="input"><span class="val mono">15</span><span class="faint">օր</span></div></div>
+        <div><label class="label">Զեղչ</label><div class="input"><span class="val mono">5</span><span class="faint">%</span></div></div>
+        <div><label class="label">Վարկային սահմանաչափ</label><div class="input focus"><span class="val mono">400 000</span><span class="faint">֏</span></div><p class="hint">Թողեք դատարկ՝ առանց սահմանաչափի</p></div>
+        <div><label class="label">Հղման անվանում</label><div class="input"><span class="val">${C.refLabel}</span></div><p class="hint">Ինչպես է ընկերությունն այն անվանում, օր․ ծախսային կենտրոն</p></div>
+        <div style="align-self:center"><span class="check on"><i class="b"></i>Հղումը պարտադիր է</span></div>
+        <div><label class="label">Նշում</label><div class="input"><span class="val">2027-ի բյուջե</span></div></div>
+      </div></div>
+      <h3 style="border-top:1px solid var(--line-soft);background:var(--surface)">Ֆիքսված երթուղիներ<span class="sub">Համընկնող երթուղին փոխարինում է սակագինը համաձայնեցված գումարով․ այն երբեք չի զեղչվում։</span></h3>
+      <div style="background:var(--surface)">${routesTable(true)}</div>
+      <div class="pad"><div class="notice neutral"><i data-lucide="info"></i><span>Պայմանները երբեք հետին թվով չեն սահմանվում։ Գործող տարբերակը մնում է անփոփոխ, նորն ուժի մեջ կմտնի իր մեկնարկի պահին։</span></div>
+      <div class="formfoot"><a class="btn ghost" href="${T('agreement')}">Չեղարկել</a><button class="btn primary"><i data-lucide="check"></i>Պահպանել տարբերակը <span class="kbd">↵</span></button></div></div></section>`
+  const agreement = TABQ === 'routes'
+    ? `<div class="tb">${form}</div>`
+    : `<div class="tb">${current}${history}</div>`
+
+  /* ── Employees (company-employees.tsx): number (mono), name, this month's rides and company spend ── */
+  const EMP = [
+    [C.rider, ECO.RIDE.rider.phone, 3, 3900], ['Տիգրան Մանուկյան', '094 55-10-20', 2, 6000], ['Լիանա Գրիգորյան', '077 31-44-90', 1, 1400],
+    ['Արսեն Սահակյան', '099 82-17-03', 1, 1000], ['Նունե Պետրոսյան', '093 40-62-18', 0, 0], ['Գևորգ Հարությունյան', '098 11-27-65', 0, 0, true],
+    ['Մարիամ Ավագյան', '055 70-09-41', 0, 0], ['Վարդան Խաչատրյան', '091 66-38-12', 0, 0], ['Էլեն Սարգսյան', '096 24-51-77', 0, 0],
+    ['Կարեն Զաքարյան', '041 90-83-26', 0, 0], ['Անի Մկրտչյան', '094 13-75-40', 0, 0], ['Արամ Վարդանյան', '077 58-20-11', 0, 0],
+    ['Սոնա Հովսեփյան', '099 07-66-35', 0, 0], ['Դավիթ Ղազարյան', '093 28-14-59', 0, 0],
+  ]
+  const employees = `<div class="tb">
+      <div class="row-flex" style="gap:8px;align-items:flex-end">
+        <div style="width:320px"><label class="label">Կապել ըստ հեռախոսի</label><div class="input l"><i data-lucide="phone"></i><span class="val mono">+374</span><span class="ph">հեռախոսահամար</span></div></div>
+        <button class="btn secondary l"><i data-lucide="link"></i>Կապել ըստ հեռախոսի</button>
+        <span class="faint" style="font:var(--c-small);padding-bottom:10px">Նոր համարը դառնում է այս պարկի հաճախորդ</span>
+      </div>
+      <section class="sec"><h3>Աշխատակիցներ<span class="sub num">${EMP.length}</span><span class="end faint" style="font:var(--c-small)">Անջատումը նախկին ուղևորությունները չի փոխում․ յուրաքանչյուրը պահպանում է իր վճարողին։</span></h3>
+        <table class="tbl"><colgroup><col style="width:170px"><col><col style="width:184px"><col style="width:190px"><col style="width:150px"></colgroup>
+          <thead><tr><th>Հեռախոս</th><th>Անուն</th><th class="c">Ուղևորություններ (ամիս)</th><th class="m">Ընկերության ծախս (ամիս)</th><th aria-label="Անջատել"></th></tr></thead>
+          <tbody>${EMP.map(([n, ph, r, s, bl], i) => `<tr class="${i === 1 ? 'on' : ''}"><td class="mono">${ph}</td><td><span class="row-flex">${n}${bl ? '<span class="pill warn"><i data-lucide="ban"></i>Սև ցուցակում</span>' : ''}</span></td><td class="c">${r}</td><td class="m">${s ? amd(s) : '<span class="dash">—</span>'}</td>
+            <td style="text-align:right">${i === 1 ? '<button class="btn s armed">Անջատե՞լ</button>' : '<button class="btn ghost s rev-act"><i data-lucide="unlink"></i>Անջատել</button>'}</td></tr>`).join('')}</tbody></table></section></div>`
+
+  /* ── Rides (company-rides.tsx): October 2026 so far; the walkthrough ride is Աննա's own (personal, cash). ── */
+  const RIDES = [
+    ['09.10 09:45', C.rider, `${R.pickup} → ${R.drop}`, R.tier, '', R.fare, 'personal'],
+    ['08.10 18:20', 'Տիգրան Մանուկյան', 'Վազգեն Սարգսյանի 26/1 → Զվարթնոց', 'Eco Comfort', 'SALES-17', 4500, 'fixed'],
+    ['08.10 09:05', C.rider, 'Դավթաշեն 3-րդ թղմ. → Վազգեն Սարգսյանի 26/1', 'Eco City', C.ref, 1600, 'fixed'],
+    ['07.10 13:40', 'Լիանա Գրիգորյան', 'Վազգեն Սարգսյանի 26/1 → Թումանյան 12', 'Eco City', '', 1400, 'missing'],
+    ['06.10 19:10', C.rider, 'Վազգեն Սարգսյանի 26/1 → Կասկադ', 'Eco City', C.ref, 1200, 'fixed'],
+    ['05.10 10:15', 'Արսեն Սահակյան', 'Կոմիտասի պող. 5 → Վազգեն Սարգսյանի 26/1', 'Eco City', 'IT-009', 1000, ''],
+    ['03.10 08:50', 'Տիգրան Մանուկյան', 'Արաբկիր 31 → Վազգեն Սարգսյանի 26/1', 'Eco City', 'SALES-17', 1500, ''],
+    ['02.10 17:30', C.rider, 'Վազգեն Սարգսյանի 26/1 → Արշակունյաց 34', 'Eco City', C.ref, 1100, ''],
+    ['01.10 22:05', 'Հովհաննես Բաբայան', 'Վազգեն Սարգսյանի 26/1 → Նոր Նորք 2-րդ զ.', 'Eco City', 'MKT-204', 1900, 'down'],
+  ]
+  const rides = `<div class="tb">
+      <div class="row-flex" style="gap:8px"><span class="month" role="group" aria-label="Ամիս"><button class="btn ghost icon s" aria-label="Նախորդ ամիս"><i data-lucide="chevron-left"></i></button><span class="lbl">Հոկտեմբեր 2026</span><button class="btn ghost icon s" aria-label="Հաջորդ ամիս" disabled style="opacity:.4"><i data-lucide="chevron-right"></i></button></span>
+        <span class="faint" style="font:var(--c-small)">7 ընկերության ուղևորություն · ${amd(12300)} · հաշվում դեռ չեն</span></div>
+      <section class="sec"><table class="tbl"><colgroup><col style="width:120px"><col style="width:160px"><col><col style="width:112px"><col style="width:120px"><col style="width:100px"><col style="width:240px"></colgroup>
+        <thead><tr><th>Ամսաթիվ</th><th>Աշխատակից</th><th>Երթուղի</th><th>Դաս</th><th>Հղում</th><th class="m">Վարձ</th><th>Հաշիվ</th></tr></thead>
+        <tbody>${RIDES.map(([d, who, rt, tier, ref, f, k]) => `<tr class="${k === 'personal' ? 'off' : ''}">
+          <td class="mono">${d}</td><td class="wrap">${who}</td><td class="wrap" style="padding-top:6px;padding-bottom:6px">${rt}</td><td>${tier}</td>
+          <td>${k === 'missing' ? '<span class="warnn" style="font:var(--c-body)"><span class="dot-w"></span>պարտադիր</span>' : ref ? `<span class="tag">${ref}</span>` : '<span class="dash">—</span>'}</td>
+          <td class="m">${amd(f)}</td>
+          <td>${k === 'personal' ? '<span class="pill"><i data-lucide="user"></i>Անձնական</span>' : k === 'down' ? '<span class="pill warn" title="Աշխատակիցն այլևս կապված չէ ընկերության հետ"><i data-lucide="triangle-alert"></i>Անձնական, ոչ ընկերության</span>' : '<span class="dash">—</span>'}</td></tr>`).join('')}</tbody></table></section>
+      <p class="faint" style="font:var(--c-small)"><span class="dot-w"></span>Պարտադիր հղումը բացակայում է․ այն կարելի է լրացնել ուղևորության խմբագրիչում մինչև հաշվի թողարկումը։ Ֆիքսված երթուղու գինը չի զեղչվում։</p></div>`
+
+  /* ── Invoices (company-invoices.tsx + invoice-actions + invoice-payment / invoice-credit) ── */
+  /* ?panel=credit: the step after invoices.html?run=1 — September issued as INV-2026-00065, a credit note under it. */
+  const CREDIT = q.get('panel') === 'credit'
+  const INV = [
+    CREDIT ? ['INV-2026-00065', '2026-09', '09.10.2026', '24.10.2026', 172300, 0, 172300, ['', 'Չվճարված']] : ['Սևագիր', '2026-09', '—', '—', 172300, 0, 172300, ['', 'Սևագիր']],
+    ['INV-2026-00061', '2026-08', '01.09.2026', '16.09.2026', 69600, 69600, 0, ['ok', 'Վճարված']],
+    ['CN-2026-00004', '2026-07', '12.08.2026', '—', -4500, 0, 0, ['info', 'Կրեդիտային հաշիվ']],
+    ['INV-2026-00048', '2026-07', '01.08.2026', '16.08.2026', 81200, 76700, 0, ['ok', 'Վճարված']],
+    ['INV-2026-00033', '2026-06', '01.07.2026', '31.07.2026', 77900, 77900, 0, ['ok', 'Վճարված']],
+  ]
+  const CREDIT_UNDER = `<div class="acts"><button class="btn secondary s"><i data-lucide="file-down"></i>PDF</button><button class="btn secondary s"><i data-lucide="sheet"></i>CSV</button>
+      <span style="width:8px"></span><button class="btn secondary s"><i data-lucide="landmark"></i>Գրանցել վճարում</button><button class="btn primary s" aria-expanded="true"><i data-lucide="file-minus"></i>Կրեդիտային հաշիվ</button>
+      <span style="flex:1"></span><button class="btn danger s"><i data-lucide="ban"></i>Չեղարկել</button></div>
+    <div class="panel" aria-label="Կրեդիտային հաշվի թողարկում"><h4><i data-lucide="file-minus"></i>Կրեդիտային հաշվի թողարկում<span class="faint" style="font:var(--c-small);font-weight:400">INV-2026-00065 · 58 տող · մնացորդ ${amd(172300)}</span></h4>
+      <table class="tbl cl"><colgroup><col style="width:120px"><col><col style="width:120px"><col style="width:150px"></colgroup>
+        <thead><tr><th>Ամսաթիվ</th><th>Կրեդիտավորվող տողեր</th><th class="m">Գումար</th><th class="m">Կրեդիտ</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">28.09 18:05</td><td class="trunc">Տիգրան Մանուկյան · Վազգեն Սարգսյանի 26/1 → Զվարթնոց · SALES-17</td><td class="m">${amd(4500)}</td><td><div class="input focus"><span class="val mono">4 500</span></div></td></tr>
+          <tr><td class="mono">27.09 09:10</td><td class="trunc">${C.rider} · Դավթաշեն 3-րդ թղմ. → Վազգեն Սարգսյանի 26/1 · ${C.ref}</td><td class="m">${amd(1600)}</td><td><div class="input"><span class="val ph mono">—</span></div></td></tr>
+          <tr><td class="mono">26.09 19:40</td><td class="trunc">Լիանա Գրիգորյան · Վազգեն Սարգսյանի 26/1 → Թումանյան 12 · ${C.ref}</td><td class="m">${amd(1400)}</td><td><div class="input"><span class="val ph mono">—</span></div></td></tr>
+        </tbody></table>
+      <div class="fgrid" style="margin-top:12px;grid-template-columns:minmax(0,1fr) auto"><div><label class="label">Պատճառ</label><div class="input"><span class="val">Չվերադարձված ուղևորություն՝ կրկնակի գրանցում</span></div></div>
+        <div style="display:flex;gap:6px;align-items:flex-end"><button class="btn ghost">Չեղարկել</button><button class="btn primary">Թողարկել կրեդիտային հաշիվը · ${amd(4500)}</button></div></div></div>`
+  /* The September draft is open: the only invoice act due on 9 Oct. Payment and credit-note panels are drawn where
+     they occur in this data — under an overdue invoice (invoices.html?view=overdue, &panel=credit). */
+  const invoices = `<div class="tb"><section class="sec"><h3>Հաշիվներ<span class="sub num">${INV.length}</span><span class="end faint" style="font:var(--c-small)">Ամսական ձևավորումը՝ <a href="invoices.html?theme=${THEME}" style="color:var(--brand-text)">Հաշիվների ձևավորում</a></span></h3>
+      <table class="tbl"><colgroup><col style="width:150px"><col style="width:122px"><col style="width:104px"><col style="width:104px"><col><col><col><col style="width:158px"><col style="width:170px"></colgroup>
+        <thead><tr><th>Համար</th><th>Ժամանակաշրջան</th><th>Թողարկված</th><th>Ժամկետ</th><th class="m">Ընդամենը</th><th class="m">Վճարված</th><th class="m">Մնացորդ</th><th>Վիճակ</th><th aria-label="Գործողություններ"></th></tr></thead>
+        <tbody>${INV.map(([n, per, iss, due, tot, paid, out, [tone, w]], i) => `<tr class="${i === 0 ? 'on' : ''}">
+          <td class="${n === 'Սևագիր' ? '' : 'mono'}">${n === 'Սևագիր' ? '<span class="faint">Սևագիր</span>' : n}</td><td class="mono">${per}</td><td class="mono">${iss}</td><td class="mono">${due}</td>
+          <td class="m">${amd(tot)}</td><td class="m">${paid ? amd(paid) : '<span class="dash">—</span>'}</td><td class="m">${amd(out)}</td>
+          <td><span class="pill ${tone}"><i class="d"></i>${w}</span></td>
+          <td style="text-align:right"><button class="btn ${i === 0 ? 'secondary' : 'ghost'} s" aria-expanded="${i === 0}">Գործողություններ</button></td></tr>
+          ${i === 0 && CREDIT ? `<tr class="under"><td colspan="9">${CREDIT_UNDER}</td></tr>` : i === 0 ? `<tr class="under"><td colspan="9">
+            <div class="notice amber" style="margin-bottom:10px"><i data-lucide="triangle-alert"></i><span>Այս սևագրի 1 ուղևորություն չունի ընկերության պահանջած հղումը։ Դրանք կարելի է լրացնել ուղևորության խմբագրիչում մինչև թողարկումը։</span></div>
+            <div class="acts"><button class="btn secondary s"><i data-lucide="file-down"></i>PDF</button><button class="btn secondary s"><i data-lucide="sheet"></i>CSV</button>
+              <span style="width:8px"></span><button class="btn primary s"><i data-lucide="check"></i>Թողարկել</button>
+              <span style="flex:1"></span><button class="btn danger s"><i data-lucide="trash-2"></i>Ջնջել սևագիրը</button></div></td></tr>` : ''}`).join('')}</tbody></table></section></div>`
+
+  /* ── Statement (company-statement.tsx): 01.10–09.10; closing = owed in the list and the header (ECO.COMPANY.used) ── */
+  const ST = [
+        ['02.10.2026', 'Ուղևորություն', `${C.rider} · ${C.ref}`, 1100, 0],
+    ['03.10.2026', 'Ուղևորություն', 'Տիգրան Մանուկյան · SALES-17', 1500, 0],
+    ['05.10.2026', 'Վճարում', 'INV-2026-00061 · AMB 1009 4417 22', 0, 69600],
+    ['05.10.2026', 'Ուղևորություն', 'Արսեն Սահակյան · IT-009', 1000, 0],
+    ['06.10.2026', 'Ուղևորություն', `${C.rider} · ${C.ref}`, 1200, 0],
+    ['07.10.2026', 'Ուղևորություն', 'Լիանա Գրիգորյան · —', 1400, 0],
+    ['08.10.2026', 'Ուղևորություն', `${C.rider} · ${C.ref}`, 1600, 0],
+    ['08.10.2026', 'Ուղևորություն', 'Տիգրան Մանուկյան · SALES-17', 4500, 0],
+  ]
+  /* the 1 Oct booking activated as personal (its rider was unlinked), so it is not a company charge */
+  const STC = ST
+  const opening = 241900
+  let bal = opening
+  const charges = STC.reduce((a, r) => a + r[3], 0), credits = STC.reduce((a, r) => a + r[4], 0)
+  const statement = `<div class="tb">
+      <div class="row-flex" style="gap:8px;align-items:flex-end">
+        <div style="width:170px"><label class="label">Սկսած</label><div class="input"><i data-lucide="calendar"></i><span class="val mono">01.10.2026</span></div></div>
+        <div style="width:170px"><label class="label">Մինչև</label><div class="input"><i data-lucide="calendar"></i><span class="val mono">09.10.2026</span></div></div>
+        <span style="flex:1"></span><button class="btn secondary"><i data-lucide="sheet"></i>CSV</button><button class="btn secondary"><i data-lucide="file-down"></i>PDF</button></div>
+      <div class="figs">
+        <div class="kpi"><span class="k">Պարտքը սկզբում</span><span class="v">${amd(opening)}</span></div>
+        <div class="kpi"><span class="k">Գանձումներ</span><span class="v">${amd(charges)}</span></div>
+        <div class="kpi"><span class="k">Մուտքեր</span><span class="v">${amd(credits)}</span></div>
+        <div class="kpi"><span class="k">Պարտքը վերջում</span><span class="v">${amd(opening + charges - credits)}</span></div>
+      </div>
+      <section class="sec"><table class="tbl"><colgroup><col style="width:150px"><col style="width:140px"><col><col style="width:130px"><col style="width:130px"><col style="width:150px"></colgroup>
+        <thead><tr><th>Ամսաթիվ</th><th>Ինչ</th><th>Հղում</th><th class="m">Գանձում</th><th class="m">Մուտք</th><th class="m">Պարտքը հետո</th></tr></thead>
+        <tbody><tr><td class="mono">01.10.2026</td><td colspan="4" class="faint">Պարտքը սկզբում</td><td class="m">${amd(opening)}</td></tr>
+        ${STC.map(([d, k, ref, ch, cr]) => { bal += ch - cr; return `<tr><td class="mono">${d}</td><td>${k}</td><td class="trunc">${ref}</td><td class="m">${ch ? amd(ch) : '<span class="dash">—</span>'}</td><td class="m">${cr ? amd(cr) : '<span class="dash">—</span>'}</td><td class="m">${amd(bal)}</td></tr>` }).join('')}</tbody></table></section></div>`
+
+  /* ── Settings (company-settings.tsx): one Save, PATCH of what changed; close is armed, reopen is one press ── */
+  const settings = `<div class="tb split">
+      <section class="sec"><h3>Տվյալներ<span class="end faint" style="font:var(--c-small)">Հաշվի գնորդի բլոկը վերցվում է թողարկման պահին</span></h3><div class="pad"><div class="fgrid">
+        <div><label class="label">Ընկերության անվանում</label><div class="input"><span class="val">${C.name}</span></div></div>
+        <div><label class="label">Իրավաբանական անվանում</label><div class="input"><span class="val">«Արարատ Սոֆթ» ՍՊԸ</span></div></div>
+        <div><label class="label">ՀՎՀՀ</label><div class="input"><span class="val mono">${C.tin}</span></div></div>
+        <div class="full"><label class="label">Իրավաբանական հասցե</label><div class="input"><span class="val">Երևան 0010, Վազգեն Սարգսյանի 26/1</span></div></div>
+        <div class="full"><label class="label">Բանկային վավերապայմաններ</label><div class="input"><span class="val">«Ակբա բանկ» ԲԲԸ · <span class="mono">2200 0123 4567 8901</span></span></div></div>
+        <div class="full"><label class="label">Հաշիվների էլ․ հասցեներ</label><div class="input focus"><span class="val mono">finance@araratsoft.am, a.hakobyan@araratsoft.am</span></div><p class="hint">Մինչև 5, ստորակետով բաժանված</p></div>
+        <div><label class="label">Կոնտակտային անձ</label><div class="input"><span class="val">${C.rider}</span></div></div>
+        <div><label class="label">Կոնտակտային հեռախոս</label><div class="input"><span class="val mono">${ECO.RIDE.rider.phone}</span></div></div>
+        <div class="full"><label class="label">Նշումներ</label><div class="input"><span class="val">Հաշիվը՝ ամսական, PDF-ը՝ ֆինանսական բաժնին</span></div></div>
+      </div>
+      <div class="formfoot"><span class="faint" style="font:var(--c-small)">Փոխվել է 1 դաշտ</span><span class="sp"></span><button class="btn primary">Պահպանել</button></div></div></section>
+      <section class="sec"><h3>Հաշիվ</h3><div class="pad" style="display:flex;flex-direction:column;gap:12px">
+        <span class="switch on"><i class="t"></i>Հաշվի վրա · այո</span>
+        <p class="explain" style="padding:0">Հաշվի վրա վճարումը վերաբերում է հաջորդ պատվերին, ոչ թե արդեն կատարվածներին — պատվերը գրանցում է ընկերությունը ստեղծման պահին, և դա հետո չի փոխվում:</p>
+        <div style="border-top:1px solid var(--line-soft);padding-top:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-start">
+          <p class="explain" style="padding:0">Նոր ուղևորություններն այլևս հաշվով չեն լինի․ նախկին ուղևորություններն ու հաշիվները մնում են։</p>
+          <button class="btn danger"><i data-lucide="archive"></i>Փակել հաշիվը</button></div>
+      </div></section></div>`
+
+  const BODY = { agreement, employees, rides, invoices, statement, settings }
+  document.getElementById('page').innerHTML = head + `<div class="scroll-y grow" role="tabpanel" aria-label="${TABS.find((t) => t[0] === tab)[1]}" data-truncate>${BODY[tab]}</div>`
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

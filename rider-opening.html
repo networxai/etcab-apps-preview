@@ -25,9 +25,6 @@
   .logo-r .ctr { background: var(--ground); -webkit-mask: url(assets/eco/letters/counter.png) center / 100% 100% no-repeat; mask: url(assets/eco/letters/counter.png) center / 100% 100% no-repeat; }
   .tagline { position: absolute; left: 0; right: 0; top: calc(50% + 28px); text-align: center; font: var(--t-body); color: var(--ink-2); transition: opacity .4s; }
   .foot { position: absolute; left: 0; right: 0; bottom: 64px; display: flex; justify-content: center; color: var(--ink-3); }
-  .replay { position: absolute; bottom: 56px; left: 50%; transform: translateX(-50%); height: 36px; padding: 0 14px; border-radius: var(--r-pill);
-    background: var(--surface); box-shadow: var(--e1); font: var(--t-secondary-strong); color: var(--ink); display: inline-flex; align-items: center; gap: 6px; }
-  .replay svg { width: 16px; height: 16px; }
 </style>
 </head>
 <body>
@@ -69,11 +66,10 @@
     title: 'Rider · Opening',
     sub: 'The real app animates the ECO TAXI letters (assets/eco/letters + manifest), then grows the leaf. 2.83 s on one clock. Frozen frames for review, plus the live loop',
     states: [
-      { id: 'live', group: 'Reveal', label: 'Live', note: 'Loops every 4.5 s here; plays once in the app, under the boot cover',
-        html: () => `<div class="splash">${logo()}</div><div class="tagline">Մեքենան՝ մի քանի րոպեում</div><button class="replay" id="replay">${R.i('rotate-ccw')}Կրկնել</button>`,
+      { id: 'live', group: 'Reveal', label: 'Live', note: 'Loops every 4.5 s here (reload the frame to restart); plays once in the app, under the boot cover. No review control is drawn inside the phone',
+        html: () => `<div class="splash">${logo()}</div><div class="tagline">Մեքենան՝ մի քանի րոպեում</div>`,
         after: () => {
-          let t0 = performance.now()
-          document.getElementById('replay').onclick = () => { t0 = performance.now() }
+          const t0 = performance.now()
           const tick = (now) => { frame((now - t0) % 4500); requestAnimationFrame(tick) }
           requestAnimationFrame(tick)
         } },

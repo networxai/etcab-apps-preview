@@ -7,10 +7,12 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="driver.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
 <script src="mapgl.local.js"></script>
 <script src="kit.js"></script>
+<script src="driver.js"></script>
 <style>
   .sheet { padding-bottom: 34px; }
   .fab.lg { width: 48px; height: 48px; }
@@ -75,14 +77,14 @@
       <span class="mycar" aria-label="Volkswagen ID.3, 01 ET 001"><img src="assets/eco/cars/city.webp" alt=""><span class="plate">01 ET 001</span></span></div>
 
     <div class="earn">
-      <div><div class="lbl">Այսօր</div><div class="hero">9 800<small>֏</small></div></div>
-      <div class="side"><span class="count">7 պատվեր</span><button class="eye" aria-label="Թաքցնել գումարը"><i data-lucide="eye"></i></button></div>
+      <div><div class="lbl">Այսօր</div><div class="hero">1 200<small>֏</small></div></div>
+      <div class="side"><span class="count">1 պատվեր</span><button class="eye" aria-label="Թաքցնել գումարը"><i data-lucide="eye"></i></button></div>
     </div>
 
     <button class="pre" aria-label="Նախապես ամրագրված, 2" onclick="location.href='driver-preorders.html?theme='+THEME">
       <span class="ic"><i data-lucide="calendar-clock"></i></span>
-      <span class="txt"><span class="t1">Նախապես ամրագրված</span><span class="t2">Վաղը, 07:40 · Զվարթնոց</span></span>
-      <span class="n">2</span><i class="chev" data-lucide="chevron-right"></i>
+      <span class="txt"><span class="t1">Նախապես ամրագրված</span><span class="t2">Այսօր, 10:05 · Կոմիտասի պող. 49</span></span>
+      <span class="n">3</span><i class="chev" data-lucide="chevron-right"></i>
     </button>
 
     <button class="drive"><i data-lucide="power"></i>Դուրս գալ գծից</button>
@@ -91,6 +93,7 @@
 <script src="audit.js"></script>
 <script>
   statusBar(document.getElementById('s'))
+  D.init([['online', 'Online, waiting']])
   icons()
   const sheetH = document.getElementById('sheet').offsetHeight
   document.getElementById('recentre').style.bottom = (sheetH + 12) + 'px'

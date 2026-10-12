@@ -15,140 +15,59 @@
 <script src="routes.js"></script>
 <script src="driver.js"></script>
 <style>
-  .sheet { padding: var(--s6) var(--margin) 34px; }
-  .decline { position: absolute; z-index: 20; top: 60px; right: 16px; height: 48px; padding: 0 18px 0 14px; border-radius: var(--r-pill);
-    background: var(--surface); box-shadow: var(--e2); display: inline-flex; align-items: center; gap: 8px; font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
-  .decline svg { width: 20px; height: 20px; }
-
-  .head { display: flex; align-items: center; gap: var(--s5); }
-  .dring .hero { font: var(--t-hero); color: var(--ink); font-variant-numeric: tabular-nums; }
-  .dring .unit { font: var(--t-caption); color: var(--ink-2); }
-  .dring .gl svg { width: 36px; height: 36px; color: var(--ink-2); position: static; transform: none; }
-  .facts { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-  .fare { font: var(--t-title); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .trip { display: flex; align-items: center; gap: 6px; font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .trip svg { width: 16px; height: 16px; }
-  .chips { display: flex; gap: 6px; margin-top: 2px; }
-  .chip.cash svg { color: var(--ok); }
-  .stops { margin: var(--s6) 0; gap: var(--s4); }
-  .stops::before { top: 22px; bottom: 22px; }
-  .stop .m { margin-top: 4px; }
-
-  /* Resolved offers (taken / expired / declined): the result replaces the facts; stops stay, quieter */
-  .res-t { font: var(--t-title); color: var(--ink); }
-  .res-s { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 6px; }
-  .res-s .d { width: 8px; height: 8px; border-radius: 50%; background: var(--ok-dot); }
-  .quiet .stop .m { background: var(--ink-3); }
-  .quiet .stop .t1 { color: var(--ink-2); font: var(--t-body-strong); }
-  .back { height: var(--h-drive); border-radius: 16px; background: var(--surface-2); color: var(--ink); font: var(--t-headline);
-    display: flex; align-items: center; justify-content: center; gap: var(--s2); width: 100%; position: relative; overflow: hidden; text-decoration: none; }
-  /* the 3 s auto-return, drawn as a draining underline */
-  .back .drain { position: absolute; left: 0; bottom: 0; height: 4px; width: 66%; background: var(--ink-3); }
-
-  .slide { font: var(--t-headline); font-size: 18px; padding-left: 0; }
-
-  /* Decline-with-reason sheet: the offer keeps ringing underneath; its countdown stays on screen */
-  .dhead { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); margin: var(--s1) 0 var(--s3); }
-  .dhead .stitle { font: var(--t-title); color: var(--ink); white-space: nowrap; }
-  .reason { display: flex; align-items: center; gap: var(--s3); min-height: 56px; width: 100%; text-align: left; font: var(--t-body); color: var(--ink); }
+  /* Decline with a reason: the offer keeps ringing underneath and its seconds stay on screen. One tap on a reason
+     IS the decline (no preselected reason, no confirm button, no two-button footer: §10.2's mis-tap rule).
+     «Ետ» is the only other control, a text button top-left. */
+  .dhead { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); margin: 0 calc(-1 * var(--s2)) var(--s2); }
+  .dhead .btn-text { width: auto; padding: 0 var(--s3); justify-content: flex-start; text-decoration: none; }
+  .stitle { font: var(--t-title); color: var(--ink); white-space: nowrap; }
+  .shint { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; margin: 2px 0 var(--s3); }
+  .reason { display: flex; align-items: center; gap: var(--s3); min-height: 60px; width: 100%; text-align: left; font: var(--t-body-strong); color: var(--ink); }
   .reason + .reason { border-top: 1px solid var(--hairline); }
-  .reason .rd { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--ink-3); flex: none; }
-  .reason[aria-checked="true"] .rd { box-shadow: inset 0 0 0 7px var(--ink); }
-  .reason span:last-child { white-space: nowrap; }
+  .reason span { flex: 1; white-space: nowrap; }
+  .reason svg { width: 20px; height: 20px; color: var(--ink-3); }
   .sheet.top { padding-top: 8px; }
-  .twobtn { display: flex; gap: var(--s2); margin-top: var(--s5); }
-  .twobtn .btn { flex: 1; }
+  /* Resolved: one way out, the 2 s auto-return drawn as a draining underline */
+  .offer .go.quiet { overflow: hidden; background: var(--surface); box-shadow: var(--e1); }
+  .go .drain { position: absolute; left: 0; bottom: 0; height: 4px; width: 66%; background: var(--ink-3); }
+  .offer .ot { font: 600 20px/26px var(--font); }
 </style>
 </head>
 <body>
-<main class="screen" id="s">
-  <div class="map" id="map" aria-label="Քարտեզ"></div>
-  <button class="decline" id="dbtn" aria-label="Հրաժարվել" data-s="decline"><i data-lucide="x"></i>Հրաժարվել</button>
-  <div class="spill" role="status" data-s="declined taken expired"><span class="dot"></span>Գծում</div>
-
-  <!-- The live offer (only visible under the decline sheet) -->
-  <section class="sheet" id="offer" data-s="decline" role="alertdialog" aria-label="Նոր պատվեր">
-    <div class="head">
-      <span id="ring1"></span>
-      <div class="facts">
-        <div class="fare">1 100 ֏</div>
-        <div class="trip"><i data-lucide="car-front"></i>4 րոպե · 1,4 կմ</div>
-        <div class="trip"><i data-lucide="route"></i>4,3 կմ · 6 րոպե</div>
-        <div class="chips"><span class="chip">Eco City</span><span class="chip cash"><i data-lucide="banknote"></i>Կանխիկ</span></div>
-      </div>
-    </div>
-    <div class="stops">
-      <div class="stop"><span class="m a"></span><div><div class="t1">Մաշտոցի պող. 40</div><div class="t2">Կենտրոն</div></div></div>
-      <div class="stop"><span class="m b"></span><div><div class="t1">Կոմիտասի պող. 49</div><div class="t2">Արաբկիր</div></div></div>
-    </div>
-    <div class="slide" role="slider" aria-label="Ընդունել" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
-      <span class="knob"><i data-lucide="arrow-right"></i></span>Ընդունել
-    </div>
-  </section>
-
-  <!-- Resolved: taken / expired / declined -->
-  <section class="sheet" id="res" data-s="taken expired declined" role="status">
-    <div class="head">
-      <span id="ring2"></span>
-      <div class="facts">
-        <div class="res-t" data-s="taken">Պատվերն արդեն վերցրել են</div>
-        <div class="res-t" data-s="expired">Ժամանակը սպառվեց</div>
-        <div class="res-t" data-s="declined">Դուք հրաժարվեցիք</div>
-        <div class="res-s" data-s="taken">Մեկ այլ վարորդ · 1 100 ֏</div>
-        <div class="res-s" data-s="expired">Եվս մեկը՝ և կնշվեք բացակա</div>
-        <div class="res-s" data-s="declined"><span class="d"></span>Դուք գծում եք · «Հեռու է»</div>
-      </div>
-    </div>
-    <div class="stops quiet">
-      <div class="stop"><span class="m a"></span><div><div class="t1">Մաշտոցի պող. 40</div><div class="t2">Կենտրոն</div></div></div>
-      <div class="stop"><span class="m b"></span><div><div class="t1">Կոմիտասի պող. 49</div><div class="t2">Արաբկիր</div></div></div>
-    </div>
-    <a class="back" href="driver-home.html"><span class="drain" aria-hidden="true"></span>Գլխավոր · 2</a>
-  </section>
-
-  <!-- Decline with a reason -->
+<main class="screen" id="s"></main>
+<script src="audit.js"></script>
+<script>
+  const s = document.getElementById('s')
+  const st = new URLSearchParams(location.search).get('state') || 'taken'
+  const res = {
+    taken: { glyph: 'user-check', title: 'Պատվերն արդեն վերցրել են', sub: 'Վերադառնում ենք գլխավոր էջ' },
+    expired: { glyph: 'timer-off', title: 'Ժամանակը սպառվեց', sub: 'Եվս մեկը՝ և կնշվեք բացակա' },
+    declined: { glyph: 'check', title: 'Դուք հրաժարվեցիք', sub: 'Դուք գծում եք · «Հեռու է»' },
+  }[st]
+  const home = `<a class="go quiet" href="driver-home.html?theme=${THEME}"><span class="drain" aria-hidden="true"></span><i data-lucide="house"></i>Գլխավոր</a>`
+  s.innerHTML = D.offer(res ? { result: res, foot: home } : { secs: 6 }) + (st === 'decline' ? `
   <div class="scrim" data-s="decline"></div>
   <section class="sheet top" data-s="decline" role="dialog" aria-label="Ինչո՞ւ եք հրաժարվում">
     <div class="grabber"></div>
-    <div class="dhead"><span class="stitle">Ինչո՞ւ</span><span id="ring3" role="timer" aria-label="Մնաց 6 վայրկյան"></span></div>
-    <div role="radiogroup">
-      <button class="reason" role="radio" aria-checked="true"><span class="rd"></span><span>Հեռու է</span></button>
-      <button class="reason" role="radio" aria-checked="false"><span class="rd"></span><span>Ուղղությունը չի համապատասխանում</span></button>
-      <button class="reason" role="radio" aria-checked="false"><span class="rd"></span><span>Ընդմիջում</span></button>
-      <button class="reason" role="radio" aria-checked="false"><span class="rd"></span><span>Այլ</span></button>
+    <div class="dhead"><a class="btn-text" href="driver-offer.html?theme=${THEME}"><i data-lucide="chevron-left"></i>Ետ</a><span id="ring3" role="timer" aria-label="Մնաց 6 վայրկյան"></span></div>
+    <div class="stitle">Ինչո՞ւ եք հրաժարվում</div>
+    <div class="shint">Հպեք պատճառին՝ պատվերը կփոխանցվի</div>
+    <div role="list">
+      <button class="reason" role="listitem"><span>Հեռու է</span><i data-lucide="chevron-right"></i></button>
+      <button class="reason" role="listitem"><span>Ուղղությունը չի համապատասխանում</span><i data-lucide="chevron-right"></i></button>
+      <button class="reason" role="listitem"><span>Ընդմիջում եմ անում</span><i data-lucide="chevron-right"></i></button>
+      <button class="reason" role="listitem"><span>Այլ պատճառ</span><i data-lucide="chevron-right"></i></button>
     </div>
-    <div class="twobtn">
-      <button class="btn btn-quiet">Ետ</button>
-      <button class="btn btn-ink">Հրաժարվել</button>
-    </div>
-  </section>
-</main>
-<script src="audit.js"></script>
-<script>
-  statusBar(document.getElementById('s'))
-  const st = D.init([
-    ['taken', 'Taken by another driver'], ['expired', 'Expired (no answer)'], ['decline', 'Decline with reason (ticking)'], ['declined', 'Declined, back on the line'],
+  </section>` : '')
+  statusBar(s)
+  D.init([
+    ['taken', 'Taken by another driver'], ['expired', 'Expired (no answer)'], ['decline', 'Decline: one tap on a reason (ticking)'], ['declined', 'Declined, back on the line'],
   ])
-  const ring = (frac, inner) => D.ring(104, 6, frac, inner)
-  document.getElementById('ring1').outerHTML = ring(.5, '<span class="hero">6</span><span class="unit">վ</span>')
-  document.getElementById('ring3').outerHTML = D.ring(48, 4, .5, '<span class="v">6</span>')
-  const glyph = { taken: 'user-check', expired: 'timer-off', declined: 'check' }[st] || 'x'
-  const r2 = document.getElementById('ring2')
-  if (r2) r2.outerHTML = ring(0, `<span class="gl"><i data-lucide="${glyph}"></i></span>`)
+  const r3 = document.getElementById('ring3')
+  if (r3) r3.outerHTML = D.ring(48, 4, .5, '<span class="v">6</span>', 'var(--warn)')
   icons()
-
-  const modal = st === 'decline'
-  const main = document.getElementById(modal ? 'offer' : 'res')
-  if (modal) for (const el of [main, document.getElementById('dbtn'), document.getElementById('map')]) { el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true') }
-  const sheetH = main.offsetHeight
-  const A = ROUTES.driverToPickup.pts, B = ROUTES.pickupToDrop.pts
-  const map = makeMap(document.getElementById('map'), { sheetH, fit: [...A, ...B], padTL: [40, 120], padBR: [40, sheetH + 36] })
-  const live = st === 'decline'
-  drawRoute(map, A, { color: cssVar(live ? '--approach' : '--ink-3'), weight: 4, dash: '1 8' })
-  drawRoute(map, B, { weight: 5, color: live ? undefined : cssVar('--ink-3') })
-  htmlMarker(map, B[B.length - 1], '<div class="pin b"></div>', [18, 18])
-  htmlMarker(map, B[0], '<div class="pin a"></div>', [18, 18])
-  htmlMarker(map, A[0], `<div class="me">${carTop(-60, 'var(--brand)', 'rgb(255 255 255 / .75)')}</div>`, [24, 40])
+  if (st === 'decline') for (const el of [s.querySelector('.offer')]) { el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true'); el.inert = true }
+  D.offerMap(!!res)
 </script>
 </body>
 </html>

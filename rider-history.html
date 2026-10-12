@@ -26,6 +26,8 @@
   .hrow .st { flex: none; display: inline-flex; align-items: center; gap: 4px; font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; }
   .hrow .st svg { width: 14px; height: 14px; }
   .group .divider.h { margin-left: 60px; }
+  .hrow .t2 .co { display: inline-flex; align-items: center; gap: 4px; }
+  .hrow .t2 .co svg { width: 13px; height: 13px; }
 
   .upcoming { width: calc(100% - 2 * var(--margin)); text-align: left; margin: 0 var(--margin); background: var(--surface); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: flex; align-items: center; gap: var(--s3); }
   .upcoming .cal { width: 48px; height: 48px; border-radius: 10px; background: var(--brand-soft); color: var(--brand-ink); display: grid; place-items: center; flex: none; }
@@ -76,6 +78,11 @@
   .ln.tot b { font: var(--t-body-strong); }
   .ln .pay { display: inline-flex; align-items: center; gap: 6px; }
   .ln .pay svg { width: 16px; height: 16px; color: var(--ok); }
+  .ln.paid { min-height: 32px; font: var(--t-body); color: var(--ink); }
+  .ln .pay.co svg { color: var(--ink-2); }
+  .notice { display: flex; gap: var(--s2); align-items: flex-start; margin-top: var(--s3); padding: var(--s3); border-radius: var(--r-card); background: var(--surface-2);
+    font: var(--t-secondary); color: var(--ink); }
+  .notice svg { width: 16px; height: 16px; flex: none; margin-top: 1px; color: var(--ink-2); }
   #sheet .btns { margin-top: var(--s4); }
   .cx { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: var(--r-pill); background: var(--surface-2);
     font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; }
@@ -90,20 +97,22 @@
   const A = R.amd
   /* Eco tariffs, fixed_upfront, rounded to 100 ֏ (NOTES.md):
      City   600 + 90/km + 12/min  · Partner 700 + 110/km + 14/min
-     Mashtots 37 → Komitas 22  City    4.3 km 6 min: 600 + 387 + 72 = 1 059 → 1 100
+     Mashtots 37 → Komitas 22  City    4,3 km 6 min: 600 + 387 + 72 = 1 059 → 1 100  (the one ride, ECO.RIDE: 9:45 → 9:51)
+     Republic Sq → Cascade, company ride (billed to ECO.COMPANY) 800
      Republic Sq → Cascade     City    2.1 km 4 min: 600 + 189 + 48 =   837 →   800
      Komitas 22 → Mashtots 37  Partner 4.3 km 7 min: 700 + 473 + 98 = 1 271 → 1 300
      Tumanyan → Opera          City    1.4 km 3 min: 600 + 126 + 36 =   762 →   800
      Komitas 22 → Zvartnots    City   12.6 km 17 min: 600 + 1 134 + 204 = 1 938 → ≈ 1 900 (estimate, scheduled) */
   const rides = [
-    ['pickupToDrop', 'Կոմիտասի պող. 22', 'Այսօր, 09:41', 'Eco City', A(1100)],
-    ['republicToCascade', 'Կասկադ', 'Երեկ, 19:12', 'Eco City', A(800)],
+    ['pickupToDrop', ECO.RIDE.drop, 'Այսօր, ' + ECO.RIDE.pickupAt.padStart(5, '0'), 'Eco City', A(ECO.RIDE.fare)],
+    ['republicToCascade', 'Կասկադ', 'Երեկ, 08:50', 'Eco City', A(800), true],
     ['pickupToDrop', 'Մաշտոցի պող. 37', '7 հոկտ., 18:20', 'Eco Comfort', A(1300)],
     ['driverToPickup', 'Օպերա', '5 հոկտ., 13:05', 'Eco City', null],
     ['driverToPickup', 'Օպերա', '2 հոկտ., 10:15', 'Eco City', A(800)],
   ]
-  const row = ([k, to, when, tier, fare]) => `<button class="hrow">${R.trace(k, 48, 48, { pad: 8, r: 3, sw: 2.5, grid: false })}
-      <span class="txt"><span class="t1">${to}</span><span class="t2">${when} · ${tier}</span></span>
+  /* co: billed to the rider's company — said in words on the row, the receipt names the company. */
+  const row = ([k, to, when, tier, fare, co]) => `<button class="hrow">${R.trace(k, 48, 48, { pad: 8, r: 3, sw: 2.5, grid: false })}
+      <span class="txt"><span class="t1">${to}</span><span class="t2">${when} · ${co ? `<span class="co">${R.i('building-2')}${ECO.PAY.company.short}</span>` : tier}</span></span>
       ${fare ? `<span class="fare">${fare}</span>` : `<span class="st">${R.i('circle-slash')}Չեղարկված</span>`}</button>`
   const group = (list) => `<div class="group">${list.map((r, i) => (i ? '<div class="divider h"></div>' : '') + row(r)).join('')}</div>`
   const head = () => `<nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl"></span><span class="navend"></span></nav><h1 class="large">Ուղևորություններ</h1>`
@@ -123,6 +132,26 @@
     htmlMarker(m, pts[pts.length - 1], '<div class="pin-b"></div>', [18, 18])
   }
 
+  const RD = ECO.RIDE, DV = RD.driver, C = ECO.COMPANY
+  const receipt = (pay) => `<div class="map" id="map" aria-label="Երթուղի"></div>${nav()}
+          <section class="sheet" id="sheet">
+            <div class="rhead"><div><div class="when">Այսօր, ${RD.pickupAt} · ${ECO.km(RD.km)} · ${RD.min} րոպե</div><div class="tier">${RD.tier}</div></div><div class="hero">${A(RD.fare)}</div></div>
+            ${stops(RD.pickup, RD.pickupAt, RD.drop, RD.dropAt)}
+            <div class="hr"></div>
+            <div class="drv">${R.avatar()}<span class="txt"><span class="t1">${DV.first} <span>${R.i('star')}${DV.rating}</span></span><span class="t2">${DV.carHy}</span></span>${R.plate(DV.plate)}</div>
+            <div class="hr"></div>
+            <div class="lines">
+              <div class="ln"><span>Նստելու վճար</span><b>${A(600)}</b></div>
+              <div class="ln"><span>Ըստ կիլոմետրի · ${ECO.km(RD.km)}</span><b>${A(387)}</b></div>
+              <div class="ln"><span>Ըստ րոպեի · ${RD.min} րոպե</span><b>${A(72)}</b></div>
+              <div class="ln"><span>Կլորացում</span><b>+${A(41)}</b></div>
+              <div class="ln tot"><span>Ընդամենը</span><b>${A(RD.fare)}</b></div>
+              <div class="ln paid"><span class="pay ${pay === 'company' ? 'co' : ''}">${pay === 'company' ? R.i('building-2') + 'Վճարում է՝ ' + C.name : R.i('banknote') + ECO.PAY.cash.label}</span></div>
+            </div>
+            ${pay === 'downgraded' ? `<div class="notice">${R.i('info')}<span>Այս ուղևորության համար վճարում եք դուք, քանի որ ընկերության հաշվի սահմանաչափը սպառված է։ Վճարեք վարորդին։</span></div>` : ''}
+            <div class="btns"><button class="btn btn-brand">${R.i('rotate-ccw')}Կրկին պատվիրել</button>${pay === 'downgraded' ? '' : '<button class="btn btn-quiet">Հաղորդել խնդրի մասին</button>'}</div>
+          </section>`
+
   Rider.page({
     title: 'Rider · Ride history',
     sub: 'A list with the real route of each ride as its thumbnail, and a receipt built from the tariff components',
@@ -135,24 +164,12 @@
       { id: 'empty', label: 'Empty', note: 'One line (hub.noRecent) and the way out',
         html: () => `<div class="page">${head()}<div class="empty"><div class="halo">${R.car('city', 184, 88, '')}</div><p>Ձեր վերջին ուղևորությունները կերևան այստեղ</p></div>
           <div class="foot"><button class="btn btn-brand">Պատվիրել</button></div></div>` },
-      { id: 'detail', label: 'Receipt', note: 'Fare = base + km + min, rounded to 100 ֏; book again is the one primary',
-        html: () => `<div class="map" id="map" aria-label="Երթուղի"></div>${nav()}
-          <section class="sheet" id="sheet">
-            <div class="rhead"><div><div class="when">Այսօր, 09:35 · 4.3 կմ · 6 րոպե</div><div class="tier">Eco City</div></div><div class="hero">${A(1100)}</div></div>
-            ${stops('Մաշտոցի պող. 37', '09:35', 'Կոմիտասի պող. 22', '09:41')}
-            <div class="hr"></div>
-            <div class="drv">${R.avatar()}<span class="txt"><span class="t1">Արամ <span>${R.i('star')}4.9</span></span><span class="t2">VW ID.3 · սպիտակ</span></span>${R.plate('01 ET 001')}</div>
-            <div class="hr"></div>
-            <div class="lines">
-              <div class="ln"><span>Նստավարձ</span><b>${A(600)}</b></div>
-              <div class="ln"><span>4.3 կմ × 90</span><b>${A(387)}</b></div>
-              <div class="ln"><span>6 րոպե × 12</span><b>${A(72)}</b></div>
-              <div class="ln"><span>Կլորացում</span><b>+${A(41)}</b></div>
-              <div class="ln tot"><span class="pay">${R.i('banknote')}Կանխիկ</span><b>${A(1100)}</b></div>
-            </div>
-            <div class="btns"><button class="btn btn-brand">${R.i('rotate-ccw')}Կրկին պատվիրել</button><button class="btn btn-quiet">Հաղորդել խնդրի մասին</button></div>
-          </section>`,
-        map: mapFor('pickupToDrop') },
+      { id: 'detail', label: 'Receipt', note: 'The one ride: 9:45 → 9:51, 4,3 km, 6 min. Lines are the tariff\'s own (receipt.tsx fare.* strings), rounded to 100 ֏; book again is the one primary',
+        html: () => receipt('cash'), map: mapFor('pickupToDrop') },
+      { id: 'detail-company', label: 'Receipt · company', note: 'A company ride: «Վճարում է՝ {company}» stands where the payment method would (receipt.tsx). No balance, no limit — those are the company\'s, not the employee\'s',
+        html: () => receipt('company'), map: mapFor('pickupToDrop') },
+      { id: 'detail-downgraded', label: 'Receipt · paid by you', note: 'A company pre-booking downgraded at activation (corporate R2): one neutral notice says why, and the payment is cash',
+        html: () => receipt('downgraded'), map: mapFor('pickupToDrop') },
       { id: 'detail-cancelled', label: 'Cancelled', note: 'No fare was charged, and the reason the rider gave',
         html: () => `<div class="map" id="map" aria-label="Երթուղի"></div>${nav()}
           <section class="sheet" id="sheet">

@@ -194,6 +194,7 @@ svg.lucide { flex: none; width: 16px; height: 16px; stroke-width: 1.75; }
 .tbl { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .tbl th { height: var(--h-thead); font: var(--c-label); color: var(--ink-faint); text-align: left; padding: 0 8px; white-space: nowrap; border-bottom: 1px solid var(--line-soft); position: sticky; top: 0; background: var(--surface); z-index: 1; }
 .tbl td { height: var(--h-trow); padding: 0 8px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tbl td:has(> .pill) { text-overflow: clip; } /* a pill is never cut: its column is sized to hold it (review, rides «..») */
 .tbl th:first-child, .tbl td:first-child { padding-left: var(--inset); }
 .tbl th:last-child, .tbl td:last-child { padding-right: var(--inset); }
 .tbl tr.on td { background: var(--surface-alt); }
@@ -269,11 +270,16 @@ svg.lucide { flex: none; width: 16px; height: 16px; stroke-width: 1.75; }
 .shift .facts { display: grid; grid-template-columns: auto auto; gap: 4px 12px; font: var(--c-body); align-content: center; }
 .shift .facts dt { color: var(--ink-muted); white-space: nowrap; } .shift .facts dd { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .docs { margin-top: 6px; }
-.doc { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; height: 44px; border-bottom: 1px solid var(--line-soft); }
+/* A document row: the title wraps and the validity date takes its own line under it (review: titles cut and overlapping
+   their dates at 1366). Icon and download stay in the first row. */
+.doc { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 10px; row-gap: 4px; align-items: center; min-height: 44px; padding: 8px 0; border-bottom: 1px solid var(--line-soft); }
+.doc > .ic { grid-row: 1 / span 2; align-self: start; }
+.doc > .pill { grid-column: 2; grid-row: 2; justify-self: start; }
+.doc > .btn { grid-column: 3; grid-row: 1 / span 2; }
 .doc:last-child { border-bottom: 0; }
 .doc .ic { width: 28px; height: 28px; border-radius: 6px; background: var(--surface); display: grid; place-items: center; color: var(--ink-muted); box-shadow: inset 0 0 0 1px var(--line-soft); }
 .doc .t { display: flex; flex-direction: column; min-width: 0; }
-.doc .t b { font: var(--c-strong); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.doc .t b { font: var(--c-strong); white-space: normal; overflow-wrap: anywhere; }
 .doc .t span { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dropz { display: flex; align-items: center; justify-content: center; gap: 6px; height: 36px; margin-top: 8px; border-radius: var(--r-ctl); box-shadow: inset 0 0 0 1px var(--line-control); font: var(--c-body); color: var(--ink-muted); background: var(--surface); }
 .dropz u { color: var(--brand-text); text-decoration: none; font-weight: 500; }
@@ -292,7 +298,4 @@ svg.lucide { flex: none; width: 16px; height: 16px; stroke-width: 1.75; }
 .check.on i.b::after { content: ''; width: 8px; height: 4px; border-left: 2px solid var(--brand-fill-ink); border-bottom: 2px solid var(--brand-fill-ink); transform: translateY(-1px) rotate(-45deg); }
 
 /* Mock-only theme switcher (not part of the product) */
-.mockbar { position: fixed; right: 10px; bottom: 10px; z-index: 99; display: flex; gap: 4px; padding: 4px; border-radius: var(--r-pill); background: var(--surface); box-shadow: var(--e2); }
-.mockbar a { font: var(--c-label); color: var(--ink-muted); text-decoration: none; padding: 4px 10px; border-radius: var(--r-pill); }
-.mockbar a.on { background: var(--ink); color: var(--surface); }
-@media print { .mockbar { display: none; } }
+/* Review chrome: the only mock link is «Ինդեքս» docked in the top bar (.live), never a floating switcher over content (C1). */

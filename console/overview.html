@@ -55,22 +55,22 @@
   <div class="main">
     <header class="bar">
       <h1>Ընդհանուր</h1>
-      <span class="crumb num">կիրակի, 11 հոկտ. · 00:00–14:26 · Երևան</span>
+      <span class="crumb num" data-eco="today">Ուրբաթ, 9 հոկտ. · 00:00–14:26 · Երևան</span>
       <div class="seg" style="margin-left:8px"><button class="on">Այսօր</button><button>7 օր</button><button>30 օր</button></div>
       <div class="live"></div>
     </header>
     <div class="content">
       <section class="card kpis" aria-label="Այսօրվա թվերը">
-        <div class="kpi"><span class="k">Պատվերներ</span><span class="v">126</span><span class="s"><span class="delta up">↑ 18%</span>նախորդ կիրակիից</span></div>
+        <div class="kpi"><span class="k">Պատվերներ</span><span class="v">126</span><span class="s"><span class="delta up">↑ 18%</span>նախորդ ուրբաթից</span></div>
         <div class="kpi"><span class="k">Կատարված</span><span class="v">112</span><span class="s"><span class="num">89%</span> · չեղարկված <span class="num">9</span></span></div>
-        <div class="kpi"><span class="k">Հասույթ</span><span class="v">268 400<small>֏</small></span><span class="s"><span class="delta up">↑ 9%</span>կանխիկ <span class="num">71%</span></span></div>
+        <div class="kpi"><span class="k">Հասույթ</span><span class="v">268 400<small>֏</small></span><span class="s"><span class="delta up">↑ 9%</span>կանխիկ <span class="num">86%</span></span></div>
         <div class="kpi"><span class="k">Միջին գին</span><span class="v">2 396<small>֏</small></span><span class="s"><span class="delta down">↓ 4%</span>միջինը <span class="num">6,8 կմ</span></span></div>
         <div class="kpi"><span class="k"><i style="width:6px;height:6px;border-radius:50%;background:var(--ok-dot)"></i>Հերթափոխում</span><span class="v">18</span><span class="s">ազատ <span class="num">11</span> · պատվերով <span class="num">7</span></span></div>
         <div class="kpi"><span class="k">Սպասում են</span><span class="v warnv">3</span><span class="s">ամենաերկարը <span class="mono">04:13</span></span></div>
       </section>
 
       <section class="card" aria-label="Պատվերներ ըստ ժամի">
-        <div class="card-h"><h2>Պատվերներ ըստ ժամի</h2><span class="end lg"><span><i class="b"></i>Այսօր</span><span><i class="l"></i>Նախորդ կիրակի</span></span></div>
+        <div class="card-h"><h2>Պատվերներ ըստ ժամի</h2><span class="end lg"><span><i class="b"></i>Այսօր</span><span><i class="l"></i>Նախորդ ուրբաթ</span></span></div>
         <div class="chart" id="chart"></div>
       </section>
 
@@ -93,7 +93,7 @@
         <div class="att scroll-y" data-truncate>
           <a href="dispatch.html"><span class="ic r"><i data-lucide="circle-alert"></i></span><span class="t"><b>Տիգրան Մեծի 67 · վարորդը չի գտնում ուղևորին</b><span>Դիսպետչեր · Խնդիրներ</span></span><span class="mono" style="color:var(--lane-problems);font-weight:600">07:34</span></a>
           <a href="drivers.html"><span class="ic w"><i data-lucide="file-text"></i></span><span class="t"><b>Գագիկ Ավետիսյան · ԱՊՊԱ-ն լրանում է</b><span>Փաստաթուղթ · 20.10.2026</span></span><span class="pill warn">9 օր</span></a>
-          <a href="drivers.html?d=8"><span class="ic r"><i data-lucide="wallet"></i></span><span class="t"><b>Կարեն Մելքոնյան · դրամապանակը բացասական է</b><span>Գործընկեր վարորդ · արգելափակված է պատվերներից</span></span><span class="mono" style="color:var(--danger-c);font-weight:600">−1 200 ֏</span></a>
+          <a href="partners.html?tab=wallet"><span class="ic w"><i data-lucide="lock"></i></span><span class="t"><b>Կարեն Մելքոնյան · դրամապանակը բացասական է</b><span>Գործընկեր վարորդ · արգելափակված է պատվերներից</span></span><span class="mono" style="color:var(--warning);font-weight:600">−1 200 ֏</span></a>
           <a href="#"><span class="ic n"><i data-lucide="user-x"></i></span><span class="t"><b>Հայկ Սահակյան · խնդրել է ջնջել հաշիվը</b><span>Ջնջման հայտ · 2 օր առաջ</span></span><i data-lucide="chevron-right" class="faint"></i></a>
           <a href="#"><span class="ic n"><i data-lucide="star"></i></span><span class="t"><b>Ցածր գնահատական · #R-20398 · 2 ★</b><span>«Մեքենան այլ էր» · 24 ժ SLA</span></span><i data-lucide="chevron-right" class="faint"></i></a>
         </div>
@@ -109,9 +109,9 @@
   const host = document.getElementById('chart')
   const W = host.clientWidth - 24, H = host.clientHeight - 16, L = 28, B = 20, max = 16
   const n = 18, bw = (W - L) / n, y = (v) => (H - B) - v / max * (H - B - 4)
-  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Պատվերներ ըստ ժամի՝ այսօր և նախորդ կիրակի">`
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Պատվերներ ըստ ժամի՝ այսօր և նախորդ ուրբաթ">`
   for (const g of [0, 4, 8, 12, 16]) s += `<line x1="${L}" x2="${W}" y1="${y(g)}" y2="${y(g)}" stroke="var(--line-soft)"/><text x="${L - 8}" y="${y(g) + 4}" text-anchor="end">${g}</text>`
-  today.forEach((v, i) => { const x = L + i * bw + 3, h = (H - B) - y(v); s += `<path d="M${x},${H - B} v${-(h - 4)} q0,-4 4,-4 h${bw - 14} q4,0 4,4 v${h - 4} z" fill="var(--chart-1)"><title>${6 + i}:00 · այսօր ${v} · նախորդ կիրակի ${last[i]}</title></path>` })
+  today.forEach((v, i) => { const x = L + i * bw + 3, h = (H - B) - y(v); s += `<path d="M${x},${H - B} v${-(h - 4)} q0,-4 4,-4 h${bw - 14} q4,0 4,4 v${h - 4} z" fill="var(--chart-1)"><title>${6 + i}:00 · այսօր ${v} · նախորդ ուրբաթ ${last[i]}</title></path>` })
   let d = ''
   last.forEach((v, i) => { const x0 = L + i * bw, x1 = x0 + bw; d += `${i ? 'L' : 'M'}${x0},${y(v)} L${x1},${y(v)} ` })
   s += `<path d="${d}" fill="none" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="4 3"/>`
@@ -122,8 +122,10 @@
   const mix = [['city', 71], ['partner', 22], ['kids', 9], ['business', 13], ['van', 5], ['vip', 6]]
   const tot = mix.reduce((a, [, v]) => a + v, 0), mmax = Math.max(...mix.map(([, v]) => v))
   document.getElementById('mix').innerHTML = mix.map(([id, v]) => `<div class="mixr"><span class="car xs">${carImg(id)}</span><span class="n">${tierById(id).name}</span><span><span class="bar" style="display:block;width:${v / mmax * 100}%"></span></span><span class="v">${v}<span>${Math.round(v / tot * 100)}%</span></span></div>`).join('')
-  const pay = [['banknote', 'Կանխիկ', 71], ['smartphone', 'Idram', 14], ['credit-card', 'Քարտ', 9], ['building-2', 'Հաշվեկշռով', 6]]
-  document.getElementById('pay').innerHTML = pay.map(([ic, n, v]) => `<div class="mixr"><span style="display:grid;place-items:center;color:var(--ink-faint)"><i data-lucide="${ic}"></i></span><span class="n">${n}</span><span><span class="bar" style="display:block;width:${v / 71 * 100}%"></span></span><span class="v">${v}%</span></div>`).join('')
+  /* Launch roster (ECO.PAY, review X4): cash and company account only; card, Idram and Telcell are «Շուտով» everywhere. */
+  const pay = [['cash', 86], ['company', 14]].map(([k, v]) => [ECO.PAY[k].icon, ECO.PAY[k].short || ECO.PAY[k].label, v])
+  document.querySelector('[data-eco=today]').textContent = ECO.DAY.today + ' · 00:00–14:26 · Երևան'
+  document.getElementById('pay').innerHTML = pay.map(([ic, n, v]) => `<div class="mixr"><span style="display:grid;place-items:center;color:var(--ink-faint)"><i data-lucide="${ic}"></i></span><span class="n">${n}</span><span><span class="bar" style="display:block;width:${v / 86 * 100}%"></span></span><span class="v">${v}%</span></div>`).join('')
   icons()
 
   const map = makeMap(document.getElementById('map'), { fit: [[40.168, 44.490], [40.204, 44.530]], padTL: [24, 48], padBR: [24, 24], badge: { bottom: '12px', right: '12px' } })

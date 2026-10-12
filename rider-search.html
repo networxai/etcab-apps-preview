@@ -29,7 +29,7 @@
   .f .fv { flex: 1; min-width: 0; font: var(--t-body); color: var(--ink); white-space: nowrap; display: flex; align-items: center; }
   .f .fv.ph { color: var(--ink-3); }
   .f .fl { font: var(--t-caption); color: var(--ink-2); flex: none; white-space: nowrap; }
-  .f .fx { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-3); flex: none; }
+  .f .fx { width: 44px; height: 44px; margin-right: -6px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-3); flex: none; }
   .f .fx svg { width: 18px; height: 18px; }
   .caret { display: inline-block; width: 2px; height: 20px; background: var(--brand-ink); margin-left: 1px; animation: blink 1s steps(1) infinite; }
   @keyframes blink { 50% { opacity: 0; } }
@@ -122,14 +122,14 @@
     states: [
       { id: 'start', group: 'Search', label: 'Before typing', note: 'Recents and saved places first; “on the map” is the first row',
         html: () => page({ html: `<div class="list">${onMap()}
-          <div class="sect">Պահպանված հասցեներ</div>${rows([['house', 'Տուն', 'Կոմիտասի պող. 22', '4.3 կմ'], ['briefcase', 'Աշխատանք', 'Վազգեն Սարգսյան 10', '0.4 կմ']])}
-          <div class="sect">Վերջին</div>${rows([['history', 'Կասկադ', 'Թամանյան փողոց', '2.1 կմ'], ['plane', 'Զվարթնոց օդանավակայան', 'Զվարթնոց', '12 կմ'], ['history', 'Մատենադարան', 'Մաշտոցի պող. 53', '1.6 կմ']])}</div>` }) },
+          <div class="sect">Պահպանված հասցեներ</div>${rows([['house', 'Տուն', 'Կոմիտասի պող. 22', '4,3 կմ'], ['briefcase', 'Աշխատանք', 'Վազգեն Սարգսյան 10', '0,4 կմ']])}
+          <div class="sect">Վերջին</div>${rows([['history', 'Կասկադ', 'Թամանյան փողոց', '2,1 կմ'], ['plane', 'Զվարթնոց օդանավակայան', 'Զվարթնոց', '12 կմ'], ['history', 'Մատենադարան', 'Մաշտոցի պող. 53', '1,6 կմ']])}</div>` }) },
       { id: 'suggest', group: 'Search', label: 'Suggest', note: '2GIS suggest; the typed part is bolded where it matched (name or street)',
         html: () => page({ to: [M], html: `<div class="list">${rows([
-          ['map-pin', `<b>${M}</b>ոցի պողոտա`, 'Կենտրոն, Երևան', '0.8 կմ'],
-          ['landmark', 'Մատենադարան', `<b>${M}</b>ոցի պող. 53`, '1.6 կմ'],
-          ['trees', `<b>${M}</b>ոցի պուրակ`, 'Կենտրոն, Երևան', '1.2 կմ'],
-          ['map-pin', `<b>${M}</b>ոցի պող. 7`, 'Կենտրոն, Երևան', '0.9 կմ'],
+          ['map-pin', `<b>${M}</b>ոցի պողոտա`, 'Կենտրոն, Երևան', '0,8 կմ'],
+          ['landmark', 'Մատենադարան', `<b>${M}</b>ոցի պող. 53`, '1,6 կմ'],
+          ['trees', `<b>${M}</b>ոցի պուրակ`, 'Կենտրոն, Երևան', '1,2 կմ'],
+          ['map-pin', `<b>${M}</b>ոցի պող. 7`, 'Կենտրոն, Երևան', '0,9 կմ'],
           ['map-pin', `<b>${M}</b>ոցի փողոց`, 'Աբովյան', '18 կմ']])}</div>` }, R.keyboard()) },
       { id: 'loading', group: 'Search', label: 'Loading', note: 'Skeleton rows hold the layout; no spinner over the list',
         html: () => page({ to: [M], html: `<div class="list" aria-busy="true" aria-label="Որոնում ենք">${[150, 200, 120, 170].map((w) =>
