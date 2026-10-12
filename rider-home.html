@@ -43,6 +43,26 @@
   .dots i { width: 6px; height: 6px; border-radius: 3px; background: var(--surface-3); }
   .dots i.on { width: 18px; background: var(--ink); }
 
+  /* The live ride, on home (R14, drawn ahead): the one card above «Ո՞ւր եք գնում» while a ride is live, so leaving the ride
+     screen (or a pre-order activating while the app is closed) never strands the rider behind a push. Brand fill = "live",
+     the upcoming pre-order card is brand-soft = "later". One tap returns to rider-ride. */
+  .livecard { display: flex; align-items: center; gap: var(--s3); width: 100%; min-height: 68px; padding: var(--s3) var(--s3) var(--s3) var(--s4);
+    margin-bottom: var(--s3); border-radius: var(--r-card); background: var(--brand); color: var(--on-brand); text-align: left; }
+  .livecard .lv { position: relative; width: 12px; height: 12px; flex: none; border-radius: 50%; background: var(--on-brand); }
+  .livecard .lv::after { content: ''; position: absolute; inset: -5px; border-radius: 50%; box-shadow: 0 0 0 2px var(--on-brand); opacity: .45; animation: lv 1.8s ease-out infinite; }
+  @keyframes lv { from { transform: scale(.6); opacity: .7; } to { transform: scale(1.3); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .livecard .lv::after { animation: none; } }
+  .livecard .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .livecard .t1 { font: var(--t-body-strong); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .livecard .t2 { font: var(--t-secondary); white-space: nowrap; opacity: .9; font-variant-numeric: tabular-nums; }
+  .livecard .t3 { display: flex; align-items: center; gap: var(--s2); margin-top: 4px; }
+  /* Plate: an Armenian plate is a physical object, white in both themes (rider.css, which home does not load). */
+  .plate { display: inline-flex; align-items: stretch; height: 26px; border-radius: 5px; background: #fff; box-shadow: inset 0 0 0 1.5px #111113; overflow: hidden; flex: none; }
+  .plate .eu { width: 14px; background: #1F4FBF; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 3px; gap: 2px; }
+  .plate .eu i { display: block; width: 8px; height: 5px; background: linear-gradient(#D90012 33.3%, #0033A0 33.3% 66.6%, #F2A800 66.6%); border-radius: 1px; }
+  .plate .eu b { font: 600 6px/6px var(--font); color: #fff; }
+  .plate .no { padding: 0 8px 0 6px; font: 600 15px/26px var(--font); color: #111113; letter-spacing: .5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .livecard > svg { width: 20px; height: 20px; flex: none; }
   .logo { position: absolute; z-index: 20; top: 74px; left: 50%; transform: translateX(-50%); width: 112px; height: 20px; filter: drop-shadow(0 1px 1px rgb(0 0 0 / .08)); }
   .puck { width: 22px; height: 22px; border-radius: 50%; background: var(--brand); border: 3.5px solid #fff; box-shadow: 0 0 0 10px var(--brand-soft), 0 2px 6px rgb(0 0 0 / .3); }
 </style>
@@ -57,6 +77,7 @@
 
   <section class="sheet" id="sheet">
     <div class="grabber"></div>
+    <div id="live"></div>
     <button class="where" aria-label="Ո՞ւր եք գնում">
       <i data-lucide="search"></i><span class="lbl">Ո՞ւր եք գնում</span>
       <span class="later" role="button" aria-label="Նախապես"><i data-lucide="calendar-clock"></i>Նախապես</span>
@@ -88,8 +109,18 @@
 </main>
 <script src="audit.js"></script>
 <script>
-  const pre = new URLSearchParams(location.search).get('preorder') === '1'
-  const rows = pre
+  const qs = new URLSearchParams(location.search)
+  const pre = qs.get('preorder') === '1'
+  /* ?active=1: the walkthrough ride (ECO.RIDE) is on its way; ?active=preorder: tomorrow's booking (ECO.BOOKINGS.air) has just
+     been activated by the sweep and assigned to Սուրեն. Plate = the identity, as on the ride screen. */
+  const active = qs.get('active')
+  const plate = (no) => `<span class="plate" role="img" aria-label="Համարանիշ ${no}"><span class="eu" aria-hidden="true"><i></i><b>AM</b></span><span class="no">${no}</span></span>`
+  const live = active === 'preorder'
+    ? { t1: 'Վարորդը նշանակված է', t2: ECO.BOOKINGS.air.driver.short + ' · նստել ' + ECO.BOOKINGS.air.time, plate: ECO.BOOKINGS.air.driver.plate, time: ECO.BOOKINGS.air.assignedAt }
+    : active ? { t1: 'Մեքենան ճանապարհին է', t2: ECO.RIDE.driver.short + ' · ' + ECO.RIDE.approachMin + ' րոպե', plate: ECO.RIDE.driver.plate, time: '9:42' } : null
+  if (live) document.getElementById('live').innerHTML = `<button class="livecard" aria-label="Ընթացիկ ուղևորություն՝ ${live.t1}, ${live.t2}, ${live.plate}"><span class="lv" aria-hidden="true"></span>
+      <span class="txt"><span class="t1">${live.t1}</span><span class="t3">${plate(live.plate)}<span class="t2">${live.t2}</span></span></span><i data-lucide="chevron-right"></i></button>`
+  const rows = live ? [['house', 'Տուն', 'Կոմիտասի պող. 22', '', '≈ 9 րոպե']] : pre
     ? [['calendar-clock', 'Վաղը, 08:30', 'Զվարթնոց օդանավակայան', 'soon', '<i data-lucide="chevron-right" style="width:20px;height:20px;color:var(--ink-3)"></i>'],
        ['house', 'Տուն', 'Կոմիտասի պող. 22', '', '≈ 9 րոպե']]
     : [['house', 'Տուն', 'Կոմիտասի պող. 22', '', '≈ 9 րոպե'],
@@ -98,7 +129,7 @@
     `${i ? '<div class="divider"></div>' : ''}<div class="row ${r[3]}" role="button" tabindex="0"><span class="ic"><i data-lucide="${r[0]}"></i></span>
       <span class="txt"><span class="t1">${r[1]}</span><span class="t2">${r[2]}</span></span><span class="end">${r[4]}</span></div>`).join('')
 
-  statusBar(document.getElementById('s'))
+  statusBar(document.getElementById('s'), live ? live.time : undefined)
   icons()
   const sheetH = document.getElementById('sheet').offsetHeight
   document.getElementById('recentre').style.bottom = (sheetH + 12) + 'px'

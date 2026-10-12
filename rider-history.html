@@ -29,13 +29,22 @@
   .hrow .t2 .co { display: inline-flex; align-items: center; gap: 4px; }
   .hrow .t2 .co svg { width: 13px; height: 13px; }
 
-  .upcoming { width: calc(100% - 2 * var(--margin)); text-align: left; margin: 0 var(--margin); background: var(--surface); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: flex; align-items: center; gap: var(--s3); }
-  .upcoming .cal { width: 48px; height: 48px; border-radius: 10px; background: var(--brand-soft); color: var(--brand-ink); display: grid; place-items: center; flex: none; }
-  .upcoming .cal svg { width: 22px; height: 22px; }
-  .upcoming .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-  .upcoming .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .upcoming .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
-  .upcoming .fare { font: var(--t-body-strong); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  /* Upcoming pre-orders: history/index.tsx geometry — a surface card per booking: calendar-clock + when (brand), the route,
+     a warn tag when the booking has a problem. Owner 2026-10-12: no inline «Չեղարկել»; the card opens the booking. */
+  .bk { display: flex; flex-direction: column; gap: var(--s2); }
+  .ubk { width: calc(100% - 2 * var(--margin)); margin: 0 var(--margin); text-align: left; background: var(--surface); border-radius: var(--r-card);
+    padding: var(--s3); display: flex; flex-direction: column; gap: var(--s2); }
+  .ubk .hd { display: flex; align-items: center; gap: var(--s2); min-height: 24px; }
+  .ubk .hd > svg:first-child { width: 20px; height: 20px; color: var(--brand-ink); }
+  .ubk .hd .w { flex: 1; font: var(--t-body-strong); color: var(--brand-ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ubk .hd .chev { width: 20px; height: 20px; color: var(--ink-3); }
+  .ubk .rt { font: var(--t-body); color: var(--ink); }
+  .ubk .ft { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
+  .ubk .tg { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px; border-radius: 6px; font: var(--t-caption); line-height: 24px; white-space: nowrap; }
+  .ubk .tg svg { width: 14px; height: 14px; }
+  .ubk .tg.warn { background: var(--warn-soft); color: #94430A; } /* --warn measured 4.25:1 on --warn-soft at 12px; this is 5.9:1 */
+  :root[data-theme="dark"] .ubk .tg.warn, :root[data-theme="dark"] .tg.warn { color: var(--warn); }
+  .ubk .tg.co { background: var(--surface-2); color: var(--ink-2); }
 
   .skrow { display: flex; align-items: center; gap: var(--s3); min-height: 72px; }
   .skrow .sk.th { width: 48px; height: 48px; border-radius: 10px; flex: none; }
@@ -116,8 +125,14 @@
       ${fare ? `<span class="fare">${fare}</span>` : `<span class="st">${R.i('circle-slash')}Չեղարկված</span>`}</button>`
   const group = (list) => `<div class="group">${list.map((r, i) => (i ? '<div class="divider h"></div>' : '') + row(r)).join('')}</div>`
   const head = () => `<nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl"></span><span class="navend"></span></nav><h1 class="large">Ուղևորություններ</h1>`
-  const upcoming = () => `<div class="sect">Նախնական պատվեր</div><button class="upcoming"><span class="cal">${R.i('calendar-clock')}</span>
-      <span class="txt"><span class="t1">Վաղը, 08:30</span><span class="t2">Զվարթնոց օդանավակայան</span></span><span class="fare">≈${R.NB}${A(1900)}</span></button>`
+  /* ECO.BOOKINGS: Աննա's three pre-orders, soonest first (upcomingBooking order). sun has problemReason → history.pending (warn);
+     co is billed to the company («Ընկերություն» marker: drawn ahead — customerScheduledRideSchema carries no billing yet). */
+  const BK = ECO.BOOKINGS
+  const booking = (b) => `<button class="ubk" aria-label="${b.when}, ${b.pickup} → ${b.drop}${b.problem ? ', Մեքենան դեռ նշանակված չէ' : ''}">
+      <span class="hd">${R.i('calendar-clock')}<span class="w">${b.when}</span>${R.i('chevron-right', 'class="chev"')}</span>
+      <span class="rt">${b.pickup} → ${b.drop}</span>
+      ${b.problem || b.pay === 'company' ? `<span class="ft">${b.problem ? `<span class="tg warn">${R.i('triangle-alert')}Մեքենան դեռ նշանակված չէ</span>` : ''}${b.pay === 'company' ? `<span class="tg co">${R.i('building-2')}${ECO.PAY.company.short}</span>` : ''}</span>` : ''}</button>`
+  const upcoming = () => `<div class="sect">Նախնական պատվերներ</div><div class="bk">${[BK.air, BK.sun, BK.co].map(booking).join('')}</div>`
 
   /* Receipt sheet (pickup → Komitas, the same ride the driver was offered: 1 100 ֏). */
   const stops = (a, ta, b, tb) => `<div class="stops"><div class="stop"><span class="g"><i></i></span><span class="a">${a}</span><span class="tm">${ta}</span></div>
@@ -156,7 +171,7 @@
     title: 'Rider · Ride history',
     sub: 'A list with the real route of each ride as its thumbnail, and a receipt built from the tariff components',
     states: [
-      { id: 'list', label: 'List', note: 'Upcoming pre-order first; then by month. Cancelled says so in words, not by colour',
+      { id: 'list', label: 'List', note: 'Pre-orders lead («Նախնական պատվերներ», history/index.tsx geometry): the time in brand, the route, a warn tag when no car is on it yet. No inline cancel (owner 2026-10-12): a card opens the booking (rider-preorders#detail), where changes go through the dispatcher. Then past rides by month; cancelled says so in words',
         html: () => `<div class="page">${head()}<div class="scroll">${upcoming()}<div class="sect">Հոկտեմբեր</div>${group(rides.slice(0, 5))}</div></div>` },
       { id: 'loading', label: 'Loading', note: 'Skeleton rows in the real row geometry, so nothing jumps when data lands',
         html: () => `<div class="page">${head()}<div class="scroll"><div class="sect">Հոկտեմբեր</div><div class="group" aria-busy="true">${[0, 1, 2, 3, 4].map((i) =>

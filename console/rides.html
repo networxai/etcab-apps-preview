@@ -48,6 +48,16 @@
   .tl .t { font: 400 12px/16px var(--mono); color: var(--ink-muted); }
   .tl i.d { width: 8px; height: 8px; border-radius: 50%; background: var(--lane); justify-self: center; }
   .tl .who { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; }
+  .tl .why { display: inline-flex; height: 20px; align-items: center; padding: 0 6px; margin-left: 4px; border-radius: var(--r-tag); background: var(--surface-alt); box-shadow: inset 0 0 0 1px var(--line-soft); font: var(--c-label); color: var(--ink); white-space: nowrap; }
+  /* Booking panel (?ride=booking): §8's edits are the operator's (PATCH /scheduled-rides/:id, POST …/cancel). */
+  .bform { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .bform .full { grid-column: 1 / 3; }
+  .bform .reads { font: var(--c-small); color: var(--ink-muted); margin-top: 4px; white-space: nowrap; }
+  .bform .reads .mono { color: var(--ink); font-weight: 500; }
+  .bform .foot { display: flex; align-items: center; gap: 8px; }
+  .dp .acts { flex-wrap: wrap; }
+  .when2 { display: flex; flex-direction: column; line-height: 16px; }
+  .when2 .dd { font: var(--c-small); color: var(--ink-faint); }
   .mk-ab { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font: 700 11px/1 var(--font); background: var(--ink); color: var(--surface); box-shadow: 0 0 0 2px var(--surface), var(--e2); }
   .mk-ab.b { background: var(--surface); color: var(--ink); box-shadow: 0 0 0 2px var(--ink), var(--e2); }
 </style>
@@ -71,11 +81,12 @@
           <button class="btn secondary s icon" aria-label="Արտահանել CSV"><i data-lucide="download"></i></button>
         </div>
         <div class="filters" style="padding-top:6px;padding-bottom:6px">
-          <span class="chip on">Բոլորը <span class="c num">126</span></span>
+          <span class="chip on" id="chip-all">Բոլորը <span class="c num">126</span></span>
           <span class="chip">Ընթացիկ <span class="c num">9</span></span>
           <span class="chip">Ավարտված <span class="c num">104</span></span>
           <span class="chip">Չեղարկված <span class="c num">9</span></span>
           <span class="chip">Վարորդ չկա <span class="c num">4</span></span>
+          <span class="chip" id="chip-sched"><i data-lucide="calendar-clock"></i>Պլանավորված <span class="c num">6</span></span>
         </div>
         <div class="scroll-y grow">
           <table class="tbl rt">
@@ -86,7 +97,7 @@
         </div>
       </section>
 
-      <aside class="card dp" aria-label="Պատվեր #R-20417">
+      <aside class="card dp" id="dp" aria-label="Պատվեր #R-20417">
         <div class="scroll-y grow">
           <div class="top">
             <div class="id"><span class="mono faint">#R-20417</span><span class="pill l-active" style="color:var(--lane);"><i class="d"></i>Ուղևորի հետ</span><span style="flex:1"></span>
@@ -164,16 +175,95 @@
       <td><span class="pill ${lane}" style="${lane ? 'color:var(--lane)' : ''}">${st === 'nodrv' ? '<i data-lucide="circle-alert"></i>' : '<i class="d"></i>'}${word}</span></td>
       <td class="r mono">${f ? amd(f) : '<span class="faint">—</span>'}</td></tr>`
   }).join('')
+  /* ── ?ride=booking (C06, drawn ahead of the console: the API has PATCH /scheduled-rides/:id and POST …/cancel, the
+     console has only the lane's cancel). The list filtered to «Պլանավորված»; the panel edits one booking in place —
+     time (the same typed DateTimePicker as the lane), addresses, agreed price — pre-assigns or releases the driver,
+     and cancels with the two-press ArmButton. Docked, never a modal (§9.8). ── */
+  const BOOK = new URLSearchParams(location.search).get('ride') === 'booking'
+  if (BOOK) {
+    const B = ECO.BOOKINGS, A = B.air
+    document.getElementById('chip-all').classList.remove('on')
+    document.getElementById('chip-sched').classList.add('on')
+    const BR = [
+      ['', '10:00', 'Հալաբյան 41', 'Զվարթնոց օդանավակայան', '041 33-21-90', 'B-0889', 'vip', 'Դավիթ Կարապետյան', '09 DK 118', ['ok', 'Վարորդը մեկնեց'], 5200],
+      ['', B.kom.time, B.kom.pickup, B.kom.drop, B.kom.phone, B.kom.id, 'city', B.kom.driver.name, B.kom.driver.plate, null, B.kom.fare],
+      ['Շբթ', B.bag.time, B.bag.pickup, B.bag.drop, B.bag.phone, B.bag.id, 'city', B.bag.driver.name, B.bag.driver.plate, ['bad', 'Չեմ հասցնի'], B.bag.fare],
+      ['Շբթ', A.time, A.pickup, A.drop, A.phone, A.id, 'city', A.driver.name, A.driver.plate, null, A.fare, 1],
+      ['Կիր', B.sun.time, B.sun.pickup, B.sun.drop, B.sun.phone, B.sun.id, 'partner', null, null, ['bad', 'Վարորդ չկա'], B.sun.fare],
+      ['Երկ', B.co.time, B.co.pickup, B.co.drop, B.co.phone, B.co.id, 'city', null, null, null, B.co.fare],
+    ]
+    document.getElementById('rows').innerHTML = BR.map(([day, t, a, b, ph, id, tier, drv, pl, st, f, on]) => `<tr class="${on ? 'on' : ''}">
+      <td><span class="when2">${day ? `<span class="dd">${day}</span>` : ''}<span class="mono">${t}</span></span></td>
+      <td><div class="route"><span class="l1">${a}<span class="arr">→</span>${b}</span><span class="l2"><span class="mono">${ph}</span> · <span class="mono">#${id}</span></span></div></td>
+      <td><span class="tiercell"><span class="car xs">${carImg(tier)}</span><span class="trunc">${tierById(tier).name.replace('Eco ', '')}</span></span></td>
+      <td>${drv ? `<span class="drvcell"><span class="nm"><span>${drv.split(' ')[0]} ${drv.split(' ')[1][0]}.</span><span>${pl}</span></span></span>` : '<span class="faint">Չնշանակված</span>'}</td>
+      <td>${st ? `<span class="pill ${st[0]}">${st[0] === 'bad' ? '<i data-lucide="circle-alert"></i>' : '<i class="d"></i>'}${st[1]}</span>` : '<span class="pill l-scheduled" style="color:var(--lane)"><i data-lucide="calendar-clock"></i>Պլան.</span>'}</td>
+      <td class="r mono">${amd(f)}</td></tr>`).join('')
+    document.querySelector('.rt thead th').textContent = 'Երբ'
+    const dp = document.getElementById('dp')
+    dp.setAttribute('aria-label', 'Ամրագրում #' + A.id)
+    dp.innerHTML = `<div class="scroll-y grow">
+      <div class="top">
+        <div class="id"><span class="mono faint">#${A.id}</span><span class="pill l-scheduled" style="color:var(--lane)"><i data-lucide="calendar-clock"></i>Պլանավորված · <span class="mono">Շբթ ${A.time}</span></span><span style="flex:1"></span>
+          <button class="btn ghost icon s" aria-label="Փակել (Esc)"><i data-lucide="x"></i></button></div>
+        <h2>${A.pickup}</h2>
+        <div class="dest"><i data-lucide="arrow-right"></i><span>${A.drop}</span></div>
+        <div class="dest num" style="font-size:12px"><span class="mono">${A.phone}</span>·<span>${A.rider}</span>·<span>Հավելված</span>·<span>ամրագրվեց <span class="mono">${A.booked.replace('Այսօր, ', '')}</span></span></div>
+        <div class="acts">
+          <button class="btn secondary s">Վերանշանակել <span class="kbd">A</span></button>
+          <button class="btn secondary s">Ազատել վարորդին</button>
+          <button class="btn danger s" aria-label="Չեղարկել ամրագրումը՝ ${A.pickup}, Շբթ ${A.time}">Չեղարկել ամրագրումը</button>
+        </div>
+      </div>
+      <div class="sec">
+        <h3>Մանրամասներ</h3>
+        <div class="bform">
+          <div class="full"><label class="label">Ե՞րբ</label><div class="input focus"><i data-lucide="calendar"></i><span class="val mono">10.10 08:30</span><button class="btn ghost icon s" aria-label="Օրացույց"><i data-lucide="calendar-days"></i></button></div>
+            <p class="reads">Ամրագրվում է <span class="mono">Շբթ, 10 հոկտեմբերի, 08:30</span></p></div>
+          <div class="full"><label class="label">Որտեղից</label><div class="input"><span class="val">${A.pickup}, Արաբկիր</span></div></div>
+          <div class="full"><label class="label">Ուր</label><div class="input"><span class="val">${A.drop}</span></div></div>
+          <div><label class="label">Համաձայնեցված գին</label><div class="input"><span class="val ph mono">օր. 2400</span><span class="faint">֏</span></div></div>
+          <div><label class="label">Սակագնով</label><div class="input" style="box-shadow:none;background:var(--surface-alt)"><span class="val mono">≈ ${amd(A.fare)}</span></div></div>
+          <div class="full foot"><span class="faint grow" style="font:var(--c-small)">${A.tier} · ${ECO.km(A.km)} · ${A.min} ր · Կանխիկ</span><button class="btn secondary s" disabled style="opacity:.55">Պահպանել</button></div>
+        </div>
+      </div>
+      <div class="mini"><div class="maphost" style="position:absolute;inset:0"><div id="map"></div></div></div>
+      <div class="sec">
+        <h3>Նախապես նշանակված վարորդ</h3>
+        <div class="drv"><span class="car m" id="drvcar"></span>
+          <div style="min-width:0"><div class="nm">${A.driver.name}</div>
+            <div class="meta"><span class="plate">${A.driver.plate}</span><span class="pill"><i data-lucide="car"></i>Պարկի</span></div>
+            <div class="meta mono faint" style="font-size:12px">${A.driver.phone}</div></div>
+          <button class="btn secondary icon" aria-label="Զանգել վարորդին"><i data-lucide="phone"></i></button></div>
+        <dl class="kv" style="margin-top:10px">
+          <dt>Նոր պատվերներ չեն գա</dt><dd class="mono">${A.held}-ից</dd>
+          <dt>Կարող է մեկնել</dt><dd class="mono">${A.held}-ից</dd>
+          <dt>Ակտիվացում</dt><dd class="mono">${A.activates}</dd>
+        </dl>
+      </div>
+      <div class="sec" style="border:0">
+        <h3>Ժամանակագրություն</h3>
+        <div class="tl" id="tl"></div>
+      </div></div>`
+  }
   document.getElementById('drvcar').innerHTML = carImg('city', 'Eco City, ID.3')
-  const TL = [['14:07', 'l-unassigned', 'Ընդունված', 'Անի Դ.'], ['14:07', 'l-searching', 'Որոնում', 'համակարգ'], ['14:09', 'l-active', 'Նշանակված', 'Արամ Պ. · ալիք 1'], ['14:12', 'l-active', 'Ճանապարհին', 'Արամ Պ.'], ['14:16', 'l-active', 'Տեղում', 'Արամ Պ.'], ['14:19', 'l-active', 'Ուղևորի հետ', 'Արամ Պ.']]
+  const TL = [['14:07', 'l-unassigned', 'Ընդունված', 'Անի Դ.'], ['14:07', 'l-searching', 'Որոնում', 'համակարգ'], ['14:08', 'l-searching', 'Առաջարկ · հրաժարվեց <span class="why">Հեռու է</span>', 'Վահե Ս.'], ['14:09', 'l-active', 'Նշանակված', 'Արամ Պ. · ալիք 2'], ['14:12', 'l-active', 'Ճանապարհին', 'Արամ Պ.'], ['14:16', 'l-active', 'Տեղում', 'Արամ Պ.'], ['14:19', 'l-active', 'Ուղևորի հետ', 'Արամ Պ.']]
+  if (BOOK) TL.splice(0, TL.length, ['9:38', 'l-scheduled', 'Ամրագրվեց', 'հաճախորդ · հավելված'], ['9:40', 'l-scheduled', 'Նախապես նշանակվեց Սուրեն Մ.', 'Անի Դ.'])
   document.getElementById('tl').innerHTML = TL.map(([t, l, w, who]) => `<span class="t">${t}</span><i class="d ${l}"></i><span>${w}</span><span class="who">${who}</span>`).join('')
   icons()
+  if (BOOK) {
+    /* The booking's pickup (Կոմիտասի պող. 22 = the walkthrough ride's drop point); no route is drawn before activation. */
+    const PK = ROUTES.pickupToDrop.pts[ROUTES.pickupToDrop.pts.length - 1]
+    const map = makeMap(document.getElementById('map'), { fit: [[PK[0] - .004, PK[1] - .006], [PK[0] + .004, PK[1] + .006]], padTL: [20, 20], padBR: [20, 20], badge: { top: '8px', left: '8px' } })
+    htmlMarker(map, PK, '<div class="mk-ab">Ա</div>', [22, 22])
+  } else {
   const P = ROUTES.republicToCascade.pts
   const map = makeMap(document.getElementById('map'), { fit: P, padTL: [28, 24], padBR: [28, 24], badge: { top: '8px', left: '8px' } })
   drawRoute(map, P, { weight: 4 })
   htmlMarker(map, P[0], '<div class="mk-ab">Ա</div>', [22, 22])
   htmlMarker(map, P[P.length - 1], '<div class="mk-ab b">Բ</div>', [22, 22])
   htmlMarker(map, P[48], carTop(40, 'var(--brand)'), [18, 34])
+  }
 </script>
 </body>
 </html>

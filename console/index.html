@@ -49,7 +49,12 @@
   const G = [
     ['Գործառնություններ', 'Operations', [
       ['dispatch', 'Դիսպետչեր', 'Dispatch', 'Queue (the centrepiece; lanes ordered by who needs a human: problems, unassigned, searching, active), keyboard intake with real Eco tiers and route prices, 2GIS map with cars and queue ages, driver strip (free first, longest idle first). At 9:41 the walkthrough ride (Մաշտոցի պող. 37 → Կոմիտասի պող. 22) is in the Searching lane, offered to Արամ Պ. The shortcut legend is the queue card\'s own footer, outside the scroll box. 9 queue rows fully visible at 1440×900, 7 at 1366×768.'],
-      ['rides', 'Պատվերներ', 'Rides + ride detail', 'Today\'s rides, two-line rows, docked detail panel (never a modal) with the actions one click deep, mini map, driver and car, upfront fare breakdown, timeline. The walkthrough ride is #R-2417, 1 100 ֏.'],
+      ['dispatch?tab=scheduled', 'Պլանավորված', 'Dispatch: scheduled lane', 'Pre-orders by the promised hour (mono), weekday when not today; «Կարող է մեկնել 09:35-ից» / «Վարորդը մեկնեց 09:35»; pre-assigned driver; company booking; driver_blocked and the driver\'s «Չեմ հասցնի» request as problem rows with Release / Reassign one click deep (the request is drawn ahead). The booking form heads the lane.'],
+      ['dispatch?intake=booking', 'Նոր ամրագրում', 'Dispatch: booking intake', 'Phone, pickup, Company / Personal, the typed date-time «10.10 08:30» and its read-back «Շբթ, 10 հոկտեմբերի, 08:30». Keyboard only, under 20 s. Pre-assigning is the booking panel\'s.'],
+      ['dispatch?intake=company', 'Ընկերության զանգ', 'Dispatch: corporate caller at intake', 'Customer card with the company badge, Company / Personal, «Ծախսերի կոդ» marked required, over-limit refusal in amber with «Անձնական».'],
+      ['dispatch?intake=price', 'Համաձայնեցված գին', 'Dispatch: intake sub-tabs, agreed price', 'The intake sub-tabs Քարտեզ · Նշումներ · Համաձայնեցված գին; an agreed 2 400 ֏ replaces the tariff price in the summary.'],
+      ['rides', 'Պատվերներ', 'Rides + ride detail', 'Today\'s rides, two-line rows, docked detail panel (never a modal) with the actions one click deep, mini map, driver and car, upfront fare breakdown, timeline. The walkthrough ride is #R-2417, 1 100 ֏. The Rides list stays as a page beside Search (owner, 12 Oct); the timeline shows a driver\'s decline with its reason (drawn ahead).'],
+      ['rides?ride=booking', 'Ամրագրում', 'Rides: a booking in the docked panel', 'The list filtered to scheduled; B-0912 (Աննա, Saturday 08:30): reassign or release the driver, edit time, addresses and agreed price in place, two-press cancel; held / may set off / activates times. Drawn ahead: the API has PATCH, the console has no screen yet.'],
       ['overview', 'Ընդհանուր', 'Overview', 'KPI strip, rides per hour against the same weekday last week (bars versus a dashed step line), tier mix and the launch payment mix (cash and company account only), live fleet map, and «needs a decision».'],
     ]],
     ['Ավտոպարկ', 'Fleet', [
@@ -76,6 +81,9 @@
       ['invoices', 'Հաշիվների ձևավորում', 'Month-end invoice run', 'September 2026 drafts preview before issuing.'],
       ['invoices?run=1', 'Թողարկված', 'Month-end run, issued', 'After «Թողարկել ընտրվածները»: invoice numbers written per row.'],
       ['invoices?view=overdue', 'Ժամկետանց հաշիվներ', 'Overdue invoices', 'Overdue list with «Գրանցել վճարում» open under a row.'],
+    ]],
+    ['Կառավարում', 'Administration', [
+      ['settings', 'Կարգավորումներ', 'Settings: dispatch', 'The five real dispatch-settings groups; Pre-orders adds the rider reminder lead «Հիշեցում ուղևորին նախնական պատվերից առաջ · 30 րոպե» (owner decision, drawn ahead).'],
     ]],
   ]
   const T = window.THEME, other = T === 'dark' ? 'light' : 'dark'

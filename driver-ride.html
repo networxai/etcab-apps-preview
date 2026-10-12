@@ -96,6 +96,44 @@
   .reason .rd { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--ink-3); flex: none; display: grid; place-items: center; }
   .reason[aria-checked="true"] .rd { box-shadow: inset 0 0 0 7px var(--ink); }
   .reason span:last-child { white-space: nowrap; }
+
+  /* MoreSheet (components/ride/sheets.tsx): give the ride back, or cancel it. Reasons are chips, none preselected;
+     chips are 48 high here (the kit chip is 32) because this is used in a parked car with one hand. */
+  .rchips { display: flex; flex-wrap: wrap; gap: var(--s2); margin-bottom: var(--s4); }
+  .rchips .chip { height: 48px; padding: 0 var(--s4); font: var(--t-body-strong); background: var(--surface-2); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+  .more .foot .btn { height: 52px; }
+  .more .cap { font: var(--t-secondary); color: var(--ink-2); margin-top: var(--s3); }
+
+  /* Ride gone (D21): what happened, then back to the line. */
+  .gone { display: flex; flex-direction: column; gap: var(--s4); }
+  .gone .was { display: flex; align-items: center; gap: var(--s3); padding: var(--s3) var(--s4); border-radius: var(--r-card); background: var(--surface-2); }
+  .gone .was .t1 { font: var(--t-headline); color: var(--ink-2); white-space: nowrap; text-decoration: line-through; text-decoration-thickness: 1.5px; }
+  .gone .was .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .gone .was svg { width: 22px; height: 22px; color: var(--ink-3); flex: none; }
+  .gone .line { display: flex; align-items: center; gap: var(--s2); font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .gone .line .d { width: 12px; height: 12px; border-radius: 50%; background: var(--ok-dot); box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok-dot) 22%, transparent); }
+  .go .drain { position: absolute; left: 0; bottom: 0; height: 4px; width: 66%; background: var(--ink-3); }
+  .go.quiet { overflow: hidden; position: relative; }
+
+  /* Chat (drawn ahead, owner 2026-10-12): read at a glance, answer with one tap. No keyboard while the car moves. */
+  .chat .who { display: flex; align-items: center; gap: var(--s3); margin: 0 0 var(--s4); }
+  .chat .who .av { width: 48px; height: 48px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; font: var(--t-headline); color: var(--ink); flex: none; }
+  .chat .who .t1 { font: var(--t-title); color: var(--ink); white-space: nowrap; }
+  .chat .who .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .chat .who .sp { flex: 1; }
+  .msgs { display: flex; flex-direction: column; gap: var(--s2); margin-bottom: var(--s4); }
+  .bub { max-width: 86%; padding: 12px 16px; border-radius: 20px; }
+  .bub.in { align-self: flex-start; background: var(--surface-2); color: var(--ink); font: 500 20px/28px var(--font); border-bottom-left-radius: 6px; }
+  .bub.out { align-self: flex-end; background: var(--ink); color: var(--surface); font: var(--t-body-strong); border-bottom-right-radius: 6px; }
+  .bub .tm { display: block; font: var(--t-caption); opacity: .75; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .bub.in .tm { color: var(--ink-2); opacity: 1; }
+  .qr { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
+  .qr button { height: 56px; border-radius: 16px; background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--line); font: var(--t-headline); color: var(--ink); white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .qr button svg { width: 20px; height: 20px; }
+  :root[data-sun] .qr button { box-shadow: inset 0 0 0 1.5px #000; }
+  .chat .cap { font: var(--t-caption); color: var(--ink-2); text-align: center; margin-top: var(--s3); white-space: nowrap; }
+  .tool .b { position: relative; }
+  .tool .badge { position: absolute; top: -2px; right: -2px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--brand); color: var(--on-brand); font: 600 12px/20px var(--font); }
 </style>
 </head>
 <body>
@@ -104,14 +142,14 @@
 
   <div class="offstrip" role="status" data-s="offline"><i data-lucide="cloud-off"></i>կապ չկա — գործողությունները կուղարկվեն<span class="tm">2:14</span></div>
 
-  <div class="guide" data-s="enroute inprogress" role="region" aria-label="Ուղղորդում">
+  <div class="guide" data-s="enroute inprogress company-inprogress chat" role="region" aria-label="Ուղղորդում">
     <span class="turn"><i data-lucide="corner-up-right"></i></span>
-    <div><div class="dist"><span data-s="enroute">300</span><span data-s="inprogress">650</span><small>մ</small></div>
-      <div class="st" data-s="enroute">Թումանյան փ.</div><div class="st" data-s="inprogress">Կոմիտասի պող.</div></div>
+    <div><div class="dist"><span data-s="enroute chat">300</span><span data-s="inprogress company-inprogress">650</span><small>մ</small></div>
+      <div class="st" data-s="enroute chat">Թումանյան փ.</div><div class="st" data-s="inprogress company-inprogress">Կոմիտասի պող.</div></div>
     <div class="then"><i data-lucide="corner-up-left"></i>ապա</div>
   </div>
 
-  <button class="fab lg" id="fab" style="right:16px" aria-label="Ընդհանուր տեսք" data-s="enroute inprogress assigned offline arrived noshow noshowsent"><i data-lucide="locate-fixed"></i></button>
+  <button class="fab lg" id="fab" style="right:16px" aria-label="Ընդհանուր տեսք" data-s="enroute inprogress assigned offline arrived noshow noshowsent company-inprogress chat"><i data-lucide="locate-fixed"></i></button>
 
   <!-- ── assigned: on the way to start (tap "On my way") ── -->
   <section class="sheet" data-s="assigned" data-sheet>
@@ -129,11 +167,11 @@
   </section>
 
   <!-- ── en route: guidance on, tap "Arrived" ── -->
-  <section class="sheet" data-s="enroute" data-sheet>
+  <section class="sheet" data-s="enroute chat" data-sheet>
     <div class="grabber"></div>
     <div class="head">
       <div><div class="eyebrow"><span class="d"></span>4 րոպե · 1,4 կմ · 9:45</div><div class="addr" data-eco="RIDE.pickup">Մաշտոցի պող. 37</div></div>
-      <button class="tool" aria-label="Զանգել ուղևորին"><span class="b"><i data-lucide="phone"></i></span></button>
+      <div style="display:flex;gap:var(--s2)"><button class="tool" aria-label="Հաղորդագրություն ուղևորից, 1 նոր"><span class="b"><i data-lucide="message-circle"></i><span class="badge" aria-hidden="true">1</span></span></button><button class="tool" aria-label="Զանգել ուղևորին"><span class="b"><i data-lucide="phone"></i></span></button></div>
     </div>
     <button class="go" style="margin-top:var(--s4)">Տեղում եմ</button>
   </section>
@@ -195,6 +233,46 @@
     <button class="go">Պատրաստ եմ</button>
   </section>
 
+  <!-- ── company in progress (D20): no fare at speed, the one fact that matters — collect nothing ── -->
+  <section class="sheet" data-s="company-inprogress" data-sheet>
+    <div class="grabber"></div>
+    <div class="head">
+      <div><div class="eyebrow"><span class="d"></span>4 րոպե · 2,9 կմ · 9:51</div><div class="addr" data-eco="RIDE.drop">Կոմիտասի պող. 22</div></div>
+    </div>
+    <div class="cobox" style="margin-top:var(--s4)"><i data-lucide="building-2"></i><div><div class="t1">Վճարում է ընկերությունը</div><div class="t2">ոչինչ մի՛ վերցրեք</div></div></div>
+    <div class="tools" style="justify-content:flex-start;gap:var(--s4)">
+      <button class="tool"><span class="b"><i data-lucide="phone"></i></span>Զանգել</button>
+      <button class="tool"><span class="b"><i data-lucide="headset"></i></span>Դիսպետչեր</button>
+    </div>
+    <div class="slide" role="slider" aria-label="Ավարտել" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+      <span class="knob"><i data-lucide="flag"></i></span>Ավարտել
+      <span class="hint" aria-hidden="true"><i data-lucide="chevron-right"></i><i data-lucide="chevron-right"></i></span>
+    </div>
+  </section>
+
+  <!-- ── company done (DoneCard paidBy company): no cash hero, no «Վերցրե՛ք կանխիկ» ── -->
+  <section class="sheet" data-s="company-done" data-sheet>
+    <div class="grabber"></div>
+    <div class="done-top">
+      <span class="ok"><i data-lucide="check"></i></span>
+      <div class="l">Կոմիտասի պող. 22 · ավարտված</div>
+    </div>
+    <div class="cobox" style="margin:var(--s5) 0 var(--s4)"><i data-lucide="building-2"></i><div><div class="t1">Վճարում է ընկերությունը</div><div class="t2">ոչինչ մի՛ վերցրեք · Աննա · Eco City</div></div></div>
+    <div class="facts"><div><b>4,3 կմ</b><span>Ճանապարհ</span></div><div><b>6 րոպե</b><span>Տևողություն</span></div><div><b>1:20</b><span>Սպասում</span></div></div>
+    <button class="go">Պատրաստ եմ</button>
+  </section>
+
+  <!-- ── ride gone mid-approach (D21): cancelled by the passenger, or reassigned by the dispatcher ── -->
+  <section class="sheet" data-s="changed reassigned" data-sheet role="status">
+    <div class="grabber"></div>
+    <div class="gone">
+      <div class="notice info"><i data-lucide="refresh-cw"></i><div><b data-s="changed">Ուղևորը չեղարկեց պատվերը</b><b data-s="reassigned">Դիսպետչերը պատվերը փոխանցեց այլ վարորդի</b>Պատվերը փոխվել է — թարմացվում է</div></div>
+      <div class="was"><i data-lucide="map-pin-off"></i><div><div class="t1" data-eco="RIDE.pickup">Մաշտոցի պող. 37</div><div class="t2">Աննա · Eco City · 1 100 ֏</div></div></div>
+      <div class="line"><span class="d"></span>Գծում եք · Սպասում ենք պատվերի</div>
+      <a class="go quiet" href="driver-home.html"><span class="drain" aria-hidden="true"></span><i data-lucide="house"></i>Գլխավոր</a>
+    </div>
+  </section>
+
   <!-- ── forced: the dispatcher assigned it; acknowledge ── -->
   <section class="sheet" data-s="forced" data-sheet role="alertdialog" aria-label="Դիսպետչերը ձեզ նշանակել է այս պատվերը">
     <div class="grabber"></div>
@@ -208,7 +286,7 @@
   </section>
 
   <!-- ── call ── -->
-  <div class="scrim" data-s="call cancel"></div>
+  <div class="scrim" data-s="call cancel chat"></div>
   <section class="sheet top" data-s="call" data-sheet="modal" role="dialog" aria-label="Զանգել">
     <div class="grabber"></div>
     <div class="stitle">Զանգել</div>
@@ -217,32 +295,54 @@
     <button class="btn btn-quiet" style="margin-top:var(--s4)">Փակել</button>
   </section>
 
-  <!-- ── cancel with a reason ── -->
-  <section class="sheet top" data-s="cancel" data-sheet="modal" role="dialog" aria-label="Չեղարկե՞լ պատվերը">
+  <!-- ── MoreSheet: cancel or give back (D19, components/ride/sheets.tsx) ── -->
+  <section class="sheet top more" data-s="cancel" data-sheet="modal" role="dialog" aria-label="Չեղարկե՞լ պատվերը">
     <div class="grabber"></div>
     <div class="stitle">Չեղարկե՞լ պատվերը</div>
-    <div role="radiogroup">
-      <button class="reason" role="radio" aria-checked="false"><span class="rd"></span><span>Ուղևորը խնդրեց</span></button>
-      <button class="reason" role="radio" aria-checked="false"><span class="rd"></span><span>Մեքենան անսարք է</span></button>
-      <button class="reason" role="radio" aria-checked="false"><span class="rd"></span><span>Ճանապարհը փակ է</span></button>
-      <button class="reason" role="radio" aria-checked="false"><span class="rd"></span><span>Այլ պատճառ</span></button>
+    <div class="rchips" role="radiogroup" aria-label="Պատճառ">
+      <button class="chip" role="radio" aria-checked="false">Ուղևորը խնդրեց</button>
+      <button class="chip" role="radio" aria-checked="false">Մեքենան անսարք է</button>
+      <button class="chip" role="radio" aria-checked="false">Ճանապարհը փակ է</button>
+      <button class="chip" role="radio" aria-checked="false">Այլ պատճառ</button>
     </div>
-    <div class="foot" style="margin-top:var(--s5)">
-      <button class="btn btn-danger-quiet" disabled aria-disabled="true" style="opacity:.55">Չեղարկել պատվերը</button><!-- enabled once a reason is chosen; nothing is preselected -->
+    <div class="foot">
+      <button class="btn btn-danger-quiet">Չեղարկել պատվերը</button>
+      <button class="btn btn-line">Վերադարձնել պատվերը</button>
       <button class="btn btn-quiet">Ետ</button>
     </div>
+    <div class="cap">Վերադարձնելիս պատվերը կանցնի այլ վարորդի, չեղարկելիս՝ կավարտվի։</div>
+  </section>
+
+  <!-- ── chat (drawn ahead): quick replies only while moving ── -->
+  <section class="sheet top chat" data-s="chat" data-sheet="modal" role="dialog" aria-label="Հաղորդագրություններ՝ Աննա">
+    <div class="grabber"></div>
+    <div class="who"><span class="av">Ա</span><div><div class="t1">Աննա</div><div class="t2">ուղևոր · <span data-eco="RIDE.pickup">Մաշտոցի պող. 37</span></div></div><span class="sp"></span>
+      <button class="iconbtn flat" aria-label="Փակել"><i data-lucide="x"></i></button></div>
+    <div class="msgs">
+      <div class="bub out">Ճանապարհին եմ<span class="tm">9:41 · կարդացված</span></div>
+      <div class="bub in">Մատենադարանի դիմացի կանգառում եմ<span class="tm">9:43</span></div>
+    </div>
+    <div class="qr" role="group" aria-label="Արագ պատասխաններ">
+      <button><i data-lucide="thumbs-up"></i>Լավ</button>
+      <button><i data-lucide="clock-3"></i>2 րոպեից</button>
+      <button><i data-lucide="map-pin"></i>Տեղում եմ</button>
+      <button><i data-lucide="phone"></i>Զանգեք ինձ</button>
+    </div>
+    <div class="cap">Գրելը՝ միայն կանգնած ժամանակ</div>
   </section>
 </main>
 <script src="audit.js"></script>
 <script>
   const st0 = new URLSearchParams(location.search).get('state') || 'assigned'
   /* The clock follows ECO.RIDE: assigned 9:41, at the pickup 9:45, riding 9:47, dropped 9:51. */
-  statusBar(document.getElementById('s'), { enroute: '9:43', arrived: '9:45', noshow: '9:50', noshowsent: '9:51', offline: '9:45', call: '9:45', cancel: '9:45', inprogress: '9:47', done: '9:51' }[st0] || '9:41')
+  statusBar(document.getElementById('s'), { enroute: '9:43', arrived: '9:45', noshow: '9:50', noshowsent: '9:51', offline: '9:45', call: '9:45', cancel: '9:45', inprogress: '9:47', done: '9:51', chat: '9:43', 'company-inprogress': '9:47', 'company-done': '9:51', changed: '9:43', reassigned: '9:43' }[st0] || '9:41')
   const st = D.init([
     ['assigned', 'Assigned · On my way'], ['enroute', 'En route · Arrived (guidance)'], ['arrived', 'Arrived · wait, slide Start'],
     ['noshow', 'No-show available (5:00+)'], ['noshowsent', 'No-show raised'], ['inprogress', 'In progress · slide Complete'],
     ['done', 'Complete · collect cash'], ['forced', 'Forced acknowledgement'], ['offline', 'Offline · actions will sync'],
-    ['call', 'Call sheet'], ['cancel', 'Cancel with reason'],
+    ['call', 'Call sheet'], ['cancel', 'Cancel or give back'], ['chat', 'Chat · quick replies (ahead)'],
+    ['company-inprogress', 'Company ride · in progress'], ['company-done', 'Company ride · complete, collect nothing'],
+    ['changed', 'Cancelled by passenger (mid-approach)'], ['reassigned', 'Reassigned by dispatcher'],
   ])
   document.getElementById('fring').outerHTML = D.ring(28, 4, .4, '', 'var(--warn)')
   icons()
@@ -250,15 +350,15 @@
   const A = ROUTES.driverToPickup.pts, B = ROUTES.pickupToDrop.pts
   const bear = (p, q) => Math.atan2((q[1] - p[1]) * Math.cos(p[0] * Math.PI / 180), q[0] - p[0]) * 180 / Math.PI
   const car = (pts, i) => `<div class="me">${carTop(bear(pts[i], pts[Math.min(i + 2, pts.length - 1)]), 'var(--brand)', 'rgb(255 255 255 / .75)')}</div>`
-  const base = ['call', 'cancel'].includes(st) ? 'arrived' : st
+  const base = ['call', 'cancel'].includes(st) ? 'arrived' : st === 'chat' ? 'enroute' : { 'company-inprogress': 'inprogress', 'company-done': 'done', reassigned: 'changed' }[st] || st
   const main = document.querySelector('.sheet[data-sheet]:not([hidden]):not(.top)') || document.querySelector('.sheet[data-s~="arrived"]')
-  if (['call', 'cancel'].includes(st)) { main.hidden = false; for (const el of [main, document.getElementById('fab'), document.getElementById('map')]) { el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true') } }
+  if (['call', 'cancel', 'chat'].includes(st)) { main.hidden = false; for (const el of [main, document.getElementById('fab'), document.getElementById('map'), ...document.querySelectorAll('.guide:not([hidden])')]) { el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true') } }
   const sheetH = main.offsetHeight
   document.getElementById('fab').style.bottom = (sheetH + 12) + 'px'
   const topPad = { enroute: 200, inprogress: 200, offline: 140 }[base] || 110
   const near = (p, d) => [[p[0] - d, p[1] - d * 1.3], [p[0] + d, p[1] + d * 1.3]]
   const fit = { assigned: [...A, ...B.slice(0, 40)], enroute: A.slice(10), arrived: near(A[A.length - 1], .0016), noshow: near(A[A.length - 1], .0016),
-    noshowsent: near(A[A.length - 1], .0016), offline: near(A[A.length - 1], .0016), inprogress: B.slice(50), done: B, forced: [...A, ...B] }[base]
+    noshowsent: near(A[A.length - 1], .0016), offline: near(A[A.length - 1], .0016), inprogress: B.slice(50), done: B, forced: [...A, ...B], changed: near(A[18], .004) }[base]
   const map = makeMap(document.getElementById('map'), { sheetH, badge: { top: '170px', left: '16px' }, fit, padTL: [40, topPad], padBR: [40, sheetH + 30] })
   const P = A[A.length - 1], DROP = B[B.length - 1]
   if (base === 'assigned' || base === 'forced') {
@@ -278,6 +378,8 @@
     drawRoute(map, B.slice(60), { weight: 6 })
     htmlMarker(map, DROP, '<div class="pin b"></div>', [18, 18])
     htmlMarker(map, B[60], car(B, 60), [64, 64])
+  } else if (base === 'changed') {
+    htmlMarker(map, A[18], car(A, 18), [64, 64])
   } else if (base === 'done') {
     drawRoute(map, B, { weight: 5, color: cssVar('--ink-3') })
     htmlMarker(map, B[0], '<div class="pin a"></div>', [18, 18])

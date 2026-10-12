@@ -57,6 +57,11 @@
   .opts .divider { margin-left: 52px; }
   .modal .h-sub { margin: -4px 0 var(--s2); }
   .modal .btns { margin-top: var(--s4); }
+  .nocar .btns { margin-top: var(--s4); }
+  .nocar .btns .btn { margin-top: 0; }
+  .ctx { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: var(--r-pill); background: var(--brand-soft); color: var(--brand-ink);
+    font: var(--t-secondary-strong); white-space: nowrap; margin-bottom: var(--s2); }
+  .ctx svg { width: 15px; height: 15px; }
 </style>
 </head>
 <body>
@@ -68,9 +73,17 @@
   const CARS = [[[.0024, -.0031], 58], [[-.0019, .0027], 214], [[.0029, .0022], 140], [[-.0026, -.0024], 322]]
 
   const RD = ECO.RIDE
-  const order = () => `<div class="order"><div class="top">${R.car('city', 64, 32, '')}<span class="tn"><span class="t1">${RD.tier}</span>
-      <span class="t2">${R.i('banknote')}${ECO.PAY.cash.label}</span></span><span class="price">${R.amd(RD.fare)}</span></div>
-    <div class="legs"><div class="leg"><span class="m"><span class="dot"></span></span>${RD.pickup}</div><div class="leg"><span class="m"><span class="sq"></span></span>${RD.drop}</div></div></div>`
+  const order = (o = RD) => `<div class="order"><div class="top">${R.car('city', 64, 32, '')}<span class="tn"><span class="t1">${o.tier}</span>
+      <span class="t2">${R.i('banknote')}${ECO.PAY.cash.label}</span></span><span class="price">${R.amd(o.fare)}</span></div>
+    <div class="legs"><div class="leg"><span class="m"><span class="dot"></span></span>${o.pickup}</div><div class="leg"><span class="m"><span class="sq"></span></span>${o.drop}</div></div></div>`
+  /* Real Searching.tsx, exhausted: «Ազատ մեքենա դեռ չկա» + «Դիսպետչերը շարունակում է որոնել», call the dispatcher (brand) and cancel (line).
+     The search is not over: the dispatcher keeps looking, so there is no retry and no "book for later" (that action does not exist). */
+  const noCars = (o, ctx) => `<div class="map" id="map" aria-label="Քարտեզ"></div>
+          <section class="sheet r nocar" id="sheet"><div class="grabber"></div>
+            ${ctx ? `<div class="ctx">${R.i('calendar-clock')}${ctx}</div>` : ''}
+            <h2 class="h-title">Ազատ մեքենա դեռ չկա</h2><div class="h-sub">Դիսպետչերը շարունակում է որոնել</div>
+            <div class="bar" role="progressbar" aria-label="Որոնում"></div>${order(o)}
+            <div class="btns"><button class="btn btn-brand">${R.i('phone')}Զանգել դիսպետչերին</button><button class="btn btn-quiet">Չեղարկել</button></div></section>`
 
   const sheet = (title, sub, extra = '') => `<div class="map" id="map" aria-label="Քարտեզ"></div>
     <section class="sheet r" id="sheet"><div class="grabber"></div>
@@ -100,17 +113,15 @@
       { id: 'answering', label: 'Driver answering', note: 'An offer is out: that one car shows its line to the pickup',
         html: () => sheet('Վարորդը պատասխանում է…', 'Սովորաբար տևում է մի քանի վայրկյան'),
         map: searchMap({ cars: CARS.slice(1), pulse: false, offer: true }) },
-      { id: 'no-cars', label: 'No free car', note: 'Said plainly. Retry, book for later, or call the dispatcher, a person',
-        html: () => `<div class="map" id="map" aria-label="Քարտեզ"></div>
-          <section class="sheet r nocar" id="sheet"><div class="grabber"></div>
-            <h2 class="h-title">Ազատ մեքենա չկա</h2><div class="h-sub">Բոլոր մեքենաները զբաղված են</div>
-            <div class="opts">
-              <div class="row" role="button" tabindex="0"><span class="ic">${R.i('calendar-clock')}</span><span class="txt"><span class="t1">Նախապես</span><span class="t2">Պատվիրել ավելի ուշ ժամի</span></span>${R.i('chevron-right', 'class="chev"')}</div>
-              <div class="divider"></div>
-              <div class="row" role="button" tabindex="0"><span class="ic">${R.i('headset')}</span><span class="txt"><span class="t1">Զանգել օպերատորին</span><span class="t2">Կօգնենք հեռախոսով</span></span>${R.i('chevron-right', 'class="chev"')}</div>
-            </div>
-            <button class="btn btn-brand">${R.i('rotate-cw')}Կրկին որոնել</button></section>`,
-        map: searchMap({ cars: [], pulse: false }) },
+      { id: 'no-cars', label: 'No free car yet', note: 'Real Searching.tsx (exhausted): said plainly, the dispatcher keeps searching, so the one primary is a call to a person and cancel stays. No "book for later" and no retry: neither exists in the app',
+        html: () => noCars(RD), map: searchMap({ cars: [], pulse: false }) },
+      { id: 'preorder-nocars', label: 'Booking, no car yet', note: 'R42, drawn ahead: tomorrow\'s 08:30 booking activated at T−15 with no car. The same screen, with the booking named on top (new string) so the rider knows which order this is; 08:16',
+        time: '08:16', html: () => noCars(ECO.BOOKINGS.air, 'Ձեր ' + ECO.BOOKINGS.air.time + '-ի նախնական պատվերը'),
+        map: (s) => {
+          const B = ROUTES.pickupToDrop.pts, K = B[B.length - 1]
+          const m = R.map(s, { fit: R.bbox(K, .0034, .0044), padTL: [24, 96], padBR: [24, s.querySelector('#sheet').offsetHeight + 16] })
+          htmlMarker(m, K, '<div class="pin-a"></div>', [18, 18])
+        } },
       { id: 'cancel-confirm', label: 'Cancel?', note: 'Keeping the search is the easy target; cancel is red, not hidden',
         html: () => `<div class="map" id="map" aria-label="Քարտեզ"></div><div class="scrim"></div>
           <section class="sheet r modal" id="sheet" role="dialog" aria-label="Չեղարկե՞լ որոնումը"><div class="grabber"></div>

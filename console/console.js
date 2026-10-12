@@ -34,7 +34,7 @@
     { group: 'Ուղևորի հավելված', fold: true, items: [['promotions', 'megaphone', 'Ակցիաներ'], ['bizpartners', 'store', 'Բիզնես գործընկերներ'], ['apptexts', 'smartphone', 'Տեքստեր և կապ']] },
     { group: 'Կառավարում', fold: true, items: [['operators', 'user-cog', 'Օպերատորներ'], ['integrations', 'plug', 'Ինտեգրումներ'], ['audit', 'history', 'Աուդիտ'], ['settings', 'settings', 'Կարգավորումներ']] },
   ]
-  const PAGES = ['overview', 'dispatch', 'rides', 'drivers', 'tariffs', 'partners', 'approvals', 'topups', 'feeplans', 'companies', 'company', 'invoices']
+  const PAGES = ['overview', 'dispatch', 'rides', 'drivers', 'tariffs', 'partners', 'approvals', 'topups', 'feeplans', 'companies', 'company', 'invoices', 'settings']
   const href = (id) => (PAGES.includes(id) ? `${id}.html?theme=${THEME}` : '#')
 
   window.shell = function (active) {

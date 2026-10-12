@@ -268,3 +268,21 @@
 .oring .u { font: var(--t-secondary-strong); color: var(--ink-2); }
 .oring .gl { padding-top: 0; align-items: center; }
 .oring .gl svg { position: static; transform: none; width: 32px; height: 32px; color: var(--ink-2); }
+
+/* ── P0 pass, 2026-10-12 ──
+   Info tone: the concurrency sentence only («Պատվերը փոխվել է — թարմացվում է»), blue as in ui-native palette.ts
+   (info / infoSoft). Never a failure colour. */
+:root { --info: #1D5BBF; --info-soft: #E6EEF9; }
+:root[data-theme="dark"] { --info: #86B3FF; --info-soft: #1A2333; }
+:root[data-sun] { --info: #174C9F; --info-soft: #E3EBF7; }
+.notice.info { background: var(--info-soft); }
+.notice.info svg { color: var(--info); }
+/* Company ride (corporate A8): «the passenger pays nothing in the car» as a block, never a small tag at speed. */
+.cobox { display: flex; align-items: center; gap: var(--s3); padding: 12px var(--s4); border-radius: var(--r-card); background: var(--brand-soft); }
+.cobox > svg { width: 24px; height: 24px; color: var(--brand-ink); flex: none; }
+.cobox .t1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+.cobox .t2 { font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; }
+:root[data-sun] .cobox { box-shadow: inset 0 0 0 1.5px var(--brand-ink); }
+.offer .tags .chip.co { background: var(--brand-soft); color: var(--ink); }
+.offer .tags .chip.co svg { color: var(--brand-ink); }
+.offer .tags { flex-wrap: wrap; }

@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Rider pre-orders</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="rider.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="mapgl.local.js"></script>
+<script src="kit.js"></script>
+<script src="routes.js"></script>
+<script src="audit.js"></script>
+<script src="rider.js"></script>
+<style>
+  /* Upcoming pre-order cards: the same geometry as rider-history#list (history/index.tsx), no inline cancel (owner 2026-10-12). */
+  .bk { display: flex; flex-direction: column; gap: var(--s2); }
+  .ubk { width: calc(100% - 2 * var(--margin)); margin: 0 var(--margin); text-align: left; background: var(--surface); border-radius: var(--r-card);
+    padding: var(--s3); display: flex; flex-direction: column; gap: var(--s2); }
+  .ubk .hd { display: flex; align-items: center; gap: var(--s2); min-height: 24px; }
+  .ubk .hd > svg:first-child { width: 20px; height: 20px; color: var(--brand-ink); }
+  .ubk .hd .w { flex: 1; font: var(--t-body-strong); color: var(--brand-ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ubk .hd .chev { width: 20px; height: 20px; color: var(--ink-3); }
+  .ubk .rt { font: var(--t-body); color: var(--ink); }
+  .ubk .ft { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
+  .tg { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px; border-radius: 6px; font: var(--t-caption); line-height: 24px; white-space: nowrap; }
+  .tg svg { width: 14px; height: 14px; }
+  .tg.warn { background: var(--warn-soft); color: #94430A; } /* --warn measured 4.25:1 on --warn-soft at 12px; this is 5.9:1 */
+  :root[data-theme="dark"] .ubk .tg.warn, :root[data-theme="dark"] .tg.warn { color: var(--warn); }
+  .tg.co { background: var(--surface-2); color: var(--ink-2); }
+  .help { margin: var(--s6) var(--margin) 0; display: flex; align-items: center; gap: var(--s3); min-height: 56px; padding: 0 var(--s4); width: calc(100% - 2 * var(--margin));
+    border-radius: var(--r-card); background: var(--surface); text-align: left; }
+  .help .ic { width: 36px; height: 36px; border-radius: 50%; background: var(--brand-soft); color: var(--brand-ink); display: grid; place-items: center; flex: none; }
+  .help .ic svg { width: 18px; height: 18px; }
+  .help .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .help .t1 { font: var(--t-body-strong); color: var(--ink); }
+  .help .t2 { font: var(--t-secondary); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+  /* Booking detail: the route on the map, the booking as a sheet. One hero: the time. */
+  #sheet { padding: var(--s5) var(--margin) 34px; }
+  .eyebrow { display: flex; align-items: center; gap: 6px; font: var(--t-secondary-strong); color: var(--brand-ink); white-space: nowrap; }
+  .eyebrow svg { width: 16px; height: 16px; }
+  .when { font: var(--t-hero); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; letter-spacing: -.4px; margin-top: var(--s1); }
+  .when.long { font: 700 32px/40px var(--font); } /* a weekday name: the hero steps down to 32 rather than run off the sheet */
+  .wsub { font: var(--t-body); color: var(--ink-2); white-space: nowrap; }
+  .stops { margin-top: var(--s3); position: relative; }
+  .stop { display: flex; align-items: center; gap: var(--s3); min-height: 36px; }
+  .stop .g { width: 18px; display: grid; place-items: center; flex: none; }
+  .stop .g i { display: block; width: 10px; height: 10px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 3px var(--surface-3); }
+  .stop.b .g i { border-radius: 2px; }
+  .stop .a { flex: 1; font: var(--t-body); color: var(--ink); white-space: nowrap; }
+  .stop .tm { font: var(--t-secondary); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .stops::before { content: ''; position: absolute; left: 8.5px; top: 22px; bottom: 22px; width: 1px; background: var(--ink-3); opacity: .5; }
+  .hr { height: 1px; background: var(--hairline); margin: var(--s3) 0; }
+  .ln { display: flex; justify-content: space-between; align-items: center; gap: var(--s3); min-height: 28px; font: var(--t-secondary); color: var(--ink-2); }
+  .ln span { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+  .ln span svg { width: 16px; height: 16px; }
+  .ln b { font: var(--t-secondary-strong); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+  .ln b svg { width: 16px; height: 16px; }
+  .ln b .cashi { color: var(--ok); }
+  .drv { display: flex; align-items: center; gap: var(--s3); }
+  .drv .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .drv .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .drv .t1 span { font: var(--t-secondary); color: var(--ink-2); display: inline-flex; align-items: center; gap: 2px; }
+  .drv .t1 svg { width: 13px; height: 13px; fill: currentColor; }
+  .drv .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .notice { display: flex; gap: var(--s2); align-items: flex-start; padding: var(--s3); border-radius: var(--r-card); background: var(--surface-2); font: var(--t-secondary); color: var(--ink); }
+  .notice svg { width: 18px; height: 18px; flex: none; margin-top: 0; color: var(--ink-2); }
+  .notice.warn { background: var(--warn-soft); }
+  .notice.warn svg { color: var(--warn); }
+  .notice b { display: block; font: var(--t-secondary-strong); }
+  #sheet .btns { margin-top: var(--s4); }
+  .cap { font: var(--t-caption); color: var(--ink-2); text-align: center; margin-top: var(--s2); }
+  .confirm .body { font: var(--t-body); color: var(--ink-2); margin-bottom: var(--s4); }
+
+  /* iOS call action sheet (tel:): system chrome, not the app's — system blue, its own two cards. */
+  .ios-as { position: absolute; z-index: 16; left: 8px; right: 8px; bottom: 34px; display: flex; flex-direction: column; gap: 8px; }
+  .ios-as .grp { border-radius: 14px; background: rgb(250 250 252 / .97); overflow: hidden; }
+  .ios-as .hd { padding: 14px 16px; font: 400 13px/18px var(--font); color: #5E5E63; text-align: center; border-bottom: 1px solid rgb(60 60 67 / .18); }
+  .ios-as button { width: 100%; height: 58px; font: 400 20px/24px var(--font); color: #0060DF; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .ios-as button svg { width: 22px; height: 22px; }
+  .ios-as .x { background: #fff; border-radius: 14px; font-weight: 600; }
+  :root[data-theme="dark"] .ios-as .grp { background: rgb(44 44 46 / .98); }
+  :root[data-theme="dark"] .ios-as .hd { color: #AEAEB2; border-color: rgb(84 84 88 / .5); }
+  :root[data-theme="dark"] .ios-as button { color: #4DA3FF; }
+  :root[data-theme="dark"] .ios-as .x { background: #2C2C2E; }
+
+  /* Lock screen: system chrome on a wallpaper; white clock, notification cards in the system material (opaque enough to read). */
+  .lock { position: absolute; inset: 0; background: radial-gradient(120% 70% at 20% 10%, #6E8C6A 0%, transparent 60%), radial-gradient(90% 60% at 90% 80%, #2F4F57 0%, transparent 70%), linear-gradient(170deg, #3E5B4C, #18252A 70%, #0D1417); }
+  :root[data-theme="dark"] .lock { background: radial-gradient(120% 70% at 20% 10%, #33452F 0%, transparent 60%), radial-gradient(90% 60% at 90% 80%, #1B2E33 0%, transparent 70%), linear-gradient(170deg, #1E2C25, #0B1013 70%, #050708); }
+  .screen:has(.lock) .statusbar { color: #fff; }
+  .screen:has(.lock) .homebar { background: #fff; }
+  .lock .lk { position: absolute; top: 58px; left: 0; right: 0; display: flex; justify-content: center; color: #fff; }
+  .lock .lk svg { width: 18px; height: 18px; }
+  .lock .date { position: absolute; top: 92px; left: 0; right: 0; text-align: center; font: 500 20px/26px var(--font); color: #fff; }
+  .lock .big { position: absolute; top: 124px; left: 0; right: 0; text-align: center; font: 600 96px/104px var(--font); color: #fff; letter-spacing: -2px; font-variant-numeric: tabular-nums; }
+  .lock .stack { position: absolute; left: 8px; right: 8px; top: 304px; display: flex; flex-direction: column; gap: 8px; }
+  .nt { border-radius: 22px; padding: 12px 14px; background: rgb(246 246 246 / .94); color: #111113; display: flex; gap: 10px; align-items: flex-start; box-shadow: 0 6px 24px rgb(0 0 0 / .18); }
+  :root[data-theme="dark"] .nt { background: rgb(36 36 38 / .95); color: #F2F2F3; }
+  .nt img.mk { width: 38px; height: 38px; border-radius: 9px; flex: none; background: #fff; padding: 4px; object-fit: contain; }
+  .nt .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .nt .r1 { display: flex; justify-content: space-between; gap: 8px; font: 600 15px/20px var(--font); }
+  .nt .r1 small { font: 400 13px/20px var(--font); color: #4A4A50; white-space: nowrap; }
+  :root[data-theme="dark"] .nt .r1 small { color: #B5B5BB; }
+  .nt .r2 { font: 600 15px/20px var(--font); }
+  .nt .r3 { font: 400 15px/20px var(--font); }
+  .nt.old { opacity: 1; transform: scale(.96); }
+  .lock .cnt { position: absolute; left: 0; right: 0; bottom: 120px; text-align: center; font: 500 13px/18px var(--font); color: #fff; }
+  .lock .ctl { position: absolute; bottom: 48px; width: 50px; height: 50px; border-radius: 50%; background: rgb(0 0 0 / .32); color: #fff; display: grid; place-items: center; }
+  .lock .ctl svg { width: 22px; height: 22px; }
+
+  /* In-app reminder banner (drawn ahead; the push itself too). */
+  .banner.rem { background: var(--surface); color: var(--ink); top: 58px; }
+  .banner.rem svg { color: var(--brand-ink); }
+  .banner.rem .b1, .banner.rem .b2 { color: var(--ink); }
+  .banner.rem .b2 { color: var(--ink-2); opacity: 1; }
+  .banner.rem .ba { color: var(--ink); background: var(--surface-2); }
+  :root[data-theme="dark"] .banner.rem { background: var(--surface-3); }
+  :root[data-theme="dark"] .banner.rem svg { color: var(--brand-ink); }
+</style>
+</head>
+<body>
+<script>
+/* Real street geometry (OSRM over OpenStreetMap, ODbL), fetched 2026-10-12 for the pre-order bookings (ECO.BOOKINGS). [lat, lng]. */
+ROUTES.preAir = { m: 14742, s: 1230, pts: [[40.206708,44.503782],[40.206399,44.504441],[40.205481,44.505095],[40.204759,44.503279],[40.204318,44.502176],[40.204082,44.501602],[40.202996,44.498929],[40.202872,44.498628],[40.202428,44.497484],[40.201647,44.495615],[40.201432,44.494992],[40.201145,44.49452],[40.200917,44.494345],[40.200513,44.494151],[40.199807,44.493798],[40.198956,44.493301],[40.198106,44.492905],[40.197743,44.492696],[40.197089,44.491608],[40.196422,44.490502],[40.195291,44.488607],[40.19445,44.48718],[40.193467,44.485512],[40.193153,44.48498],[40.192913,44.484573],[40.192357,44.483655],[40.190298,44.480188],[40.189677,44.47917],[40.188309,44.476902],[40.187751,44.475663],[40.187296,44.475026],[40.186779,44.474804],[40.186151,44.474964],[40.185234,44.476],[40.183985,44.476892],[40.181787,44.478394],[40.180049,44.479534],[40.174492,44.482576],[40.172049,44.483645],[40.169922,44.484602],[40.169234,44.484955],[40.168793,44.484975],[40.167889,44.484857],[40.167676,44.484745],[40.166884,44.483542],[40.166493,44.48276],[40.166191,44.48215],[40.164273,44.477967],[40.163116,44.475368],[40.161956,44.472764],[40.161185,44.471037],[40.159962,44.468365],[40.158888,44.465553],[40.158505,44.464464],[40.158195,44.46355],[40.157646,44.461701],[40.157548,44.461288],[40.15677,44.457973],[40.156594,44.457071],[40.156551,44.456605],[40.156549,44.456259],[40.156817,44.454198],[40.157048,44.453034],[40.157885,44.449959],[40.158331,44.448322],[40.158525,44.447608],[40.158971,44.446009],[40.159747,44.443033],[40.159876,44.442472],[40.160031,44.441338],[40.160043,44.440744],[40.160001,44.44038],[40.15974,44.439443],[40.158743,44.436972],[40.158205,44.435511],[40.158035,44.434456],[40.15807,44.433374],[40.158193,44.4322],[40.158596,44.430668],[40.159022,44.429622],[40.159832,44.427732],[40.160453,44.426288],[40.163227,44.419834],[40.163718,44.41869],[40.164315,44.417232],[40.164546,44.416341],[40.164642,44.415647],[40.164654,44.415013],[40.164401,44.411989],[40.164088,44.408393],[40.163985,44.407222],[40.16368,44.403728],[40.163643,44.4033],[40.1633,44.403328],[40.161179,44.403642],[40.16102,44.403609],[40.160896,44.403553],[40.160748,44.403446],[40.160614,44.403314],[40.159388,44.401998],[40.159059,44.401731],[40.158759,44.40155],[40.158473,44.401425],[40.158112,44.401335],[40.157636,44.40131],[40.156644,44.401305],[40.156526,44.401273],[40.156415,44.401195],[40.156273,44.400963],[40.156157,44.400806],[40.156009,44.400716],[40.155377,44.400635],[40.155141,44.400598],[40.154795,44.400455],[40.154341,44.40014],[40.15322,44.398955]] }
+ROUTES.preSun = { m: 2173, s: 259, pts: [[40.190505,44.51519],[40.19052,44.51519],[40.190528,44.515037],[40.190532,44.514968],[40.19056,44.51458],[40.190625,44.514575],[40.190626,44.514553],[40.190645,44.514294],[40.190632,44.514241],[40.190641,44.514051],[40.190623,44.514017],[40.190443,44.514006],[40.190269,44.513596],[40.190452,44.513427],[40.190178,44.512875],[40.190128,44.512774],[40.190312,44.512604],[40.190435,44.512482],[40.190607,44.512287],[40.190798,44.512026],[40.191004,44.511708],[40.191104,44.511515],[40.191172,44.511377],[40.191235,44.511213],[40.191364,44.510866],[40.191468,44.510513],[40.191543,44.510146],[40.191632,44.509493],[40.191822,44.508091],[40.191855,44.507803],[40.191875,44.507627],[40.191762,44.507617],[40.191741,44.507786],[40.191593,44.508906],[40.191513,44.509504],[40.191433,44.51012],[40.191418,44.510197],[40.19137,44.510441],[40.19127,44.510786],[40.191146,44.51113],[40.191128,44.511171],[40.191036,44.511375],[40.190902,44.511615],[40.190745,44.511873],[40.190503,44.512195],[40.190357,44.512358],[40.190219,44.512498],[40.189723,44.512942],[40.189253,44.513351],[40.189112,44.513473],[40.188739,44.513797],[40.188679,44.513852],[40.188545,44.513973],[40.188527,44.513989],[40.188403,44.514097],[40.188347,44.514145],[40.188272,44.51421],[40.187735,44.514679],[40.187622,44.514777],[40.18755,44.514839],[40.187522,44.514863],[40.187234,44.515082],[40.18691,44.514726],[40.18624,44.513946],[40.186315,44.513874],[40.186516,44.513675],[40.186519,44.513602],[40.186559,44.512757],[40.186566,44.512537],[40.186575,44.512293],[40.186412,44.512084],[40.186338,44.511991],[40.186257,44.512104],[40.18613,44.512283],[40.185646,44.512946],[40.18561,44.512999],[40.185526,44.513109],[40.185457,44.513206],[40.18559,44.513365],[40.185833,44.513653]] }
+ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.50409],[40.206137,44.504628],[40.205481,44.505095],[40.204847,44.503499],[40.204424,44.50244],[40.204318,44.502176],[40.204089,44.501618],[40.203633,44.50049],[40.202996,44.498929],[40.202904,44.498705],[40.202799,44.498451],[40.202428,44.497484],[40.201804,44.496037],[40.201615,44.495528],[40.201432,44.494992],[40.201204,44.494581],[40.201083,44.494454],[40.200917,44.494345],[40.20058,44.49417],[40.200394,44.494096],[40.199807,44.493798],[40.199109,44.493426],[40.198507,44.493159],[40.198243,44.493047],[40.198108,44.493032],[40.197983,44.493039],[40.197811,44.493067],[40.197429,44.493168],[40.196762,44.493443],[40.196392,44.493729],[40.196025,44.494137],[40.195723,44.494578],[40.195113,44.495541],[40.194569,44.496406],[40.19379,44.497647],[40.192932,44.49902],[40.192609,44.499628],[40.192343,44.50047],[40.192276,44.501165],[40.192233,44.50222],[40.192144,44.504193],[40.192006,44.504423],[40.191967,44.504415],[40.191086,44.504207],[40.190794,44.504144],[40.189307,44.503774],[40.188931,44.50385],[40.187379,44.504654],[40.187146,44.504739],[40.187138,44.504945],[40.187018,44.505126],[40.186685,44.50512],[40.186237,44.50509],[40.18556,44.505019],[40.185337,44.504978],[40.185038,44.504786],[40.184883,44.504682],[40.184737,44.504834],[40.184393,44.505331],[40.184225,44.505574],[40.184796,44.506254],[40.185145,44.506695],[40.185594,44.507227],[40.186138,44.507872],[40.185612,44.508578],[40.18534,44.508971],[40.184939,44.509548],[40.184689,44.509899],[40.184603,44.51002],[40.183907,44.510996],[40.183763,44.511186],[40.183578,44.511452],[40.183239,44.511923],[40.182864,44.512455],[40.182676,44.512229],[40.182202,44.511662],[40.181857,44.51125],[40.181538,44.510874],[40.181351,44.51067],[40.181109,44.510405],[40.180969,44.510318],[40.180288,44.511311],[40.17988,44.511905],[40.179793,44.512028],[40.17948,44.512477]] }
+</script>
+<script>
+  const BK = ECO.BOOKINGS, C = ECO.COMPANY, DP = ECO.DISPATCH
+  const A = R.amd
+  /* Each booking's map: its own OSRM route (page-local ROUTES.pre*), ECO numbers for km / min / fare. */
+  const ROUTE_OF = { air: 'preAir', sun: 'preSun', co: 'preCo' }
+  const keyOf = (b) => Object.keys(BK).find((k) => BK[k] === b)
+
+  const booking = (b) => `<button class="ubk" aria-label="${b.when}, ${b.pickup} → ${b.drop}${b.problem ? ', Մեքենան դեռ նշանակված չէ' : ''}">
+      <span class="hd">${R.i('calendar-clock')}<span class="w">${b.when}</span>${R.i('chevron-right', 'class="chev"')}</span>
+      <span class="rt">${b.pickup} → ${b.drop}</span>
+      ${b.problem || b.pay === 'company' ? `<span class="ft">${b.problem ? `<span class="tg warn">${R.i('triangle-alert')}Մեքենան դեռ նշանակված չէ</span>` : ''}${b.pay === 'company' ? `<span class="tg co">${R.i('building-2')}${ECO.PAY.company.short}</span>` : ''}</span>` : ''}</button>`
+  const helpRow = () => `<button class="help" aria-label="Զանգել դիսպետչերին ${DP.phone}"><span class="ic">${R.i('phone')}</span><span class="txt"><span class="t1">Փոփոխել կամ չեղարկել</span><span class="t2">Զանգել դիսպետչերին · ${DP.phone}</span></span>${R.i('chevron-right', 'class="chev" style="width:20px;height:20px;color:var(--ink-3)"')}</button>`
+  const list = (extra = '') => `<div class="page"${extra ? ' style="padding-top:132px"' : ''}>${extra}<nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl"></span><span class="navend"></span></nav>
+      <h1 class="large">Նախնական պատվերներ</h1><div class="scroll"><div class="sect">Շուտով</div><div class="bk">${[BK.air, BK.sun, BK.co].map(booking).join('')}</div>${helpRow()}</div></div>`
+
+  const fab = () => `<button class="fab" style="top:62px;left:16px" aria-label="Հետ">${R.i('arrow-left')}</button>`
+  const stops = (b) => `<div class="stops"><div class="stop"><span class="g"><i></i></span><span class="a">${b.pickup}</span><span class="tm">${b.time}</span></div>
+      <div class="stop b"><span class="g"><i></i></span><span class="a">${b.drop}</span><span class="tm">${ECO.km(b.km)} · ${b.min} ր</span></div></div>`
+  const payLine = (b) => b.pay === 'company'
+    ? `<div class="ln"><span>Վճարում</span><b>${R.i('building-2')}${C.name}</b></div><div class="ln"><span>${C.refLabel}</span><b>${b.ref}</b></div>`
+    : `<div class="ln"><span>Վճարում</span><b>${R.i('banknote', 'class="cashi"')}${ECO.PAY.cash.label}</b></div>`
+  const driverRow = (d) => `<div class="drv"><span class="avatar ini" role="img" aria-label="Վարորդ՝ ${d.name}">${d.ini}</span>
+      <span class="txt"><span class="t1">${d.first} <span>${R.i('star')}${d.rating}</span></span><span class="t2">${d.car}</span></span>${R.plate(d.plate)}</div>`
+  /* The booking sheet. Owner 2026-10-12: «Սկսել հիմա» (start now) is the one primary; changes and cancellation go through the dispatcher. */
+  const detailSheet = (b) => `<div class="map" id="map" aria-label="Երթուղի"></div>${fab()}
+      <section class="sheet" id="sheet">
+        <div class="eyebrow">${R.i('calendar-clock')}Նախնական պատվեր · ${b.day}</div>
+        <div class="when${b.when.length > 12 ? ' long' : ''}">${b.when.replace(/^./, (c) => c.toUpperCase())}</div>
+        ${stops(b)}
+        <div class="hr"></div>
+        <div class="ln"><span>${b.tier}</span><b>${A(b.fare)}</b></div>
+        ${payLine(b)}
+        <div class="hr"></div>
+        ${b.driver ? driverRow(b.driver) : `<div class="notice warn">${R.i('triangle-alert')}<span><b>Մեքենան դեռ նշանակված չէ</b>Դիսպետչերը մեքենա կնշանակի ժամանակից առաջ</span></div>`}
+        <div class="btns"><button class="btn btn-brand">${R.i('zap')}Սկսել հիմա</button><button class="btn btn-quiet">${R.i('phone')}Զանգել դիսպետչերին</button></div>
+        <div class="cap">Փոփոխել կամ չեղարկել՝ դիսպետչերի միջոցով</div>
+      </section>`
+  const mapFor = (b) => (s) => {
+    const pts = ROUTES[ROUTE_OF[keyOf(b)]].pts
+    const sheetH = s.querySelector('#sheet').offsetHeight
+    const m = R.map(s, { fit: pts, padTL: [56, 96], padBR: [56, sheetH + 32] })
+    drawRoute(m, pts, { weight: 5 })
+    htmlMarker(m, pts[0], '<div class="pin-a"></div>', [18, 18])
+    htmlMarker(m, pts[pts.length - 1], '<div class="pin-b"></div>', [18, 18])
+  }
+  /* A modal over the dimmed booking sheet. */
+  const overDetail = (b, top) => detailSheet(b).replace('<section class="sheet" id="sheet">', '<div class="scrim" aria-hidden="true"></div><section class="sheet" id="sheet" aria-hidden="true" inert>') + top
+
+  /* Lock screen. reminder: ECO.DISPATCH.reminderMin before the booking (console Settings → Dispatch). */
+  const minus = (t, m) => { const [h, mm] = t.split(':').map(Number), x = h * 60 + mm - m; return `${String(Math.floor(x / 60)).padStart(2, '0')}:${String(x % 60).padStart(2, '0')}` }
+  const B = BK.air, D = B.driver
+  const remindAt = minus(B.time, DP.reminderMin)
+  const nt = (t, r2, r3, cls = '') => `<div class="nt ${cls}"><img class="mk" src="assets/eco/mark.png" alt=""><span class="txt"><span class="r1"><span>Eco Taxi</span><small>${t}</small></span><span class="r2">${r2}</span><span class="r3">${r3}</span></span></div>`
+  const lock = (clock, cards) => `<div class="lock" aria-label="Կողպված էկրան"><div class="lk" aria-hidden="true">${R.i('lock')}</div>
+      <div class="date">${B.day.replace(' հոկտ.', ' հոկտեմբերի')}</div><div class="big">${clock.replace(/^0/, '')}</div>
+      <div class="stack">${cards}</div>
+      <div class="ctl" aria-hidden="true" style="left:46px">${R.i('flashlight')}</div><div class="ctl" aria-hidden="true" style="right:46px">${R.i('camera')}</div></div>`
+  const reminderCard = (t) => nt(t, `${DP.reminderMin} րոպեից՝ ձեր նախնական պատվերը`, `${B.time} · ${B.pickup} → ${B.dropShort}`)
+
+  Rider.page({
+    title: 'Rider · Pre-orders',
+    sub: 'A booking for later, from the list to the car: list, the booking, start it now, call the dispatcher to change it, the reminder, and the push when a driver is assigned. The rider cannot cancel or edit in the app (owner, 12 Oct). ECO.BOOKINGS: tomorrow 08:30 to Zvartnots with Սուրեն pre-assigned',
+    states: [
+      { id: 'list', group: 'Bookings', label: 'List', note: 'Reached from History («Նախնական պատվերներ» leads it) and the home card. Soonest first; a warn tag when no car is on it yet; the company marker on an on-account booking. No inline cancel: a card opens the booking, and the one way to change or cancel is the dispatcher',
+        html: () => list() },
+      { id: 'detail', group: 'Bookings', label: 'Booking', note: 'Drawn ahead (R35): the time is the hero; route, tier and fixed price, payment, the pre-assigned driver and plate. «Սկսել հիմա» is the one primary; «Զանգել դիսպետչերին» for any change. Needs tier, fare, payment and driver on the customer booking wire',
+        html: () => detailSheet(BK.air), map: mapFor(BK.air) },
+      { id: 'detail-nodriver', group: 'Bookings', label: 'No car yet', note: 'problemReason set (the pre-assigned driver was blocked): the same warn words as the list, and what happens next. Still the rider\'s booking; nothing failed',
+        html: () => detailSheet(BK.sun), map: mapFor(BK.sun) },
+      { id: 'detail-company', group: 'Bookings', label: 'Company', note: 'An on-account booking: «Ընկերության հաշվին» names the company and its cost code where the payment would be. No driver yet (Monday)',
+        html: () => detailSheet(BK.co), map: mapFor(BK.co) },
+
+      { id: 'start-confirm', group: 'Actions', label: 'Start now', note: 'Owner decision: a rider may bring a booking forward. One question, same price; the search starts at once and the screen becomes the live ride (rider-searching → rider-ride). The pre-assigned driver gets it first if free (dispatch decides)',
+        html: () => overDetail(BK.air, `<section class="sheet r modal confirm" role="dialog" aria-label="Սկսե՞լ հիմա"><div class="grabber"></div>
+          <div class="mhead"><h2 class="h-title">Սկսե՞լ հիմա</h2><button class="xbtn" aria-label="Փակել">${R.i('x')}</button></div>
+          <p class="body">Մեքենան կփնտրենք հենց հիմա։ Գինը նույնն է՝ ${A(BK.air.fare)}։</p>
+          <div class="btns"><button class="btn btn-brand">Սկսել հիմա</button><button class="btn btn-quiet">Ոչ, թողնել</button></div></section>`),
+        map: mapFor(BK.air) },
+      { id: 'call', group: 'Actions', label: 'Call to change', note: '«Զանգել դիսպետչերին» opens the phone (tel:, the fleet\'s dispatcherPhone): iOS asks once. Changing the time, the addresses or cancelling is the dispatcher\'s (§8: bookings are edited by the operator)',
+        html: () => overDetail(BK.air, `<div class="ios-as" role="dialog" aria-label="Զանգ"><div class="grp"><div class="hd">Դիսպետչեր · Eco Taxi</div><button>${R.i('phone')}Զանգել ${DP.phone}</button></div><button class="x">Չեղարկել</button></div>`),
+        map: mapFor(BK.air) },
+
+      { id: 'reminder', group: 'Before pickup', label: 'Reminder', time: ' ', note: `Drawn ahead (owner: yes): a push ${DP.reminderMin} min before pickup; the lead is set in the console (Settings → Dispatch, ECO.DISPATCH.reminderMin). Tapping opens the booking`,
+        html: () => lock(remindAt, reminderCard('հիմա')) },
+      { id: 'reminder-inapp', group: 'Before pickup', label: 'Reminder, app open', time: remindAt.replace(/^0/, ''), note: 'The same reminder while the app is open: a banner over the screen with «Բացել», not a modal',
+        html: () => list(R.banner({ icon: 'bell-ring', t1: `${DP.reminderMin} րոպեից՝ ձեր նախնական պատվերը`, t2: `${B.time} · ${B.pickup}`, action: 'Բացել' }).replace('class="banner ', 'data-overlay class="banner rem ')) },
+      { id: 'activated', group: 'Before pickup', label: 'Driver assigned', time: ' ', note: `The sweep turns the booking into a ride (${B.assignedAt}) and the ride_assigned push says so, with the booked pickup time. Tap → rider-home.html?active=preorder (the resume card) → rider-ride.html#preorder. The earlier reminder sits under it`,
+        html: () => lock(B.assignedAt, nt('հիմա', `Վարորդը նշանակված է · նստել ${B.time}`, `${D.first} · ${D.car.split(' · ')[0]} · ${D.plate}`) + reminderCard('12 ր առաջ').replace('class="nt ', 'class="nt old ')) },
+    ],
+  })
+</script>
+</body>
+</html>

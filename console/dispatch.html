@@ -49,6 +49,59 @@
   .legend { display: flex; align-items: center; gap: 12px; height: 32px; padding: 0 12px; border-top: 1px solid var(--line-soft); background: var(--surface-alt); border-radius: 0 0 var(--r-card) var(--r-card); font: var(--c-small); color: var(--ink-faint); flex: none; white-space: nowrap; }
   .legend span { display: inline-flex; gap: 4px; align-items: center; }
 
+  /* Scheduled lane (scheduled-lane.tsx): ordered by the promised hour, which leads in its own mono column. No age, no SLA,
+     no claim. A problem row takes a third line so Release / Reassign stay one click deep (§9.4). */
+  .bk { position: relative; display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; column-gap: 10px; row-gap: 2px; padding: 8px 12px 8px 16px; border-bottom: 1px solid var(--line-soft); }
+  .bk::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--lane); }
+  .bk:hover, .bk.sel { background: var(--surface-alt); }
+  .bk time { grid-row: 1 / 3; align-self: start; min-height: 46px; display: flex; flex-direction: column; justify-content: center; font: 500 14px/20px var(--mono); font-variant-numeric: tabular-nums; }
+  .bk time .dd { font: 400 12px/16px var(--font); color: var(--ink-faint); }
+  .bk .a { font: var(--c-row); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .bk .a .arr { color: var(--ink-faint); margin: 0 4px; font-weight: 400; }
+  .bk .m { grid-column: 2 / 4; display: flex; align-items: center; gap: 8px; min-width: 0; font: var(--c-small); color: var(--ink-muted); height: 24px; }
+  .bk .m .ph { font: 400 12px/16px var(--mono); width: 92px; flex: none; }
+  .bk .m3 { grid-column: 2 / 4; display: flex; align-items: center; height: 18px; }
+  .bk .st { display: inline-flex; align-items: center; gap: 4px; font: var(--c-small); color: var(--ink-muted); white-space: nowrap; flex: none; }
+  .bk .st.ok { color: var(--ok-text); font-weight: 500; }
+  .bk .st svg { width: 12px; height: 12px; }
+  .bk .m .trunc { flex: 1; }
+  .bk .m .drv { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; margin-left: auto; color: var(--ink); font-weight: 500; }
+  .bk .m .drv svg { width: 14px; height: 14px; color: var(--ink-faint); }
+  .bk .m .co-badge, .bk .m .none { margin-left: auto; }
+  .bk .m .none { color: var(--ink-faint); white-space: nowrap; }
+  .bk .m .why { color: var(--lane-problems); font-weight: 500; }
+  .bk .x { align-self: start; }
+  .bk .acts { grid-column: 2 / 4; display: flex; gap: 4px; align-items: flex-end; height: 28px; }
+  .bk.p { --lane: var(--lane-problems); }
+  .q-book { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 12px 12px 16px; border-bottom: 1px solid var(--line-soft); background: var(--surface); position: relative; }
+  .q-book .full { grid-column: 1 / 3; }
+  .q-book .foot { display: flex; align-items: center; gap: 8px; min-height: 28px; }
+  .q-book .reads { flex: 1; min-width: 0; font: var(--c-small); color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .q-book .reads .mono { color: var(--ink); font-weight: 500; }
+  .dtp { position: absolute; left: 16px; top: calc(100% - 4px); z-index: 12; width: 304px; background: var(--surface); border-radius: var(--r-ctl); box-shadow: var(--e2), 0 0 0 1px var(--line-soft); padding: 8px; }
+  .dtp .mh { display: flex; align-items: center; justify-content: space-between; font: 600 13px/18px var(--font); margin-bottom: 6px; }
+  .dtp .grid7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+  .dtp .grid7 .wd { font: 600 12px/16px var(--font); color: var(--ink-faint); padding: 2px 0; }
+  .dtp .grid7 .d { height: 28px; display: grid; place-items: center; border-radius: 6px; font: 400 12px/16px var(--mono); color: var(--ink); }
+  .dtp .grid7 .d.past { color: var(--ink-faint); }
+  .dtp .grid7 .d.today { box-shadow: inset 0 0 0 1px var(--line-control); }
+  .dtp .grid7 .d.on { background: var(--ink); color: var(--surface); font-weight: 500; }
+  .dtp .quick { display: flex; gap: 4px; margin-top: 8px; }
+  .dtp .quick .chip { height: 24px; font: var(--c-small); padding: 0 8px; }
+  .dtp .ft { margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--line-soft); text-align: center; font: var(--c-small); color: var(--ink-faint); }
+  /* Intake billing (intake-billing.tsx) and sub-tabs (intake-sub-tabs.tsx) */
+  .billing { display: flex; flex-direction: column; gap: 6px; }
+  .billing .seg { display: flex; } .billing .seg button { flex: 1; justify-content: center; }
+  .req { font: 500 12px/16px var(--font); color: var(--warning); margin-left: 4px; }
+  .hint-warn { font: var(--c-small); color: var(--warning); }
+  .co-badge { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 6px; border-radius: var(--r-tag); background: var(--brand-tint); color: var(--brand-text); font: var(--c-label); white-space: nowrap; }
+  .co-badge svg { width: 12px; height: 12px; }
+  .in-tabs { display: flex; gap: 12px; border-bottom: 1px solid var(--line-soft); }
+  .in-tabs button { height: 30px; font: var(--c-strong); color: var(--ink-muted); white-space: nowrap; box-shadow: inset 0 -2px 0 transparent; display: inline-flex; align-items: center; gap: 6px; }
+  .in-tabs button[aria-selected="true"] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--ink); }
+  .in-tabs .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand-vivid); }
+  .textarea { min-height: 56px; align-items: flex-start; padding-top: 8px; height: auto; }
+
   /* Intake */
   .in .card-b { display: flex; flex-direction: column; gap: 12px; padding: 12px var(--inset); }
   .pinrow { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 8px; align-items: center; }
@@ -120,7 +173,7 @@
       <!-- QUEUE: the centrepiece. No pagination: one scrolling list, lanes sticky. -->
       <section class="card q" aria-label="Հերթ">
         <div class="card-h" style="padding:0 12px">
-          <div class="tabs" role="tablist"><button class="on" role="tab">Հիմա <span class="c num">13</span></button><button role="tab">Պլանավորված <span class="c num">3</span></button></div>
+          <div class="tabs" role="tablist" id="qtabs"></div>
           <div class="end"><span class="chip" style="height:26px">Իմերը <span class="c num">1</span></span><button class="btn ghost icon s" aria-label="Որոնել հերթում (/)"><i data-lucide="search"></i></button></div>
         </div>
         <div class="scroll-y grow" id="queue" data-truncate></div>
@@ -130,37 +183,7 @@
       <!-- INTAKE: keyboard-only, phone + pickup are the only required fields (§9.1, §9.8). -->
       <section class="card in" aria-label="Պատվերի ընդունում">
         <div class="card-h"><h2>Նոր պատվեր</h2><span class="kbd">F2</span><span class="end"><span class="pill"><i data-lucide="phone"></i><span class="num">00:14</span></span></span></div>
-        <div class="card-b scroll-y grow">
-          <div>
-            <label class="label">Հեռախոս</label>
-            <div class="input l"><i data-lucide="phone"></i><span class="val mono">093 15-62-40</span></div>
-          </div>
-          <div class="cust">
-            <div class="t"><span>Անի Պետրոսյան</span><span class="faint num">· 14 պատվեր · վերջինը՝ երեկ</span></div>
-            <div class="rec"><span class="chip">Կոմիտաս 12</span><span class="chip">Վազգեն Սարգսյան 10</span><span class="chip">Զվարթնոց</span></div>
-          </div>
-          <div>
-            <label class="label">Որտեղից</label>
-            <div class="pinrow"><span class="pin">Ա</span><div class="input l"><span class="val">Կոմիտաս պողոտա 12, Արաբկիր</span><i data-lucide="circle-check" style="color:var(--ok)"></i></div></div>
-          </div>
-          <div style="position:relative">
-            <label class="label">Ուր <span class="faint" style="font-weight:400">· ոչ պարտադիր</span></label>
-            <div class="pinrow"><span class="pin b">Բ</span><div class="input l focus"><span class="val">Հալաբյան 4<span style="border-left:1.5px solid var(--ink);margin-left:1px"></span></span><span class="kbd">↑↓</span></div></div>
-            <div class="pop" data-overlay role="listbox" aria-label="Հասցեների առաջարկներ" style="top:62px">
-              <div class="on"><i data-lucide="map-pin"></i><span>Հալաբյան 41</span><span class="faint">· Աջափնյակ</span></div>
-              <div><i data-lucide="map-pin"></i><span>Հալաբյան 46</span><span class="faint">· Աջափնյակ</span></div>
-            </div>
-          </div>
-          <div>
-            <label class="label">Ծառայություն <span class="faint" style="font-weight:400">· 1–7</span></label>
-            <div class="tiers" id="tiers" data-truncate></div>
-          </div>
-          <div class="two">
-            <div><label class="label">Երբ</label><div class="input"><i data-lucide="clock"></i><span class="val">Հիմա</span><i data-lucide="chevron-down"></i></div></div>
-            <div><label class="label">Վճարում</label><div class="input"><i data-lucide="banknote"></i><span class="val">Կանխիկ</span><i data-lucide="chevron-down"></i></div></div>
-          </div>
-          <div><label class="label">Նշումներ</label><div class="input"><span class="val ph">օր. Զանգել հասնելիս</span></div></div>
-        </div>
+        <div class="card-b scroll-y grow" id="intake"></div>
         <div class="actbar">
           <div class="sum"><b id="sumfare">1 000 ֏</b><span class="num" id="sumtxt">Eco City · 3,6 կմ · 9 ր</span></div>
           <button class="btn ghost icon" aria-label="Մաքրել դաշտերը (Esc)"><i data-lucide="eraser"></i></button>
@@ -237,15 +260,121 @@
     }
     h += '</div>'
   }
+  /* ── Views (mock switches): ?tab=scheduled · ?intake=booking (the booking form inside the scheduled lane, as in the
+     real console: BookingIntake sits at the top of ScheduledLaneSection) · ?intake=company · ?intake=price ── */
+  const QS = new URLSearchParams(location.search)
+  const INTAKE = QS.get('intake')
+  const TAB = QS.get('tab') === 'scheduled' || INTAKE === 'booking' ? 'scheduled' : 'now'
+  const B = ECO.BOOKINGS
+  /* The lane, ordered by the promised hour (scheduled-lane.tsx). Five bookings from ECO plus one local row: Դավիթ Կ.'s
+     10:00 airport run, which he set off for at 09:35 — the same car the Active lane shows «Ճանապարհին» to Հալաբյան 41.
+     problem: driver_blocked = problem.driver_blocked (real); cantmake = the driver's «Չեմ հասցնի» request (owner decision
+     2026-10-12, drawn ahead: no API yet). */
+  const BROWS = [
+    { t: '10:00', a: 'Հալաբյան 41', d: 'Զվարթնոց օդանավակայան', ph: '041 33-21-90', drv: 'Դավիթ Կ.', pl: '09 DK 118', started: '09:35' },
+    { t: B.kom.time, a: B.kom.pickup, d: B.kom.drop, ph: B.kom.phone, drv: B.kom.driver.short, pl: B.kom.driver.plate, from: B.kom.held },
+    { day: 'Շբթ', t: B.bag.time, a: B.bag.pickup, d: B.bag.drop, ph: B.bag.phone, drv: B.bag.driver.short, pl: B.bag.driver.plate, cant: '09:31' },
+    { day: 'Շբթ', t: B.air.time, a: B.air.pickup, d: B.air.drop, ph: B.air.phone, drv: B.air.driver.short, pl: B.air.driver.plate, from: B.air.held, sel: INTAKE !== 'booking' },
+    { day: 'Կիր', t: B.sun.time, a: B.sun.pickup, d: B.sun.drop, ph: B.sun.phone, why: 'Վարորդը արգելափակված է (հաշվեկշիռ)' },
+    { day: 'Երկ', t: B.co.time, a: B.co.pickup, d: B.co.drop, ph: B.co.phone, co: 1 },
+  ]
+  /* Row geometry from scheduled-lane.tsx: the hour (with the weekday when not today) leads in its mono column; then the
+     pickup, and the phone with the destination — or the reason in the destination's slot when the booking needs a
+     human. «Կարող է մեկնել HH:MM-ից» (startableFrom) / «Վարորդը մեկնեց HH:MM» (startedByDriver) take a small third line
+     here rather than squeezing the pickup (the real row puts them beside it; at 452px the pickup lost). The pre-assigned
+     driver's name at the end of line 2 is drawn ahead (the wire row has no driver). */
+  const bookingRow = (r) => {
+    const named = `Չեղարկել ամրագրումը՝ ${r.a}, ${r.day ? r.day + ' ' : ''}${r.t}`
+    const l1 = r.started ? `<span class="st ok"><i data-lucide="navigation"></i>Վարորդը մեկնեց <span class="mono">${r.started}</span></span>`
+      : r.from ? `<span class="st">Կարող է մեկնել <span class="mono">${r.from}</span>-ից</span>` : ''
+    const ctx = r.cant ? `<span class="why trunc">Չեմ հասցնի · ${r.drv}-ի հարցումը, <span class="mono">${r.cant}</span></span>`
+      : r.why ? `<span class="why trunc">${r.why}</span>` : `<span class="trunc">${r.d}</span>`
+    const who = r.cant || r.why ? '' : r.drv ? `<span class="drv"><i data-lucide="user-check"></i>${r.drv}</span>`
+      : r.co ? `<span class="co-badge"><i data-lucide="building-2"></i>${ECO.COMPANY.short}</span>` : '<span class="none">Չնշանակված</span>'
+    const acts = r.cant ? `<span class="acts"><button class="btn secondary xs">Ազատել</button><button class="btn secondary xs">Վերանշանակել <span class="kbd">A</span></button><button class="btn ghost xs icon" aria-label="Զանգել վարորդին"><i data-lucide="phone"></i></button></span>`
+      : r.why ? `<span class="acts"><button class="btn secondary xs">Նշանակել <span class="kbd">A</span></button><button class="btn ghost xs icon" aria-label="Զանգել ուղևորին"><i data-lucide="phone"></i></button></span>` : ''
+    return `<div class="bk${r.cant || r.why ? ' p' : ''}${r.sel ? ' sel' : ''}" tabindex="0"><time>${r.day ? `<span class="dd">${r.day}</span>` : ''}${r.t}</time>
+      <span class="a">${r.a}</span>
+      <button class="btn ghost xs x" aria-label="${named}">Չեղարկել</button>
+      <span class="m"><span class="ph">${r.ph}</span>${ctx}${who}</span>${l1 ? `<span class="m3">${l1}</span>` : ''}${acts}</div>`
+  }
+  /* DateTimePicker (ui/date-time-picker.tsx): typed «dd.mm hh:mm» in the console's language, a calendar on demand,
+     the three quick picks, and the read-back under the form. October 2026, Monday first; today Friday the 9th. */
+  const picker = () => {
+    let g = ['Երկ', 'Երք', 'Չրք', 'Հնգ', 'Ուր', 'Շբթ', 'Կիր'].map((w) => `<span class="wd">${w}</span>`).join('')
+    g += '<span></span><span></span><span></span>'
+    for (let d = 1; d <= 31; d++) g += `<span class="d${d < 9 ? ' past' : ''}${d === 9 ? ' today' : ''}${d === 10 ? ' on' : ''}">${d}</span>`
+    return `<div class="dtp" data-overlay role="dialog" aria-label="Օրացույց"><div class="mh"><button class="btn ghost icon s" aria-label="Նախորդ ամիս"><i data-lucide="chevron-left"></i></button><span>հոկտեմբերի 2026</span><button class="btn ghost icon s" aria-label="Հաջորդ ամիս"><i data-lucide="chevron-right"></i></button></div>
+      <div class="grid7">${g}</div><div class="quick"><span class="chip">+30ր</span><span class="chip">Մեկ ժամից</span><span class="chip">Վաղը առավոտյան</span></div><div class="ft">⏎ հաստատել · Esc փակել</div></div>`
+  }
+  const bookingForm = (filled) => `<form class="q-book" aria-label="Նոր ամրագրում" onsubmit="return false">
+      <div><label class="label">Հեռախոս</label><div class="input"><i data-lucide="phone"></i>${filled ? `<span class="val mono">${B.air.phone}</span>` : '<span class="val ph">օր. 091 23 45 67</span>'}</div></div>
+      <div><label class="label">Որտեղից</label><div class="input">${filled ? `<span class="val">${B.air.pickup}</span>` : '<span class="val ph">օր. Կոմիտաս 12</span>'}</div></div>
+      ${filled ? `<div class="full billing"><div class="seg" role="radiogroup" aria-label="Ով է վճարում"><button role="radio" aria-checked="false">Ընկերություն · ${ECO.COMPANY.short}</button><button class="on" role="radio" aria-checked="true">Անձնական</button></div></div>` : ''}
+      <div class="full" style="position:relative"><label class="label">Ե՞րբ</label><div class="input${filled ? ' focus' : ''}"><i data-lucide="calendar"></i>${filled ? '<span class="val mono">10.10 08:30</span><button class="btn ghost icon s" aria-label="Մաքրել"><i data-lucide="x"></i></button>' : '<span class="val ph mono">օր. 25.10 18:30</span>'}<button class="btn ghost icon s" aria-label="Օրացույց"><i data-lucide="calendar-days"></i></button></div>${QS.get('picker') ? picker() : ''}</div>
+      <div class="full foot">${filled ? '<p class="reads">Ամրագրվում է <span class="mono">Շբթ, 10 հոկտեմբերի, 08:30</span></p>' : '<span class="reads"></span>'}<button class="btn secondary s">Ամրագրել</button></div></form>`
+
+  document.getElementById('qtabs').innerHTML = `<button class="${TAB === 'now' ? 'on' : ''}" role="tab" aria-selected="${TAB === 'now'}">Հիմա <span class="c num">13</span></button><button class="${TAB === 'scheduled' ? 'on' : ''}" role="tab" aria-selected="${TAB === 'scheduled'}">Պլանավորված <span class="c num">${BROWS.length}</span></button>`
+  if (TAB === 'scheduled') h = bookingForm(INTAKE === 'booking') + `<div class="l-scheduled"><div class="lane-h"><i data-lucide="calendar-clock"></i>Պլանավորված <span class="c num">${BROWS.length}</span><span class="end">ըստ խոստացված ժամի</span></div>${BROWS.map(bookingRow).join('')}</div>`
   document.getElementById('queue').innerHTML = h
 
+  /* ── Intake (intake-panel.tsx). Phone and pickup are the only required fields (§9.1). Band 3 is the real sub-tabs
+     (intake-sub-tabs.tsx): Քարտեզ · Նշումներ · Համաձայնեցված գին — each a createRideSchema field; the map tab here
+     points at the map column. ?intake=company: a caller whose company is on account (customer-card.tsx badge,
+     intake-billing.tsx Company / Personal, the reference marked required, the over-limit refusal in amber). ── */
+  const CO = INTAKE === 'company', BAND = INTAKE === 'price' ? 'amount' : 'notes'
+  const subTabs = () => `<div><div class="in-tabs" role="tablist" aria-label="Նոր պատվեր">${[['map', 'Քարտեզ'], ['notes', 'Նշումներ'], ['amount', 'Համաձայնեցված գին']].map(([k, l]) =>
+      `<button role="tab" aria-selected="${BAND === k}" tabindex="${BAND === k ? 0 : -1}">${l}${k === 'amount' && BAND === 'amount' ? '<span class="dot" aria-hidden="true"></span>' : ''}</button>`).join('')}</div>
+      <div role="tabpanel" style="padding-top:8px">${BAND === 'amount'
+        ? `<div class="row-flex"><div class="input l focus" style="width:160px"><span class="val mono">2 400<span style="border-left:1.5px solid var(--ink);margin-left:1px"></span></span><span class="faint">֏</span></div><p class="faint" style="font:var(--c-small)">Փոխարինում է սակագնի գինը</p></div>`
+        : '<div class="input textarea"><span class="val ph">օր. Զանգել հասնելիս</span></div>'}</div></div>`
+  document.getElementById('intake').innerHTML = `
+    <div><label class="label">Հեռախոս</label><div class="input l"><i data-lucide="phone"></i><span class="val mono">${CO ? B.co.phone : '093 15-62-40'}</span></div></div>
+    ${CO ? `<div class="cust"><div class="t"><span>${ECO.COMPANY.rider}</span><span class="co-badge"><i data-lucide="building-2"></i>${ECO.COMPANY.name} · հաշվեկշռով</span></div>
+        <div class="rec"><span class="chip">${B.co.drop}</span><span class="chip">Զվարթնոց</span></div></div>`
+      : `<div class="cust"><div class="t"><span>Անի Պետրոսյան</span><span class="faint num">· 14 պատվեր · վերջինը՝ երեկ</span></div>
+        <div class="rec"><span class="chip">Կոմիտաս 12</span><span class="chip">Վազգեն Սարգսյան 10</span><span class="chip">Զվարթնոց</span></div></div>`}
+    <div><label class="label">Որտեղից</label><div class="pinrow"><span class="pin">Ա</span><div class="input l"><span class="val">${CO ? B.co.pickup + ', Արաբկիր' : 'Կոմիտաս պողոտա 12, Արաբկիր'}</span><i data-lucide="circle-check" style="color:var(--ok)"></i></div></div></div>
+    ${CO ? `<div><label class="label">Ուր <span class="faint" style="font-weight:400">· ոչ պարտադիր</span></label><div class="pinrow"><span class="pin b">Բ</span><div class="input l"><span class="val">${B.co.drop}</span><i data-lucide="circle-check" style="color:var(--ok)"></i></div></div></div>
+      <div class="billing" role="group" aria-label="Ով է վճարում"><label class="label" style="margin:0">Ով է վճարում</label>
+        <div class="seg" role="radiogroup"><button class="on" role="radio" aria-checked="true">Ընկերություն · ${ECO.COMPANY.short}</button><button role="radio" aria-checked="false">Անձնական</button></div>
+        <div><label class="label">${ECO.COMPANY.refLabel}<span class="req">· պարտադիր</span></label><div class="input"><span class="val ph">օր. ${ECO.COMPANY.ref}</span></div></div>
+        <span class="hint-warn">Ընկերությունը հղում է պահանջում։ Ուղևորությունն ընդունվում է առանց դրա․ այն կարելի է լրացնել մինչև հաշիվ-ապրանքագրի թողարկումը։</span>
+        <div class="notice amber" role="status"><i data-lucide="triangle-alert"></i><span class="grow">Ընկերությունը գերազանցել է վարկային սահմանաչափը։ Ընդունեք որպես անձնական։</span><button class="btn secondary s">Անձնական</button></div></div>`
+      : `<div style="position:relative">
+        <label class="label">Ուր <span class="faint" style="font-weight:400">· ոչ պարտադիր</span></label>
+        <div class="pinrow"><span class="pin b">Բ</span><div class="input l${INTAKE ? '' : ' focus'}"><span class="val">${INTAKE ? 'Հալաբյան 41' : 'Հալաբյան 4<span style="border-left:1.5px solid var(--ink);margin-left:1px"></span>'}</span>${INTAKE ? '<i data-lucide="circle-check" style="color:var(--ok)"></i>' : '<span class="kbd">↑↓</span>'}</div></div>
+        ${INTAKE ? '' : `<div class="pop" data-overlay role="listbox" aria-label="Հասցեների առաջարկներ" style="top:62px">
+          <div class="on"><i data-lucide="map-pin"></i><span>Հալաբյան 41</span><span class="faint">· Աջափնյակ</span></div>
+          <div><i data-lucide="map-pin"></i><span>Հալաբյան 46</span><span class="faint">· Աջափնյակ</span></div></div>`}</div>`}
+    <div><label class="label">Ծառայություն <span class="faint" style="font-weight:400">· 1–7</span></label><div class="tiers" id="tiers" data-truncate></div></div>
+    <div class="two">
+      <div><label class="label">Երբ</label><div class="input"><i data-lucide="clock"></i><span class="val">Հիմա</span><i data-lucide="chevron-down"></i></div></div>
+      <div><label class="label">Վճարում</label><div class="input"><i data-lucide="${CO ? 'building-2' : 'banknote'}"></i><span class="val">${CO ? 'Ընկերություն' : 'Կանխիկ'}</span><i data-lucide="chevron-down"></i></div></div>
+    </div>
+    ${subTabs()}`
+
   /* Tier picker: prices for the typed phone order, Կոմիտաս 12 → Հալաբյան 41 (3,6 կմ, 9 ր). The walkthrough trip is in the queue. */
-  const IK = 3.6, IM = 9
-  document.getElementById('sumfare').textContent = amd(fare(TIERS[0], IK, IM))
-  document.getElementById('sumtxt').textContent = `${TIERS[0].name} · ${ECO.dec(IK)} կմ · ${IM} ր`
+  const IK = CO ? B.co.km : 3.6, IM = CO ? B.co.min : 9
+  document.getElementById('sumfare').textContent = INTAKE === 'price' ? amd(2400) : amd(fare(TIERS[0], IK, IM))
+  document.getElementById('sumtxt').textContent = INTAKE === 'price' ? 'Համաձայնեցված գին' : `${TIERS[0].name} · ${ECO.dec(IK)} կմ · ${IM} ր`
   let t = `<button class="tierb any"><span class="anyic"><i data-lucide="locate-fixed"></i></span><span class="n">Մոտակա ազատը</span></button>`
   TIERS.forEach((x, i) => { t += `<button class="tierb${i === 0 ? ' on' : ''}" aria-label="${x.name}, ${i + 2}"><span class="car xs">${carImg(x.id)}</span><span class="n">${x.name.replace('Eco ', '')}</span><span class="p">${amd(fare(x, IK, IM))}</span></button>` })
   document.getElementById('tiers').innerHTML = t
+  /* The state's subject in view: the refusal (company) or the agreed-price band (price) sits at the foot of the
+     scrolled form, as it does after the operator has tabbed down to it. */
+  if (CO || INTAKE === 'price') document.fonts.ready.then(() => {
+    const ib = document.getElementById('intake'), tg = ib.querySelector(CO ? '.notice' : '[role=tabpanel]')
+    const top0 = ib.getBoundingClientRect().top - ib.scrollTop
+    const need = tg.getBoundingClientRect().bottom - ib.getBoundingClientRect().bottom + 12 + ib.scrollTop
+    /* Snap to a field's top edge so no label is left half under the card head. */
+    const snap = [...ib.children].map((c) => c.getBoundingClientRect().top - top0 - 12).find((y) => y >= need)
+    if (need > 0 && snap !== undefined) {
+      const max = ib.scrollHeight - ib.clientHeight
+      if (snap > max) ib.style.paddingBottom = (12 + snap - max) + 'px'
+      ib.scrollTop = snap
+    } else if (need > 0) ib.scrollTop = need
+  })
 
   /* Driver strip */
   const order = { free: 0, away: 2, lost: 3, ride: 1 }

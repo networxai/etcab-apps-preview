@@ -104,7 +104,8 @@ window.D && (window.D.offer = function (o) {
   const ring = `<div class="oring" role="timer" aria-label="${o.result ? o.result.title : 'Մնաց ' + secs + ' վայրկյան'}"><svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-hidden="true">
       <circle cx="48" cy="48" r="${r}" fill="none" stroke="var(--surface-3)" stroke-width="${sw}"/>
       <circle cx="48" cy="48" r="${r}" fill="none" stroke="${tone}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${(c * (1 - frac)).toFixed(1)}"/></svg>${inner}</div>`
-  const pay = ECO.PAY[R.pay]
+  /* o.pay 'company': the server's paidBy (offer/[id].tsx PAID_BY_LABEL) — «Վճարում է ընկերությունը», never a cash chip. */
+  const pay = ECO.PAY[o.pay || R.pay]
   return `<section class="offer${o.result ? ' quiet' : ''}" ${o.result ? 'role="status"' : `role="alertdialog" aria-label="Նոր պատվեր, ${ECO.amd(R.fare)}"`}>
     <div class="oh">
       <span class="bell${o.result ? ' done' : ''}" aria-hidden="true"><i data-lucide="${o.result ? o.result.glyph : 'bell-ring'}"></i></span>
@@ -115,7 +116,7 @@ window.D && (window.D.offer = function (o) {
     <div class="obody">
       <div class="orow">
         <div><div class="fare">${ECO.amd(R.fare)}</div>
-          <div class="tags"><span class="chip">${R.tier}</span><span class="chip"><i data-lucide="${pay.icon}"></i>${pay.label}</span></div></div>
+          <div class="tags"><span class="chip">${R.tier}</span>${o.pay === 'company' ? `<span class="chip co"><i data-lucide="building-2"></i>Վճարում է ընկերությունը</span>` : `<span class="chip"><i data-lucide="${pay.icon}"></i>${pay.label}</span>`}</div></div>
         ${ring}
       </div>
       ${o.result ? `<div class="pick" style="font:var(--t-body-strong)"><small style="font:var(--t-secondary-strong);color:var(--ink-2)">${o.result.sub}</small></div>`

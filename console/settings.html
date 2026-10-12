@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings</title>
+<link rel="stylesheet" href="console.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+<style>
+  /* Mirrors apps/operator components/admin/dispatch-settings.tsx: five groups in one 48rem column, every field a number
+     with its unit, no preview band. The Pre-bookings group gains the rider reminder (owner decision 2026-10-12, drawn
+     ahead: no rider push type and no config field yet). Money and Invoicing are the existing money-settings.tsx and
+     invoicing settings, shown here as tabs only. */
+  .content { grid-template-columns: minmax(0, 1fr); }
+  .page { overflow: hidden; }
+  .col { width: 768px; max-width: 100%; padding: 4px var(--inset) 24px; display: flex; flex-direction: column; gap: 12px; }
+  .lead { font: var(--c-body); color: var(--ink-muted); max-width: 680px; }
+  .grp { border-radius: var(--r-card); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-soft); }
+  .grp > h2 { font: var(--c-head); padding: 12px var(--inset) 4px; }
+  .grp > .ex { font: var(--c-small); color: var(--ink-muted); padding: 0 var(--inset) 8px; max-width: 680px; }
+  .set { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 12px; align-items: center; min-height: 44px; padding: 6px var(--inset); border-top: 1px solid var(--line-soft); }
+  .set .l { font: var(--c-body); color: var(--ink); }
+  .set .l small { display: block; font: var(--c-small); color: var(--ink-muted); margin-top: 2px; }
+  .set .v { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+  .set .v .input { width: 120px; }
+  .set .v .input .val { text-align: right; }
+  .set .u { font: var(--c-small); color: var(--ink-muted); width: 36px; white-space: nowrap; }
+  .set.new { background: var(--brand-tint); box-shadow: inset 3px 0 0 var(--brand-vivid); }
+  .set.new .l b { font-weight: 600; }
+  .newtag { display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border-radius: var(--r-tag); background: var(--brand-fill); color: var(--brand-fill-ink); font: 500 12px/16px var(--font); margin-left: 6px; vertical-align: 1px; }
+  .sum { font: var(--c-small); color: var(--ok-text); }
+  .foot { display: flex; align-items: center; gap: 8px; padding-top: 4px; }
+  .foot .rev { margin-left: auto; font: var(--c-small); color: var(--ink-faint); }
+</style>
+</head>
+<body>
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <span class="crumb">Կառավարում <i data-lucide="chevron-right"></i></span><h1>Կարգավորումներ</h1>
+      <div class="live"></div>
+    </header>
+    <div class="content">
+      <section class="card page" aria-label="Կարգավորումներ">
+        <nav class="tabsl" style="margin-top:0" aria-label="Կարգավորումների բաժիններ">
+          <a href="#" class="on" aria-current="page"><i data-lucide="activity"></i>Դիսպետչեր</a>
+          <a href="#"><i data-lucide="wallet"></i>Գումար</a>
+          <a href="#"><i data-lucide="receipt-text"></i>Հաշիվներ</a>
+        </nav>
+        <div class="scroll-y grow"><div class="col" id="col"></div></div>
+      </section>
+    </div>
+  </div>
+</div>
+<script>
+  shell('settings')
+  /* [label key text, value, unit, hint, kind] — strings from lib/i18n.ts hy (settings.*). Values: the launch config;
+     the pre-booking leads are the ones every surface uses (ECO.BOOKINGS: held T−30, activates T−15). */
+  const N = (l, v, u, hint, ph) => `<div class="set"><span class="l">${l}${hint ? `<small>${hint}</small>` : ''}</span><span class="v"><span class="input"><span class="val mono${v ? '' : ' ph'}">${v || ph}</span></span><span class="u">${u || ''}</span></span></div>`
+  const SW = (l, on) => `<div class="set"><span class="l">${l}</span><span class="v"><span class="switch${on ? ' on' : ''}" role="switch" aria-checked="${on}"><i class="t"></i>${on ? 'Միացված' : 'Անջատված'}</span><span class="u"></span></span></div>`
+  const G = (title, rows, ex) => `<section class="grp"><h2>${title}</h2>${ex ? `<p class="ex">${ex}</p>` : ''}${rows.join('')}</section>`
+  const R = ECO.DISPATCH.reminderMin
+  document.getElementById('col').innerHTML = `
+    <p class="lead">Ինչպես է համակարգն ընտրում վարորդին յուրաքանչյուր պատվերի համար՝ ով է թեկնածու, ինչպես են դասակարգվում, ինչպես են ուղարկվում առաջարկները։</p>
+    ${G('Առաքում', [SW('Ավտոմատ առաքում ստեղծելիս', true)])}
+    ${G('Ո՞վ է թեկնածու', [N('Շառավղի քայլերը', '2, 4, 7', 'կմ', 'Թվեր՝ ստորակետով բաժանված, օրինակ՝ «2, 4, 7»։'), SW('Մեքենայի դասը պետք է համընկնի', true), N('Նվազագույն վարկանիշ', '', '', '', 'օր. 4.5'), N('Բաց առաջարկներ մեկ վարորդի', '1', '')])}
+    ${G('Ինչպե՞ս են դասակարգվում', [N('Մոտիկություն', '0.7', ''), N('Պարապ ժամանակ', '0.3', ''), N('Ընդունման տոկոս', '0', ''), N('Վարկանիշ', '0', ''),
+      '<div class="set"><span class="l">Կշիռների գումարը</span><span class="v"><span class="sum mono">1.0</span><span class="u"></span></span></div>',
+      N('Մոտիկության սահման', '5', 'կմ'), N('Պարապ ժամանակի սահման', '30', 'րոպե')], 'Չորս կշիռների գումարը պետք է լինի 1: Ընդունման տոկոսը և վարկանիշը մեկնարկին 0 են, քանի որ դեռ բավարար պատմություն չկա — բարձրացրեք, երբ լինի:')}
+    ${G('Ինչպե՞ս են ուղարկվում առաջարկները', [N('Ալիքներ (վարորդ մեկ ալիքում)', '1, 1, 1', ''), SW('Հարկադիր նշանակում (առանց ընդունման)', false), N('Առաջարկի սպասման ժամկետ', '20', 'վրկ'), N('Հաստատման պատուհան', '30', 'վրկ'), N('Բացակա՝ բաց թողած առաջարկներից հետո', '3', '')],
+      'Ալիքները հենց առաջարկի ռազմավարությունն են: «1, 1, 1»-ը հարցնում է երեք վարորդի հերթով; «3»-ը՝ երեքին միանգամից; վարորդների թվից մեծ մեկ թիվը՝ բոլորին:')}
+    ${G('Նախնական պատվերներ', [N('Ակտիվացնել պատվերը մինչ', '15', 'րոպե'), N('Պահել վարորդին մինչ', '30', 'րոպե'), N('Վարորդը կարող է մեկնել մինչ', '', 'րոպե', '', 'ինչպես պահելը'),
+      `<div class="set new"><span class="l"><b>Հիշեցում ուղևորին նախնական պատվերից առաջ</b><span class="newtag">Նոր</span><small>Ուղևորը ստանում է ծանուցում՝ ժամը, հասցեն և նշանակված մեքենան։ 0՝ անջատված</small></span><span class="v"><span class="input focus"><span class="val mono">${R}</span></span><span class="u">րոպե</span></span></div>`])}
+    <div class="foot"><button class="btn primary">Պահպանել</button><button class="btn secondary">Վերականգնել լռելյայնը</button><span class="pill warn">Չպահպանված</span><span class="rev">Տարբերակ 14</span></div>`
+  icons()
+  /* The page opens on what this state is about: the Pre-bookings group with the new reminder row (the real page is one
+     scrolling column; the operator has scrolled to it). */
+  document.fonts.ready.then(() => {
+    const box = document.querySelector('.page .scroll-y'), row = document.querySelector('.set.new')
+    box.scrollTop += row.getBoundingClientRect().top - box.getBoundingClientRect().top - box.clientHeight / 2 + row.offsetHeight / 2
+  })
+  document.fonts.ready.then(() => { document.documentElement.dataset.mapReady = 'none' })
+</script>
+</body>
+</html>

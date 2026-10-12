@@ -58,6 +58,44 @@
     PARTNER: { name: 'Կարեն Մելքոնյան', ref: '000041', refLabel: 'Վճարման կոդ', warnBelow: 3000, blockBelow: 0,
       bank: { name: 'Ամերիաբանկ', holder: 'Էկո Տաքսի ՍՊԸ', account: '1570 0412 3456 4417', accountMasked: '1570 •••• 4417' },
       office: { address: 'Կոմիտասի պող. 38', hours: 'Երկ–Շբթ · 09:00–20:00' } },
+
+    /* Pre-orders (§8 scheduled_ride), one set for every surface: the rider's bookings (rider-preorders, -history, -home,
+       -book), the driver's commitments (driver-preorders, -home) and the console's scheduled lane and booking panel.
+       Day words follow apps/rider lib/schedule.ts formatWhen: «Այսօր, …», «Վաղը, …», a weekday (lower-case, as the app
+       renders it) for < 7 days, then «12 հոկտեմբերի, …». Fares are the fixed_upfront tariff (rider-history comment).
+       held = heldFrom (T−30: no new offers reach that driver; the driver's «Սկսել» opens), the activation sweep runs at T−15.
+       Fields marked "ahead" are drawn ahead of the wire: customerScheduledRideSchema carries only scheduledFor, pickupText,
+       destinationText, activatedRideId, cancelledAt and problemReason (RIDER-NOTES, "Drawn ahead of the app"). */
+    /* The fleet's dispatcher desk (dispatcherPhone() in both apps' config; rider-account already shows it) and the
+       console settings the apps obey. reminderMin: owner decision 2026-10-12, a rider reminder push N minutes before a
+       pre-order, set in console Settings → Dispatch (drawn ahead: no push type yet). */
+    DISPATCH: { phone: '010 55-55-55', reminderMin: 30 },
+
+    BOOKINGS: {
+      /* Աննա's (ECO.RIDE.rider) walkthrough booking: tomorrow's airport run, pre-assigned to Սուրեն. */
+      air: { id: 'B-0912', who: 'rider', when: 'Վաղը, 08:30', day: 'Շաբաթ, 10 հոկտ.', iso: '2026-10-10T08:30', time: '08:30', held: '08:00', activates: '08:15',
+        pickup: 'Կոմիտասի պող. 22', drop: 'Զվարթնոց օդանավակայան', dropShort: 'Զվարթնոց', tier: 'Eco City', km: 12.6, min: 17, fare: 1900, pay: 'cash',
+        rider: 'Աննա', phone: '091 23-45-67', booked: 'Այսօր, 9:38',
+        driver: { name: 'Սուրեն Մկրտչյան', short: 'Սուրեն Մ.', first: 'Սուրեն', ini: 'ՍՄ', phone: '094 12-40-77', plate: '22 OU 447', car: 'Toyota Prius · մոխրագույն', rating: '4,8' },
+        /* The activation story (R41/R43): the sweep assigns at 08:12, the driver starts early at 08:02 (held from 08:00). */
+        assignedAt: '08:12', startedAt: '08:02', etaMin: 6 },
+      /* A booking whose pre-assigned driver was blocked: problemReason → the rider's warn tag «Մեքենան դեռ նշանակված չէ»,
+         the console's driver_blocked pill. */
+      sun: { id: 'B-0917', who: 'rider', when: 'կիրակի, 19:00', day: 'Կիրակի, 11 հոկտ.', iso: '2026-10-11T19:00', time: '19:00', held: '18:30', activates: '18:45',
+        pickup: 'Կասկադ', drop: 'Մաշտոցի պող. 37', tier: 'Eco Comfort', km: 2.4, min: 6, fare: 1000, pay: 'cash',
+        rider: 'Աննա', phone: '091 23-45-67', booked: 'Երեկ, 21:14', problem: 'driver_blocked', driver: null },
+      /* A company booking (ADR-C2 on a pre-order): billed to ECO.COMPANY with its cost code. */
+      co: { id: 'B-0921', who: 'rider', when: 'երկուշաբթի, 09:00', day: 'Երկուշաբթի, 12 հոկտ.', iso: '2026-10-12T09:00', time: '09:00', held: '08:30', activates: '08:45',
+        pickup: 'Կոմիտասի պող. 22', drop: 'Վազգեն Սարգսյանի 26/1', tier: 'Eco City', km: 4.1, min: 11, fare: 1100, pay: 'company', ref: 'MKT-204',
+        rider: 'Աննա Հակոբյան', phone: '091 23-45-67', booked: 'Այսօր, 9:39', driver: null },
+      /* Արամ's (ECO.RIDE.driver) two commitments, as driver-preorders draws them. */
+      kom: { id: 'B-0898', who: 'driver', when: 'Այսօր, 10:05', iso: '2026-10-09T10:05', time: '10:05', held: '09:35', activates: '09:50',
+        pickup: 'Կոմիտասի պող. 49', drop: 'Հանրապետության հր.', tier: 'Eco City', fare: 1200, pay: 'cash', rider: 'Լուսինե', phone: '098 51-20-44',
+        driver: { name: 'Արամ Պետրոսյան', short: 'Արամ Պ.', plate: '01 ET 001' } },
+      bag: { id: 'B-0904', who: 'driver', when: 'Վաղը, 07:40', iso: '2026-10-10T07:40', time: '07:40', held: '07:10', activates: '07:25',
+        pickup: 'Բաղրամյան պող. 24', drop: 'Զվարթնոց', tier: 'Eco City', km: 13.1, fare: 2000, pay: 'cash', rider: 'Արմեն', phone: '077 41-22-08',
+        driver: { name: 'Արամ Պետրոսյան', short: 'Արամ Պ.', plate: '01 ET 001' } },
+    },
   }
 
   /* iOS status bar. */

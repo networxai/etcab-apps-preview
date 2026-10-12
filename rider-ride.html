@@ -73,6 +73,51 @@
   .screen .toast { top: 62px; }
   /* The fee is said before the red button (review): this fleet charges no rider cancellation fee, so «Անվճար» in --ok. */
   .inline-note.fee { color: var(--ok); font: var(--t-secondary-strong); margin: calc(-1 * var(--s2)) 0 var(--s1); }
+  /* ── P0 states (2026-10-12) ── */
+  /* A Notice (ui-native Notice tone neutral): surface-2 card, info glyph, ink text. Never red: these are outcomes, not failures. */
+  .notice { display: flex; gap: var(--s2); align-items: flex-start; padding: var(--s3); border-radius: var(--r-card); background: var(--surface-2);
+    font: var(--t-secondary); color: var(--ink); margin-top: var(--s3); }
+  .notice svg { width: 18px; height: 18px; flex: none; color: var(--ink-2); }
+  .notice b { display: block; font: var(--t-body-strong); }
+  /* DriverCard tags: «Վճարում է ընկերությունը» is tone ok (DriverCard.tsx). */
+  .tags { display: flex; gap: var(--s2); margin-top: var(--s2); }
+  .tagp { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: var(--r-pill); font: var(--t-secondary-strong); white-space: nowrap; }
+  .tagp svg { width: 15px; height: 15px; }
+  .tagp.ok { background: var(--ok-soft); color: var(--ok); }
+  /* The booking a live ride came from (drawn ahead): the promised pickup, which is not the ETA. */
+  .tagp.pre { background: var(--brand-soft); color: var(--brand-ink); }
+  .cap { font: var(--t-secondary); color: var(--ink-2); margin-top: var(--s2); }
+  /* cancelled: what was ordered, faint, and the one way out */
+  .gone { display: flex; flex-direction: column; gap: var(--s3); }
+  .gone .stops2 { border-radius: var(--r-card); background: var(--surface-2); padding: var(--s2) var(--s4); }
+  .stop2 { display: flex; align-items: center; gap: var(--s3); min-height: 36px; font: var(--t-body); color: var(--ink-2); white-space: nowrap; }
+  .stop2 i { width: 10px; height: 10px; flex: none; border-radius: 50%; box-shadow: inset 0 0 0 3px var(--ink-3); }
+  .stop2 i.b { border-radius: 2px; box-shadow: none; background: var(--ink-3); }
+  /* reassigned: the searching sheet (Searching.tsx), its bar from rider-searching */
+  .sbar { height: 3px; border-radius: 2px; background: var(--surface-3); overflow: hidden; margin: var(--s3) 0 var(--s2); position: relative; }
+  .sbar::after { content: ''; position: absolute; top: 0; bottom: 0; width: 34%; border-radius: 2px; background: var(--brand); animation: sslide 1.6s ease-in-out infinite; }
+  @keyframes sslide { from { left: -34%; } to { left: 100%; } }
+  @media (prefers-reduced-motion: reduce) { .sbar::after { animation: none; left: 33%; } }
+  /* chat (owner 2026-10-12: rider–driver messages, drawn ahead) */
+  .chat { display: flex; flex-direction: column; gap: var(--s2); padding: var(--s2) 0 var(--s3); }
+  .chat .day { align-self: center; font: var(--t-caption); color: var(--ink-2); padding: 2px 0 var(--s1); }
+  .bub { max-width: 78%; padding: 10px 14px; border-radius: 18px; font: var(--t-body); }
+  .bub small { display: block; font: var(--t-caption); margin-top: 2px; opacity: .8; font-variant-numeric: tabular-nums; }
+  .bub.in { align-self: flex-start; background: var(--surface-2); color: var(--ink); border-bottom-left-radius: 6px; }
+  .bub.out { align-self: flex-end; background: var(--ink); color: var(--surface); border-bottom-right-radius: 6px; }
+  .bub.out small { text-align: right; }
+  .quick { display: flex; gap: var(--s2); overflow-x: auto; margin: 0 calc(-1 * var(--margin)); padding: 0 var(--margin); scrollbar-width: none; }
+  .quick::-webkit-scrollbar { display: none; }
+  .quick .chip.tog { flex: none; }
+  .chathead { display: flex; align-items: center; gap: var(--s3); }
+  .chathead .avatar { width: 40px; height: 40px; font: var(--t-body-strong); }
+  .chathead .nm { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .chathead .n1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .chathead .n2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .share-what { margin-top: var(--s3); display: flex; flex-direction: column; }
+  .share-what .row { min-height: 44px; }
+  .share-what .row .ic { width: 32px; height: 32px; }
+  .share-what .row .ic svg { width: 16px; height: 16px; }
 </style>
 </head>
 <body>
@@ -86,16 +131,23 @@
 
   /* The one ride (kit.js ECO.RIDE): assigned 9:41, pickup 9:45, drop 9:51; Արամ Պետրոսյան, 01 ET 001. */
   const RD = ECO.RIDE, DV = RD.driver
-  const identity = () => `<div class="ident"><div class="who">${R.plate(DV.plate, true)}<span class="model">${DV.carHy}</span></div>${R.car('city', 120, 60, DV.car)}</div>`
-  const driver = () => `<div class="drv">${R.avatar()}<span class="nm"><span class="n1">${DV.first}</span><span class="n2">${star}${DV.rating} · ${ECO.num(1240)} ուղևորություն</span></span></div>`
+  const SU = ECO.BOOKINGS.air.driver
+  const identity = (d = DV) => `<div class="ident"><div class="who">${R.plate(d.plate, true)}<span class="model">${d.carHy || d.car}</span></div>${R.car('city', 120, 60, d.car)}</div>`
+  const face = (d) => d === DV ? R.avatar() : `<span class="avatar ini" role="img" aria-label="Վարորդ՝ ${d.name}">${d.ini}</span>`
+  const driver = (d = DV) => `<div class="drv">${face(d)}<span class="nm"><span class="n1">${d.first}</span><span class="n2">${star}${d.rating}${d === DV ? ' · ' + ECO.num(1240) + ' ուղևորություն' : ''}</span></span></div>`
   const acts = (list) => `<div class="acts">${list.map(([ic, l, c]) => `<button class="act ${c || ''}" aria-label="${l}"><span class="o">${R.i(ic)}</span><span class="l">${l}</span></button>`).join('')}</div>`
   const A_WAIT = [['phone', 'Զանգել'], ['message-circle', 'Գրել'], ['share-2', 'Կիսվել'], ['x', 'Չեղարկել', 'danger']]
 
-  const approachSheet = (eta, status, clock) => `<div class="map" id="map" aria-label="Քարտեզ"></div>
+  /* o: { d: driver, pre: pill above the ETA, tags: under the status, after: under the actions } */
+  const approachSheet = (eta, status, clock, o = {}) => `<div class="map" id="map" aria-label="Քարտեզ"></div>
     <button class="fab" style="top:62px;left:16px" aria-label="Հետ">${R.i('chevron-down')}</button>
     <section class="sheet r" id="sheet"><div class="grabber"></div>
-      <div class="head2"><div><div class="eta">${eta}</div><div class="status">${status} · <b>${clock}</b></div></div></div>
-      ${identity()}${driver()}${acts(A_WAIT)}</section>`
+      ${o.pre ? `<div class="tags" style="margin:0 0 var(--s2)">${o.pre}</div>` : ''}
+      <div class="head2"><div><div class="eta">${eta}</div><div class="status">${status}${clock ? ` · <b>${clock}</b>` : ''}</div></div></div>
+      ${o.tags ? `<div class="tags">${o.tags}</div>` : ''}${o.cap ? `<div class="cap">${o.cap}</div>` : ''}
+      ${identity(o.d)}${driver(o.d)}${acts(A_WAIT)}${o.after || ''}</section>`
+  const preTag = (t) => `<span class="tagp pre">${R.i('calendar-clock')}Նախնական պատվեր · նստել ${t}</span>`
+  const notice = (body, icon = 'info') => `<div class="notice" role="status">${R.i(icon)}<span>${body}</span></div>`
 
   /* Approach map: the driver's dotted line to the pickup, our car on it, the pickup pin. frac = how far along the car is. */
   const approachMap = (frac) => (s) => {
@@ -107,13 +159,21 @@
     htmlMarker(m, k.ll, carTop(k.deg), [18, 34])
     return m
   }
+  /* A booking's pickup is Կոմիտասի պող. 22 (ECO.BOOKINGS.air/co): the car comes in along the last stretch of pickupToDrop. */
+  const toBooking = (frac, label) => (s) => {
+    const k = at(T, frac), rest = T.slice(k.i)
+    const m = R.map(s, { fit: rest, padTL: [64, 132], padBR: [64, s.querySelector('#sheet').offsetHeight + 56] })
+    drawRoute(m, rest, { dash: true, color: cssVar('--approach'), weight: 4 })
+    htmlMarker(m, DROP, '<div class="pin-a"></div>', [18, 18])
+    htmlMarker(m, DROP, `<div class="maptag plain" data-overlay style="position:absolute;right:16px;top:-18px">${label}</div>`, [0, 0], [0, 0])
+    htmlMarker(m, k.ll, carTop(k.deg), [18, 34])
+  }
   const modal = (title, body, base = 'assigned') => ({ html: () => `<div class="map" id="map" aria-label="Քարտեզ"></div><div class="scrim"></div>
       <section class="sheet r modal" id="sheet" role="dialog" aria-label="${title}"><div class="grabber"></div>
       <div class="mhead"><h2 class="h-title">${title}</h2><button class="xbtn" aria-label="Փակել">${R.i('x')}</button></div>${body}</section>`,
     map: approachMap(.35) })
 
-  const reasons = ['Վարորդը շատ երկար է գալիս', 'Փոխեցի ծրագրերս', 'Սխալ հասցե եմ նշել', 'Վարորդը խնդրեց չեղարկել', 'Այլ պատճառ']
-
+  
   Rider.page({
     title: 'Rider · On the way and in the ride',
     sub: 'Live 2GIS map; ETA is the one hero number; the plate chip carries the identity. Same ride as the driver offer and the console (kit.js ECO.RIDE): Eco City, Մաշտոցի 37 → Կոմիտասի 22, 9:41 → 9:45 → 9:51, 1 100 ֏',
@@ -171,21 +231,76 @@
           htmlMarker(m, k.ll, `<div style="filter:grayscale(1);opacity:.55">${carTop(k.deg)}</div>`, [18, 34])
         } },
 
-      { id: 'cancel-reasons', group: 'Sheets', label: 'Cancel: reason', note: 'Reason first, then whether it costs anything («Չեղարկումն անվճար է»: no rider cancellation fee exists), then the red action. «No, wait» is as easy to hit',
-        ...modal('Ինչո՞ւ եք չեղարկում', `<div class="reasons" role="radiogroup">${reasons.map((r, i) =>
-          `${i ? '<div class="divider"></div>' : ''}<button class="choice" role="radio" aria-checked="${i === 0}"><span class="radio"></span><span class="t">${r}</span></button>`).join('')}</div>
-          <div class="inline-note fee">${R.i('circle-check')}<span>Չեղարկումն անվճար է</span></div>
+      { id: 'cancel-reasons', group: 'Sheets', label: 'Cancel: reason', note: 'Real CancelSheet: «Չեղարկե՞լ պատվերը», the four reason chips (ride.reason.*), none preselected and optional; that it is free («Չեղարկումն անվճար է»: no rider cancellation fee exists); then the red action. «Ոչ, սպասել» is as easy to hit',
+        ...modal('Չեղարկե՞լ պատվերը', `<div class="chips" role="group" aria-label="Պատճառ" style="margin-bottom:var(--s4)">${['Պլանները փոխվեցին', 'Վարորդը հեռու է', 'Սխալ հասցե', 'Այլ'].map((r) =>
+          `<button class="chip tog" aria-pressed="false">${r}</button>`).join('')}</div>
+          <div class="inline-note fee" style="margin:0 0 var(--s1)">${R.i('circle-check')}<span>Չեղարկումն անվճար է</span></div>
           <div class="btns"><button class="btn btn-danger">Չեղարկել պատվերը</button><button class="btn btn-quiet">Ոչ, սպասել</button></div>`) },
-      { id: 'message', group: 'Sheets', label: 'Message', note: 'One-tap messages; typing is the fallback',
-        ...modal('Գրել վարորդին', `<div class="chips">${['Դուրս եմ գալիս', 'Սպասեք, խնդրում եմ', 'Մուտքի մոտ եմ', 'Զանգեք ինձ'].map((c, i) =>
-          `<button class="chip tog" aria-pressed="${i === 0}">${c}</button>`).join('')}</div>
-          <div class="msgfield"><span class="ph">Հաղորդագրություն</span><button class="send" aria-label="Ուղարկել">${R.i('arrow-up')}</button></div>`) },
-      { id: 'share', group: 'Sheets', label: 'Share', note: 'A live link: whoever opens it sees the car and the ETA, nothing else',
-        html: () => modal('Կիսվել ուղևորությամբ', `<div class="sharecard">${R.trace('pickupToDrop', 72, 72, { pad: 10, grid: false })}
+      { id: 'message', group: 'Messages and share', label: 'Messages', note: 'Owner 2026-10-12: rider–driver messages, drawn ahead (no chat on the wire yet). Quick replies first, typing is the fallback; the thread lives with the ride and closes with it. Driver side: driver-ride#chat',
+        time: '9:44', html: () => `<div class="map" id="map" aria-label="Քարտեզ"></div><div class="scrim"></div>
+          <section class="sheet r modal" id="sheet" role="dialog" aria-label="Հաղորդագրություններ վարորդի հետ"><div class="grabber"></div>
+            <div class="chathead">${R.avatar()}<span class="nm"><span class="n1">${DV.first}</span><span class="n2">${DV.plate} · ${DV.carHy}</span></span><button class="xbtn" aria-label="Փակել">${R.i('x')}</button></div>
+            <div class="chat" role="log" aria-label="Նամակագրություն">
+              <span class="day">Այսօր</span>
+              <div class="bub in">Բարև, 4 րոպեից տեղում եմ<small>9:41</small></div>
+              <div class="bub out">Լավ, դուրս եմ գալիս<small>9:42 · կարդացված</small></div>
+              <div class="bub in">Կանգնած եմ Մատենադարանի դիմաց, սպիտակ ID.3<small>9:44</small></div>
+            </div>
+            <div class="quick" role="group" aria-label="Արագ պատասխաններ">${['Դուրս եմ գալիս', 'Սպասեք, խնդրում եմ', 'Ես մուտքի մոտ եմ', 'Զանգեք ինձ'].map((c, i) => `<button class="chip tog" aria-pressed="false"${i > 1 ? ' data-peek' : ''}>${c}</button>`).join('')}</div>
+            <div class="msgfield"><span class="ph">Հաղորդագրություն</span><button class="send" aria-label="Ուղարկել">${R.i('arrow-up')}</button></div>
+          </section>`,
+        map: approachMap(.8) },
+      { id: 'share', group: 'Messages and share', label: 'Share my trip', note: 'Owner 2026-10-12, drawn ahead: a live link (trip-share.html) that shows the car, the route and the arrival time, never the rider\'s phone. It stops working when the ride ends. Send = the system share sheet; copy is the quiet fallback',
+        time: RD.riding.clock, html: () => modal('Կիսվել ուղևորությամբ', `<div class="sharecard">${R.trace('pickupToDrop', 72, 72, { pad: 10, grid: false })}
             <span class="tx"><span class="t1">${DV.first} · ${DV.plate}</span><span class="t2">Ժամանում ${RD.dropAt}</span><span class="url">ecotaxi.am/r/7KQ2X</span></span></div>
-          <div class="btns"><button class="btn btn-quiet">${R.i('copy')}Պատճենել հղումը</button><button class="btn btn-quiet">${R.i('share')}Ուղարկել</button></div>`).html()
-          + `<div class="toast" role="status">${R.i('check')}Հղումը պատճենված է</div>`,
-        map: approachMap(.35) },
+          <div class="share-what">
+            <div class="row"><span class="ic">${R.i('map-pin')}</span><span class="txt"><span class="t2">Մեքենան քարտեզին և ժամանման ժամը</span></span></div>
+            <div class="row"><span class="ic">${R.i('eye-off')}</span><span class="txt"><span class="t2">Ձեր համարը չի երևում</span></span></div>
+            <div class="row"><span class="ic">${R.i('flag')}</span><span class="txt"><span class="t2">Հղումն անջատվում է ուղևորության ավարտին</span></span></div>
+          </div>
+          <div class="btns"><button class="btn btn-brand">${R.i('share')}Ուղարկել</button><button class="btn btn-quiet">${R.i('copy')}Պատճենել հղումը</button></div>`).html(),
+        map: (s) => {
+          const k = at(T, .35), rest = T.slice(k.i)
+          const m = R.map(s, { fit: rest, padTL: [56, 96], padBR: [56, s.querySelector('#sheet').offsetHeight + 56] })
+          drawRoute(m, rest, { weight: 5 }); htmlMarker(m, DROP, '<div class="pin-b"></div>', [18, 18]); htmlMarker(m, k.ll, carTop(k.deg), [18, 34])
+        } },
+
+      { id: 'company', group: 'Interrupted and variants', label: 'Company ride', note: 'R52, real (DriverCard paidByCompany): «Վճարում է ընկերությունը» as an ok tag under the status. No amount, no limit',
+        time: RD.assigned, html: () => approachSheet(RD.approachMin + ' րոպե', 'Մեքենան ճանապարհին է', RD.pickupAt, { tags: `<span class="tagp ok">${R.i('building-2')}Վճարում է ընկերությունը</span>` }), map: approachMap(0) },
+      { id: 'cancelled-by', group: 'Interrupted and variants', label: 'Cancelled by them', note: 'R49, real (ride/[id].tsx): the driver or the dispatcher cancelled. A neutral Notice «Պատվերը չեղարկված է» and «Փակել» back to home; the car and the driver leave the screen. Nothing to rate, nothing charged',
+        time: '9:43', html: () => `<div class="map" id="map" aria-label="Քարտեզ"></div>
+          <section class="sheet r gone" id="sheet"><div class="grabber"></div>
+            ${notice('<b>Պատվերը չեղարկված է</b>', 'circle-slash')}
+            <div class="stops2"><div class="stop2"><i></i>${RD.pickup}</div><div class="stop2"><i class="b"></i>${RD.drop}</div></div>
+            <button class="btn btn-brand">Փակել</button></section>`,
+        map: (s) => {
+          const m = R.map(s, { fit: R.bbox(PICK, .0022, .003), padTL: [48, 120], padBR: [48, s.querySelector('#sheet').offsetHeight + 40] })
+          htmlMarker(m, PICK, '<div class="pin-a"></div>', [18, 18])
+        } },
+      { id: 'reassigned', group: 'Interrupted and variants', label: 'Driver gave it back', note: 'R50: the driver handed the ride back to dispatch (epoch bump), so the screen returns to Searching (real). The line «Վարորդը փոխվեց · որոնում ենք նորը» is drawn ahead (new string): today the card just disappears',
+        time: '9:43', html: () => `<div class="map" id="map" aria-label="Քարտեզ"></div>
+          <section class="sheet r" id="sheet"><div class="grabber"></div>
+            <h2 class="h-title">Որոնում ենք մեքենա</h2><div class="h-sub">Ընտրում ենք մեքենա ձեզ համար</div>
+            <div class="sbar" role="progressbar" aria-label="Որոնում ենք մեքենա"></div>
+            ${notice('Վարորդը փոխվեց · որոնում ենք նորը')}
+            <div class="btns" style="margin-top:var(--s4)"><button class="btn btn-quiet">Չեղարկել</button></div></section>`,
+        map: (s) => {
+          const m = R.map(s, { fit: R.bbox(PICK, .0034, .0044), padTL: [24, 96], padBR: [24, s.querySelector('#sheet').offsetHeight + 16] })
+          htmlMarker(m, PICK, '<div class="pin-a"></div>', [18, 18])
+          ;[[[.0024, -.0031], 58], [[-.0019, .0027], 214], [[.0029, .0022], 140]].forEach(([o, d]) => htmlMarker(m, [PICK[0] + o[0], PICK[1] + o[1]], carTop(d), [18, 34]))
+        } },
+      { id: 'cancel-failed', group: 'Interrupted and variants', label: 'Cancel failed', note: 'R53, real: the cancel did not go through (offline, or the ride moved). The ride stays exactly as it was and a neutral Notice says so; cancel stays one tap away',
+        time: '9:42', html: () => approachSheet(RD.approachMin + ' րոպե', 'Մեքենան ճանապարհին է', RD.pickupAt, { after: notice('Չեղարկումը չստացվեց։ Փորձեք կրկին') }), map: approachMap(.1) },
+
+      { id: 'preorder', group: 'From a pre-order', label: 'Activated booking', note: 'R41, drawn ahead: tomorrow\'s 08:30 booking (ECO.BOOKINGS.air) was activated by the sweep and assigned at 08:12. The ETA is the hero (the car is early); the brand tag keeps the promised pickup, which the real ride screen does not carry yet. Reached from the push or rider-home?active=preorder',
+        time: ECO.BOOKINGS.air.assignedAt, html: () => approachSheet(ECO.BOOKINGS.air.etaMin + ' րոպե', 'Մեքենան ճանապարհին է', '08:18', { d: { ...SU, carHy: SU.car }, pre: preTag(ECO.BOOKINGS.air.time) }),
+        map: toBooking(.55, ECO.BOOKINGS.air.pickup) },
+      { id: 'early', group: 'From a pre-order', label: 'Driver started early', note: 'R43, drawn ahead (ADR-P1: the driver may start from T−30): Սուրեն pressed «Ճանապարհին եմ» at 08:02. The status says so in words and the caption takes the hurry out: the pickup is still 08:30 (new strings)',
+        time: '08:03', html: () => approachSheet('12 րոպե', 'Վարորդը ճանապարհին է', 'նստել ' + ECO.BOOKINGS.air.time, { d: { ...SU, carHy: SU.car }, pre: preTag(ECO.BOOKINGS.air.time), cap: 'Վարորդը կսպասի մինչև ' + ECO.BOOKINGS.air.time + '-ը։ Շտապել պետք չէ' }),
+        map: toBooking(.2, ECO.BOOKINGS.air.pickup) },
+      { id: 'downgraded', group: 'From a pre-order', label: 'Company → personal', note: 'R44, real (BillingNotice, receipt.downgraded.over_limit): Monday\'s company booking (ECO.BOOKINGS.co) activated after the company limit ran out, so the ride is the rider\'s, paid in cash. One neutral Notice, never red',
+        time: '08:47', html: () => approachSheet('5 րոպե', 'Մեքենան ճանապարհին է', '08:52', { pre: preTag(ECO.BOOKINGS.co.time), after: notice('Այս ուղևորության համար վճարում եք դուք, քանի որ ընկերության հաշվի սահմանաչափը սպառված է։ Վճարեք վարորդին։') }),
+        map: toBooking(.4, ECO.BOOKINGS.co.pickup) },
     ],
   })
 </script>

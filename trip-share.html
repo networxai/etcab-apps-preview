@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shared trip</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="rider.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="mapgl.local.js"></script>
+<script src="kit.js"></script>
+<script src="routes.js"></script>
+<style>
+  /* The public trip page (owner 2026-10-12, drawn ahead): what someone the rider shared the trip with opens in any mobile
+     browser, with no app and no login. It shows the car, the route and the arrival time; never the rider's phone, never
+     the driver's phone. Once the ride ends the link shows that it ended and nothing else (no last position). */
+  body { min-height: 100vh; background: var(--ground); }
+  .wrap { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; background: var(--surface); }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); height: 56px; padding: 0 var(--margin); flex: none; }
+  .top img { height: 20px; width: auto; display: block; }
+  .live { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: var(--r-pill); background: var(--surface-2);
+    font: var(--t-caption); color: var(--ink); white-space: nowrap; }
+  .live i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok-dot); }
+  .live.off i { background: var(--ink-3); }
+  .mapbox { position: relative; height: 340px; flex: none; overflow: hidden; }
+  .mapbox #map::after { display: none; } /* no status bar to fade under on a web page */
+  .card { padding: var(--s5) var(--margin) var(--s8); display: flex; flex-direction: column; gap: var(--s4); }
+  .who { font: var(--t-title); color: var(--ink); }
+  .eta { display: flex; align-items: baseline; gap: var(--s2); }
+  .eta b { font: var(--t-hero); color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -.4px; }
+  .eta span { font: var(--t-body); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .stops { border-radius: var(--r-card); background: var(--surface-2); padding: var(--s2) var(--s4); position: relative; }
+  .stop { display: flex; align-items: center; gap: var(--s3); min-height: 40px; font: var(--t-body); color: var(--ink); white-space: nowrap; }
+  .stop i { width: 10px; height: 10px; flex: none; border-radius: 50%; box-shadow: inset 0 0 0 3px var(--ink); }
+  .stop i.b { border-radius: 2px; box-shadow: none; background: var(--ink); }
+  .stop .tm { margin-left: auto; font: var(--t-secondary); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .drv { display: flex; align-items: center; gap: var(--s3); }
+  .drv .nm { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .drv .n1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .drv .n2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .fine { display: flex; gap: var(--s2); align-items: flex-start; font: var(--t-secondary); color: var(--ink-2); }
+  .fine svg { width: 16px; height: 16px; flex: none; margin-top: 1px; }
+  a.btn { text-decoration: none; }
+  .done-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--s3); padding: var(--s8) var(--margin) var(--s4); }
+  .done-hero .badge { width: 64px; height: 64px; border-radius: 50%; background: var(--surface-2); color: var(--ink); display: grid; place-items: center; }
+  .done-hero .badge svg { width: 28px; height: 28px; }
+  .done-hero h1 { font: var(--t-title); color: var(--ink); }
+  .done-hero p { font: var(--t-body); color: var(--ink-2); }
+  @media (min-width: 600px) {
+    body { padding: var(--s8) 0; }
+    .wrap { min-height: 0; border-radius: 20px; overflow: hidden; box-shadow: var(--e2); }
+    .mapbox { height: 380px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="w"></div>
+<script>
+  const RD = ECO.RIDE, DV = RD.driver
+  const ended = new URLSearchParams(location.search).get('state') === 'ended'
+  const plate = (no) => `<span class="plate" role="img" aria-label="Համարանիշ ${no}"><span class="eu" aria-hidden="true"><i></i><b>AM</b></span><span class="no">${no}</span></span>`
+  const head = (on) => `<header class="top"><img src="assets/eco/logo-wide.png" alt="Eco Taxi" width="112" height="20"><span class="live ${on ? '' : 'off'}"><i></i>${on ? 'Կենդանի' : 'Ավարտված'}</span></header>`
+  const cta = `<a class="btn btn-quiet" href="#">Պատվիրել Eco Taxi</a>`
+  document.getElementById('w').innerHTML = ended
+    ? `${head(false)}<div class="done-hero"><span class="badge"><i data-lucide="flag"></i></span><h1>Ուղևորությունն ավարտված է</h1>
+         <p>${RD.rider.name}ն տեղ հասավ ${RD.dropAt}-ին</p></div>
+       <div class="card"><div class="stops"><div class="stop"><i></i>${RD.pickup}<span class="tm">${RD.pickupAt}</span></div><div class="stop"><i class="b"></i>${RD.drop}<span class="tm">${RD.dropAt}</span></div></div>
+         <div class="fine"><i data-lucide="eye-off"></i><span>Մեքենայի դիրքն այլևս չի ցուցադրվում</span></div>${cta}</div>`
+    : `${head(true)}<div class="mapbox"><div id="map" aria-label="Մեքենան քարտեզին"></div></div>
+       <div class="card">
+         <div class="who">${RD.rider.name}ն ուղևորվում է</div>
+         <div class="eta"><b>${RD.dropAt}</b><span>ժամանում · ${RD.riding.left} րոպե</span></div>
+         <div class="stops"><div class="stop"><i></i>${RD.pickup}<span class="tm">${RD.pickupAt}</span></div><div class="stop"><i class="b"></i>${RD.drop}<span class="tm">${RD.dropAt}</span></div></div>
+         <div class="drv"><span class="avatar ini" aria-hidden="true">${DV.ini}</span><span class="nm"><span class="n1">${DV.first}</span><span class="n2">${DV.carHy}</span></span>${plate(DV.plate)}</div>
+         <div class="fine"><i data-lucide="link-2-off"></i><span>Հղումն անջատվում է ուղևորության ավարտին</span></div>
+         ${cta}
+       </div>`
+  icons()
+  if (ended) {
+    Promise.all([document.fonts.ready]).then(() => setTimeout(() => { document.documentElement.dataset.mapReady = 'none' }, 300))
+  } else {
+    const T = ROUTES.pickupToDrop.pts
+    const brg = (a, b) => Math.atan2((b[1] - a[1]) * Math.cos(a[0] * Math.PI / 180), b[0] - a[0]) * 180 / Math.PI
+    const i = Math.floor(.35 * (T.length - 1)), rest = T.slice(i)
+    const m = makeMap(document.getElementById('map'), { fit: rest, padTL: [40, 40], padBR: [56, 64], badge: { top: '12px', left: '12px' } })
+    drawRoute(m, rest, { weight: 5 })
+    htmlMarker(m, T[T.length - 1], '<div class="pin-b"></div>', [18, 18])
+    htmlMarker(m, T[i], carTop(brg(T[i], T[i + 1])), [18, 34])
+  }
+</script>
+</body>
+</html>

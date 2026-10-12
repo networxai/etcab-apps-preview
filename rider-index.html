@@ -28,7 +28,7 @@
 </head>
 <body>
 <script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light'</script>
-<header><h1>Ուղևորի հավելված․ բոլոր էկրանները<span class="en">Rider app, every screen: 12 screens, 77 states, day and night. Open a screen for its state switcher. Company billing: booking (company / personal, cost reference, over-limit), receipt, account.</span></h1>
+<header><h1>Ուղևորի հավելված․ բոլոր էկրանները<span class="en">Rider app, every screen: 14 screens, 98 states (96 in the app, 2 on the public trip page), day and night. Open a screen for its state switcher. Company billing: booking (company / personal, cost reference, over-limit), receipt, account.</span></h1>
   <div class="bar" role="group" aria-label="Թեմա / Theme"><a data-t="light" href="?theme=light">Ցերեկ · Day</a><a data-t="dark" href="?theme=dark">Գիշեր · Night</a><a href="index.html">Գլխավոր · Hub</a></div></header>
 <div class="grid" id="g"></div>
 <script>
@@ -36,23 +36,36 @@
     ['rider-opening', 'Opening', 'Letter-by-letter logo reveal, then the leaf', 'done'],
     ['rider-login', 'Login', 'Phone, code, errors, resend, offline, name', 'phone'],
     ['rider-home', 'Home', 'Approved hero', null],
+    ['rider-home', 'Home, ride in progress', 'Live-ride card back to the ride (drawn ahead)', null, { q: 'active=1', shot: 'rider-home-active' }],
+    ['rider-home', 'Home, pre-order activated', '«Վարորդը նշանակված է · նստել 08:30» (drawn ahead)', null, { q: 'active=preorder', shot: 'rider-home-active-preorder' }],
     ['rider-search', 'Address search', '2GIS suggest, saved, recent, pick on map', 'start'],
     ['rider-tiers', 'Tiers and fare', 'Approved hero', null],
     ['rider-book', 'Booking details', 'Note, Later, payment', 'details'],
+    ['rider-book', 'When: day + quarter-hour', '7 day chips, slots from now + 30 min, «Հիմա»', 'when'],
+    ['rider-book', 'Booking for later', 'Time set, note off, company pre-booking', 'scheduled'],
     ['rider-book', 'Company booking', 'Company / personal, «Ծախսերի կոդ», over-limit fallback', 'company'],
     ['rider-searching', 'Finding a car', 'Calm search, no cars, cancel', 'searching'],
+    ['rider-searching', 'No car yet', 'Call the dispatcher; activated pre-order variant', 'no-cars'],
     ['rider-ride', 'Driver and ride', 'Assigned, arriving, arrived, riding, cancel', 'assigned'],
+    ['rider-ride', 'Ride interrupted', 'Cancelled by them, driver gave it back, cancel failed', 'cancelled-by'],
+    ['rider-ride', 'Company ride', '«Վճարում է ընկերությունը» on the driver card', 'company'],
+    ['rider-ride', 'Pre-order becomes a ride', 'Activated booking, early start, company → personal', 'preorder'],
+    ['rider-ride', 'Messages and share', 'Chat with quick replies, share-my-trip link (drawn ahead)', 'message'],
+    ['trip-share', 'Shared trip (public page)', 'What a recipient opens; ended state', null, { href: 'trip-share.html', shot: 'trip-share' }],
     ['rider-done', 'Trip complete', 'Fare breakdown, rating, compliments', 'rate'],
     ['rider-done', 'Receipt, company', '«Վճարում է՝ …» in place of the payment method', 'company'],
-    ['rider-history', 'Ride history', 'List and detail', 'list'],
+    ['rider-history', 'Ride history', 'Pre-orders first, then rides; receipts', 'list'],
+    ['rider-preorders', 'Pre-orders', 'List, change via the dispatcher, reminder', 'list'],
+    ['rider-preorders', 'Pre-order detail', 'Pre-assigned driver, «Սկսել հիմա» (drawn ahead)', 'detail'],
+    ['rider-preorders', 'Pre-order pushes', 'Reminder 30 min before; driver assigned · pickup 08:30', 'activated'],
     ['rider-account', 'Account', 'Profile, places, wallet, language, theme, help, legal, delete', 'main'],
     ['rider-account', 'Account, company rider', 'Linked company in the wallet', 'main-company'],
     ['rider-offline', 'Offline and errors', 'Banner pattern, degraded, full-screen error', 'offline'],
   ]
   const T = document.documentElement.dataset.theme
   document.querySelectorAll('.bar a[data-t]').forEach((a) => a.setAttribute('aria-current', String(a.dataset.t === T)))
-  document.getElementById('g').innerHTML = S.map(([f, t, s, st]) => `<a href="${f}.html${st ? "#" + st : ""}"><div class="thumbs">${['light', 'dark'].map((th) =>
-    `<img loading="lazy" alt="" src="shots/${st ? `${f}-${st}-${th}` : `${f}-${th}`}.png">`).join('')}</div><b>${t}</b><span>${s}</span></a>`).join('')
+  document.getElementById('g').innerHTML = S.map(([f, t, s, st, x]) => `<a href="${x && x.href ? x.href : x && x.q ? `${f}.html?${x.q}` : `${f}.html${st ? "#" + st : ""}`}"><div class="thumbs">${['light', 'dark'].map((th) =>
+    `<img loading="lazy" alt="" src="shots/${x && x.shot ? `${x.shot}-${th}` : st ? `${f}-${st}-${th}` : `${f}-${th}`}.png">`).join('')}</div><b>${t}</b><span>${s}</span></a>`).join('')
 </script>
 </body>
 </html>

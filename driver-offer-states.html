@@ -45,7 +45,7 @@
     declined: { glyph: 'check', title: 'Դուք հրաժարվեցիք', sub: 'Դուք գծում եք · «Հեռու է»' },
   }[st]
   const home = `<a class="go quiet" href="driver-home.html?theme=${THEME}"><span class="drain" aria-hidden="true"></span><i data-lucide="house"></i>Գլխավոր</a>`
-  s.innerHTML = D.offer(res ? { result: res, foot: home } : { secs: 6 }) + (st === 'decline' ? `
+  s.innerHTML = D.offer(res ? { result: res, foot: home } : st === 'company' ? { secs: 9, pay: 'company' } : { secs: 6 }) + (st === 'decline' ? `
   <div class="scrim" data-s="decline"></div>
   <section class="sheet top" data-s="decline" role="dialog" aria-label="Ինչո՞ւ եք հրաժարվում">
     <div class="grabber"></div>
@@ -61,7 +61,7 @@
   </section>` : '')
   statusBar(s)
   D.init([
-    ['taken', 'Taken by another driver'], ['expired', 'Expired (no answer)'], ['decline', 'Decline: one tap on a reason (ticking)'], ['declined', 'Declined, back on the line'],
+    ['taken', 'Taken by another driver'], ['expired', 'Expired (no answer)'], ['decline', 'Decline: one tap on a reason (ticking)'], ['declined', 'Declined, back on the line'], ['company', 'Company ride (paid by company)'],
   ])
   const r3 = document.getElementById('ring3')
   if (r3) r3.outerHTML = D.ring(48, 4, .5, '<span class="v">6</span>', 'var(--warn)')

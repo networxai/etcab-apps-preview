@@ -82,15 +82,24 @@
   .seg { display: flex; gap: 4px; padding: 4px; border-radius: var(--r-control); background: var(--surface-2); }
   .seg button { flex: 1; height: 44px; border-radius: 10px; font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; }
   .seg button[aria-checked="true"] { background: var(--raised); color: var(--ink); box-shadow: var(--e1); }
-  .wheel { position: relative; display: flex; justify-content: center; align-items: center; gap: var(--s2); height: 200px; margin: var(--s4) 0; }
-  .wheel .band { position: absolute; left: 0; right: 0; top: 80px; height: 40px; border-radius: 10px; background: var(--surface-2); }
-  .wheel .col { position: relative; width: 72px; display: flex; flex-direction: column; align-items: center; }
-  .wheel .col span { height: 40px; display: grid; place-items: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .wheel .c2 { font: 400 17px/22px var(--font); color: var(--ink-3); }
-  .wheel .c1 { font: 400 20px/24px var(--font); color: var(--ink-2); }
-  .wheel .c0 { font: 600 24px/28px var(--font); color: var(--ink); }
-  .wheel .colon { position: relative; font: 600 24px/28px var(--font); color: var(--ink); }
-  .when-sub { font: var(--t-secondary); color: var(--ink-2); margin-top: var(--s3); text-align: center; }
+  /* "When?" (apps/rider components/when-sheet.tsx + lib/schedule.ts): «Հիմա», then 7 day chips in one scrolling row;
+     under them every quarter-hour of that day that is ≥ now + 30 min (LEAD_MINUTES), four to a row. No wheel. */
+  .days { display: flex; gap: var(--s2); overflow: hidden; margin: 0 calc(-1 * var(--margin)) var(--s3); padding: 0 var(--margin); }
+  .days .chip { height: 44px; padding: 0 14px; flex: none; }
+  .days .chip svg { width: 18px; height: 18px; }
+  .days .chip[aria-checked="true"] { background: var(--ink); color: var(--surface); box-shadow: none; }
+  .slots { position: relative; height: 252px; overflow: hidden; margin-bottom: var(--s4); }
+  .slots .in { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s2); }
+  .slots button { height: 44px; border-radius: var(--r-card); background: var(--surface-2); font: var(--t-body-strong); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .slots button[aria-checked="true"] { background: var(--ink); color: var(--surface); }
+  .slots::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 28px; pointer-events: none; background: linear-gradient(transparent, var(--surface)); }
+  .slots.top::before { content: ''; position: absolute; z-index: 1; left: 0; right: 0; top: 0; height: 20px; pointer-events: none; background: linear-gradient(var(--surface), transparent); }
+  /* The note is off while a time is set (book.tsx noteOff): scheduled_ride has no notes column. */
+  .opt[aria-disabled="true"] { color: var(--ink-3); background: var(--surface-2); }
+  .opt.whenset { background: var(--brand-soft); color: var(--brand-ink); }
+  .opt.whenset .chev { color: var(--brand-ink); }
+  .opt.ico { width: 44px; padding: 0; justify-content: center; }
+  .noteoff { font: var(--t-caption); color: var(--ink-2); margin: calc(-1 * var(--s1)) 0 var(--s3); }
 
   .paylist .choice { min-height: 60px; }
   .paylist .choice .ico { width: 36px; height: 36px; border-radius: 10px; background: var(--surface-2); display: grid; place-items: center; flex: none; }
@@ -117,40 +126,61 @@
 </head>
 <body>
 <script>
-  /* Tenant "eco" tariffs, fixed_upfront, Republic Sq → Cascade = 2.1 km, 4 min (NOTES.md). */
-  const TIERS = [['city', 'Eco City', 3, 4, 800], ['partner', 'Eco Comfort', 4, 4, 1000], ['kids', 'Eco Kids', 7, 4, 1200],
-    ['business', 'Eco Business', 6, 4, 1400], ['van', 'Eco Van', 9, 7, 1600], ['vip', 'Eco Vip', 11, 4, 2100]]
-  const tiers = () => `<div class="tiers" role="radiogroup" aria-label="Դաս">${TIERS.map(([k, n, eta, seats, p], i) =>
+/* Real street geometry (OSRM over OpenStreetMap, ODbL), fetched 2026-10-12 for the pre-order bookings (ECO.BOOKINGS). [lat, lng]. */
+ROUTES.preAir = { m: 14742, s: 1230, pts: [[40.206708,44.503782],[40.206399,44.504441],[40.205481,44.505095],[40.204759,44.503279],[40.204318,44.502176],[40.204082,44.501602],[40.202996,44.498929],[40.202872,44.498628],[40.202428,44.497484],[40.201647,44.495615],[40.201432,44.494992],[40.201145,44.49452],[40.200917,44.494345],[40.200513,44.494151],[40.199807,44.493798],[40.198956,44.493301],[40.198106,44.492905],[40.197743,44.492696],[40.197089,44.491608],[40.196422,44.490502],[40.195291,44.488607],[40.19445,44.48718],[40.193467,44.485512],[40.193153,44.48498],[40.192913,44.484573],[40.192357,44.483655],[40.190298,44.480188],[40.189677,44.47917],[40.188309,44.476902],[40.187751,44.475663],[40.187296,44.475026],[40.186779,44.474804],[40.186151,44.474964],[40.185234,44.476],[40.183985,44.476892],[40.181787,44.478394],[40.180049,44.479534],[40.174492,44.482576],[40.172049,44.483645],[40.169922,44.484602],[40.169234,44.484955],[40.168793,44.484975],[40.167889,44.484857],[40.167676,44.484745],[40.166884,44.483542],[40.166493,44.48276],[40.166191,44.48215],[40.164273,44.477967],[40.163116,44.475368],[40.161956,44.472764],[40.161185,44.471037],[40.159962,44.468365],[40.158888,44.465553],[40.158505,44.464464],[40.158195,44.46355],[40.157646,44.461701],[40.157548,44.461288],[40.15677,44.457973],[40.156594,44.457071],[40.156551,44.456605],[40.156549,44.456259],[40.156817,44.454198],[40.157048,44.453034],[40.157885,44.449959],[40.158331,44.448322],[40.158525,44.447608],[40.158971,44.446009],[40.159747,44.443033],[40.159876,44.442472],[40.160031,44.441338],[40.160043,44.440744],[40.160001,44.44038],[40.15974,44.439443],[40.158743,44.436972],[40.158205,44.435511],[40.158035,44.434456],[40.15807,44.433374],[40.158193,44.4322],[40.158596,44.430668],[40.159022,44.429622],[40.159832,44.427732],[40.160453,44.426288],[40.163227,44.419834],[40.163718,44.41869],[40.164315,44.417232],[40.164546,44.416341],[40.164642,44.415647],[40.164654,44.415013],[40.164401,44.411989],[40.164088,44.408393],[40.163985,44.407222],[40.16368,44.403728],[40.163643,44.4033],[40.1633,44.403328],[40.161179,44.403642],[40.16102,44.403609],[40.160896,44.403553],[40.160748,44.403446],[40.160614,44.403314],[40.159388,44.401998],[40.159059,44.401731],[40.158759,44.40155],[40.158473,44.401425],[40.158112,44.401335],[40.157636,44.40131],[40.156644,44.401305],[40.156526,44.401273],[40.156415,44.401195],[40.156273,44.400963],[40.156157,44.400806],[40.156009,44.400716],[40.155377,44.400635],[40.155141,44.400598],[40.154795,44.400455],[40.154341,44.40014],[40.15322,44.398955]] }
+ROUTES.preSun = { m: 2173, s: 259, pts: [[40.190505,44.51519],[40.19052,44.51519],[40.190528,44.515037],[40.190532,44.514968],[40.19056,44.51458],[40.190625,44.514575],[40.190626,44.514553],[40.190645,44.514294],[40.190632,44.514241],[40.190641,44.514051],[40.190623,44.514017],[40.190443,44.514006],[40.190269,44.513596],[40.190452,44.513427],[40.190178,44.512875],[40.190128,44.512774],[40.190312,44.512604],[40.190435,44.512482],[40.190607,44.512287],[40.190798,44.512026],[40.191004,44.511708],[40.191104,44.511515],[40.191172,44.511377],[40.191235,44.511213],[40.191364,44.510866],[40.191468,44.510513],[40.191543,44.510146],[40.191632,44.509493],[40.191822,44.508091],[40.191855,44.507803],[40.191875,44.507627],[40.191762,44.507617],[40.191741,44.507786],[40.191593,44.508906],[40.191513,44.509504],[40.191433,44.51012],[40.191418,44.510197],[40.19137,44.510441],[40.19127,44.510786],[40.191146,44.51113],[40.191128,44.511171],[40.191036,44.511375],[40.190902,44.511615],[40.190745,44.511873],[40.190503,44.512195],[40.190357,44.512358],[40.190219,44.512498],[40.189723,44.512942],[40.189253,44.513351],[40.189112,44.513473],[40.188739,44.513797],[40.188679,44.513852],[40.188545,44.513973],[40.188527,44.513989],[40.188403,44.514097],[40.188347,44.514145],[40.188272,44.51421],[40.187735,44.514679],[40.187622,44.514777],[40.18755,44.514839],[40.187522,44.514863],[40.187234,44.515082],[40.18691,44.514726],[40.18624,44.513946],[40.186315,44.513874],[40.186516,44.513675],[40.186519,44.513602],[40.186559,44.512757],[40.186566,44.512537],[40.186575,44.512293],[40.186412,44.512084],[40.186338,44.511991],[40.186257,44.512104],[40.18613,44.512283],[40.185646,44.512946],[40.18561,44.512999],[40.185526,44.513109],[40.185457,44.513206],[40.18559,44.513365],[40.185833,44.513653]] }
+ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.50409],[40.206137,44.504628],[40.205481,44.505095],[40.204847,44.503499],[40.204424,44.50244],[40.204318,44.502176],[40.204089,44.501618],[40.203633,44.50049],[40.202996,44.498929],[40.202904,44.498705],[40.202799,44.498451],[40.202428,44.497484],[40.201804,44.496037],[40.201615,44.495528],[40.201432,44.494992],[40.201204,44.494581],[40.201083,44.494454],[40.200917,44.494345],[40.20058,44.49417],[40.200394,44.494096],[40.199807,44.493798],[40.199109,44.493426],[40.198507,44.493159],[40.198243,44.493047],[40.198108,44.493032],[40.197983,44.493039],[40.197811,44.493067],[40.197429,44.493168],[40.196762,44.493443],[40.196392,44.493729],[40.196025,44.494137],[40.195723,44.494578],[40.195113,44.495541],[40.194569,44.496406],[40.19379,44.497647],[40.192932,44.49902],[40.192609,44.499628],[40.192343,44.50047],[40.192276,44.501165],[40.192233,44.50222],[40.192144,44.504193],[40.192006,44.504423],[40.191967,44.504415],[40.191086,44.504207],[40.190794,44.504144],[40.189307,44.503774],[40.188931,44.50385],[40.187379,44.504654],[40.187146,44.504739],[40.187138,44.504945],[40.187018,44.505126],[40.186685,44.50512],[40.186237,44.50509],[40.18556,44.505019],[40.185337,44.504978],[40.185038,44.504786],[40.184883,44.504682],[40.184737,44.504834],[40.184393,44.505331],[40.184225,44.505574],[40.184796,44.506254],[40.185145,44.506695],[40.185594,44.507227],[40.186138,44.507872],[40.185612,44.508578],[40.18534,44.508971],[40.184939,44.509548],[40.184689,44.509899],[40.184603,44.51002],[40.183907,44.510996],[40.183763,44.511186],[40.183578,44.511452],[40.183239,44.511923],[40.182864,44.512455],[40.182676,44.512229],[40.182202,44.511662],[40.181857,44.51125],[40.181538,44.510874],[40.181351,44.51067],[40.181109,44.510405],[40.180969,44.510318],[40.180288,44.511311],[40.17988,44.511905],[40.179793,44.512028],[40.17948,44.512477]] }
+</script>
+<script>
+  /* Tenant "eco" tariffs, fixed_upfront: fare = max(floor, base + per_km·km + per_min·min) rounded to 100 ֏ (NOTES.md; the console's
+     TIERS in console.js carry the same numbers). ETA = the nearest car of that tier, in minutes. */
+  const TARIFF = { city: [600, 90, 12, 700], partner: [700, 110, 14, 900], kids: [900, 130, 18, 1200], business: [1000, 150, 20, 1400], van: [1200, 170, 22, 1600], vip: [1500, 220, 30, 2000] }
+  const price = (id, km, mn) => { const [b, k, m, f] = TARIFF[id]; return Math.max(f, Math.round((b + k * km + m * mn) / 100) * 100) }
+  const TIERS = [['city', 'Eco City', 3, 4], ['partner', 'Eco Comfort', 4, 4], ['kids', 'Eco Kids', 7, 4], ['business', 'Eco Business', 6, 4], ['van', 'Eco Van', 9, 7], ['vip', 'Eco Vip', 11, 4]]
+  const B = ECO.BOOKINGS, C = ECO.COMPANY
+  /* Trips drawn on this page. now = Republic Sq → Cascade (2,1 km, 4 min → Eco City 800 ֏).
+     air = ECO.BOOKINGS.air being booked (Komitas 22 → Zvartnots, 12,6 km, 17 min → 1 900 ֏); co = ECO.BOOKINGS.co (4,1 km, 11 min → 1 100 ֏). */
+  const TRIPS = {
+    now: { route: 'republicToCascade', km: 2.1, min: 4, a: 'Հանրապետության հր.', b: 'Կասկադ' },
+    air: { route: 'preAir', km: B.air.km, min: B.air.min, a: B.air.pickup, b: B.air.dropShort, bRight: true },
+    co: { route: 'preCo', km: B.co.km, min: B.co.min, a: B.co.pickup, b: B.co.drop },
+  }
+  if (price('city', B.air.km, B.air.min) !== B.air.fare || price('city', B.co.km, B.co.min) !== B.co.fare) console.error('[rider-book] tariff and ECO.BOOKINGS fares disagree')
+
+  const tiers = (trip) => `<div class="tiers" role="radiogroup" aria-label="Դաս">${TIERS.map(([k, n, eta, seats], i) =>
     `<button class="tier ${i ? '' : 'on'}" role="radio" aria-checked="${!i}" ${i >= 2 ? 'data-peek' : ''}>
       ${i ? '' : `<span class="tick" aria-hidden="true">${R.i('leaf')}</span>`}
       <span class="art">${k === 'kids' ? carImg('city') + `<span class="seat" role="img" aria-label="Մանկական նստոցով">${R.i('baby')}</span>` : carImg(k)}</span><span class="name">${n}</span>
       <span class="meta"><span aria-label="Մեքենան՝ ${eta} րոպեում">${R.i('car-front')}${eta} ր</span><span>${R.i('user-round')}${seats}</span></span>
-      <span class="price">${R.amd(p)}</span></button>`).join('')}</div>`
-  const C = ECO.COMPANY
-  /* pay: 'cash' (personal) or 'company' — the opt chip says who pays. */
-  const opts = (sched, pay = 'cash') => `<div class="opts">
-      <button class="opt grow ${sched ? 'set' : ''}" aria-label="Ե՞րբ՝ ${sched ? 'Վաղը, 08:30' : 'Հիմա'}">${R.i(sched ? 'calendar-clock' : 'clock-3')}${sched ? 'Վաղը, 08:30' : 'Հիմա'}${R.i('chevron-down', 'class="chev"')}</button>
-      <button class="opt" aria-label="Նշում վարորդին${sched ? '՝ ավելացված' : ''}">${R.i('message-square-text')}Նշում${sched ? '<span class="dot" aria-hidden="true"></span>' : ''}</button>
+      <span class="price">${R.amd(price(k, trip.km, trip.min))}</span></button>`).join('')}</div>`
+  const cta = (trip, label = 'Պատվիրել') => `${label} · Eco City · ${R.amd(price('city', trip.km, trip.min))}`
+
+  /* when: null = now; else the useWhenLabel string («Վաղը, 08:30»). A set time turns the chip brand-soft and switches the note off. */
+  const opts = (when, pay = 'cash') => `<div class="opts">
+      <button class="opt grow ${when ? 'whenset' : ''}" aria-label="Ե՞րբ՝ ${when || 'Հիմա'}">${R.i(when ? 'calendar-clock' : 'clock-3')}${when || 'Հիմա'}${R.i('chevron-down', 'class="chev"')}</button>
+      ${when ? `<button class="opt ico" aria-disabled="true" aria-label="Նշում վարորդին. Նշումը հասանելի է միայն հիմա պատվիրելիս">${R.i('message-square-text')}</button>`
+        : `<button class="opt" aria-label="Նշում վարորդին">${R.i('message-square-text')}Նշում</button>`}
       ${pay === 'company'
-        ? `<button class="opt" aria-label="Վճարում՝ ${ECO.PAY.company.label}">${R.i('building-2')}${ECO.PAY.company.short}</button>`
-        : `<button class="opt" aria-label="Վճարում՝ ${ECO.PAY.cash.label}"><span class="cash">${R.i('banknote')}</span>${ECO.PAY.cash.label}</button>`}</div>`
+        ? `<button class="opt${when ? ' ico' : ''}" aria-label="Վճարում՝ ${ECO.PAY.company.label}">${R.i('building-2')}${when ? '' : ECO.PAY.company.short}</button>` /* with a time set the line is long; the segment below names the company */
+        : `<button class="opt" aria-label="Վճարում՝ ${ECO.PAY.cash.label}"><span class="cash">${R.i('banknote')}</span>${ECO.PAY.cash.label}</button>`}</div>
+      ${when ? '<div class="noteoff">Նշումը հասանելի է միայն հիմա պատվիրելիս</div>' : ''}`
   const billTo = (choice, ref) => `<div class="billto" role="group" aria-label="Ով է վճարում։ Հպեք՝ փոխելու համար">
       <div class="seg" role="radiogroup"><button role="radio" aria-checked="${choice === 'company'}" aria-label="Ընկերություն · ${C.name}">Ընկերություն<small>${C.short}</small></button><button role="radio" aria-checked="${choice !== 'company'}">Անձնական</button></div>
       ${choice === 'company' ? `<div class="billed">${R.i('building-2')}Վճարում է՝ ${C.name}</div>` : ''}
       ${ref === 'filled' ? `<label class="ref"><span class="rl">${C.refLabel}</span><span class="rv">${C.ref}</span></label>` : ''}
       ${ref === 'missing' ? `<label class="ref miss" aria-describedby="refmsg"><span class="rl">${C.refLabel}</span><span class="rv"></span></label><div class="refmsg" id="refmsg">Ձեր ընկերությունը խնդրում է լրացնել այս դաշտը</div>` : ''}</div>`
-  const company = (choice, ref) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers()}${opts(false, choice)}${billTo(choice, ref)}
-      ${ref === 'missing' ? '<button class="btn" disabled>Պատվիրել</button>' : `<button class="btn btn-brand">Պատվիրել · Eco City · ${R.amd(800)}</button>`}</section>`)
   const base = (sheet, fab = true) => `<div class="map" id="map" aria-label="Քարտեզ"></div>
       ${fab ? `<button class="fab" style="top:62px;left:16px" aria-label="Հետ">${R.i('arrow-left')}</button>` : ''}${sheet}`
-  const details = (sched) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers()}${opts(sched)}
-      <button class="btn btn-brand">Պատվիրել · Eco City · ${R.amd(800)}</button></section>`)
+  const company = (choice, ref, when = null, trip = TRIPS.now) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers(trip)}${opts(when, choice)}${billTo(choice, ref)}
+      ${ref === 'missing' ? '<button class="btn" disabled>Պատվիրել</button>' : `<button class="btn btn-brand">${cta(trip)}</button>`}</section>`)
+  const details = (when, trip) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers(trip)}${opts(when)}
+      <button class="btn btn-brand">${cta(trip)}</button></section>`)
   const modal = (title, body, cls = '') => base(`<div class="scrim" aria-hidden="true"></div>
       <section class="sheet r modal ${cls}" id="sheet" role="dialog" aria-label="${title}"><div class="grabber"></div>
       <div class="mhead"><h2 class="h-title">${title}</h2><button class="xbtn" aria-label="Փակել">${R.i('x')}</button></div>${body}</section>`, false)
 
-  const RT = () => ROUTES.republicToCascade.pts
-  const drawRide = (s, tags = true) => {
+  const drawRide = (s, tags = true, trip = TRIPS.now) => {
+    const RT = ROUTES[trip.route].pts
     /* A sheet raised by the keyboard: the map (and 2GIS's logo, which must stay visible) stops above sheet + keyboard. */
     let sheetH = s.querySelector('#sheet').offsetHeight, sel = '#sheet'
     if (s.querySelector('.modal.kb')) {
@@ -158,44 +188,73 @@
       s.insertAdjacentHTML('beforeend', `<div id="kbh" aria-hidden="true" style="position:absolute;visibility:hidden;width:1px;height:${sheetH}px"></div>`)
       sel = '#kbh'
     }
-    const m = R.map(s, { sheet: sel, fit: RT(), padTL: [48, 132], padBR: [48, sheetH + 44] })
-    drawRoute(m, RT(), { weight: 5 })
-    const a = RT()[0], b = RT()[RT().length - 1]
+    const m = R.map(s, { sheet: sel, fit: RT, padTL: [48, 132], padBR: [48, sheetH + 44] })
+    drawRoute(m, RT, { weight: 5 })
+    const a = RT[0], b = RT[RT.length - 1]
     htmlMarker(m, a, '<div class="pin-a"></div>', [18, 18])
     htmlMarker(m, b, '<div class="pin-b"></div>', [18, 18])
     if (tags) {
-      htmlMarker(m, a, `<div class="maptag plain" style="position:absolute;right:20px;top:-18px">Հանրապետության հր.</div>`, [0, 0], [0, 0])
-      htmlMarker(m, b, `<div class="maptag" style="position:absolute;left:0;top:-22px;transform:translate(-50%,-100%)"><b>2,1 կմ · 4 ր</b>Կասկադ</div>`, [0, 0], [0, 0])
+      htmlMarker(m, a, `<div class="maptag plain" style="position:absolute;right:20px;top:-18px">${trip.a}</div>`, [0, 0], [0, 0])
+      /* The airport sits at the map's west edge, so its tag opens to the right of the pin instead of centring over it. */
+      htmlMarker(m, b, `<div class="maptag" style="position:absolute;${trip.bRight ? 'left:16px;top:-18px' : 'left:0;top:-22px;transform:translate(-50%,-100%)'}"><b>${ECO.km(trip.km)} · ${trip.min} ր</b>${trip.b}</div>`, [0, 0], [0, 0])
     }
   }
-  /* Today is Friday 9 October 2026: tomorrow is Saturday the 10th, then Sunday the 11th (i18n weekday./month. names). */
-  const wheel = () => {
-    const col = (vals) => `<div class="col">${vals.map((v, i) => `<span class="c${Math.abs(i - 2)}">${v}</span>`).join('')}</div>`
-    return `<div class="wheel" role="group" aria-label="Ժամ՝ 08:30"><span class="band" aria-hidden="true"></span>${col(['06', '07', '08', '09', '10'])}<span class="colon">:</span>${col(['20', '25', '30', '35', '40'])}</div>`
+
+  /* "When?" — schedule.ts: dayOptions(now, 7) and timeOptions(day, now). Today is ECO.DAY (Friday 9 October, 9:41), so today's
+     first slot is 9:41 + 30 = 10:11 → 10:15. Day chips read «{Այսօր|Վաղը|weekday} · {d} {month}» (when-sheet.tsx dayLabel). */
+  const WD = ['կիրակի', 'երկուշաբթի', 'երեքշաբթի', 'չորեքշաբթի', 'հինգշաբթի', 'ուրբաթ', 'շաբաթ']
+  const MON = ['հունվարի', 'փետրվարի', 'մարտի', 'ապրիլի', 'մայիսի', 'հունիսի', 'հուլիսի', 'օգոստոսի', 'սեպտեմբերի', 'հոկտեմբերի', 'նոյեմբերի', 'դեկտեմբերի']
+  const [Y, Mo, D0] = ECO.DAY.iso.split('-').map(Number)
+  const days = Array.from({ length: 7 }, (_, i) => { const d = new Date(Y, Mo - 1, D0 + i); return `${i === 0 ? 'Այսօր' : i === 1 ? 'Վաղը' : WD[d.getDay()]} · ${d.getDate()} ${MON[d.getMonth()]}` })
+  const [nh, nm] = ECO.DAY.now.split(':').map(Number)
+  const clock = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
+  const slotsFor = (day) => { const out = []; for (let m = 0; m < 1440; m += 15) if (day > 0 || m >= nh * 60 + nm + 30) out.push(m); return out }
+  /* The slot list scrolls inside the sheet. rowsScrolled = 0: today from the first slot (5 full rows, then more under the fade);
+     rowsScrolled = n: already scrolled to row n (a sliver of the row above shows). Rows not fully in view are data-peek. */
+  const whenSheet = (day, picked, rowsScrolled = 0) => {
+    const list = slotsFor(day), rows = []
+    for (let i = 0; i < list.length; i += 4) rows.push(list.slice(i, i + 4))
+    const first = rowsScrolled ? rowsScrolled - 1 : 0, full = rowsScrolled ? [rowsScrolled, rowsScrolled + 4] : [0, 5]
+    const shown = rows.slice(first, full[1] + 1)
+    const chips = `<div class="days" role="radiogroup" aria-label="Օր"><button class="chip" aria-label="Հիմա">${R.i('clock')}Հիմա</button>${days.map((l, i) =>
+      `<button class="chip" role="radio" aria-checked="${i === day}">${l}</button>`).join('')}</div>`
+    const grid = `<div class="slots${rowsScrolled ? ' top' : ''}" role="radiogroup" aria-label="Ժամ"><div class="in" style="margin-top:${rowsScrolled ? -30 : 0}px">${shown.map((row, j) => {
+      const r = first + j, peek = r < full[0] || r >= full[1]
+      return row.map((m) => `<button role="radio" aria-checked="${clock(m) === picked}" aria-label="${clock(m)}"${peek ? ' data-peek' : ''}>${clock(m)}</button>`).join('')
+    }).join('')}</div></div>`
+    return modal('Ե՞րբ', `${chips}${grid}${picked ? '<button class="btn btn-brand">Հաստատել</button>' : '<button class="btn" disabled>Հաստատել</button>'}`)
+  }
+
+  const daysInView = (s) => {
+    const row = s.querySelector('.days'), on = row.querySelector('[aria-checked="true"]')
+    if (on.offsetLeft + on.offsetWidth > row.clientWidth) row.scrollLeft = on.offsetLeft - 16 - 52
+    row.querySelectorAll('.chip').forEach((c) => { const r = c.getBoundingClientRect(); if (r.left < 0 || r.right > 390) c.dataset.peek = '' ; else delete c.dataset.peek })
   }
 
   Rider.page({
     title: 'Rider · Booking details',
-    sub: 'Extends the approved tier sheet: when, a note for the driver, payment (cash; card «Շուտով»), and the company / personal choice for corporate riders',
+    sub: 'Extends the approved tier sheet: when (now, or a quarter-hour up to 7 days ahead), a note for the driver (now only), payment (cash; card «Շուտով»), and the company / personal choice for corporate riders',
     states: [
       { id: 'details', group: 'Sheet', label: 'Details', note: 'One compact line under the tiers: when · note · payment. Order stays the one accent',
-        html: () => details(false), map: (s) => drawRide(s) },
-      { id: 'scheduled', group: 'Sheet', label: 'Scheduled + note', note: 'A set option is ringed; the note shows a dot, not its text',
-        html: () => details(true), map: (s) => drawRide(s) },
+        html: () => details(null, TRIPS.now), map: (s) => drawRide(s) },
+      { id: 'scheduled', group: 'Sheet', label: 'Scheduled', note: 'A time is set (book.tsx): the when chip turns brand-soft and reads «Վաղը, 08:30»; the note switches off and says why (book.noteNowOnly), because scheduled_ride has no notes column. ECO.BOOKINGS.air: 12,6 km, 17 min → 1 900 ֏',
+        html: () => details(B.air.when, TRIPS.air), map: (s) => drawRide(s, true, TRIPS.air) },
+      { id: 'scheduled-company', group: 'Sheet', label: 'Scheduled · company', note: 'R33: a company rider pre-books on account (corp.schedule): Company / Personal and «Ծախսերի կոդ» work as for a ride now. ECO.BOOKINGS.co, Monday 09:00, 1 100 ֏',
+        html: () => company('company', 'filled', B.co.when, TRIPS.co), map: (s) => drawRide(s, false, TRIPS.co) },
 
-      { id: 'note', group: 'Sheets', label: 'Note', note: 'Free text plus one-tap chips; keyboard up, sheet rides above it',
+      { id: 'note', group: 'Sheets', label: 'Note', note: 'Free text plus one-tap chips; keyboard up, sheet rides above it. Only for a ride now',
         html: () => modal('Նշում վարորդին', `<div class="mtext"><span class="v">Մուտքը բակից է<span class="caret"></span></span><span class="n">14/200</span></div>
           <div class="chips" role="group" aria-label="Արագ նշումներ"><button class="chip tog" aria-pressed="false">Զանգել ժամանելիս</button><button class="chip tog" aria-pressed="true">${R.i('check')}Ուղեբեռ</button><button class="chip tog" aria-pressed="false">Կենդանի</button></div>
           <button class="btn btn-brand">Պահպանել</button>`, 'kb') + R.keyboard(), map: (s) => drawRide(s, false) },
-      { id: 'when', group: 'Sheets', label: 'When', note: 'Day as a segment, time as a wheel in 5-minute steps; the chosen row sits in a band',
-        html: () => modal('Ե՞րբ', `<div class="seg" role="radiogroup" aria-label="Օր"><button role="radio" aria-checked="false">Այսօր</button><button role="radio" aria-checked="true">Վաղը</button><button role="radio" aria-checked="false">Կիրակի, 11</button></div>
-          <div class="when-sub">շաբաթ, 10 հոկտեմբերի</div>${wheel()}<button class="btn btn-brand">Հաստատել</button>`), map: (s) => drawRide(s, false) },
+      { id: 'when', group: 'Sheets', label: 'When · today', note: 'when-sheet.tsx: «Հիմա» clears a time; 7 day chips; under them every quarter-hour ≥ now + 30 min. At 9:41 today starts at 10:15. «Հաստատել» stays off until a slot is picked',
+        html: () => whenSheet(0, null), after: daysInView, map: (s) => drawRide(s, false, TRIPS.air) },
+      { id: 'when-tomorrow', group: 'Sheets', label: 'When · tomorrow', note: 'Tomorrow picked: the whole day from 00:00, scrolled to the morning; 08:30 is the chosen slot (ink fill). Picking a day clears the slot',
+        html: () => whenSheet(1, B.air.time, 7), after: daysInView, map: (s) => drawRide(s, false, TRIPS.air) },
       { id: 'pay', group: 'Sheets', label: 'Payment', note: 'Cash is the one live method (PaySheet.tsx); card is listed and honestly marked «Շուտով», never hidden. A company rider chooses Company / Personal on the sheet itself',
         html: () => modal('Վճարում', `<div class="paylist" role="radiogroup" aria-label="Վճարման եղանակ">
           <button class="choice" role="radio" aria-checked="true"><span class="ico cashc">${R.i('banknote')}</span><span class="t">Կանխիկ</span><span class="radio"></span></button>
           <div class="divider" style="margin-left:48px"></div>
           <button class="choice" role="radio" aria-checked="false" aria-disabled="true"><span class="ico">${R.i('wallet')}</span><span class="t">Քարտով</span><span class="soon">Շուտով</span></button></div>`), map: (s) => drawRide(s, false) },
-
 
       { id: 'company', group: 'Company', label: 'Company ride', note: 'Only for a rider whose company is on account (bill-to.ts): Company / Personal, remembered per rider. The billed-to line names the company; the agreement asks for a cost-centre code',
         html: () => company('company', 'filled'), map: (s) => drawRide(s, false) },
@@ -207,13 +266,13 @@
         html: () => modal('Ընկերությունը չի կարող վճարել այս ուղևորության համար', `<div class="refusal"><p class="body">Ընկերության հաշվի սահմանաչափը սպառված է։ Կարող եք ինքներդ վճարել վարորդին։</p>
           <div class="btns"><button class="btn btn-brand">Վճարել ինքս</button><button class="btn btn-quiet">Չեղարկել</button></div></div>`), map: (s) => drawRide(s, false) },
 
-      { id: 'scheduled-ok', group: 'Done', label: 'Scheduled', note: 'The time is the one hero; the ride lives in Account → scheduled bookings',
+      { id: 'scheduled-ok', group: 'Done', label: 'Scheduled', note: 'book.tsx ModalSheet «Պատվերն ընդունված է»: the time is the one hero; «Պատրաստ է» goes to «Ուղևորություններ», where the booking leads the list under «Նախնական պատվերներ». The line under it is new copy (owner: the rider changes or cancels through the dispatcher, not in the app)',
         html: () => base(`<section class="sheet r ok" id="sheet"><div class="grabber"></div>
-          <div class="top"><span class="badge">${R.i('calendar-check')}</span><h2 class="h-title">Պատվերն ընդունված է</h2></div>
-          <div class="hero">08:30</div><div class="hsub">Վաղը, շաբաթ, 10 հոկտեմբերի</div>
-          <div class="trip"><div class="stop"><span class="g"><i></i></span>Հանրապետության հրապարակ</div><div class="stop"><span class="g"><i class="b"></i></span>Կասկադ</div>
-            <div class="meta"><span>Eco City</span>·<b>${R.amd(800)}</b>·<span>Կանխիկ</span></div></div>
-          <button class="btn btn-brand">Լավ</button></section>`), map: (s) => drawRide(s) },
+          <div class="top"><span class="badge">${R.i('calendar-clock')}</span><h2 class="h-title">Պատվերն ընդունված է</h2></div>
+          <div class="hero">${B.air.when}</div><div class="hsub">Մեքենան կնշանակվի ժամանակից առաջ։ Փոփոխելու կամ չեղարկելու համար զանգեք դիսպետչերին</div>
+          <div class="trip"><div class="stop"><span class="g"><i></i></span>${B.air.pickup}</div><div class="stop"><span class="g"><i class="b"></i></span>${B.air.drop}</div>
+            <div class="meta"><span>${B.air.tier}</span>·<b>${R.amd(B.air.fare)}</b>·<span>${ECO.PAY.cash.label}</span></div></div>
+          <button class="btn btn-brand">Պատրաստ է</button></section>`), map: (s) => drawRide(s, true, TRIPS.air) },
     ],
   })
 </script>
