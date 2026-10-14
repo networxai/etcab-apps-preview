@@ -1,5 +1,6 @@
-/* Corporate (Companies · company page · invoice run · overdue): layout only, on top of console.css.
-   Mirrors apps/operator components/admin/companies.tsx, company-*.tsx, invoice-*.tsx, invoices-overdue.tsx.
+/* Corporate (Companies · company page · monthly company reports): layout only, on top of console.css.
+   Mirrors apps/operator components/admin/companies.tsx and company-*.tsx. No invoices (owner decision 11, 2026-10-14):
+   the month is tracked (rides, amount, optional «Վճարված»), exported and sent, never issued as a numbered document.
    Colours, type, controls and pills all come from console.css; nothing here adds a ground or a hue. */
 
 /* Full-width list page: one card that scrolls, header strip above it. */
@@ -65,14 +66,12 @@
 .formfoot { display: flex; align-items: center; justify-content: flex-end; gap: 6px; padding-top: 12px; border-top: 1px solid var(--line-soft); margin-top: 12px; }
 .formfoot .sp { flex: 1; }
 
-/* Under-row panel (invoice actions, payment, credit): opens beneath its row, one at a time. */
+/* Under-row panel (send a report): opens beneath its row, one at a time. */
 .under td { background: var(--surface-alt); height: auto; padding-top: 12px; padding-bottom: 12px; white-space: normal; }
 .under .acts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .under .panel { margin-top: 12px; background: var(--surface); border-radius: var(--r-card); box-shadow: var(--e1); padding: 12px var(--inset); }
 .under .panel h4 { font: var(--c-head); display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-.pgrid { display: grid; grid-template-columns: 160px 220px 200px 160px minmax(0, 1fr); gap: 12px; align-items: end; }
-.cl td { height: 40px; }
-.cl .input { height: var(--h-s); width: 120px; margin-left: auto; }
+.sgrid { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; align-items: end; }
 
 /* Statement figures. */
 .figs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-radius: var(--r-card); box-shadow: inset 0 0 0 1px var(--line-soft); }
@@ -80,11 +79,9 @@
 .figs .kpi:last-child { border-right: 0; }
 .figs .kpi .v { font: 600 20px/28px var(--font); }
 
-/* Run bar: month stepper + Run. */
+/* Month stepper. */
 .month { display: inline-flex; align-items: center; gap: 4px; }
-.month .lbl { font: 500 14px/20px var(--mono); min-width: 132px; text-align: center; white-space: nowrap; }
-.outc b { font: 600 13px/18px var(--mono); }
-.outc .amb { color: var(--warning); font: var(--c-body); }
+.month .lbl { font: 500 14px/20px var(--font); min-width: 132px; text-align: center; white-space: nowrap; }
 .warnn { color: var(--warning); font-weight: 600; }
 .dot-w { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--warning); margin-right: 6px; vertical-align: 1px; }
 .cb { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--line-control); background: var(--surface); }
@@ -100,7 +97,34 @@ tr:hover .rev-act, tr:focus-within .rev-act, tr.on .rev-act { opacity: 1; }
 @media (max-width: 1400px) {
   .tb.two, .tb.split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .credit { grid-template-columns: auto 160px; }
-  .pgrid { grid-template-columns: 140px 190px 170px 140px minmax(0, 1fr); }
   .hide-s { display: none; }
 }
 #views a { text-decoration: none; height: 26px; }
+
+/* Fact strip: the period's figures on one line (replaces a lead paragraph). */
+.facts { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; font: var(--c-small); color: var(--ink-muted); }
+.facts b { display: block; font: 600 15px/20px var(--font); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.facts > span { white-space: nowrap; }
+
+/* Credit in use: a 48px bar + percent; amber pill with a triangle at ≥ 90 % (never colour alone). */
+.lim { display: inline-flex; align-items: center; gap: 8px; }
+.bar3 { width: 48px; height: 6px; border-radius: 3px; background: var(--surface-3); overflow: hidden; flex: none; }
+.bar3 i { display: block; height: 100%; background: var(--ink-muted); }
+.lim.near .bar3 i { background: var(--warning); }
+
+/* «Վճարված» with who/when under it. */
+.paid { display: inline-flex; flex-direction: column; gap: 0; line-height: 1; }
+.paid small { font: var(--c-small); color: var(--ink-faint); margin-left: 24px; white-space: nowrap; }
+.tbl td:has(> .paid) { padding-top: 4px; padding-bottom: 4px; }
+
+/* Export group: three ghost buttons in fixed order (Excel · CSV · PDF). */
+.xp { display: inline-flex; gap: 2px; }
+.xp .btn { padding: 0 8px; }
+
+/* Report table: bounded rows + a total that is the period's own figure. */
+.rep tfoot td { height: 40px; font: var(--c-strong); border-top: 1px solid var(--line-strong); border-bottom: 0; position: sticky; bottom: 0; background: var(--surface); }
+.rep tfoot td.m { font: 600 13px/18px var(--mono); }
+.cut td { height: 36px; color: var(--ink-muted); font: var(--c-small); text-align: center; }
+
+.sendp { background: var(--surface-alt); border-radius: var(--r-card); padding: 12px var(--inset); }
+.sendp h4 { font: var(--c-head); display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }

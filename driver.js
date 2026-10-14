@@ -18,7 +18,7 @@
   const SCREENS = [
     ['driver-login', 'Login'], ['driver-ready', 'Readiness'], ['driver-shift', 'Shift'], ['driver-home', 'Home (hero)'],
     ['driver-home-states', 'Home, other states'], ['driver-preorders', 'Pre-orders'], ['driver-offer', 'Offer (hero)'],
-    ['driver-offer-states', 'Offer, other states'], ['driver-ride', 'Ride flow'], ['driver-earnings', 'Earnings'], ['driver-account', 'Account'],
+    ['driver-offer-states', 'Offer, other states'], ['driver-ride', 'Ride flow'], ['driver-earnings', 'Earnings'], ['driver-inbox', 'Notifications'], ['driver-account', 'Account'],
   ]
 
   const link = (over) => {
@@ -111,7 +111,7 @@ window.D && (window.D.offer = function (o) {
     <div class="oh">
       <span class="bell${o.result ? ' done' : ''}" aria-hidden="true"><i data-lucide="${o.result ? o.result.glyph : 'bell-ring'}"></i></span>
       <span class="ot">${o.result ? o.result.title : 'Նոր պատվեր'}</span>
-      ${o.result || o.decline === false ? '' : `<button class="ochip" id="dbtn" aria-label="Հրաժարվել"${o.declineHref ? ` onclick="location.href='${o.declineHref}'"` : ''}><i data-lucide="x"></i>Հրաժարվել</button>`}
+      ${o.result || o.decline === false ? '' : `<button class="ochip" id="dbtn" aria-label="Մերժել"${o.declineHref ? ` onclick="location.href='${o.declineHref}'"` : ''}><i data-lucide="x"></i>Մերժել</button>`}
     </div>
     <div class="ocard"><div class="map" id="map" aria-label="Երթուղին քարտեզի վրա"></div></div>
     <div class="obody">

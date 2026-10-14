@@ -71,14 +71,13 @@
 <div class="screen" id="screen">
   <div class="main">
     <header class="bar">
-      <span class="crumb">Ուղևորի հավելված <i data-lucide="chevron-right"></i></span><h1>Բիզնես գործընկերների քարտեր</h1>
+      <span class="crumb">Ուղևորի հավելված <i data-lucide="chevron-right"></i></span><h1>Գովազդներ</h1>
       <div class="live"></div>
     </header>
     <div class="content">
       <section class="card lst" aria-labelledby="t1">
-        <div class="card-h"><h2 id="t1">Քարտեր</h2><span class="sub num" id="cnt"></span>
-          <span class="end"><button class="btn primary s" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր քարտ<span class="kbd">N</span></button></span></div>
-        <p class="explain">Այն, ինչ ուղևորը տեսնում է հավելվածի գլխավոր էջում՝ «Ո՞ւր եք գնում» տողի տակ. տարածք, որը վաճառում է ավտոպարկը։ Հասցեով քարտը պատվիրում է մեքենա մինչև գործընկերի դուռը, հղումով քարտը բացում է նրա էջը։</p>
+        <div class="card-h"><h2 id="t1">Գովազդներ</h2><span class="sub num" id="cnt"></span><span class="sub">· ուղևորի գլխավոր էջում</span>
+          <span class="end"><button class="btn primary s" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր գովազդ<span class="kbd">N</span></button></span></div>
         <div id="create"></div>
         <div class="tb">
           <span class="input"><i data-lucide="search"></i><span class="val ph">օր. Սուրճ</span></span>
@@ -86,7 +85,7 @@
         </div>
         <div class="scroll-y grow">
           <table class="tbl pt"><colgroup><col style="width:96px"><col><col style="width:26%"><col style="width:64px"><col style="width:112px"><col style="width:140px"></colgroup>
-            <thead><tr><th></th><th>Վերնագիր</th><th>Սեղմելիս</th><th class="r"><abbr title="Հերթականություն" style="text-decoration:none">Հերթ.</abbr></th><th>Վիճակ</th><th></th></tr></thead>
+            <thead><tr><th></th><th>Գովազդատու</th><th>Սեղմելիս</th><th class="r"><abbr title="Հերթականություն" style="text-decoration:none">Հերթ.</abbr></th><th>Վիճակ</th><th></th></tr></thead>
             <tbody id="rows"></tbody></table>
         </div>
       </section>
@@ -98,7 +97,7 @@
               <div class="chips"><span><i data-lucide="house"></i>Տուն</span><span><i data-lucide="briefcase"></i>Աշխատանք</span><span><i data-lucide="calendar-clock"></i>Նախապես</span></div></div>
             <div class="partners"><div class="track" id="track"></div><div class="dots" id="dots" aria-hidden="true"></div></div>
           </div></div>
-          <span class="cap">Միացված քարտերը՝ ըստ հերթականության։ Անջատվածները ուղևորը չի տեսնում։</span>
+          <span class="cap">Միայն միացվածները՝ ըստ հերթի</span>
           <div class="order" id="order"></div>
         </div>
       </aside>
@@ -121,10 +120,10 @@
   document.getElementById('c-on').textContent = live.length
   document.getElementById('c-off').textContent = cards.length - live.length
   document.getElementById('rows').innerHTML = cards.map((c) => {
-    const thumb = c.img ? `<img class="thumb" src="${c.img}" alt="">` : `<span class="thumb broken" role="img" aria-label="Այս նկարը չի բացվում — ուղևորը դատարկ քարտ կտեսնի" title="Այս նկարը չի բացվում — ուղևորը դատարկ քարտ կտեսնի"><i data-lucide="image-off"></i></span>`
-    const tap = !c.tap ? '<span class="tap faint">ոչինչ չի լինում</span>'
-      : c.tap[0] === 'dest' ? `<span class="tap"><i data-lucide="car-taxi-front"></i><span class="nm2"><b>${c.tap[1]}</b><span>պատվեր դեպի</span></span></span>`
-      : `<span class="tap"><i data-lucide="external-link"></i><span class="nm2"><b class="mono">${c.tap[1]}</b><span>բացվում է</span></span></span>`
+    const thumb = c.img ? `<img class="thumb" src="${c.img}" alt="">` : `<span class="thumb broken" role="img" aria-label="Նկարը չի բացվում՝ ուղևորը դատարկ քարտ կտեսնի" title="Նկարը չի բացվում՝ ուղևորը դատարկ քարտ կտեսնի"><i data-lucide="image-off"></i></span>`
+    const tap = !c.tap ? '<span class="tap faint">Ոչինչ</span>'
+      : c.tap[0] === 'dest' ? `<span class="tap"><i data-lucide="car-taxi-front"></i><span class="nm2"><b>${c.tap[1]}</b><span>պատվեր այստեղ</span></span></span>`
+      : `<span class="tap"><i data-lucide="external-link"></i><span class="nm2"><b class="mono">${c.tap[1]}</b><span>բացում է կայքը</span></span></span>`
     const verb = c.on ? 'Անջատել' : 'Միացնել'
     return `<tr class="${c.on ? '' : 'paused'}"><td>${thumb}</td><td><span class="nm2"><b>${c.who}</b><span>${c.img ? c.sub : '<span class="broken-note"><i data-lucide="image-off"></i>Նկարը չի բացվում</span>'}</span></span></td><td>${tap}</td>
       <td class="r mono">${c.order}</td><td><span class="pill ${c.on ? 'ok' : ''}"><i class="d"></i>${c.on ? 'Միացված' : 'Անջատված'}</span></td>
@@ -134,19 +133,19 @@
      card will land (order 25: between Տարոն and Արաքս), outlined. Submit stays disabled until the address is picked from
      the suggestions (promotions.pickSuggestion), exactly as intake's AddressField. */
   if (NEW) document.getElementById('create').innerHTML = `<div class="create" role="group" aria-labelledby="cr">
-    <h3 id="cr"><i data-lucide="plus"></i>Ավելացնել քարտ</h3>
+    <h3 id="cr"><i data-lucide="plus"></i>Նոր գովազդ</h3>
     <div class="fg">
-      <div class="f s6"><label class="label">Վերնագիր</label><span class="input focus"><span class="val">${NEWC.who}</span></span></div>
-      <div class="f s6"><label class="label">Տողը վերնագրի տակ</label><span class="input"><span class="val">${NEWC.offer}</span></span></div>
-      <div class="f s12"><label class="label">Ինչ է ասում քարտը բացելիս՝ առաջարկը գործընկերի բառերով</label><span class="input"><span class="val">Երեքշաբթի և չորեքշաբթի ցանկացած սեանս՝ 2 000 ֏, Eco Taxi-ով եկողներին</span></span></div>
-      <div class="f s6"><label class="label">Նկարի հասցե (URL)</label><span class="input"><span class="val mono">https://moscowcinema.am/eco.jpg</span></span><div class="hint">Գործընկերի կայքի նկար, կամ այս API-ի /media ուղի</div></div>
-      <div class="f s6"><label class="label">Հղում (բացվում է դիտարկիչում)</label><span class="input"><span class="val ph">օր. https://flora.am</span></span></div>
-      <div class="f s9"><label class="label">Հասցե (սեղմելով՝ պատվեր այնտեղ)</label><span class="input l"><i data-lucide="map-pin"></i><span class="val">Աբովյան 18</span></span>
+      <div class="f s6"><label class="label">Գովազդատու</label><span class="input focus"><span class="val">${NEWC.who}</span></span></div>
+      <div class="f s6"><label class="label">Առաջարկ՝ մեկ տող</label><span class="input"><span class="val">${NEWC.offer}</span></span></div>
+      <div class="f s12"><label class="label">Առաջարկը մանրամասն</label><span class="input"><span class="val">Երեքշաբթի և չորեքշաբթի ցանկացած սեանս՝ 2 000 ֏, Eco Taxi-ով եկողներին</span></span></div>
+      <div class="f s6"><label class="label">Նկարի հղում</label><span class="input"><span class="val mono">https://moscowcinema.am/eco.jpg</span></span><div class="hint">Կայքից կամ /media-ից</div></div>
+      <div class="f s6"><label class="label">Կայքի հղում</label><span class="input"><span class="val ph">օր. https://flora.am</span></span></div>
+      <div class="f s9"><label class="label">Հասցե՝ պատվերի համար</label><span class="input l"><i data-lucide="map-pin"></i><span class="val">Աբովյան 18</span></span>
         <div class="sug" role="listbox" aria-label="Հասցեների առաջարկներ"><div class="on" role="option" aria-selected="true"><i data-lucide="map-pin"></i>Աբովյան փ. 18, Մոսկվա կինոթատրոն</div><div role="option"><i data-lucide="map-pin"></i>Աբովյան փ. 18/1</div></div>
-        <div class="hint">Ընտրեք հասցեն առաջարկներից կամ մաքրեք դաշտը</div></div>
-      <div class="f s3"><label class="label">Հերթականություն</label><span class="input"><span class="val mono">25</span></span><div class="hint">Ամբողջ թիվ՝ 0-ից 1000</div></div>
+        <div class="hint">Ընտրեք ցանկից</div></div>
+      <div class="f s3"><label class="label">Հերթականություն</label><span class="input"><span class="val mono">25</span></span><div class="hint">0–1000</div></div>
     </div>
-    <div class="foot"><button class="btn primary" aria-disabled="true" style="opacity:.5">Ավելացնել քարտ</button><button class="btn secondary">Չեղարկել</button><span class="faint">Esc փակում է միայն դատարկ ձևը</span></div>
+    <div class="foot"><button class="btn primary" aria-disabled="true" style="opacity:.5">Ավելացնել</button><button class="btn secondary">Չեղարկել</button><span class="faint">Esc-ը փակում է միայն դատարկ ձևը</span></div>
   </div>`
   /* The carousel: live cards by order (the API's order is the rider's order). With ?new=1 the draft card is shown at its slot. */
   const strip = live.map((c) => ({ who: c.who, offer: c.offer || c.sub, img: c.img, order: c.order }))
@@ -158,7 +157,7 @@
     <img src="${s.img}" alt=""><span class="tag2">Գովազդ</span><div class="copy"><div class="who">${s.who}</div><div class="offer">${s.offer}</div></div></article>`).join('')
   document.getElementById('track').style.transform = `translateX(${-326 * first}px)`
   document.getElementById('dots').innerHTML = strip.map((_, i) => `<i class="${i === first ? 'on' : ''}"></i>`).join('')
-  document.getElementById('order').innerHTML = strip.map((s) => `<div><span class="mono r">${s.order}</span>${s.who}${s.isNew ? ' <span class="pill brand" style="height:20px">Նոր · չպահպանված</span>' : ''}</div>`).join('')
+  document.getElementById('order').innerHTML = strip.map((s) => `<div><span class="mono r">${s.order}</span>${s.who}${s.isNew ? ' <span class="pill brand" style="height:20px">Նոր · չպահված</span>' : ''}</div>`).join('')
   icons()
   document.documentElement.dataset.mapReady = 'none'
 </script>

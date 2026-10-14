@@ -178,7 +178,7 @@
           <div class="end"><span class="chip" style="height:26px">Իմերը <span class="c num">1</span></span><button class="btn ghost icon s" aria-label="Որոնել հերթում (/)"><i data-lucide="search"></i></button></div>
         </div>
         <div class="scroll-y grow" id="queue" data-truncate></div>
-        <div class="legend"><span><span class="kbd">F2</span>հեռախոս</span><span><span class="kbd">T</span>վերցնել</span><span><span class="kbd">A</span>նշանակել</span><span><span class="kbd">/</span>որոնում</span><span style="margin-left:auto"><span class="kbd">↵</span>ստեղծել</span></div>
+        <div class="legend"><span><span class="kbd">F2</span>նոր պատվեր</span><span><span class="kbd">T</span>վերցնել</span><span><span class="kbd">A</span>նշանակել</span><span><span class="kbd">/</span>որոնում</span><span style="margin-left:auto"><span class="kbd">↵</span>ստեղծել</span></div>
       </section>
 
       <!-- INTAKE: keyboard-only, phone + pickup are the only required fields (§9.1, §9.8). -->
@@ -205,8 +205,8 @@
         <div class="lead">
           <b>Հերթափոխում <span class="num faint">12</span></b>
           <div class="cnt">
-            <span><i style="background:var(--ok-dot)"></i>Ազատ <b class="num">6</b></span><span><i style="background:var(--ink)"></i>Պատվեր <b class="num">4</b></span>
-            <span><i style="background:var(--warn)"></i>Դադար <b class="num">1</b></span><span><i style="background:var(--danger)"></i>Լռում <b class="num">1</b></span>
+            <span><i style="background:var(--ok-dot)"></i>Ազատ <b class="num">6</b></span><span><i style="background:var(--ink)"></i>Պատվերով <b class="num">4</b></span>
+            <span><i style="background:var(--warn)"></i>Բացակա <b class="num">1</b></span><span><i style="background:var(--danger)"></i>Կապ չկա <b class="num">1</b></span>
           </div>
         </div>
         <div class="list" id="strip" data-truncate data-peek></div>
@@ -219,11 +219,11 @@
   document.getElementById('clock').textContent = ECO.DAY.now
   document.getElementById('today').textContent = ECO.DAY.today
   const lanes = [
-    { k: 'problems', ic: 'circle-alert', name: 'Խնդիրներ', end: 'պահանջում են մարդ', rows: [
-      { a: 'Տիգրան Մեծի 67', ph: '099 11-22-33', why: 'Վարորդը չի գտնում ուղևորին', age: '07:34', late: 1, acts: 'assign-force', sel: 1 },
-      { a: 'Ծովակալ Իսակովի պողոտա 24', ph: '011 00-08-02', why: 'Վարորդ չկա · 2 ալիք', age: '33:01', late: 1, acts: 'search-assign', pre: 'Պլան. 15:45' },
+    { k: 'problems', ic: 'circle-alert', name: 'Խնդիրներ', end: 'պետք է միջամտել', rows: [
+      { a: 'Տիգրան Մեծի 67', ph: '099 11-22-33', why: 'Ուղևորը չեկավ · վարորդը սպասում է', age: '07:34', late: 1, acts: 'assign-force', sel: 1 },
+      { a: 'Ծովակալ Իսակովի պողոտա 24', ph: '011 00-08-02', why: 'Վարորդ չկա · 2 ալիք', age: '33:01', late: 1, acts: 'search-assign', pre: 'Նախնական · 15:45' },
     ] },
-    { k: 'unassigned', ic: 'circle-dashed', name: 'Չնշանակված', end: 'SLA 3 ր', rows: [
+    { k: 'unassigned', ic: 'circle-dashed', name: 'Չնշանակված', end: 'նորմ՝ 3 ր', rows: [
       { a: 'Կոմիտաս 12', ph: '091 70-33-14', d: 'Զվարթնոց օդանավակայան', age: '02:42', sla: .9, acts: 'take' },
       { a: 'Մաշտոցի պող. 53, «Երևան Մոլ» մուտք 2', ph: '093 11-80-02', d: 'Դավթաշեն 3-րդ թաղ.', age: '01:06', sla: .37, acts: 'release' },
       { a: 'Աբովյան 4', ph: '077 50-12-12', d: 'Արաբկիր, Կոմիտաս 49', age: '00:42', sla: .23, claimed: 'Մարիամ Հ.' },
@@ -277,8 +277,8 @@
     { t: B.kom.time, a: B.kom.pickup, d: B.kom.drop, ph: B.kom.phone, drv: B.kom.driver.short, pl: B.kom.driver.plate, from: B.kom.held },
     { day: 'Շբթ', t: B.bag.time, a: B.bag.pickup, d: B.bag.drop, ph: B.bag.phone, drv: B.bag.driver.short, pl: B.bag.driver.plate, cant: '09:31' },
     { day: 'Շբթ', t: B.air.time, a: B.air.pickup, d: B.air.drop, ph: B.air.phone, drv: B.air.driver.short, pl: B.air.driver.plate, from: B.air.held, sel: INTAKE !== 'booking' },
-    { day: 'Կիր', t: B.sun.time, a: B.sun.pickup, d: B.sun.drop, ph: B.sun.phone, why: 'Վարորդը արգելափակված է (հաշվեկշիռ)' },
-    { day: 'Երկ', t: B.co.time, a: B.co.pickup, d: B.co.drop, ph: B.co.phone, co: 1 },
+    { day: 'Կիր', tier: B.sun.tier, auto: B.sun.activates, t: B.sun.time, a: B.sun.pickup, d: B.sun.drop, ph: B.sun.phone, blocked: 1 },
+    { day: 'Երկ', t: B.co.time, a: B.co.pickup, d: B.co.drop, ph: B.co.phone, co: 1, tier: B.co.tier, auto: B.co.activates },
   ]
   /* Row geometry from scheduled-lane.tsx: the hour (with the weekday when not today) leads in its mono column; then the
      pickup, and the phone with the destination — or the reason in the destination's slot when the booking needs a
@@ -286,13 +286,15 @@
      here rather than squeezing the pickup (the real row puts them beside it; at 452px the pickup lost). The pre-assigned
      driver's name at the end of line 2 is drawn ahead (the wire row has no driver). */
   const bookingRow = (r) => {
-    const named = `Չեղարկել ամրագրումը՝ ${r.a}, ${r.day ? r.day + ' ' : ''}${r.t}`
+    const named = `Չեղարկել նախնական պատվերը՝ ${r.a}, ${r.day ? r.day + ' ' : ''}${r.t}`
     const l1 = r.started ? `<span class="st ok"><i data-lucide="navigation"></i>Վարորդը մեկնեց <span class="mono">${r.started}</span></span>`
-      : r.from ? `<span class="st">Կարող է մեկնել <span class="mono">${r.from}</span>-ից</span>` : ''
-    const ctx = r.cant ? `<span class="why trunc">Չեմ հասցնի · ${r.drv}-ի հարցումը, <span class="mono">${r.cant}</span></span>`
+      : r.from ? `<span class="st">Կարող է մեկնել <span class="mono">${r.from}</span>-ից</span>`
+      /* Owner Q1: a pre-order with no driver is searched AUTOMATICALLY among its tariff's drivers when it comes due. */
+      : r.auto ? `<span class="st"><i data-lucide="${r.blocked ? 'user-x' : 'search'}"></i>${r.blocked ? 'Վարորդն արգելափակված է · ' : ''}ավտոմատ որոնում · ${r.tier} · <span class="mono">${r.auto}</span>-ին</span>` : ''
+    const ctx = r.cant ? `<span class="why trunc">Վարորդը չի հասցնի · ${r.drv} · <span class="mono">${r.cant}</span></span>`
       : r.why ? `<span class="why trunc">${r.why}</span>` : `<span class="trunc">${r.d}</span>`
     const who = r.cant || r.why ? '' : r.drv ? `<span class="drv"><i data-lucide="user-check"></i>${r.drv}</span>`
-      : r.co ? `<span class="co-badge"><i data-lucide="building-2"></i>${ECO.COMPANY.short}</span>` : '<span class="none">Չնշանակված</span>'
+      : r.co ? `<span class="co-badge"><i data-lucide="building-2"></i>${ECO.COMPANY.short}</span>` : '<span class="none">Ավտոմատ</span>'
     const acts = r.cant ? `<span class="acts"><button class="btn secondary xs">Ազատել</button><button class="btn secondary xs">Վերանշանակել <span class="kbd">A</span></button><button class="btn ghost xs icon" aria-label="Զանգել վարորդին"><i data-lucide="phone"></i></button></span>`
       : r.why ? `<span class="acts"><button class="btn secondary xs">Նշանակել <span class="kbd">A</span></button><button class="btn ghost xs icon" aria-label="Զանգել ուղևորին"><i data-lucide="phone"></i></button></span>` : ''
     return `<div class="bk${r.cant || r.why ? ' p' : ''}${r.sel ? ' sel' : ''}" tabindex="0"><time>${r.day ? `<span class="dd">${r.day}</span>` : ''}${r.t}</time>
@@ -303,21 +305,21 @@
   /* DateTimePicker (ui/date-time-picker.tsx): typed «dd.mm hh:mm» in the console's language, a calendar on demand,
      the three quick picks, and the read-back under the form. October 2026, Monday first; today Friday the 9th. */
   const picker = () => {
-    let g = ['Երկ', 'Երք', 'Չրք', 'Հնգ', 'Ուր', 'Շբթ', 'Կիր'].map((w) => `<span class="wd">${w}</span>`).join('')
+    let g = ['Երկ', 'Երք', 'Չրք', 'Հնգ', 'Ուրբ', 'Շբթ', 'Կիր'].map((w) => `<span class="wd">${w}</span>`).join('')
     g += '<span></span><span></span><span></span>'
     for (let d = 1; d <= 31; d++) g += `<span class="d${d < 9 ? ' past' : ''}${d === 9 ? ' today' : ''}${d === 10 ? ' on' : ''}">${d}</span>`
-    return `<div class="dtp" data-overlay role="dialog" aria-label="Օրացույց"><div class="mh"><button class="btn ghost icon s" aria-label="Նախորդ ամիս"><i data-lucide="chevron-left"></i></button><span>հոկտեմբերի 2026</span><button class="btn ghost icon s" aria-label="Հաջորդ ամիս"><i data-lucide="chevron-right"></i></button></div>
-      <div class="grid7">${g}</div><div class="quick"><span class="chip">+30ր</span><span class="chip">Մեկ ժամից</span><span class="chip">Վաղը առավոտյան</span></div><div class="ft">⏎ հաստատել · Esc փակել</div></div>`
+    return `<div class="dtp" data-overlay role="dialog" aria-label="Օրացույց"><div class="mh"><button class="btn ghost icon s" aria-label="Նախորդ ամիս"><i data-lucide="chevron-left"></i></button><span>Հոկտեմբեր 2026</span><button class="btn ghost icon s" aria-label="Հաջորդ ամիս"><i data-lucide="chevron-right"></i></button></div>
+      <div class="grid7">${g}</div><div class="quick"><span class="chip">+30 ր</span><span class="chip">Մեկ ժամից</span><span class="chip">Վաղն առավոտյան</span></div><div class="ft">⏎ հաստատել · Esc փակել</div></div>`
   }
-  const bookingForm = (filled) => `<form class="q-book" aria-label="Նոր ամրագրում" onsubmit="return false">
+  const bookingForm = (filled) => `<form class="q-book" aria-label="Նոր նախնական պատվեր" onsubmit="return false">
       <div><label class="label">Հեռախոս</label><div class="input"><i data-lucide="phone"></i>${filled ? `<span class="val mono">${B.air.phone}</span>` : '<span class="val ph">օր. 091 23 45 67</span>'}</div></div>
       <div><label class="label">Որտեղից</label><div class="input">${filled ? `<span class="val">${B.air.pickup}</span>` : '<span class="val ph">օր. Կոմիտաս 12</span>'}</div></div>
-      ${filled ? `<div class="full billing"><div class="seg" role="radiogroup" aria-label="Ով է վճարում"><button role="radio" aria-checked="false">Ընկերություն · ${ECO.COMPANY.short}</button><button class="on" role="radio" aria-checked="true">Անձնական</button></div></div>` : ''}
+      ${filled ? `<div class="full billing"><div class="seg" role="radiogroup" aria-label="Վճարող"><button role="radio" aria-checked="false">Ընկերություն · ${ECO.COMPANY.short}</button><button class="on" role="radio" aria-checked="true">Անձնական</button></div></div>` : ''}
       <div class="full" style="position:relative"><label class="label">Ե՞րբ</label><div class="input${filled ? ' focus' : ''}"><i data-lucide="calendar"></i>${filled ? '<span class="val mono">10.10 08:30</span><button class="btn ghost icon s" aria-label="Մաքրել"><i data-lucide="x"></i></button>' : '<span class="val ph mono">օր. 25.10 18:30</span>'}<button class="btn ghost icon s" aria-label="Օրացույց"><i data-lucide="calendar-days"></i></button></div>${QS.get('picker') ? picker() : ''}</div>
-      <div class="full foot">${filled ? '<p class="reads">Ամրագրվում է <span class="mono">Շբթ, 10 հոկտեմբերի, 08:30</span></p>' : '<span class="reads"></span>'}<button class="btn secondary s">Ամրագրել</button></div></form>`
+      <div class="full foot">${filled ? '<p class="reads">Նստեցում՝ <span class="mono">Շբթ, 10 հոկտ., 08:30</span></p>' : '<span class="reads"></span>'}<button class="btn secondary s">Ստեղծել պատվեր</button></div></form>`
 
-  document.getElementById('qtabs').innerHTML = `<button class="${TAB === 'now' ? 'on' : ''}" role="tab" aria-selected="${TAB === 'now'}">Հիմա <span class="c num">13</span></button><button class="${TAB === 'scheduled' ? 'on' : ''}" role="tab" aria-selected="${TAB === 'scheduled'}">Պլանավորված <span class="c num">${BROWS.length}</span></button>`
-  if (TAB === 'scheduled') h = bookingForm(INTAKE === 'booking') + `<div class="l-scheduled"><div class="lane-h"><i data-lucide="calendar-clock"></i>Պլանավորված <span class="c num">${BROWS.length}</span><span class="end">ըստ խոստացված ժամի</span></div>${BROWS.map(bookingRow).join('')}</div>`
+  document.getElementById('qtabs').innerHTML = `<button class="${TAB === 'now' ? 'on' : ''}" role="tab" aria-selected="${TAB === 'now'}">Հիմա <span class="c num">13</span></button><button class="${TAB === 'scheduled' ? 'on' : ''}" role="tab" aria-selected="${TAB === 'scheduled'}">Նախնական <span class="c num">${BROWS.length}</span></button>`
+  if (TAB === 'scheduled') h = bookingForm(INTAKE === 'booking') + `<div class="l-scheduled"><div class="lane-h"><i data-lucide="calendar-clock"></i>Նախնական պատվերներ <span class="c num">${BROWS.length}</span><span class="end">ըստ նստեցման ժամի</span></div>${BROWS.map(bookingRow).join('')}</div>`
   document.getElementById('queue').innerHTML = h
 
   /* ── Intake (intake-panel.tsx). Phone and pickup are the only required fields (§9.1). Band 3 is the real sub-tabs
@@ -332,24 +334,24 @@
         : '<div class="input textarea"><span class="val ph">օր. Զանգել հասնելիս</span></div>'}</div></div>`
   document.getElementById('intake').innerHTML = `
     <div><label class="label">Հեռախոս</label><div class="input l"><i data-lucide="phone"></i><span class="val mono">${CO ? B.co.phone : '093 15-62-40'}</span></div></div>
-    ${CO ? `<div class="cust"><div class="t"><span>${ECO.COMPANY.rider}</span><span class="co-badge"><i data-lucide="building-2"></i>${ECO.COMPANY.name} · հաշվեկշռով</span></div>
+    ${CO ? `<div class="cust"><div class="t"><span>${ECO.COMPANY.rider}</span><span class="co-badge"><i data-lucide="building-2"></i>${ECO.COMPANY.short} · ընկերության հաշվին</span></div>
         <div class="rec"><span class="chip">${B.co.drop}</span><span class="chip">Զվարթնոց</span></div></div>`
       : `<div class="cust"><div class="t"><span>Անի Պետրոսյան</span><span class="faint num">· 14 պատվեր · վերջինը՝ երեկ</span></div>
         <div class="rec"><span class="chip">Կոմիտաս 12</span><span class="chip">Վազգեն Սարգսյան 10</span><span class="chip">Զվարթնոց</span></div></div>`}
     <div><label class="label">Որտեղից</label><div class="pinrow"><span class="pin">Ա</span><div class="input l"><span class="val">${CO ? B.co.pickup + ', Արաբկիր' : 'Կոմիտաս պողոտա 12, Արաբկիր'}</span><i data-lucide="circle-check" style="color:var(--ok)"></i></div></div></div>
     ${CO ? `<div><label class="label">Ուր <span class="faint" style="font-weight:400">· ոչ պարտադիր</span></label><div class="pinrow"><span class="pin b">Բ</span><div class="input l"><span class="val">${B.co.drop}</span><i data-lucide="circle-check" style="color:var(--ok)"></i></div></div></div>
-      <div class="billing" role="group" aria-label="Ով է վճարում"><label class="label" style="margin:0">Ով է վճարում</label>
+      <div class="billing" role="group" aria-label="Վճարող"><label class="label" style="margin:0">Վճարող</label>
         <div class="seg" role="radiogroup"><button class="on" role="radio" aria-checked="true">Ընկերություն · ${ECO.COMPANY.short}</button><button role="radio" aria-checked="false">Անձնական</button></div>
         <div><label class="label">${ECO.COMPANY.refLabel}<span class="req">· պարտադիր</span></label><div class="input"><span class="val ph">օր. ${ECO.COMPANY.ref}</span></div></div>
-        <span class="hint-warn">Ընկերությունը հղում է պահանջում։ Ուղևորությունն ընդունվում է առանց դրա․ այն կարելի է լրացնել մինչև հաշիվ-ապրանքագրի թողարկումը։</span>
-        <div class="notice amber" role="status"><i data-lucide="triangle-alert"></i><span class="grow">Ընկերությունը գերազանցել է վարկային սահմանաչափը։ Ընդունեք որպես անձնական։</span><button class="btn secondary s">Անձնական</button></div></div>`
+        <span class="hint-warn">Առանց կոդի էլ կընդունվի · լրացնել կարելի է հետո</span>
+        <div class="notice amber" role="status"><i data-lucide="triangle-alert"></i><span class="grow">Ընկերության սահմանաչափը լրացել է · ընդունել որպես անձնական</span><button class="btn secondary s">Անձնական</button></div></div>`
       : `<div style="position:relative">
         <label class="label">Ուր <span class="faint" style="font-weight:400">· ոչ պարտադիր</span></label>
         <div class="pinrow"><span class="pin b">Բ</span><div class="input l${INTAKE ? '' : ' focus'}"><span class="val">${INTAKE ? 'Հալաբյան 41' : 'Հալաբյան 4<span style="border-left:1.5px solid var(--ink);margin-left:1px"></span>'}</span>${INTAKE ? '<i data-lucide="circle-check" style="color:var(--ok)"></i>' : '<span class="kbd">↑↓</span>'}</div></div>
         ${INTAKE ? '' : `<div class="pop" data-overlay role="listbox" aria-label="Հասցեների առաջարկներ" style="top:62px">
           <div class="on"><i data-lucide="map-pin"></i><span>Հալաբյան 41</span><span class="faint">· Աջափնյակ</span></div>
           <div><i data-lucide="map-pin"></i><span>Հալաբյան 46</span><span class="faint">· Աջափնյակ</span></div></div>`}</div>`}
-    <div><label class="label">Ծառայություն <span class="faint" style="font-weight:400">· 1–7</span></label><div class="tiers" id="tiers" data-truncate></div></div>
+    <div><label class="label">Սակագին <span class="faint" style="font-weight:400">· 1–7</span></label><div class="tiers" id="tiers" data-truncate></div></div>
     <div class="two">
       <div><label class="label">Երբ</label><div class="input"><i data-lucide="clock"></i><span class="val">Հիմա</span><i data-lucide="chevron-down"></i></div></div>
       <div><label class="label">Վճարում</label><div class="input"><i data-lucide="${CO ? 'building-2' : 'banknote'}"></i><span class="val">${CO ? 'Ընկերություն' : 'Կանխիկ'}</span><i data-lucide="chevron-down"></i></div></div>
@@ -384,7 +386,7 @@
   let fi = 0
   document.getElementById('strip').innerHTML = DRIVERS.slice().sort((a, b) => order[a.state] - order[b.state]).map((d, i) => {
     const [tone, word] = DSTATE[d.state]
-    const tail = d.state === 'free' ? `ազատ ${idle[fi++]}` : d.state === 'ride' ? '→ Կոմիտաս 12' : d.state === 'lost' ? 'դիրքը՝ 03:40 առաջ' : 'դադար 7 ր'
+    const tail = d.state === 'free' ? `ազատ ${idle[fi++]}` : d.state === 'ride' ? '→ Կոմիտաս 12' : d.state === 'lost' ? 'դիրքը՝ 03:40 առաջ' : 'բացակա 7 ր'
     return `<div class="dc"${i > 3 ? ' data-peek' : ''}><span class="car s">${carImg(d.tier)}</span><span class="nm">${d.name.split(" ")[0]} ${d.name.split(" ")[1][0]}.</span><span class="pl"><span class="plate">${d.plate}</span></span>
       <span class="st"><span class="pill ${tone}" style="height:20px"><i class="d"></i>${word}</span><span class="trunc">${tail}</span></span></div>`
   }).join('')
@@ -398,7 +400,7 @@
   })
   drawRoute(map, ROUTES.pickupToDrop.pts, { weight: 5 })
   const P = ROUTES.pickupToDrop.pts
-  htmlMarker(map, P[0], '<div class="mk-pin l-searching" style="transform:none"><i></i><b>00:52</b></div>', [90, 24], [12, 12])
+  if (QS.get('state') !== 'sos') htmlMarker(map, P[0], '<div class="mk-pin l-searching" style="transform:none"><i></i><b>00:52</b></div>', [90, 24], [12, 12])
   htmlMarker(map, P[P.length - 1], '<div class="mk-drop" aria-label="' + ECO.RIDE.drop + '"></div>', [14, 14])
   htmlMarker(map, [40.1990, 44.5205], '<div class="mk-pin l-problems" style="transform:none"><i></i><b>07:34</b></div>', [90, 24], [12, 12])
   htmlMarker(map, [40.1735, 44.5005], '<div class="mk-pin l-unassigned" style="transform:none"><i></i><b>01:06</b></div>', [90, 24], [12, 12])

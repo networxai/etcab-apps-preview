@@ -11,7 +11,7 @@
 <script src="console-audit.js"></script>
 <style>
   .content { grid-template-columns: minmax(0, 1fr) 420px; }
-  @media (max-width: 1400px) { .content { grid-template-columns: minmax(0, 1fr) 384px; } .carcell .car { display: none; } col.c-car { width: 100px !important; } col.c-doc { width: 120px !important; } col.c-typ { width: 116px !important; } .tabsl { gap: 10px; } .shift { grid-template-columns: 128px minmax(0, 1fr) !important; } }
+  @media (max-width: 1400px) { .content { grid-template-columns: minmax(0, 1fr) 384px; } .carcell .car { display: none; } col.c-car { width: 100px !important; } col.c-doc { width: 132px !important; } col.c-typ { width: 128px !important; } .tabsl { gap: 10px; } .shift { grid-template-columns: 128px minmax(0, 1fr) !important; } }
   .dt td { height: 52px; }
 </style>
 </head>
@@ -20,28 +20,27 @@
   <div class="main">
     <header class="bar">
       <h1>Վարորդներ</h1>
-      <span class="crumb num">Պարկի վարորդներ · 30 · հերթափոխում 7 · գործընկերները՝ <a href="partners.html" style="color:var(--brand-text)">առանձին բաժնում</a></span>
+      <span class="crumb num">Ավտոպարկի վարորդներ · 30 · հերթափոխում 7 · <a href="partners.html" style="color:var(--brand-text)">Գործընկերներ →</a></span>
       <div class="live"></div>
     </header>
     <div class="content">
       <section class="card" aria-label="Վարորդների ցանկ">
         <div class="filters">
-          <div class="seg" role="tablist" aria-label="Հերթապահություն"><button class="on">Բոլորը <span class="c num">30</span></button><button>Հերթափոխում <span class="c num">7</span></button><button>Անջատված <span class="c num">23</span></button></div>
-          <div class="input" style="width:236px"><i data-lucide="search"></i><span class="val ph">օր. 11 AA 111</span><span class="kbd">/</span></div>
+          <div class="seg" role="tablist" aria-label="Հերթափոխ"><button class="on">Բոլորը <span class="c num">30</span></button><button>Հերթափոխում <span class="c num">7</span></button><button>Անջատված <span class="c num">23</span></button></div>
+          <div class="input" style="width:236px"><i data-lucide="search"></i><span class="val ph">Անուն, հեռախոս, համարանիշ</span><span class="kbd">/</span></div>
           <span style="flex:1"></span>
           <button class="btn secondary s"><i data-lucide="plus"></i>Նոր վարորդ</button>
         </div>
         <div class="filters" style="padding-top:6px;padding-bottom:6px">
+          <span class="chip"><i data-lucide="lock"></i>Պատվերները կանգնած <span class="c num">1</span></span>
           <span class="chip">Փաստաթուղթը լրանում է <span class="c num">3</span></span>
-          <span class="chip">Արգելափակված <span class="c num">1</span></span>
-          <span class="chip">Ջնջման հայտ <span class="c num">1</span></span>
+          <span class="chip">Ջնջման հարցում <span class="c num">1</span></span>
           <span class="chip">Առանց մեքենայի <span class="c num">2</span></span>
-
         </div>
         <div class="scroll-y grow">
           <table class="tbl dt">
-            <colgroup><col><col class="c-car" style="width:150px"><col style="width:132px"><col class="c-doc" style="width:124px"><col style="width:112px"></colgroup>
-            <thead><tr><th>Վարորդ</th><th>Պարկի մեքենա</th><th>Հերթապահություն</th><th>Փաստաթղթեր</th><th class="r">Այսօր պարկին</th></tr></thead>
+            <colgroup><col><col class="c-car" style="width:150px"><col style="width:132px"><col class="c-doc" style="width:132px"><col class="c-typ" style="width:132px"></colgroup>
+            <thead><tr><th>Վարորդ</th><th>Մեքենա</th><th>Վիճակ</th><th>Փաստաթղթեր</th><th class="r">Այսօր</th></tr></thead>
             <tbody id="rows"></tbody>
           </table>
         </div>
@@ -52,51 +51,71 @@
 </div>
 <script>
   shell('drivers')
-  /* Fleet drivers only (owner 2026-10-11): partners have their own section. Fleet drivers drive our cars, so
-     the car column is the shift car, and money is settlement by billing plan, not a wallet. */
+  /* Fleet drivers only (owner 2026-10-11): partners have their own section. Fleet drivers drive our cars, so the car
+     column is the shift car. Owner #3 (2026-10-14): a fleet driver has NO balance — no settlement, owed, limit or
+     ledger anywhere on this page; «Այսօր» is what the driver did (rides · fares), a fact, not money owed. */
   const EXTRA = [['Մհեր Աբգարյան', 'ՄԱ', '093 15-77-02', '19 MA 190', 'city', 'off'], ['Սոնա Խաչատրյան', 'ՍԽ', '077 62-11-48', '20 SK 202', 'kids', 'off'],
     ['Վարդան Մանուկյան', 'ՎՄ', '094 30-25-66', '05 VM 050', 'business', 'off'], ['Հովիկ Զաքարյան', 'ՀԶ', '098 41-09-37', '64 HZ 640', 'van', 'off'], ['Աշոտ Բաղդասարյան', 'ԱԲ', '055 76-48-21', '38 AB 381', 'city', 'off']]
   const FLEET = DRIVERS.filter((d) => d.type === 'fleet').concat(EXTRA.map(([name, ini, phone, plate, tier, state]) => ({ name, ini, phone, plate, tier, state, type: 'fleet' })))
-  const sel = +(new URLSearchParams(location.search).get('d') ?? 0)
-  const docState = ['bad', 'ok', 'warn', 'bad', 'ok', 'ok', 'ok', 'ok', 'ok', 'warn', 'ok', 'ok']
-  const today = [2964, 3420, 1860, 0, 2280, 3110, 0, 0, 0, 0, 0, 0]
+  const QS = new URLSearchParams(location.search)
+  /* Owner #5: expired insurance stops orders until a new document is approved. The live example is Վահե (ECO.DOCS.blocked,
+     FLEET index 3); the Documents tab opens on him unless &d= says otherwise. Արամ (index 0) is valid until 20.10. */
+  const BLK = ECO.DOCS.blocked, ARAM = ECO.DOCS.aram, VAHE = FLEET.findIndex((d) => d.name === BLK.name)
+  const sel = +(QS.get('d') ?? (QS.get('tab') === 'docs' ? VAHE : 0))
+  const short = (s) => s.slice(0, 5) /* 20.10.2026 → 20.10 */
+  /* Per row: [tone, icon, word]. Lilit and Vardan M.: 9 days left; Արամ: insurance valid until 20.10. */
+  const docState = FLEET.map((d, i) => i === 0 ? ['warn', 'clock', 'մինչև ' + short(ARAM.insurance)] : i === VAHE ? ['bad', 'circle-alert', 'Ժամկետանց'] : [2, 9].includes(i) ? ['warn', 'clock', '9 օր'] : ['ok', 'circle-check', 'Կարգին'])
+  const today = [[9, 14820], [11, 16400], [6, 8900], [0, 0], [7, 11200], [10, 15300], [1, 1400], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+  const stateOf = (d, i) => i === VAHE ? ['warn', 'Կանգնած', 'lock'] : [...DSTATE[d.state], null]
+  const stPill = ([tone, word, ic]) => `<span class="pill ${tone}">${ic ? `<i data-lucide="${ic}"></i>` : '<i class="d"></i>'}${word}</span>`
   document.getElementById('rows').innerHTML = FLEET.map((d, i) => {
-    const [tone, word] = DSTATE[d.state]
-    const ds = docState[i]
-    const doc = ds === 'ok' ? '<span class="pill ok"><i data-lucide="circle-check"></i>Կարգին</span>' : ds === 'warn' ? '<span class="pill warn"><i data-lucide="clock"></i>9 օր</span>' : '<span class="pill bad"><i data-lucide="circle-alert"></i>Ժամկետանց</span>'
+    const [dt, di, dw] = docState[i], [n, f] = today[i]
     return `<tr class="${i === sel ? 'on' : ''}"><td><span class="who"><span class="av">${d.ini}</span><span class="nm"><b>${d.name}</b><span>${d.phone}</span></span></span></td>
       <td>${d.state === 'off' ? '<span class="faint">—</span>' : `<span class="carcell"><span class="car xs">${carImg(d.tier)}</span><span class="plate">${d.plate}</span></span>`}</td>
-      <td><span class="pill ${tone}"><i class="d"></i>${word}</span></td><td>${doc}</td><td class="r mono">${today[i] ? amd(today[i]) : '<span class="faint">—</span>'}</td></tr>`
+      <td>${stPill(stateOf(d, i))}</td><td><span class="pill ${dt}"><i data-lucide="${di}"></i>${dw}</span></td>
+      <td class="r mono">${n ? `<span class="faint">${n} ·</span> ${amd(f)}` : '<span class="faint">—</span>'}</td></tr>`
   }).join('')
 
-  const d = FLEET[sel], T = tierById(d.tier), partner = false
-  const [tone, word] = DSTATE[d.state]
-  const [, tw, ti] = DTYPE[d.type]
-  const wallet = `
-    <div class="blk"><h3><i data-lucide="receipt"></i>Հաշվարկ<span class="end faint" style="font-weight:400">«Պարկի ստանդարտ 20%»</span></h3>
-      <div style="font:var(--c-body);color:var(--ink-muted);margin-top:6px">Վարորդը հանձնում է կանխիկը հերթափոխի վերջում։ Այսօր պարկին՝ <b class="num" style="color:var(--ink)">2 964 ֏</b> · մնացորդ՝ <b class="num" style="color:var(--ink)">0 ֏</b></div></div>`
+  const d = FLEET[sel], T = tierById(d.tier)
+  const [n, f] = today[sel] || [0, 0]
+  const dl = (b) => `<button class="btn ghost icon s" aria-label="Ներբեռնել"><i data-lucide="download"></i></button>`
+  const docRow = (title, file, pill) => `<div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>${title}</b><span>${file}</span></span>${pill}${dl()}</div>`
+  const okP = (dt) => `<span class="pill ok">Մինչև <span class="num">${dt}</span></span>`
+  /* The uploaded replacement waits on the office: one press to approve, reject asks for a reason in place (no dialog). */
+  const pending = `<div class="doc" style="grid-template-columns:44px minmax(0,1fr) auto"><span class="ic" style="width:44px;height:44px;background:var(--surface-3)"><i data-lucide="image"></i></span>
+      <span class="t"><b>Ապահովագրություն · նոր</b><span>Լուսանկար հավելվածից · <span class="num">${BLK.uploaded}</span></span></span>
+      <span class="row-flex" style="gap:6px;grid-row:1 / span 2;grid-column:3"><button class="btn ghost s">Մերժել</button><button class="btn primary s"><i data-lucide="check"></i>Հաստատել</button></span>
+      <span class="pill warn" style="grid-column:2;grid-row:2;justify-self:start"><i data-lucide="clock"></i>Սպասում է հաստատման</span></div>`
+  const docs = sel === VAHE ? {
+      head: '<span class="end pill warn" style="height:20px"><i data-lucide="lock"></i>Պատվերները կանգնած են</span>',
+      rows: pending + docRow('Ապահովագրություն (ԱՊՊԱ)', 'osago-2025.pdf', `<span class="pill bad"><i data-lucide="circle-alert"></i>Ժամկետանց՝ <span class="num">${BLK.expired}</span></span>`)
+        + docRow('Վարորդական վկայական', 'licence-2023.pdf', okP('22.06.2029')) + docRow('Տաքսու թույլտվություն', 'taxi-permit.pdf', okP('01.03.2027')) }
+    : sel === 0 ? {
+      head: '<span class="end pill warn" style="height:20px"><i data-lucide="clock"></i>1 լրանում է</span>',
+      rows: docRow('Վարորդական վկայական', 'licence-2024.pdf', okP('14.04.2027'))
+        + docRow('Ապահովագրություն (ԱՊՊԱ)', 'osago-2025.pdf', `<span class="pill warn"><i data-lucide="clock"></i>Մինչև <span class="num">${ARAM.insurance}</span></span>`)
+        + docRow('Տաքսու թույլտվություն', 'taxi-permit.pdf', `<span class="pill warn"><i data-lucide="clock"></i>Մինչև <span class="num">${ARAM.permit}</span></span>`)
+        + docRow('Հաշվառման վկայական', 'Ավտոպարկի մեքենա · reg.pdf', '<span class="pill">Առանց ժամկետի</span>') }
+    : { head: '<span class="end pill ok" style="height:20px"><i data-lucide="circle-check"></i>Կարգին</span>',
+      rows: docRow('Վարորդական վկայական', 'licence.pdf', okP('09.11.2028')) + docRow('Ապահովագրություն (ԱՊՊԱ)', 'osago.pdf', okP('30.03.2027')) + docRow('Տաքսու թույլտվություն', 'taxi-permit.pdf', okP('01.02.2027')) }
+  const stop = sel === VAHE ? `<div style="margin:12px var(--inset) 0"><div class="notice amber"><i data-lucide="lock"></i><span><b>Պատվերները կանգնած են · ապահովագրություն</b><br><span class="num">Ժամկետանց՝ ${BLK.expired} · նոր լուսանկար՝ ${BLK.uploaded}</span></span></div></div>` : ''
   document.getElementById('dp').innerHTML = `
     <div class="scroll-y grow">
       <div class="head"><span class="av l">${d.ini}</span>
         <div style="min-width:0"><h2>${d.name}</h2>
-          <div class="meta"><span class="mono muted" style="font-size:12px">+374 ${d.phone.slice(1)}</span><span class="pill ${tone}"><i class="d"></i>${word}</span></div></div>
+          <div class="meta"><span class="mono muted" style="font-size:12px">+374 ${d.phone.slice(1)}</span>${stPill(stateOf(d, sel))}</div></div>
         <button class="btn ghost icon s" aria-label="Փակել (Esc)"><i data-lucide="x"></i></button></div>
-      <div class="acts"><button class="btn secondary s"><i data-lucide="key-round"></i>Մուտքի կոդ</button><button class="btn secondary s icon" aria-label="Զանգել"><i data-lucide="phone"></i></button><span style="flex:1"></span><button class="btn danger s"><i data-lucide="power"></i>Ավարտել հերթապահությունը</button></div>
-      <div class="tabsl" role="tablist"><button class="on">Ընդհանուր</button><button>Պատվերներ</button><button>Գումար</button><button>Փաստաթղթեր <span class="c num">4</span></button><button aria-label="Գնահատական 4,9"><i data-lucide="star"></i><span class="num">4,9</span></button></div>
-      ${wallet}
+      <div class="acts"><button class="btn secondary s"><i data-lucide="key-round"></i>Տալ մուտքի կոդ</button><button class="btn secondary s icon" aria-label="Զանգել"><i data-lucide="phone"></i></button><span style="flex:1"></span><button class="btn danger s"><i data-lucide="power"></i>Ավարտել հերթափոխը</button></div>
+      <div class="tabsl" role="tablist"><button class="on">Ընդհանուր</button><button>Պատվերներ</button><button>Հերթափոխեր</button><button>Փաստաթղթեր <span class="c num">${sel === VAHE ? 5 : 4}</span></button><button aria-label="Գնահատական 4,9"><i data-lucide="star"></i><span class="num">4,9</span></button></div>
+      ${stop}
       <div class="blk">
         <h3><i data-lucide="car"></i>Ընթացիկ հերթափոխ<span class="end faint num" style="font-weight:400">08:12-ից · 6 ժ 14 ր</span></h3>
         <div class="shift"><span class="car" style="width:100%;height:80px">${carImg(d.tier, T.name)}</span>
-          <dl class="facts"><dt>Մեքենա</dt><dd><span class="plate">${d.plate}</span></dd><dt>Փաթեթ</dt><dd>${T.name}</dd><dt>Մոդել</dt><dd>${partner ? 'Model 3 · սեփական' : 'ID.3 · պարկի'}</dd><dt>Այսօր</dt><dd>9 · 14 820 ֏</dd></dl></div>
+          <dl class="facts"><dt>Մեքենա</dt><dd><span class="plate">${d.plate}</span></dd><dt>Սակագին</dt><dd>${T.name}</dd><dt>Մոդել</dt><dd>ID.3 · ավտոպարկի</dd><dt>Այսօր</dt><dd>${n} պատվեր · ${amd(f)}</dd></dl></div>
       </div>
       <div class="blk" style="margin-bottom:12px">
-        <h3><i data-lucide="file-text"></i>Փաստաթղթեր<span class="end pill bad" style="height:20px"><i data-lucide="circle-alert"></i>1 ժամկետանց</span></h3>
-        <div class="docs" data-truncate>
-          <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>Վկայական</b><span>licence-2024.pdf</span></span><span class="pill ok">Վավեր է մինչև <span class="num">14.04.2027</span></span><button class="btn ghost icon s" aria-label="Ներբեռնել"><i data-lucide="download"></i></button></div>
-          <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>Ապահովագրություն (ԱՊՊԱ)</b><span>osago-2025.pdf</span></span><span class="pill bad"><i data-lucide="circle-alert"></i>Ժամկետանց՝ <span class="num">02.10.2026</span></span><button class="btn ghost icon s" aria-label="Ներբեռնել"><i data-lucide="download"></i></button></div>
-          <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>Թույլտվություն</b><span>taxi-permit.pdf</span></span><span class="pill ok">Մինչև <span class="num">01.02.2027</span></span><button class="btn ghost icon s" aria-label="Ներբեռնել"><i data-lucide="download"></i></button></div>
-          <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>Հաշվառման վկայական</b><span>${partner ? 'Սեփական մեքենա' : 'Պարկի մեքենա'} · reg.pdf</span></span><span class="pill">ժամկետը նշված չէ</span><button class="btn ghost icon s" aria-label="Ներբեռնել"><i data-lucide="download"></i></button></div>
-        </div>
+        <h3><i data-lucide="file-text"></i>Փաստաթղթեր${docs.head}</h3>
+        <div class="docs" data-truncate>${docs.rows}</div>
         <div class="dropz"><i data-lucide="upload"></i>Քաշեք ֆայլն այստեղ կամ <u>ընտրեք</u></div>
       </div>
     </div>`

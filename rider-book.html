@@ -55,6 +55,9 @@
   .ref.miss .rv { color: var(--ink-3); }
   .refmsg { font: var(--t-secondary); color: var(--warn); }
   .refusal .body { font: var(--t-body); color: var(--ink-2); margin-bottom: var(--s4); }
+  /* Company refusals: one icon disc + a short title + one line, so the sheet reads at a glance (2026-10-14 pass). */
+  .refusal .rico { width: 48px; height: 48px; border-radius: 50%; background: var(--surface-2); color: var(--ink-2); display: grid; place-items: center; margin-bottom: var(--s3); }
+  .refusal .rico svg { width: 24px; height: 24px; }
   .cash { width: 28px; height: 28px; border-radius: 8px; background: var(--surface-2); display: grid; place-items: center; color: var(--ok); flex: none; }
   .cash svg { width: 18px; height: 18px; }
 
@@ -149,6 +152,9 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
   const TARIFF = { city: [600, 90, 12, 700], partner: [700, 110, 14, 900], kids: [900, 130, 18, 1200], business: [1000, 150, 20, 1400], van: [1200, 170, 22, 1600], vip: [1500, 220, 30, 2000] }
   const price = (id, km, mn) => { const [b, k, m, f] = TARIFF[id]; return Math.max(f, Math.round((b + k * km + m * mn) / 100) * 100) }
   const TIERS = [['city', 'Eco City', 3, 4], ['partner', 'Eco Comfort', 4, 4], ['kids', 'Eco Kids', 7, 4], ['business', 'Eco Business', 6, 4], ['van', 'Eco Van', 9, 7], ['vip', 'Eco Vip', 11, 4]]
+  /* Owner #1 (2026-10-14): pre-orders are per tariff (ECO.TIERS[].preorders, console Tariffs). A booking for later offers only the
+     tariffs that allow it; the others are left out of the row, not greyed (a dead card in a radio row is a tap that does nothing). */
+  const preOk = (name) => { const t = (ECO.TIERS || []).find((x) => x.name === name); return !t || t.preorders !== false }
   const B = ECO.BOOKINGS, C = ECO.COMPANY
   /* Trips drawn on this page. now = Republic Sq → Cascade (2,1 km, 4 min → Eco City 800 ֏).
      air = ECO.BOOKINGS.air being booked (Komitas 22 → Zvartnots, 12,6 km, 17 min → 1 900 ֏); co = ECO.BOOKINGS.co (4,1 km, 11 min → 1 100 ֏). */
@@ -165,7 +171,7 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
     : mode === 'dash' ? '<span class="price dash" aria-label="Գին չկա">—</span>'
     : mode === 'metered' ? `<span class="price">≈ ${R.amd(price(k, trip.km, trip.min))}</span><span class="est">Մոտավոր</span>`
     : `<span class="price">${R.amd(price(k, trip.km, trip.min))}</span>`
-  const tiers = (trip, mode) => `<div class="tiers" role="radiogroup" aria-label="Դաս">${TIERS.map(([k, n, eta, seats], i) =>
+  const tiers = (trip, mode, later) => `<div class="tiers" role="radiogroup" aria-label="Սակագին">${TIERS.filter(([, n]) => !later || preOk(n)).map(([k, n, eta, seats], i) =>
     `<button class="tier ${i ? '' : 'on'}" role="radio" aria-checked="${!i}" ${i >= 2 ? 'data-peek' : ''}>
       ${i ? '' : `<span class="tick" aria-hidden="true">${R.i('leaf')}</span>`}
       <span class="art">${k === 'kids' ? carImg('city') + `<span class="seat" role="img" aria-label="Մանկական նստոցով">${R.i('baby')}</span>` : carImg(k)}</span><span class="name">${n}</span>
@@ -178,22 +184,22 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
   /* when: null = now; else the useWhenLabel string («Վաղը, 08:30»). A set time turns the chip brand-soft and switches the note off. */
   const opts = (when, pay = 'cash') => `<div class="opts">
       <button class="opt grow ${when ? 'whenset' : ''}" aria-label="Ե՞րբ՝ ${when || 'Հիմա'}">${R.i(when ? 'calendar-clock' : 'clock-3')}${when || 'Հիմա'}${R.i('chevron-down', 'class="chev"')}</button>
-      ${when ? `<button class="opt ico" aria-disabled="true" aria-label="Նշում վարորդին. Նշումը հասանելի է միայն հիմա պատվիրելիս">${R.i('message-square-text')}</button>`
+      ${when ? `<button class="opt ico" aria-disabled="true" aria-label="Նշում վարորդին՝ միայն հիմա պատվիրելիս">${R.i('message-square-text')}</button>`
         : `<button class="opt" aria-label="Նշում վարորդին">${R.i('message-square-text')}Նշում</button>`}
       ${pay === 'company'
         ? `<button class="opt${when ? ' ico' : ''}" aria-label="Վճարում՝ ${ECO.PAY.company.label}">${R.i('building-2')}${when ? '' : ECO.PAY.company.short}</button>` /* with a time set the line is long; the segment below names the company */
         : `<button class="opt" aria-label="Վճարում՝ ${ECO.PAY.cash.label}"><span class="cash">${R.i('banknote')}</span>${ECO.PAY.cash.label}</button>`}</div>
-      ${when ? '<div class="noteoff">Նշումը հասանելի է միայն հիմա պատվիրելիս</div>' : ''}`
-  const billTo = (choice, ref) => `<div class="billto" role="group" aria-label="Ով է վճարում։ Հպեք՝ փոխելու համար">
+      ${when ? '<div class="noteoff">Նշում՝ միայն հիմա պատվիրելիս</div>' : ''}`
+  const billTo = (choice, ref) => `<div class="billto" role="group" aria-label="Ո՞վ է վճարում">
       <div class="seg" role="radiogroup"><button role="radio" aria-checked="${choice === 'company'}" aria-label="Ընկերություն · ${C.name}">Ընկերություն<small>${C.short}</small></button><button role="radio" aria-checked="${choice !== 'company'}">Անձնական</button></div>
       ${choice === 'company' ? `<div class="billed">${R.i('building-2')}Վճարում է՝ ${C.name}</div>` : ''}
       ${ref === 'filled' ? `<label class="ref"><span class="rl">${C.refLabel}</span><span class="rv">${C.ref}</span></label>` : ''}
-      ${ref === 'missing' ? `<label class="ref miss" aria-describedby="refmsg"><span class="rl">${C.refLabel}</span><span class="rv"></span></label><div class="refmsg" id="refmsg">Ձեր ընկերությունը խնդրում է լրացնել այս դաշտը</div>` : ''}</div>`
+      ${ref === 'missing' ? `<label class="ref miss" aria-describedby="refmsg"><span class="rl">${C.refLabel}</span><span class="rv"></span></label><div class="refmsg" id="refmsg">Ընկերությունը պահանջում է այս կոդը</div>` : ''}</div>`
   const base = (sheet, fab = true) => `<div class="map" id="map" aria-label="Քարտեզ"></div>
       ${fab ? `<button class="fab" style="top:62px;left:16px" aria-label="Հետ">${R.i('arrow-left')}</button>` : ''}${sheet}`
-  const company = (choice, ref, when = null, trip = TRIPS.now) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers(trip)}${opts(when, choice)}${billTo(choice, ref)}
+  const company = (choice, ref, when = null, trip = TRIPS.now) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers(trip, undefined, !!when)}${opts(when, choice)}${billTo(choice, ref)}
       ${ref === 'missing' ? '<button class="btn" disabled>Պատվիրել</button>' : `<button class="btn btn-brand">${cta(trip, 'Պատվիրել', when)}</button>`}</section>`)
-  const details = (when, trip) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers(trip)}${opts(when)}
+  const details = (when, trip) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers(trip, undefined, !!when)}${opts(when)}
       <button class="btn btn-brand">${cta(trip, 'Պատվիրել', when)}</button></section>`)
   /* The order sheet with a neutral Notice above Order (book.tsx: orderError → <Notice tone="neutral">, from orderRefusalKey). */
   const orderSheet = ({ trip = TRIPS.now, mode, notice = '', btn }) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers(trip, mode)}${opts(null)}
@@ -226,8 +232,8 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
 
   /* "When?" — schedule.ts: dayOptions(now, 7) and timeOptions(day, now). Today is ECO.DAY (Friday 9 October, 9:41), so today's
      first slot is 9:41 + 30 = 10:11 → 10:15. Day chips read «{Այսօր|Վաղը|weekday} · {d} {month}» (when-sheet.tsx dayLabel). */
-  const WD = ['կիրակի', 'երկուշաբթի', 'երեքշաբթի', 'չորեքշաբթի', 'հինգշաբթի', 'ուրբաթ', 'շաբաթ']
-  const MON = ['հունվարի', 'փետրվարի', 'մարտի', 'ապրիլի', 'մայիսի', 'հունիսի', 'հուլիսի', 'օգոստոսի', 'սեպտեմբերի', 'հոկտեմբերի', 'նոյեմբերի', 'դեկտեմբերի']
+  const WD = ['Կիր', 'Երկ', 'Երք', 'Չրք', 'Հնգ', 'Ուրբ', 'Շբթ'] /* rule 6 short weekdays */
+  const MON = ['հունվ.', 'փետր.', 'մարտի', 'ապր.', 'մայիսի', 'հունիսի', 'հուլիսի', 'օգոստ.', 'սեպտ.', 'հոկտ.', 'նոյ.', 'դեկտ.'] /* rule 6: «14 հոկտ.» */
   const [Y, Mo, D0] = ECO.DAY.iso.split('-').map(Number)
   const days = Array.from({ length: 7 }, (_, i) => { const d = new Date(Y, Mo - 1, D0 + i); return `${i === 0 ? 'Այսօր' : i === 1 ? 'Վաղը' : WD[d.getDay()]} · ${d.getDate()} ${MON[d.getMonth()]}` })
   const [nh, nm] = ECO.DAY.now.split(':').map(Number)
@@ -262,26 +268,26 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
     states: [
       { id: 'details', group: 'Sheet', label: 'Details', note: 'One compact line under the tiers: when · note · payment. Order stays the one accent',
         html: () => details(null, TRIPS.now), map: (s) => drawRide(s) },
-      { id: 'scheduled', group: 'Sheet', label: 'Scheduled', note: 'A time is set (book.tsx): the when chip turns brand-soft and reads «Վաղը, 08:30»; the note switches off and says why (book.noteNowOnly), because scheduled_ride has no notes column. ECO.BOOKINGS.air: 12,6 km, 17 min → 1 900 ֏',
+      { id: 'scheduled', group: 'Sheet', label: 'Scheduled', note: 'A time is set (book.tsx): the when chip turns brand-soft and reads «Վաղը, 08:30»; the note switches off and says why (book.noteNowOnly), because scheduled_ride has no notes column. Owner #1: only tariffs with ECO.TIERS[].preorders are offered (Eco Kids and Eco Van drop out of the row). ECO.BOOKINGS.air: 12,6 km, 17 min → 1 900 ֏',
         html: () => details(B.air.when, TRIPS.air), map: (s) => drawRide(s, true, TRIPS.air) },
-      { id: 'scheduled-company', group: 'Sheet', label: 'Scheduled · company', note: 'R33: a company rider pre-books on account (corp.schedule): Company / Personal and «Ծախսերի կոդ» work as for a ride now. ECO.BOOKINGS.co, Monday 09:00, 1 100 ֏',
+      { id: 'scheduled-company', group: 'Sheet', label: 'Scheduled · company', note: 'R33: a company rider pre-books on account (corp.schedule): Company / Personal and «Ծախսերի կոդ» work as for a ride now; the tier row is the pre-order subset (owner #1). ECO.BOOKINGS.co, Monday 09:00, 1 100 ֏',
         html: () => company('company', 'filled', B.co.when, TRIPS.co), map: (s) => drawRide(s, false, TRIPS.co) },
 
       { id: 'note', group: 'Sheets', label: 'Note', note: 'Free text plus one-tap chips; keyboard up, sheet rides above it. Only for a ride now',
         html: () => modal('Նշում վարորդին', `<div class="mtext"><span class="v">Մուտքը բակից է<span class="caret"></span></span><span class="n">14/200</span></div>
-          <div class="chips" role="group" aria-label="Արագ նշումներ"><button class="chip tog" aria-pressed="false">Զանգել ժամանելիս</button><button class="chip tog" aria-pressed="true">${R.i('check')}Ուղեբեռ</button><button class="chip tog" aria-pressed="false">Կենդանի</button></div>
-          <button class="btn btn-brand">Պահպանել</button>`, 'kb') + R.keyboard(), map: (s) => drawRide(s, false) },
+          <div class="chips" role="group" aria-label="Արագ նշումներ"><button class="chip tog" aria-pressed="false">Զանգել ժամանելիս</button><button class="chip tog" aria-pressed="true">${R.i('check')}Ուղեբեռ</button><button class="chip tog" aria-pressed="false">Կենդանու հետ</button></div>
+          <button class="btn btn-brand">Պահել</button>`, 'kb') + R.keyboard(), map: (s) => drawRide(s, false) },
       { id: 'when', group: 'Sheets', label: 'When · today', note: 'when-sheet.tsx: «Հիմա» clears a time; 7 day chips; under them every quarter-hour ≥ now + 30 min. At 9:41 today starts at 10:15. «Հաստատել» stays off until a slot is picked',
         html: () => whenSheet(0, null), after: daysInView, map: (s) => drawRide(s, false, TRIPS.air) },
       { id: 'when-tomorrow', group: 'Sheets', label: 'When · tomorrow', note: 'Tomorrow picked: the whole day from 00:00, scrolled to the morning; 08:30 is the chosen slot (ink fill). Picking a day clears the slot',
         html: () => whenSheet(1, B.air.time, 7), after: daysInView, map: (s) => drawRide(s, false, TRIPS.air) },
       { id: 'when-late', group: 'Sheets', label: 'When · late evening', time: '23:41', note: 'R29 (drawn ahead: the real sheet opens on an empty «Այսօր»). At 23:41 the first slot is past midnight, so today has none: its chip is struck through and the sheet opens on Tomorrow from 00:15. The row ends at the seventh day, and the line says both limits once',
-        html: () => whenSheet(1, null, 0, { now: 23 * 60 + 41, note: 'Այսօր ազատ ժամ չկա · մինչև 7 օր առաջ' }), after: (s) => s.querySelectorAll('.days .chip').forEach((c) => { const r = c.getBoundingClientRect(); if (r.right > 390) c.dataset.peek = '' }), map: (s) => drawRide(s, false, TRIPS.air) },
+        html: () => whenSheet(1, null, 0, { now: 23 * 60 + 41, note: 'Այսօր ազատ ժամ չկա · առավելագույնը 7 օր առաջ' }), after: (s) => s.querySelectorAll('.days .chip').forEach((c) => { const r = c.getBoundingClientRect(); if (r.right > 390) c.dataset.peek = '' }), map: (s) => drawRide(s, false, TRIPS.air) },
       { id: 'pay', group: 'Sheets', label: 'Payment', note: 'Cash is the one live method (PaySheet.tsx); card is listed and honestly marked «Շուտով», never hidden. A company rider chooses Company / Personal on the sheet itself',
         html: () => modal('Վճարում', `<div class="paylist" role="radiogroup" aria-label="Վճարման եղանակ">
           <button class="choice" role="radio" aria-checked="true"><span class="ico cashc">${R.i('banknote')}</span><span class="t">Կանխիկ</span><span class="radio"></span></button>
           <div class="divider" style="margin-left:48px"></div>
-          <button class="choice" role="radio" aria-checked="false" aria-disabled="true"><span class="ico">${R.i('wallet')}</span><span class="t">Քարտով</span><span class="soon">Շուտով</span></button></div>`), map: (s) => drawRide(s, false) },
+          <button class="choice" role="radio" aria-checked="false" aria-disabled="true"><span class="ico">${R.i('wallet')}</span><span class="t">Քարտ</span><span class="soon">Շուտով</span></button></div>`), map: (s) => drawRide(s, false) },
 
       { id: 'company', group: 'Company', label: 'Company ride', note: 'Only for a rider whose company is on account (bill-to.ts): Company / Personal, remembered per rider. The billed-to line names the company; the agreement asks for a cost-centre code',
         html: () => company('company', 'filled'), map: (s) => drawRide(s, false) },
@@ -290,18 +296,18 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
       { id: 'personal', group: 'Company', label: 'Personal', note: 'The same rider paying personally: the row stays, the billed-to line and the code go, payment is cash',
         html: () => company('personal', ''), map: (s) => drawRide(s, false) },
       { id: 'company-unavailable', group: 'Company', label: 'Company unavailable', note: 'R22: the same fallback sheet (reference-field.tsx, reason «unavailable»): the company is closed or no longer pays for rides. One way forward, personal; no reason the rider cannot act on',
-        html: () => modal('Ընկերությունը չի կարող վճարել այս ուղևորության համար', `<div class="refusal"><p class="body">Այս պահին ընկերության հաշվին պատվիրել հնարավոր չէ։ Կարող եք ինքներդ վճարել վարորդին։</p>
+        html: () => modal('Ընկերությունը չի վճարում', `<div class="refusal"><span class="rico">${R.i('building-2')}</span><p class="body">Այս պահին ընկերության հաշվին պատվիրել հնարավոր չէ</p>
           <div class="btns"><button class="btn btn-brand">Վճարել ինքս</button><button class="btn btn-quiet">Չեղարկել</button></div></div>`), map: (s) => drawRide(s, false) },
       { id: 'company-refused', group: 'Company', label: 'Over limit', note: 'The company cannot take this ride (409): the reason in plain words and one way forward, «Վճարել ինքս», which re-quotes and books personally. Never the company balance. Not red',
-        html: () => modal('Ընկերությունը չի կարող վճարել այս ուղևորության համար', `<div class="refusal"><p class="body">Ընկերության հաշվի սահմանաչափը սպառված է։ Կարող եք ինքներդ վճարել վարորդին։</p>
+        html: () => modal('Ընկերությունը չի վճարում', `<div class="refusal"><span class="rico">${R.i('gauge')}</span><p class="body">Ընկերության սահմանաչափը սպառված է</p>
           <div class="btns"><button class="btn btn-brand">Վճարել ինքս</button><button class="btn btn-quiet">Չեղարկել</button></div></div>`), map: (s) => drawRide(s, false) },
 
       { id: 'blacklisted', group: 'Refused', label: 'Not accepted', note: 'R23, §10.11 (book.blacklisted, orderRefusalKey customer_blacklisted). The caller ECO.BLACKLIST is flagged in the console; here it is one neutral line, no reason, no accusation, and the sheet keeps everything typed. Not red: nothing broke',
         html: () => orderSheet({ notice: onotice('info', 'Չենք կարող ընդունել այս պատվերը') }), map: (s) => drawRide(s, false) },
       { id: 'refused', group: 'Refused', label: 'Order refused', note: 'R24: any other refusal (book.refused). Same slot, same tone; the order button stays to try again',
-        html: () => orderSheet({ notice: onotice('info', 'Պատվերը չընդունվեց։ Փորձեք կրկին կամ կապվեք գրասենյակի հետ') }), map: (s) => drawRide(s, false) },
+        html: () => orderSheet({ notice: onotice('info', 'Պատվերը չընդունվեց', 'Կրկնեք կամ զանգեք գրասենյակ') }), map: (s) => drawRide(s, false) },
       { id: 'offline-order', group: 'Refused', label: 'Offline at order', note: 'R24: no network when Order was pressed (app.offline). The banner says why at the top; the line by the button says the order did not go',
-        html: () => orderSheet({ notice: onotice('wifi-off', 'Կապ չկա։ Ստուգեք ինտերնետը') }) + R.banner({ t1: 'Կապ չկա', t2: 'Պատվերը չի ուղարկվել', action: 'Կրկնել' }), map: (s) => drawRide(s, false) },
+        html: () => orderSheet({ notice: onotice('wifi-off', 'Պատվերը չի ուղարկվել') }) + R.banner({ t1: 'Կապ չկա', action: 'Կրկնել' }), map: (s) => drawRide(s, false) },
 
       { id: 'quote-loading', group: 'Quote', label: 'Pricing', note: 'R25: quotes in flight. Each tier holds its price slot with a skeleton (TierCard Skeleton); Order already works and reads without a price',
         html: () => orderSheet({ mode: 'pending', btn: '<button class="btn btn-brand">Պատվիրել</button>' }), map: (s) => drawRide(s, false) },
@@ -312,10 +318,10 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
       { id: 'metered', group: 'Quote', label: 'Metered tier', note: 'R26, §10.9: a fleet on a metered tariff must not show a promise. «≈» on every price, «Մոտավոր» under it, «≈» on the button. Eco is fixed_upfront today, so this is the white-label face. book.noPrice is the ride screen\'s line when there is no estimate at all',
         html: () => orderSheet({ mode: 'metered', btn: `<button class="btn btn-brand">Պատվիրել · Eco City · ≈ ${R.amd(price('city', TRIPS.now.km, TRIPS.now.min))}</button>` }), map: (s) => drawRide(s, false) },
 
-      { id: 'scheduled-ok', group: 'Done', label: 'Scheduled', note: 'book.tsx ModalSheet «Պատվերն ընդունված է»: the time is the one hero; «Պատրաստ է» goes to «Ուղևորություններ», where the booking leads the list under «Նախնական պատվերներ». The line under it is new copy (owner: the rider changes or cancels through the dispatcher, not in the app)',
+      { id: 'scheduled-ok', group: 'Done', label: 'Scheduled', note: 'book.tsx ModalSheet «Պատվերն ընդունված է»: the time is the one hero; «Պատրաստ է» goes to «Ուղևորություններ», where the booking leads the list under «Նախնական պատվերներ». One line under it (new copy): the rider changes or cancels through the dispatcher, not in the app (owner #1)',
         html: () => base(`<section class="sheet r ok" id="sheet"><div class="grabber"></div>
           <div class="top"><span class="badge">${R.i('calendar-clock')}</span><h2 class="h-title">Պատվերն ընդունված է</h2></div>
-          <div class="hero">${B.air.when}</div><div class="hsub">Մեքենան կնշանակվի ժամանակից առաջ։ Փոփոխելու կամ չեղարկելու համար զանգեք դիսպետչերին</div>
+          <div class="hero">${B.air.when}</div><div class="hsub">Փոխելու համար զանգեք դիսպետչերին</div>
           <div class="trip"><div class="stop"><span class="g"><i></i></span>${B.air.pickup}</div><div class="stop"><span class="g"><i class="b"></i></span>${B.air.drop}</div>
             <div class="meta"><span>${B.air.tier}</span>·<b>${R.amd(B.air.fare)}</b>·<span>${ECO.PAY.cash.label}</span></div></div>
           <button class="btn btn-brand">Պատրաստ է</button></section>`), map: (s) => drawRide(s, true, TRIPS.air) },

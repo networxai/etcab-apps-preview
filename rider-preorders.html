@@ -31,6 +31,8 @@
   .tg.warn { background: var(--warn-soft); color: #94430A; } /* --warn measured 4.25:1 on --warn-soft at 12px; this is 5.9:1 */
   :root[data-theme="dark"] .ubk .tg.warn, :root[data-theme="dark"] .tg.warn { color: var(--warn); }
   .tg.co { background: var(--surface-2); color: var(--ink-2); }
+  /* Owner Q1: no driver on a booking is normal: the system searches that tariff automatically at the time. Neutral tag, not warn. */
+  .tg.auto { background: var(--surface-2); color: var(--ink-2); }
   .help { margin: var(--s6) var(--margin) 0; display: flex; align-items: center; gap: var(--s3); min-height: 56px; padding: 0 var(--s4); width: calc(100% - 2 * var(--margin));
     border-radius: var(--r-card); background: var(--surface); text-align: left; }
   .help .ic { width: 36px; height: 36px; border-radius: 50%; background: var(--brand-soft); color: var(--brand-ink); display: grid; place-items: center; flex: none; }
@@ -75,6 +77,12 @@
   #sheet .btns { margin-top: var(--s4); }
   .cap { font: var(--t-caption); color: var(--ink-2); text-align: center; margin-top: var(--s2); }
   .confirm .body { font: var(--t-body); color: var(--ink-2); margin-bottom: var(--s4); }
+  /* Start now: who is asked, in order, as a two-step strip, and the price as a fact (2026-10-14: three sentences → three rows). */
+  .steps { display: flex; flex-direction: column; gap: var(--s2); margin-bottom: var(--s4); }
+  .steps .sp { display: flex; align-items: center; gap: var(--s3); min-height: 32px; font: var(--t-body); color: var(--ink); white-space: nowrap; }
+  .steps .n { width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; font: var(--t-secondary-strong); color: var(--ink); font-variant-numeric: tabular-nums; flex: none; }
+  .steps .eq svg { width: 20px; height: 20px; margin: 0 4px; color: var(--ink-2); flex: none; }
+  .steps .eq b { font: var(--t-body-strong); font-variant-numeric: tabular-nums; }
   /* start now: the search bar from rider-searching, the pre-assigned driver under it */
   .sbar { height: 3px; border-radius: 2px; background: var(--surface-3); overflow: hidden; margin: var(--s3) 0 var(--s3); position: relative; }
   .sbar::after { content: ''; position: absolute; top: 0; bottom: 0; width: 34%; border-radius: 2px; background: var(--brand); animation: sslide 1.6s ease-in-out infinite; }
@@ -141,10 +149,10 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
   const ROUTE_OF = { air: 'preAir', sun: 'preSun', co: 'preCo' }
   const keyOf = (b) => Object.keys(BK).find((k) => BK[k] === b)
 
-  const booking = (b) => `<button class="ubk" aria-label="${b.when}, ${b.pickup} → ${b.drop}${b.problem ? ', Մեքենան դեռ նշանակված չէ' : ''}">
+  const booking = (b) => `<button class="ubk" aria-label="${b.when}, ${b.pickup} → ${b.drop}${b.problem ? ', Մեքենան՝ ավտոմատ որոնմամբ' : ''}">
       <span class="hd">${R.i('calendar-clock')}<span class="w">${b.when}</span>${R.i('chevron-right', 'class="chev"')}</span>
       <span class="rt">${b.pickup} → ${b.drop}</span>
-      ${b.problem || b.pay === 'company' ? `<span class="ft">${b.problem ? `<span class="tg warn">${R.i('triangle-alert')}Մեքենան դեռ նշանակված չէ</span>` : ''}${b.pay === 'company' ? `<span class="tg co">${R.i('building-2')}${ECO.PAY.company.short}</span>` : ''}</span>` : ''}</button>`
+      ${b.problem || b.pay === 'company' ? `<span class="ft">${b.problem ? `<span class="tg auto">${R.i('search')}Մեքենան՝ ավտոմատ որոնմամբ</span>` : ''}${b.pay === 'company' ? `<span class="tg co">${R.i('building-2')}${ECO.PAY.company.short}</span>` : ''}</span>` : ''}</button>`
   const helpRow = () => `<button class="help" aria-label="Զանգել դիսպետչերին ${DP.phone}"><span class="ic">${R.i('phone')}</span><span class="txt"><span class="t1">Փոփոխել կամ չեղարկել</span><span class="t2">Զանգել դիսպետչերին · ${DP.phone}</span></span>${R.i('chevron-right', 'class="chev" style="width:20px;height:20px;color:var(--ink-3)"')}</button>`
   const list = (extra = '') => `<div class="page"${extra ? ' style="padding-top:132px"' : ''}>${extra}<nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl"></span><span class="navend"></span></nav>
       <h1 class="large">Նախնական պատվերներ</h1><div class="scroll"><div class="sect">Շուտով</div><div class="bk">${[BK.air, BK.sun, BK.co].map(booking).join('')}</div>${helpRow()}</div></div>`
@@ -167,9 +175,9 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
         <div class="ln"><span>${b.tier}</span><b>${A(b.fare)}</b></div>
         ${payLine(b)}
         <div class="hr"></div>
-        ${b.driver ? driverRow(b.driver) : `<div class="notice warn">${R.i('triangle-alert')}<span><b>Մեքենան դեռ նշանակված չէ</b>Դիսպետչերը մեքենա կնշանակի ժամանակից առաջ</span></div>`}
+        ${b.driver ? driverRow(b.driver) : `<div class="notice">${R.i('search')}<span><b>Մեքենան կգտնենք ավտոմատ</b>Ժամին՝ մոտակա ${b.tier}</span></div>`}
         <div class="btns"><button class="btn btn-brand">${R.i('zap')}Սկսել հիմա</button><button class="btn btn-quiet">${R.i('phone')}Զանգել դիսպետչերին</button></div>
-        <div class="cap">Փոփոխել կամ չեղարկել՝ դիսպետչերի միջոցով</div>
+        <div class="cap">Փոխել կամ չեղարկել՝ միայն դիսպետչերի միջոցով</div>
       </section>`
   const mapFor = (b) => (s) => {
     const pts = ROUTES[ROUTE_OF[keyOf(b)]].pts
@@ -191,7 +199,7 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
       <div class="date">${B.day.replace(' հոկտ.', ' հոկտեմբերի')}</div><div class="big">${clock.replace(/^0/, '')}</div>
       <div class="stack">${cards}</div>
       <div class="ctl" aria-hidden="true" style="left:46px">${R.i('flashlight')}</div><div class="ctl" aria-hidden="true" style="right:46px">${R.i('camera')}</div></div>`
-  const reminderCard = (t) => nt(t, `${DP.reminderMin} րոպեից՝ ձեր նախնական պատվերը`, `${B.time} · ${B.pickup} → ${B.dropShort}`)
+  const reminderCard = (t) => nt(t, `Նախնական պատվեր՝ ${DP.reminderMin} րոպեից`, `${B.time} · ${B.pickup} → ${B.dropShort}`)
 
   /* Start now (owner ruling a): the booking becomes a ride; the pre-assigned driver is asked first, then normal dispatch. */
   const startSheet = (fallback) => `<div class="map" id="map" aria-label="Քարտեզ"></div>${fab()}
@@ -200,7 +208,7 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
         <div class="h-sub">${BK.air.pickup} → ${BK.air.dropShort} · ${A(BK.air.fare)}</div>
         <div class="sbar" role="progressbar" aria-label="${fallback ? 'Որոնում ենք մեքենա' : 'Սպասում ենք վարորդի պատասխանին'}"></div>
         ${fallback
-          ? `<div class="notice">${R.i('info')}<span>${BK.air.driver.first}ը հիմա չի կարող · ընտրում ենք մոտակա մեքենան</span></div>`
+          ? `<div class="notice">${R.i('info')}<span>${BK.air.driver.first}ը հիմա չի կարող · որոնում ենք մոտակա ${BK.air.tier}</span></div>`
           : driverRow(BK.air.driver)}
         <div class="btns"><button class="btn btn-quiet">${R.i('phone')}Զանգել դիսպետչերին</button></div>
       </section>`
@@ -216,24 +224,25 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
     title: 'Rider · Pre-orders',
     sub: 'A booking for later, from the list to the car: list, the booking, start it now, call the dispatcher to change it, the reminder, and the push when a driver is assigned. The rider cannot cancel or edit in the app (owner, 12 Oct). ECO.BOOKINGS: tomorrow 08:30 to Zvartnots with Սուրեն pre-assigned',
     states: [
-      { id: 'list', group: 'Bookings', label: 'List', note: 'Reached from History («Նախնական պատվերներ» leads it) and the home card. Soonest first; a warn tag when no car is on it yet; the company marker on an on-account booking. No inline cancel: a card opens the booking, and the one way to change or cancel is the dispatcher',
+      { id: 'list', group: 'Bookings', label: 'List', note: 'Reached from History («Նախնական պատվերներ» leads it) and the home card. Soonest first; a neutral tag «Մեքենան՝ ավտոմատ որոնմամբ» when no driver is pre-assigned (owner Q1: the system searches that tariff automatically, so it is not a problem); the company marker on an on-account booking. No inline cancel: a card opens the booking, and the one way to change or cancel is the dispatcher',
         html: () => list() },
       { id: 'detail', group: 'Bookings', label: 'Booking', note: 'Drawn ahead (R35): the time is the hero; route, tier and fixed price, payment, the pre-assigned driver and plate. «Սկսել հիմա» is the one primary; «Զանգել դիսպետչերին» for any change. Needs tier, fare, payment and driver on the customer booking wire',
         html: () => detailSheet(BK.air), map: mapFor(BK.air) },
-      { id: 'detail-nodriver', group: 'Bookings', label: 'No car yet', note: 'problemReason set (the pre-assigned driver was blocked): the same warn words as the list, and what happens next. Still the rider\'s booking; nothing failed',
+      { id: 'detail-nodriver', group: 'Bookings', label: 'No car yet', note: 'problemReason set (the pre-assigned driver was blocked). Owner Q1: at the time the system searches automatically and any driver of the booking\'s tariff can take it, so the notice is neutral and says exactly that; no person has to assign a car',
         html: () => detailSheet(BK.sun), map: mapFor(BK.sun) },
       { id: 'detail-company', group: 'Bookings', label: 'Company', note: 'An on-account booking: «Ընկերության հաշվին» names the company and its cost code where the payment would be. No driver yet (Monday)',
         html: () => detailSheet(BK.co), map: mapFor(BK.co) },
 
-      { id: 'start-confirm', group: 'Actions', label: 'Start now', note: 'Owner decision: a rider may bring a booking forward. One question, same price; the search starts at once and the screen becomes the live ride (rider-searching → rider-ride). Owner ruling 12 Oct: the pre-assigned driver (Սուրեն) gets the first offer; if he declines or lets it ring out, normal dispatch takes over — the copy says exactly that, so the fallback is no surprise (new strings)',
+      { id: 'start-confirm', group: 'Actions', label: 'Start now', note: 'Owner decision: a rider may bring a booking forward. One question, same price; the search starts at once and the screen becomes the live ride (rider-searching → rider-ride). Owner ruling 12 Oct: the pre-assigned driver (Սուրեն) gets the first offer; if he declines or lets it ring out, the automatic search offers it to any driver of that tariff (owner Q1) — the sheet draws it as a two-step strip (your driver, then the nearest car) and the price as a fact, so the fallback is no surprise (new strings)',
         html: () => overDetail(BK.air, `<section class="sheet r modal confirm" role="dialog" aria-label="Սկսե՞լ հիմա"><div class="grabber"></div>
           <div class="mhead"><h2 class="h-title">Սկսե՞լ հիմա</h2><button class="xbtn" aria-label="Փակել">${R.i('x')}</button></div>
-          <p class="body">Նախ կառաջարկենք ձեր վարորդին՝ ${BK.air.driver.first}ին։ Եթե նա հիմա չկարողանա, կգտնենք այլ մեքենա։ Գինը նույնն է՝ ${A(BK.air.fare)}։</p>
+          <div class="steps"><div class="sp"><span class="n">1</span><span>Նախ՝ ${BK.air.driver.first}ին</span></div><div class="sp"><span class="n">2</span><span>Չկարողանա՝ մոտակա ${BK.air.tier}</span></div>
+            <div class="sp eq">${R.i('equal')}<span>Գինը նույնն է · <b>${A(BK.air.fare)}</b></span></div></div>
           <div class="btns"><button class="btn btn-brand">Սկսել հիմա</button><button class="btn btn-quiet">Ոչ, թողնել</button></div></section>`),
         map: mapFor(BK.air) },
       { id: 'start-sent', group: 'Actions', label: 'Start now · asking your driver', time: BK.air.startNow.at, note: `Owner ruling (a), drawn ahead: right after «Սկսել հիմա» the booking is a live ride and the offer rings on ${BK.air.startNow.first}'s phone first (the normal ${BK.air.startNow.offerSec} s offer, driver-offer-states#preorder-now). The sheet names him and his car; the bar is the same calm search bar. No in-app cancel here: changes stay with the dispatcher (see NOTES, needs owner decision)`,
         html: () => startSheet(false), map: startMap(false) },
-      { id: 'start-fallback', group: 'Actions', label: 'Start now · another car', time: '9:53', note: `Owner ruling (a): ${BK.air.startNow.first} declined or let the offer expire, so normal dispatch searches for any free Eco City nearby. One neutral line says why the face changed; same price. When a car accepts, the screen becomes rider-ride#assigned`,
+      { id: 'start-fallback', group: 'Actions', label: 'Start now · another car', time: '9:53', note: `Owner ruling (a): ${BK.air.startNow.first} declined or let the offer expire, so the automatic search offers it to any free Eco City driver nearby (owner Q1: same tariff). One neutral line says why the face changed; same price. When a car accepts, the screen becomes rider-ride#assigned`,
         html: () => startSheet(true), map: startMap(true) },
       { id: 'call', group: 'Actions', label: 'Call to change', note: '«Զանգել դիսպետչերին» opens the phone (tel:, the fleet\'s dispatcherPhone): iOS asks once. Changing the time, the addresses or cancelling is the dispatcher\'s (§8: bookings are edited by the operator)',
         html: () => overDetail(BK.air, `<div class="ios-as" role="dialog" aria-label="Զանգ"><div class="grp"><div class="hd">Դիսպետչեր · Eco Taxi</div><button>${R.i('phone')}Զանգել ${DP.phone}</button></div><button class="x">Չեղարկել</button></div>`),
@@ -242,9 +251,9 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
       { id: 'reminder', group: 'Before pickup', label: 'Reminder', time: ' ', note: `Drawn ahead (owner: yes): a push ${DP.reminderMin} min before pickup; the lead is set in the console (Settings → Dispatch, ECO.DISPATCH.reminderMin). Tapping opens the booking`,
         html: () => lock(remindAt, reminderCard('հիմա')) },
       { id: 'reminder-inapp', group: 'Before pickup', label: 'Reminder, app open', time: remindAt.replace(/^0/, ''), note: 'The same reminder while the app is open: a banner over the screen with «Բացել», not a modal',
-        html: () => list(R.banner({ icon: 'bell-ring', t1: `${DP.reminderMin} րոպեից՝ ձեր նախնական պատվերը`, t2: `${B.time} · ${B.pickup}`, action: 'Բացել' }).replace('class="banner ', 'data-overlay class="banner rem ')) },
-      { id: 'activated', group: 'Before pickup', label: 'Driver assigned', time: ' ', note: `The sweep turns the booking into a ride (${B.assignedAt}) and the ride_assigned push says so, with the booked pickup time. Tap → rider-home.html?active=preorder (the resume card) → rider-ride.html#preorder. The earlier reminder sits under it`,
-        html: () => lock(B.assignedAt, nt('հիմա', `Վարորդը նշանակված է · նստել ${B.time}`, `${D.first} · ${D.car.split(' · ')[0]} · ${D.plate}`) + reminderCard('12 ր առաջ').replace('class="nt ', 'class="nt old ')) },
+        html: () => list(R.banner({ icon: 'bell-ring', t1: `Նախնական պատվեր՝ ${DP.reminderMin} րոպեից`, t2: `${B.time} · ${B.pickup}`, action: 'Բացել' }).replace('class="banner ', 'data-overlay class="banner rem ')) },
+      { id: 'activated', group: 'Before pickup', label: 'Driver assigned', time: ' ', note: `At the time the sweep activates the booking and the automatic search (owner Q1: pre-assigned driver first, else any driver of that tariff) assigns a car (${B.assignedAt}); the ride_assigned push says so, with the booked pickup time. Tap → rider-home.html?active=preorder (the resume card) → rider-ride.html#preorder. The earlier reminder sits under it`,
+        html: () => lock(B.assignedAt, nt('հիմա', `Վարորդը նշանակված է · ${B.time}-ին`, `${D.first} · ${D.car.split(' · ')[0]} · ${D.plate}`) + reminderCard('12 ր առաջ').replace('class="nt ', 'class="nt old ')) },
     ],
   })
 </script>

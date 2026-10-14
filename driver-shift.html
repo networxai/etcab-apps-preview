@@ -91,14 +91,14 @@
 <body>
 <main class="screen page" id="s">
   <div class="appbar" data-not="empty">
-    <button class="iconbtn" aria-label="Ետ"><i data-lucide="arrow-left"></i></button>
+    <button class="iconbtn" aria-label="Հետ"><i data-lucide="arrow-left"></i></button>
   </div>
 
   <!-- ── choose / taken ── -->
   <div class="content" data-s="choose taken">
-    <div class="ptitle">Ընտրե՛ք մեքենան</div>
+    <div class="ptitle">Ընտրեք մեքենան</div>
     <div class="psub" data-s="choose">4 ազատ մեքենա</div>
-    <div class="notice warn" data-s="taken" role="status" style="margin-top:var(--s3)"><i data-lucide="car-front"></i><div><b>01 ET 001-ն արդեն հերթապահում է</b>Ընտրե՛ք այլ մեքենա</div></div>
+    <div class="notice warn" data-s="taken" role="status" style="margin-top:var(--s3)"><i data-lucide="car-front"></i><div><b>01 ET 001-ն արդեն զբաղված է</b>Ընտրեք այլ մեքենա</div></div>
     <div class="cars" role="radiogroup" aria-label="Մեքենա" style="margin-top:var(--s4)">
       <button class="car" role="radio" id="car1" aria-checked="true"><span class="art"><img src="assets/eco/cars/city.webp" alt=""></span>
         <span class="txt"><span class="t1">Volkswagen ID.3</span><span class="meta"><span class="plate">01 ET 001</span><span class="tier" data-s="choose">Eco City</span><span class="busychip" data-s="taken">Զբաղված</span></span></span><span class="rd"><i data-lucide="check"></i></span></button>
@@ -110,7 +110,7 @@
         <span class="txt"><span class="t1">Մինիվեն</span><span class="meta"><span class="plate">01 ET 021</span><span class="tier">Eco Van</span></span></span><span class="rd"></span></button>
     </div>
     <div class="grow"></div>
-    <div class="foot" data-s="choose"><button class="btn btn-brand">Սկսել հերթապահությունը</button></div>
+    <div class="foot" data-s="choose"><button class="btn btn-brand">Սկսել հերթափոխը</button></div>
     <div class="foot" data-s="taken"><button class="btn btn-quiet"><i data-lucide="phone"></i>Զանգել դիսպետչերին</button></div>
   </div>
 
@@ -129,10 +129,10 @@
 
   <!-- ── operator opened the shift for you ── -->
   <div class="content" data-s="operator">
-    <div class="ptitle">Հերթապահություն</div>
-    <div class="psub">սկսված է · 09:12</div>
+    <div class="ptitle">Հերթափոխ</div>
+    <div class="psub">Սկսվել է 09:12-ին</div>
     <div class="opcar"><img src="assets/eco/cars/city.webp" alt="Volkswagen ID.3"><span class="plate">01 ET 001</span><span class="model">Volkswagen ID.3 · Eco City</span></div>
-    <div class="card opnote"><span class="ic"><i data-lucide="headset"></i></span><div class="t1">Հերթապահությունը սկսել է դիսպետչերը</div></div>
+    <div class="card opnote"><span class="ic"><i data-lucide="headset"></i></span><div class="t1">Հերթափոխը բացել է դիսպետչերը</div></div>
     <div class="grow"></div>
     <div class="foot"><button class="btn btn-brand">Հասկացա</button><button class="btn-text">Սխալ մեքենա է</button></div>
   </div>
@@ -142,20 +142,20 @@
     <div class="ptitle">Այսօրվա արդյունք</div>
     <div class="psub">09:12–15:20</div>
     <div class="card sum">
-      <div class="lbl">Վաստակ</div>
+      <div class="lbl">Պատվերների գումարը</div>
       <div class="hero">9 800<small>֏</small></div>
       <div class="split" role="img" aria-label="Կանխիկ 7 600 ֏, ընկերության հաշվին 2 200 ֏"><i class="cash"></i><i class="company"></i></div>
       <div class="legend"><span><i class="sw" style="background:var(--c-cash)"></i>Կանխիկ <b>7 600 ֏</b></span><span><i class="sw" style="background:var(--c-company)"></i>Ընկերություն <b>2 200 ֏</b></span></div>
-      <div class="stats"><div><b>7</b><span>պատվեր</span></div><div><b>6 ժ 08 ր</b><span>գծում</span></div><div><b>58 կմ</b><span>ճանապարհ</span></div></div>
+      <div class="stats"><div><b>7</b><span>պատվեր</span></div><div><b>6 ժ 08 ր</b><span>առցանց</span></div><div><b>58 կմ</b><span>ճանապարհ</span></div></div>
     </div>
     <div class="card chart">
       <div class="hd"><span>֏ ըստ ժամի</span><span>լավագույնը՝ 14:00</span></div>
-      <div class="bars" id="bars" role="img" aria-label="Վաստակն ըստ ժամի, լավագույնը 14:00՝ 3 100 ֏"></div>
+      <div class="bars" id="bars" role="img" aria-label="Գումարն ըստ ժամի, լավագույնը 14:00՝ 3 100 ֏"></div>
       <div class="hrs" id="hrs" aria-hidden="true"></div>
     </div>
     <div class="ret"><img src="assets/eco/cars/city.webp" alt=""><span class="plate">01 ET 001</span><span class="t2">Մեքենան կազատվի</span></div>
     <div class="grow"></div>
-    <div class="foot"><button class="btn btn-brand">Ավարտել հերթապահությունը</button></div>
+    <div class="foot"><button class="btn btn-brand">Ավարտել հերթափոխը</button></div>
   </div>
 </main>
 <script src="audit.js"></script>

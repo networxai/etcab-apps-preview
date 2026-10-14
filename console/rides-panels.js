@@ -2,7 +2,7 @@
    the panel for one state, read from ?panel= (or ?ride=booking-now). Every control sits in the panel, opened in place
    from the panel's action row: one click deep (§9.4), never a modal (§9.8).
    Real sources: components/ride/ride-actions.tsx (assign + force cards, no-show), ride-editor.tsx (details, last-write 409),
-   decision-log.tsx + ride-tabs.tsx (Map · Timeline · Decisions), ride-billing.tsx (payer, reference, invoice).
+   decision-log.tsx + ride-tabs.tsx (Map · Timeline · Decisions), ride-billing.tsx (payer, reference, month — no invoice: owner #11).
    Strings: apps/operator lib/i18n.ts hy (ride.actions.*, ride.edit.*, ride.decisions.*, offer.*, party.*, state.*),
    corporate-i18n / companies-i18n (intake.billing.*, ride.billing.*). New strings are listed in scratchpad c-ops-notes. */
 (function () {
@@ -83,12 +83,12 @@
      «Կիրառել» is live; «Չներկայացավ» stays off with its reason beside it (the ride is in progress, not arrived). ── */
   if (P === 'force') {
     actsEl.innerHTML = ACTS('force')
-    after(`<section class="xsec" aria-label="Ստիպողաբար փոխել վիճակը"><h3><i data-lucide="triangle-alert"></i>Ստիպողաբար փոխել վիճակը<span class="end">գրանցվում է՝ Անի Դ.</span></h3>
+    after(`<section class="xsec" aria-label="Փոխել վիճակը ձեռքով"><h3><i data-lucide="triangle-alert"></i>Փոխել վիճակը ձեռքով<span class="end">կգրանցվի՝ Անի Դ.</span></h3>
       <div class="two2"><div><label class="label">Փոխել վիճակը</label><div class="input"><span class="val">Չեղարկված</span><i data-lucide="chevron-down"></i></div></div>
-        <div><label class="label">Չեղարկել է</label><div class="input" aria-describedby="h-party"><span class="val">հաճախորդ</span><i data-lucide="chevron-down"></i></div></div></div>
+        <div><label class="label">Ով չեղարկեց</label><div class="input" aria-describedby="h-party"><span class="val">ուղևոր</span><i data-lucide="chevron-down"></i></div></div></div>
       ${reason('Ուղևորը զանգեց և հրաժարվեց, վարորդը տեղյակ է')}
-      <div class="btns"><button class="btn danger s" disabled aria-describedby="h-ns" style="opacity:.55">Չներկայացավ</button><button class="btn danger-fill s">Կիրառել</button></div>
-      <div>${hint('h-ns', 'Չներկայացավը հնարավոր է միայն վարորդի տեղ հասնելուց հետո')}${hint('h-party', 'Չեղարկումը գրանցում է, թե ով է չեղարկել')}</div></section>`)
+      <div class="btns"><button class="btn danger s" disabled aria-describedby="h-ns" style="opacity:.55">Ուղևորը չեկավ</button><button class="btn danger-fill s">Կիրառել</button></div>
+      <div>${hint('h-ns', '«Ուղևորը չեկավ»՝ միայն երբ վարորդը տեղում է')}${hint('h-party', 'Կգրանցվի, թե ով չեղարկեց')}</div></section>`)
     scrollTo()
   }
 
@@ -100,15 +100,15 @@
     head('20431', 'l-problems', 'Վարորդ չկա', 'circle-alert')
     top.querySelector('h2').textContent = 'Տիգրան Մեծի 67'
     top.querySelectorAll('.dest')[0].innerHTML = '<i data-lucide="arrow-right"></i><span>Կենտրոն</span>'
-    top.querySelectorAll('.dest')[1].innerHTML = '<span class="mono">14:26</span>·<span class="mono">099 11-22-33</span>·<span>Զանգ</span>·<span>Մարիամ Հ.</span>'
+    top.querySelectorAll('.dest')[1].innerHTML = '<span class="mono">14:26</span>·<span class="mono">099 11-22-33</span>·<span>Հեռախոսով</span>·<span>Մարիամ Հ.</span>'
     actsEl.innerHTML = ACTS('force')
-    after(`<section class="xsec" aria-label="Ստիպողաբար փոխել վիճակը"><h3><i data-lucide="triangle-alert"></i>Ստիպողաբար փոխել վիճակը<span class="end">վարորդ չկա</span></h3>
+    after(`<section class="xsec" aria-label="Փոխել վիճակը ձեռքով"><h3><i data-lucide="triangle-alert"></i>Փոխել վիճակը ձեռքով<span class="end">վարորդ չկա</span></h3>
       <div style="position:relative"><label class="label">Փոխել վիճակը</label><div class="input focus" aria-describedby="h-st"><span class="val ph">Ընտրել վիճակը</span><i data-lucide="chevron-up"></i></div>
         <div class="opts" role="listbox" aria-label="Վիճակներ" style="margin-top:4px"><div class="on" role="option">Ընդունված</div><div role="option">Որոնում</div><div role="option">Վարորդ չկա<span class="end">հիմա</span></div><div role="option">Չեղարկված</div></div></div>
-      ${hint('h-nodrv', 'Նշանակված, Ճանապարհին, Տեղում, Ուղևորի հետ և Ավարտված վիճակները վարորդ են պահանջում․ նախ նշանակեք', 'user-x')}
+      ${hint('h-nodrv', 'Վարորդով վիճակները՝ նշանակելուց հետո', 'user-x')}
       ${reason('')}
-      <div class="btns"><button class="btn danger s" disabled style="opacity:.55" aria-describedby="h-ns h-rs">Չներկայացավ</button><button class="btn danger-fill s" disabled style="opacity:.55" aria-describedby="h-st h-rs">Կիրառել</button></div>
-      <div>${hint('h-ns', 'Չներկայացավը հնարավոր է միայն վարորդի տեղ հասնելուց հետո')}${hint('h-rs', 'Գրեք պատճառը՝ «Չներկայացավ» և «Կիրառել» կոճակները միացնելու համար')}${hint('h-st', 'Ընտրեք վիճակը, որին պետք է անցնի պատվերը')}</div></section>`)
+      <div class="btns"><button class="btn danger s" disabled style="opacity:.55" aria-describedby="h-ns h-rs">Ուղևորը չեկավ</button><button class="btn danger-fill s" disabled style="opacity:.55" aria-describedby="h-st h-rs">Կիրառել</button></div>
+      <div>${hint('h-ns', '«Ուղևորը չեկավ»՝ միայն երբ վարորդը տեղում է')}${hint('h-rs', 'Գրեք պատճառը, և կոճակները կմիանան')}${hint('h-st', 'Ընտրեք նոր վիճակը')}</div></section>`)
     dp.querySelector('.drv').closest('.sec').innerHTML = '<h3>Վարորդ</h3><p class="faint" style="font:var(--c-body)">Դեռ նշանակված չէ · 2 ալիք, 7 հարցված</p>'
     scrollTo()
   }
@@ -123,11 +123,11 @@
           <div class="on" role="option" aria-selected="true"><i data-lucide="circle" style="width:8px;height:8px;fill:var(--ok-dot);color:var(--ok-dot)"></i>Սուրեն Մկրտչյան<span class="plate" style="height:20px">22 OU 447</span><span class="end">ազատ · 1,1 կմ</span></div>
           <div role="option"><i data-lucide="circle" style="width:8px;height:8px;fill:var(--ok-dot);color:var(--ok-dot)"></i>Սոնա Խաչատրյան<span class="plate" style="height:20px">20 SK 202</span><span class="end">ազատ · 3,8 կմ</span></div>
           <div class="sep" aria-hidden="true"></div>
-          <div class="busy" role="option"><i data-lucide="circle" style="width:8px;height:8px;fill:var(--ink);color:var(--ink)"></i>Վահե Սարգսյան<span class="plate" style="height:20px">55 SM 620</span><span class="end">պատվերի մեջ</span></div>
-          <div class="busy" role="option"><i data-lucide="circle" style="width:8px;height:8px;fill:var(--ink);color:var(--ink)"></i>Սամվել Հարությունյան<span class="plate" style="height:20px">11 SH 511</span><span class="end">պատվերի մեջ</span></div>
+          <div class="busy" role="option"><i data-lucide="circle" style="width:8px;height:8px;fill:var(--ink);color:var(--ink)"></i>Լիլիթ Մանուկյան<span class="plate" style="height:20px">18 OL 220</span><span class="end">պատվերով</span></div>
+          <div class="busy" role="option"><i data-lucide="circle" style="width:8px;height:8px;fill:var(--ink);color:var(--ink)"></i>Սամվել Հարությունյան<span class="plate" style="height:20px">11 SH 511</span><span class="end">պատվերով</span></div>
         </div></div>
       <div class="btns"><button class="btn secondary s"><i data-lucide="search"></i>Ուղարկել որոնման</button><button class="btn primary s"><i data-lucide="user-round-check"></i>Նշանակել</button></div>
-      ${hint('h-ep', 'Նշանակելիս Արամ Պ.-ի հավելվածը ստանում է «Պատվերը փոխվել է» և վերադառնում գլխավոր էկրան', 'smartphone')}</section>`)
+      ${hint('h-ep', 'Արամ Պ.-ի հավելվածում պատվերը կփակվի «Պատվերը փոխվել է» նշումով', 'smartphone')}</section>`)
     scrollTo()
   }
 
@@ -136,15 +136,15 @@
      driver's reason (owner decision 2026-10-12: decline requires a reason; drawn ahead — offer.declined has no reason). ── */
   if (P === 'decisions') {
     const tl = dp.querySelector('#tl').closest('.sec')
-    const W = (n, rev, at, rs) => `<div class="wave"><b>Ալիք ${n}</b><span class="mono">տարբ. ${rev} · ${at}</span></div>
+    const W = (n, rev, at, rs) => `<div class="wave"><b>Ալիք ${n}</b><span class="mono">${at}</span></div>
       <table class="dl"><colgroup><col><col class="s"><col class="k"><col class="o"></colgroup><thead><tr><th>Վարորդ</th><th class="n">Միավոր</th><th class="n" title="Հեռավորություն">Հեռ.</th><th class="o">Արդյունք</th></tr></thead><tbody>
       ${rs.map(([d, s, km, o, why, na]) => `<tr class="${na ? 'notasked' : ''}"><td>${d}</td><td class="n mono">${s}</td><td class="n mono">${km}</td><td class="o">${o}${why ? `<span class="sub"><span class="why2">${why}</span></span>` : ''}</td></tr>`).join('')}</tbody></table>`
     tl.remove()
-    after(`<div class="rtabs" role="tablist" aria-label="Պատվեր"><button role="tab" aria-selected="false" tabindex="-1">Քարտեզ</button><button role="tab" aria-selected="false" tabindex="-1">Ժամանակագրություն</button><button role="tab" aria-selected="true">Դիսպետչերի որոշումներ</button></div>
-      <section class="xsec" style="box-shadow:none" aria-label="Դիսպետչերի որոշումներ">
-        <p class="hint"><i data-lucide="info"></i>Ստորև երևում են միայն հերթապահության մեջ եղած վարորդները։ Անջատված կամ բացակայող վարորդը չի դիտարկվել և չի նշված։</p>
-        ${W(1, 14, '14:07:12', [['Վահե Սարգսյան', '0,86', '1,2 կմ', 'հրաժարվեց', 'Հեռու է'], ['Արամ Պետրոսյան', '0,79', '1,9 կմ', 'գնահատվել է, չի հարցվել', '', 1], ['Էդգար Պողոսյան', '0,61', '3,4 կմ', 'գնահատվել է, չի հարցվել', '', 1]])}
-        ${W(2, 14, '14:08:31', [['Արամ Պետրոսյան', '0,79', '1,9 կմ', 'ընդունեց'], ['Էդգար Պողոսյան', '0,61', '3,4 կմ', 'գնահատվել է, չի հարցվել', '', 1]])}
+    after(`<div class="rtabs" role="tablist" aria-label="Պատվեր"><button role="tab" aria-selected="false" tabindex="-1">Քարտեզ</button><button role="tab" aria-selected="false" tabindex="-1">Ժամանակագրություն</button><button role="tab" aria-selected="true">Որոնում</button></div>
+      <section class="xsec" style="box-shadow:none" aria-label="Որոնում">
+        <p class="hint"><i data-lucide="info"></i>Միայն հերթափոխում եղած վարորդները · անցանց և բացակա վարորդները չեն դիտարկվել</p>
+        ${W(1, 14, '14:07:12', [['Էդգար Պողոսյան', '0,86', '1,2 կմ', 'մերժեց', 'Հեռու է'], ['Արամ Պետրոսյան', '0,79', '1,9 կմ', 'չհարցվեց', '', 1], ['Լիլիթ Մանուկյան', '0,61', '3,4 կմ', 'չհարցվեց', '', 1]])}
+        ${W(2, 14, '14:08:31', [['Արամ Պետրոսյան', '0,79', '1,9 կմ', 'ընդունեց'], ['Լիլիթ Մանուկյան', '0,61', '3,4 կմ', 'չհարցվեց', '', 1]])}
       </section>`)
     dp.querySelector('.mini').remove()
     document.documentElement.dataset.mapReady = 'none'
@@ -157,14 +157,14 @@
   if (P === 'edit' || P === 'conflict') {
     const cf = P === 'conflict'
     actsEl.innerHTML = ACTS('edit')
-    after(`<section class="xsec" aria-label="Մանրամասներ"><h3><i data-lucide="pencil"></i>Մանրամասներ<span class="end"><span class="pill warn" style="height:20px" title="Կան չպահպանված փոփոխություններ">Չպահպանված</span></span></h3>
+    after(`<section class="xsec" aria-label="Մանրամասներ"><h3><i data-lucide="pencil"></i>Մանրամասներ<span class="end"><span class="pill warn" style="height:20px" title="Կան չպահված փոփոխություններ">Չպահված</span></span></h3>
       <div><label class="label">Ուր</label><div class="pinrow" style="display:grid;grid-template-columns:20px minmax(0,1fr);gap:8px;align-items:center"><span class="mk-ab b" style="width:20px;height:20px;font-size:11px;box-shadow:inset 0 0 0 1.5px var(--ink)">Բ</span><div class="input"><span class="val">Կասկադ, Թամանյան փ.</span><i data-lucide="circle-check" style="color:var(--ok)"></i></div></div></div>
       <div class="two2"><div><label class="label">Համաձայնեցված գին</label><div class="input"><span class="val mono">1 000</span><span class="faint">֏</span></div></div><div><label class="label">Սակագնով</label><div class="input" style="box-shadow:none;background:var(--surface-alt)"><span class="val mono">800 ֏</span></div></div></div>
       <div><label class="label">Նշումներ</label><div class="input ta focus"><span class="val">Ուղևորը սայլակով է, զանգել հասնելիս<span style="border-left:1.5px solid var(--ink);margin-left:1px"></span></span></div></div>
-      ${cf ? `<div class="notice blue" role="status"><i data-lucide="refresh-cw"></i><div class="grow" style="display:flex;flex-direction:column;gap:6px"><span>Սա փոխվել է, մինչ դուք խմբագրում էիք։</span>
-          <div class="theirs"><span>Գործընկերը պահպանեց «Նշումներ»՝ <q>Զանգել հասնելիս, մուտքը բակից</q></span><span class="faint" style="font:var(--c-small)">Մարիամ Հ. · 14:21</span></div>
-          <div class="btns" style="justify-content:flex-start"><button class="btn secondary s">Վերցնել նրանցը</button><button class="btn ghost s">Թարմացնել և կրկին վերցնել</button></div></div></div>` : ''}
-      <div class="btns"><button class="btn ghost s">Չեղարկել</button><button class="btn primary s">Պահպանել</button></div></section>`)
+      ${cf ? `<div class="notice blue" role="status"><i data-lucide="refresh-cw"></i><div class="grow" style="display:flex;flex-direction:column;gap:6px"><span>Մինչ խմբագրում էիք, Մարիամ Հ.-ն փոխեց նշումները</span>
+          <div class="theirs"><span><q>Զանգել հասնելիս, մուտքը բակից</q></span><span class="faint" style="font:var(--c-small)">Մարիամ Հ. · 14:21</span></div>
+          <div class="btns" style="justify-content:flex-start"><button class="btn secondary s">Վերցնել իրենը</button><button class="btn ghost s">Թարմացնել</button></div></div></div>` : ''}
+      <div class="btns"><button class="btn ghost s">Փակել</button><button class="btn primary s">Պահել</button></div></section>`)
     scrollTo()
   }
 
@@ -176,16 +176,16 @@
     head('20424', 'l-active', 'Տեղում')
     top.querySelector('h2').textContent = 'Թումանյան 21'
     top.querySelectorAll('.dest')[0].innerHTML = '<i data-lucide="arrow-right"></i><span>Երևան Մոլ</span>'
-    top.querySelectorAll('.dest')[1].innerHTML = '<span class="mono">14:12</span>·<span class="mono">098 23-55-90</span>·<span>Հավելված</span>'
+    top.querySelectorAll('.dest')[1].innerHTML = '<span class="mono">14:12</span>·<span class="mono">098 23-55-90</span>·<span>Հավելվածից</span>'
     actsEl.innerHTML = ACTS('force')
     const d = dp.querySelector('.drv'); d.querySelector('.nm').textContent = 'Սուրեն Մկրտչյան'; d.querySelector('.plate').textContent = '22 OU 447'; d.querySelector('.meta.mono').textContent = '094 12-40-77'
-    after(`<section class="xsec" aria-label="Չներկայացավ"><h3><i data-lucide="user-x"></i>Ուղևորը չի երևում<span class="end">վարորդը տեղում է <span class="mono">14:16</span>-ից</span></h3>
-      <div class="timer" role="timer" aria-label="Սպասում է 6 րոպե 12 վայրկյան"><b>6:12</b><span>սպասում · անվճար սպասումը՝ <span class="mono">5:00</span></span></div>
+    after(`<section class="xsec" aria-label="Ուղևորը չեկավ"><h3><i data-lucide="user-x"></i>Ուղևորը չեկավ<span class="end">վարորդը տեղում է <span class="mono">14:16</span>-ից</span></h3>
+      <div class="timer" role="timer" aria-label="Սպասում է 6 րոպե 12 վայրկյան"><b>6:12</b><span>սպասում · անվճար՝ <span class="mono">5:00</span></span></div>
       <div class="tbar" aria-hidden="true"><i style="width:100%"></i><em style="left:80.6%"></em></div>
       <div class="notice amber" role="status"><i data-lucide="hand"></i><span class="grow">Վարորդը նշեց «Ուղևորը չեկավ» · <span class="mono">14:21</span></span><button class="btn ghost s icon" aria-label="Զանգել ուղևորին"><i data-lucide="phone"></i></button></div>
       ${reason('Երկու զանգ, չպատասխանեց')}
-      <div class="btns"><button class="btn danger s">Չներկայացավ</button><button class="btn danger-fill s" disabled style="opacity:.55" aria-describedby="h-st">Կիրառել</button></div>
-      ${hint('h-st', 'Ընտրեք վիճակը, որին պետք է անցնի պատվերը')}</section>`)
+      <div class="btns"><button class="btn danger s">Ուղևորը չեկավ</button><button class="btn danger-fill s" disabled style="opacity:.55" aria-describedby="h-st">Կիրառել</button></div>
+      ${hint('h-st', 'Ընտրեք նոր վիճակը')}</section>`)
     scrollTo()
   }
 
@@ -199,16 +199,16 @@
     head('20398', '', 'Ավարտված')
     top.querySelector('h2').textContent = ECO.BOOKINGS.co.pickup
     top.querySelectorAll('.dest')[0].innerHTML = `<i data-lucide="arrow-right"></i><span>${ECO.BOOKINGS.co.drop}</span>`
-    top.querySelectorAll('.dest')[1].innerHTML = `<span class="mono">13:20</span>·<span class="mono">${ECO.CUSTOMER.phone}</span>·<span>Հավելված</span>`
+    top.querySelectorAll('.dest')[1].innerHTML = `<span class="mono">13:20</span>·<span class="mono">${ECO.CUSTOMER.phone}</span>·<span>Հավելվածից</span>`
     actsEl.innerHTML = '<button class="btn secondary s icon act-on" aria-label="Մանրամասներ" aria-expanded="true"><i data-lucide="pencil"></i></button><span style="flex:1"></span><span class="faint" style="font:var(--c-small)">Ավարտված պատվերը չի փոխվում</span>'
     const d = dp.querySelector('.drv'); d.querySelector('.nm').textContent = 'Նարեկ Հովհաննիսյան'; d.querySelector('.plate').textContent = '07 AB 913'; d.querySelector('.meta.mono').textContent = '098 23-55-90'
     after(`<section class="xsec" aria-label="Վճարող"><h3><i data-lucide="building-2"></i>Վճարող</h3>
-      <dl class="kv"><dt>Վճարող</dt><dd>Ընկերություն · ${ECO.COMPANY.name}</dd><dt>${ECO.COMPANY.refLabel}</dt><dd class="mono">${ECO.COMPANY.ref}</dd><dt>Հաշիվ</dt><dd>Սևագիր · <span class="mono">հոկտ. 2026</span></dd><dt>Ուղևոր</dt><dd><a href="customer.html?theme=${THEME}" style="color:var(--brand-text)">${ECO.COMPANY.rider}</a></dd></dl>
+      <dl class="kv"><dt>Վճարող</dt><dd>Ընկերություն · ${ECO.COMPANY.name}</dd><dt>${ECO.COMPANY.refLabel}</dt><dd class="mono">${ECO.COMPANY.ref}</dd><dt>Ամիս</dt><dd><a href="company.html?theme=${THEME}&tab=statement" style="color:var(--brand-text)">Հոկտեմբեր 2026</a> · <span class="faint">ընթացիկ</span></dd><dt>Ուղևոր</dt><dd><a href="customer.html?theme=${THEME}" style="color:var(--brand-text)">${ECO.COMPANY.rider}</a></dd></dl>
       <h3 style="margin-top:4px"><i data-lucide="star"></i>Գնահատական</h3>
       <dl class="kv"><dt>Ուղևորից</dt><dd><span class="stars" aria-label="5 աստղ">${'<i data-lucide="star"></i>'.repeat(5)}</span></dd><dt>Մեկնաբանություն</dt><dd>«Մաքուր մեքենա, ճշտապահ»</dd><dt>Վարորդից</dt><dd><span class="stars" aria-label="5 աստղ">${'<i data-lucide="star"></i>'.repeat(5)}</span></dd>
         <dt>Փորձնական պատվեր</dt><dd>Ոչ</dd></dl></section>`)
     const kv = dp.querySelector('.kv:not(.xsec .kv)')
-    if (kv) kv.innerHTML = '<dt>Eco City · բազային</dt><dd>600 ֏</dd><dt>4,1 կմ × 90 ֏</dt><dd>369 ֏</dd><dt>11 ր × 12 ֏</dt><dd>132 ֏</dd><dt>Կլորացում (100 ֏)</dt><dd>−1 ֏</dd><dt class="tot">Ընդամենը · Ընկերության հաշվին</dt><dd class="tot">1 100 ֏</dd>'
+    if (kv) kv.innerHTML = '<dt>Eco City · նստեցում</dt><dd>600 ֏</dd><dt>4,1 կմ × 90 ֏</dt><dd>369 ֏</dd><dt>11 ր × 12 ֏</dt><dd>132 ֏</dd><dt>Կլորացում (100 ֏)</dt><dd>−1 ֏</dd><dt class="tot">Ընդամենը · Ընկերության հաշվին</dt><dd class="tot">1 100 ֏</dd>'
     scrollTo()
   }
 
@@ -219,12 +219,12 @@
     head('20391', '', 'Չեղարկված')
     top.querySelector('h2').textContent = 'Չարենցի 1'
     top.querySelectorAll('.dest')[0].innerHTML = '<i data-lucide="arrow-right"></i><span>Գայի պող. 16</span>'
-    top.querySelectorAll('.dest')[1].innerHTML = '<span class="mono">12:57</span>·<span class="mono">044 71-03-82</span>·<span>Զանգ</span>·<span>Սոնա Ա.</span>'
-    actsEl.innerHTML = '<span class="faint" style="font:var(--c-small)">Այս պատվերն ավարտված է, այլևս չի կարող փոխվել։</span>'
+    top.querySelectorAll('.dest')[1].innerHTML = '<span class="mono">12:57</span>·<span class="mono">044 71-03-82</span>·<span>Հեռախոսով</span>·<span>Սոնա Ա.</span>'
+    actsEl.innerHTML = '<span class="faint" style="font:var(--c-small)">Ավարտված պատվերը չի փոխվում</span>'
     after(`<section class="xsec" aria-label="Չեղարկում"><h3><i data-lucide="ban"></i>Չեղարկում</h3>
-      <dl class="kv"><dt>Չեղարկել է</dt><dd>հաճախորդ</dd><dt>Պատճառ</dt><dd>«Պլանները փոխվեցին»</dd><dt>Երբ</dt><dd class="mono">13:02 · նշանակումից 3 ր հետո</dd><dt>Վարորդին</dt><dd>Ոչինչ չի գանձվել</dd><dt>Փորձնական պատվեր</dt><dd>Ոչ</dd></dl></section>`)
+      <dl class="kv"><dt>Ով չեղարկեց</dt><dd>ուղևոր</dd><dt>Պատճառ</dt><dd>«Պլանները փոխվեցին»</dd><dt>Երբ</dt><dd class="mono">13:02 · նշանակումից 3 ր հետո</dd><dt>Միջնորդավճար</dt><dd>Չի գանձվել</dd><dt>Փորձնական պատվեր</dt><dd>Ոչ</dd></dl></section>`)
     dp.querySelector('.drv').closest('.sec').innerHTML = '<h3>Վարորդ</h3><div class="drv"><span class="car m">' + carImg('city') + '</span><div style="min-width:0"><div class="nm">Էդգար Պողոսյան</div><div class="meta"><span class="plate">27 EP 336</span><span class="pill"><i data-lucide="handshake"></i>Գործընկեր</span></div></div><span></span></div>'
-    document.getElementById('tl').innerHTML = [['12:57', 'l-unassigned', 'Ընդունված', 'Սոնա Ա.'], ['12:58', 'l-active', 'Նշանակված', 'Էդգար Պ. · ալիք 1'], ['12:59', 'l-active', 'Ճանապարհին', 'Էդգար Պ.'], ['13:02', '', 'Չեղարկված <span class="why">հաճախորդ</span>', 'ուղևոր · հավելված']]
+    document.getElementById('tl').innerHTML = [['12:57', 'l-unassigned', 'Ընդունված', 'Սոնա Ա.'], ['12:58', 'l-active', 'Նշանակված', 'Էդգար Պ. · ալիք 1'], ['12:59', 'l-active', 'Ճանապարհին', 'Էդգար Պ.'], ['13:02', '', 'Չեղարկված <span class="why">ուղևոր</span>', 'ուղևոր · հավելված']]
       .map(([t, l, w, who]) => `<span class="t">${t}</span><i class="d ${l}"></i><span>${w}</span><span class="who">${who}</span>`).join('')
     scrollTo()
   }
@@ -236,14 +236,14 @@
     const A = ECO.BOOKINGS.air, S = A.startNow
     const bk = rowById(A.id)
     if (bk) { bk.classList.add('on'); statePill(bk, 'l-searching', 'Առաջարկ', 'bell-ring'); bk.querySelector('td').innerHTML = `<span class="when2"><span class="dd">հիմա</span><span class="mono">${S.at}</span></span>` }
-    const pill = top.querySelector('.id .pill'); pill.className = 'pill l-searching'; pill.innerHTML = '<i data-lucide="bell-ring"></i>Սկսվեց հիմա · առաջարկ'
+    const pill = top.querySelector('.id .pill'); pill.className = 'pill l-searching'; pill.innerHTML = '<i data-lucide="bell-ring"></i>Սկսվեց հիմա'
     actsEl.innerHTML = '<button class="btn secondary s">Վերանշանակել <span class="kbd">A</span></button><button class="btn secondary s">Ուղարկել որոնման</button><span style="flex:1"></span><button class="btn danger s">Չեղարկել</button>'
     after(`<section class="xsec" aria-label="Սկսել հիմա"><h3><i data-lucide="zap"></i>Ուղևորը սկսեց հիմա<span class="end mono">${S.at}</span></h3>
       <div class="steps">
-        <span class="no now">1</span><span>Առաջարկ նախապես նշանակված վարորդին՝ <b>${S.first}</b><small>${A.driver.plate} · 2,3 կմ · նույն առաջարկի էկրանը</small></span><span class="ring" role="timer" aria-label="Մնաց 14 վայրկյան"><i data-lucide="bell-ring"></i>0:14</span>
-        <span class="no">2</span><span>Եթե հրաժարվի կամ չպատասխանի՝ սովորական որոնում<small>ալիքներ ըստ Կարգավորումների · ամրագրման վարորդն ազատվում է</small></span><span class="faint" style="font:var(--c-small)">հետո</span>
+        <span class="no now">1</span><span>Առաջարկ նախապես նշանակված վարորդին՝ <b>${S.first}</b><small>${A.driver.plate} · 2,3 կմ · սովորական առաջարկ, ${S.offerSec} վրկ</small></span><span class="ring" role="timer" aria-label="Մնաց 14 վայրկյան"><i data-lucide="bell-ring"></i>0:14</span>
+        <span class="no">2</span><span>Եթե մերժի կամ չպատասխանի՝ ավտոմատ որոնում · ${A.tier}<small>միայն ${A.tier} սակագնի վարորդները · ${S.first}-ն ազատվում է</small></span><span class="faint" style="font:var(--c-small)">հետո</span>
       </div></section>`)
-    document.getElementById('tl').innerHTML = [['9:38', 'l-scheduled', 'Ամրագրվեց', 'հաճախորդ · հավելված'], ['9:40', 'l-scheduled', 'Նախապես նշանակվեց Սուրեն Մ.', 'Անի Դ.'], [S.at, 'l-searching', 'Սկսվեց հիմա', 'հաճախորդ · հավելված'], [S.at, 'l-searching', 'Առաջարկ · սպասում է պատասխանի', 'Սուրեն Մ. · առաջինը']]
+    document.getElementById('tl').innerHTML = [['9:38', 'l-scheduled', 'Ստեղծվեց', 'ուղևոր · հավելված'], ['9:40', 'l-scheduled', 'Նախապես նշանակվեց Սուրեն Մ.', 'Անի Դ.'], [S.at, 'l-searching', 'Սկսվեց հիմա', 'ուղևոր · հավելված'], [S.at, 'l-searching', 'Առաջարկ · սպասում է պատասխանի', 'Սուրեն Մ. · առաջինը']]
       .map(([t, l, w, who]) => `<span class="t">${t}</span><i class="d ${l}"></i><span>${w}</span><span class="who">${who}</span>`).join('')
     scrollTo()
   }

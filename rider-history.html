@@ -45,6 +45,8 @@
   .ubk .tg.warn { background: var(--warn-soft); color: #94430A; } /* --warn measured 4.25:1 on --warn-soft at 12px; this is 5.9:1 */
   :root[data-theme="dark"] .ubk .tg.warn, :root[data-theme="dark"] .tg.warn { color: var(--warn); }
   .ubk .tg.co { background: var(--surface-2); color: var(--ink-2); }
+  /* Owner Q1: no driver on a booking is normal, not a problem: the system searches that tariff automatically at the time. Neutral tag. */
+  .ubk .tg.auto { background: var(--surface-2); color: var(--ink-2); }
 
   .skrow { display: flex; align-items: center; gap: var(--s3); min-height: 72px; }
   .skrow .sk.th { width: 48px; height: 48px; border-radius: 10px; flex: none; }
@@ -92,6 +94,7 @@
   .notice { display: flex; gap: var(--s2); align-items: flex-start; margin-top: var(--s3); padding: var(--s3); border-radius: var(--r-card); background: var(--surface-2);
     font: var(--t-secondary); color: var(--ink); }
   .notice svg { width: 16px; height: 16px; flex: none; margin-top: 1px; color: var(--ink-2); }
+  .notice b { display: block; font: var(--t-secondary-strong); }
   #sheet .btns { margin-top: var(--s4); }
   .cx { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: var(--r-pill); background: var(--surface-2);
     font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; }
@@ -99,9 +102,12 @@
   .why { margin-top: var(--s3); background: var(--surface-2); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: flex; flex-direction: column; gap: 2px; }
   .why .k { font: var(--t-caption); color: var(--ink-2); }
   .why .v { font: var(--t-body); color: var(--ink); white-space: nowrap; }
-  .errbox { padding: var(--s2) var(--margin) 0; display: flex; flex-direction: column; gap: var(--s3); }
-  .errbox .notice { margin-top: 0; background: var(--surface); box-shadow: var(--e1); font: var(--t-body); }
-  .errbox .notice svg { width: 20px; height: 20px; }
+  /* Receipt could not load: the blank-state pattern (icon disc + one word + one line), Retry pinned at the foot (2026-10-14). */
+  .errbox { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--s2); padding: 0 var(--s8) 80px; text-align: center; }
+  .errbox .eo { width: 64px; height: 64px; border-radius: 50%; background: var(--surface); box-shadow: var(--e1); display: grid; place-items: center; color: var(--ink-2); margin-bottom: var(--s2); }
+  .errbox .eo svg { width: 28px; height: 28px; }
+  .errbox .et { font: var(--t-headline); color: var(--ink); }
+  .errbox .es { font: var(--t-secondary); color: var(--ink-2); }
 </style>
 </head>
 <body>
@@ -131,10 +137,10 @@
   /* ECO.BOOKINGS: Աննա's three pre-orders, soonest first (upcomingBooking order). sun has problemReason → history.pending (warn);
      co is billed to the company («Ընկերություն» marker: drawn ahead — customerScheduledRideSchema carries no billing yet). */
   const BK = ECO.BOOKINGS
-  const booking = (b) => `<button class="ubk" aria-label="${b.when}, ${b.pickup} → ${b.drop}${b.problem ? ', Մեքենան դեռ նշանակված չէ' : ''}">
+  const booking = (b) => `<button class="ubk" aria-label="${b.when}, ${b.pickup} → ${b.drop}${b.problem ? ', Մեքենան՝ ավտոմատ որոնմամբ' : ''}">
       <span class="hd">${R.i('calendar-clock')}<span class="w">${b.when}</span>${R.i('chevron-right', 'class="chev"')}</span>
       <span class="rt">${b.pickup} → ${b.drop}</span>
-      ${b.problem || b.pay === 'company' ? `<span class="ft">${b.problem ? `<span class="tg warn">${R.i('triangle-alert')}Մեքենան դեռ նշանակված չէ</span>` : ''}${b.pay === 'company' ? `<span class="tg co">${R.i('building-2')}${ECO.PAY.company.short}</span>` : ''}</span>` : ''}</button>`
+      ${b.problem || b.pay === 'company' ? `<span class="ft">${b.problem ? `<span class="tg auto">${R.i('search')}Մեքենան՝ ավտոմատ որոնմամբ</span>` : ''}${b.pay === 'company' ? `<span class="tg co">${R.i('building-2')}${ECO.PAY.company.short}</span>` : ''}</span>` : ''}</button>`
   const upcoming = () => `<div class="sect">Նախնական պատվերներ</div><div class="bk">${[BK.air, BK.sun, BK.co].map(booking).join('')}</div>`
 
   /* Receipt sheet (pickup → Komitas, the same ride the driver was offered: 1 100 ֏). */
@@ -159,14 +165,14 @@
             <div class="drv">${R.avatar()}<span class="txt"><span class="t1">${DV.first} <span>${R.i('star')}${DV.rating}</span></span><span class="t2">${DV.carHy}</span></span>${R.plate(DV.plate)}</div>
             <div class="hr"></div>
             <div class="lines">
-              <div class="ln"><span>Նստելու վճար</span><b>${A(600)}</b></div>
+              <div class="ln"><span>Նստեցում</span><b>${A(600)}</b></div>
               <div class="ln"><span>Ըստ կիլոմետրի · ${ECO.km(RD.km)}</span><b>${A(387)}</b></div>
               <div class="ln"><span>Ըստ րոպեի · ${RD.min} րոպե</span><b>${A(72)}</b></div>
               <div class="ln"><span>Կլորացում</span><b>+${A(41)}</b></div>
               <div class="ln tot"><span>Ընդամենը</span><b>${A(RD.fare)}</b></div>
               <div class="ln paid"><span class="pay ${pay === 'company' ? 'co' : ''}">${pay === 'company' ? R.i('building-2') + 'Վճարում է՝ ' + C.name : R.i('banknote') + ECO.PAY.cash.label}</span></div>
             </div>
-            ${pay === 'downgraded' ? `<div class="notice">${R.i('info')}<span>Այս ուղևորության համար վճարում եք դուք, քանի որ ընկերության հաշվի սահմանաչափը սպառված է։ Վճարեք վարորդին։</span></div>` : ''}
+            ${pay === 'downgraded' ? `<div class="notice">${R.i('info')}<span><b>Վճարել եք դուք · կանխիկ</b>Ընկերության սահմանաչափը սպառված էր</span></div>` : ''}
             <div class="btns"><button class="btn btn-brand">${R.i('rotate-ccw')}Կրկին պատվիրել</button>${pay === 'downgraded' ? '' : '<button class="btn btn-quiet">Հաղորդել խնդրի մասին</button>'}</div>
           </section>`
 
@@ -180,7 +186,7 @@
         html: () => `<div class="page">${head()}<div class="scroll"><div class="sect">Հոկտեմբեր</div><div class="group" aria-busy="true">${[0, 1, 2, 3, 4].map((i) =>
           `${i ? '<div class="divider h"></div>' : ''}<div class="skrow"><span class="sk th"></span><span class="lines"><span class="sk" style="width:${[62, 44, 70, 52, 58][i]}%;height:14px"></span><span class="sk" style="width:${[46, 38, 50, 42, 40][i]}%;height:12px"></span></span><span class="sk" style="width:56px;height:14px"></span></div>`).join('')}</div></div></div>` },
       { id: 'empty', label: 'Empty', note: 'One line (hub.noRecent) and the way out',
-        html: () => `<div class="page">${head()}<div class="empty"><div class="halo">${R.car('city', 184, 88, '')}</div><p>Ձեր վերջին ուղևորությունները կերևան այստեղ</p></div>
+        html: () => `<div class="page">${head()}<div class="empty"><div class="halo">${R.car('city', 184, 88, '')}</div><p>Ձեր ուղևորությունները կերևան այստեղ</p></div>
           <div class="foot"><button class="btn btn-brand">Պատվիրել</button></div></div>` },
       { id: 'detail', label: 'Receipt', note: 'The one ride: 9:45 → 9:51, 4,3 km, 6 min. Lines are the tariff\'s own (receipt.tsx fare.* strings), rounded to 100 ֏; book again is the one primary',
         html: () => receipt('cash'), map: mapFor('pickupToDrop') },
@@ -188,16 +194,16 @@
         html: () => receipt('company'), map: mapFor('pickupToDrop') },
       { id: 'detail-downgraded', label: 'Receipt · paid by you', note: 'A company pre-booking downgraded at activation (corporate R2): one neutral notice says why, and the payment is cash',
         html: () => receipt('downgraded'), map: mapFor('pickupToDrop') },
-      { id: 'receipt-error', label: 'Receipt offline', time: '9:58', note: 'R61, real (history/[id].tsx): the receipt could not load. The same neutral Notice the app uses — app.offline with «Կրկնել» (app.retry) — where the receipt would be; never red, and back is still one tap. No map: it could not load either',
+      { id: 'receipt-error', label: 'Receipt offline', time: '9:58', note: 'R61, real (history/[id].tsx): the receipt could not load. The blank-state pattern (icon, «Կապ չկա», one line) with «Կրկնել» (app.retry) at the foot; never red, back is still one tap. No map: it could not load either',
         html: () => `<div class="page">${head().replace('<h1 class="large">Ուղևորություններ</h1>', '<h1 class="large">Ուղևորություն</h1>')}
-          <div class="errbox"><div class="notice" role="status">${R.i('wifi-off')}<span>Կապ չկա։ Ստուգեք ինտերնետը</span></div>
-          <button class="btn btn-quiet">${R.i('rotate-ccw')}Կրկնել</button></div></div>` },
+          <div class="errbox" role="status"><span class="eo">${R.i('wifi-off')}</span><span class="et">Կապ չկա</span><span class="es">Ստացականը կբացվի կապի հետ</span></div>
+          <div class="foot"><button class="btn btn-quiet">${R.i('rotate-ccw')}Կրկնել</button></div></div>` },
       { id: 'detail-cancelled', label: 'Cancelled', note: 'No fare was charged, and the reason the rider gave',
         html: () => `<div class="map" id="map" aria-label="Երթուղի"></div>${nav()}
           <section class="sheet" id="sheet">
             <div class="rhead"><div><div class="when">5 հոկտ., 13:05</div><div class="tier">Eco City</div></div><span class="cx">${R.i('circle-slash')}Չեղարկված</span></div>
             ${stops('Թումանյան 8', '13:05', 'Օպերա', '—')}
-            <div class="why"><span class="k">Պատճառ</span><span class="v">Փոխեցի ծրագրերը</span></div>
+            <div class="why"><span class="k">Պատճառ</span><span class="v">Պլանները փոխվեցին</span></div>
             <div class="lines" style="margin-top:var(--s3)"><div class="ln tot"><span>Վճար չի գանձվել</span><b>${A(0)}</b></div></div>
             <div class="btns"><button class="btn btn-brand">${R.i('rotate-ccw')}Կրկին պատվիրել</button></div>
           </section>`,

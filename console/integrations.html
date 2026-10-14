@@ -36,7 +36,7 @@
       <div class="live"></div>
     </header>
     <div class="content">
-      <div class="head2"><p>Քարտեզի և SMS-ի բանալիները։ Պահպանվածը երբեք չի ցուցադրվում։</p></div>
+      <div class="head2"><p>Քարտեզի և SMS-ի բանալիներ · պահվածը չի ցուցադրվում</p></div>
       <section class="card" aria-labelledby="k-maps" id="maps"></section>
       <section class="card" aria-labelledby="k-sms" id="sms"></section>
     </div>
@@ -61,20 +61,20 @@
     const fields = F[kind].map(([n, req, secret, hint]) => {
       const bad = REFUSED && kind === 'maps' && n === 'location'
       const v = kind === 'maps' ? TYPED[n] : null
-      return `<div class="fd"><label class="label"><span class="mono">${n}</span>${req ? '<span class="req">· Պարտադիր է</span>' : ''}</label>
+      return `<div class="fd"><label class="label"><span class="mono">${n}</span>${req ? '<span class="req">· պարտադիր</span>' : ''}</label>
         <span class="input${bad ? ' err' : ''}">${secret ? '<i data-lucide="key-round"></i>' : ''}<span class="val${v ? '' : ' ph'}">${v || ''}</span></span>
-        ${bad ? '<div class="why" id="why-loc"><i data-lucide="circle-alert"></i>Մերժվեց — ստուգեք այս արժեքը մատակարարի փաստաթղթերով։</div>' : ''}<div class="hint">${hint.replace('<', '&lt;').replace('>', '&gt;')}</div></div>`
+        ${bad ? '<div class="why" id="why-loc"><i data-lucide="circle-alert"></i>Մերժվեց․ ստուգեք արժեքը</div>' : ''}<div class="hint">${hint.replace('<', '&lt;').replace('>', '&gt;')}</div></div>`
     }).join('')
     const status = when ? `<span class="pill ok"><i class="d"></i>Կարգավորված է · <span class="num">${when}</span></span>` : '<span class="pill"><i class="d"></i>Կարգավորված չէ</span>'
     const foot = REFUSED && kind === 'maps'
-      ? `<div class="notice red" role="alert"><i data-lucide="circle-alert"></i><span>Արժեքները մերժվեցին։ Ստուգեք նշված դաշտերը մատակարարի փաստաթղթերով և պահպանեք կրկին։</span></div>`
-      : `<div class="notice neutral"><i data-lucide="info"></i><span>Պահպանելը փոխարինում է ամբողջ բանալին։ Լրացրեք բոլոր դաշտերը, ոչ միայն փոփոխվածը։</span></div>`
+      ? `<div class="notice red" role="alert"><i data-lucide="circle-alert"></i><span>Չպահվեց․ ստուգեք նշված դաշտը</span></div>`
+      : `<div class="notice neutral"><i data-lucide="info"></i><span>Պահելը փոխարինում է բոլոր դաշտերը․ լրացրեք բոլորը</span></div>`
     return `<div class="card-h"><h2 id="k-${kind}">${title}</h2><span class="sub">${sub}</span><span class="end">${status}</span></div>
       <div class="scroll-y grow"><div class="fl">${fields}</div></div>
-      <div class="ft">${foot}<button class="btn primary">Պահպանել</button></div>`
+      <div class="ft">${foot}<button class="btn ${kind === 'maps' ? 'primary' : 'secondary'}">Պահել</button></div>`
   }
   document.getElementById('maps').innerHTML = card('maps', 'Քարտեզ', '2GIS', '02.10.2026, 14:20')
-  document.getElementById('sms').innerHTML = card('sms', 'SMS', 'broker', '28.09.2026, 11:05')
+  document.getElementById('sms').innerHTML = card('sms', 'SMS', 'մատակարար', '28.09.2026, 11:05')
   icons()
   document.documentElement.dataset.mapReady = 'none'
 </script>

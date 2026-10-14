@@ -86,7 +86,7 @@
   .reason .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
   .reason .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .reason svg { width: 20px; height: 20px; color: var(--warn); flex: none; }
-  .reason .t2.wrap { white-space: normal; }
+  .reason .t1, .reason .t2.wrap { white-space: normal; } /* a refusal reason may run to two lines; it is never cut */
   /* Save a place (R64, drawn ahead: POST /customer/places exists, the app has no add UI). The address is already chosen
      (from search, or offered after a ride); the rider only names it: three label chips, Other opens a name field. */
   .pa-addr { display: flex; gap: var(--s3); align-items: center; padding: var(--s3) var(--s4); border-radius: var(--r-card); background: var(--surface-2); }
@@ -95,7 +95,7 @@
   .pa-addr .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
   .pa-addr .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
   .pa-lbl { font: var(--t-secondary-strong); color: var(--ink-2); margin: var(--s4) 0 var(--s2); }
-  .pa-chips { display: flex; gap: var(--s2); flex-wrap: wrap; }
+  .pa-chips { display: flex; gap: var(--s2); flex-wrap: wrap; margin: var(--s4) 0 0; }
   .pa-chips .chip svg { width: 16px; height: 16px; }
   .sheet.modal .field { margin-top: var(--s3); height: 56px; }
   .sheet.modal.pa-sheet { bottom: 251px; padding-bottom: var(--s4); } /* rides on the raised keyboard, as iOS moves it */
@@ -116,9 +116,9 @@
     <div class="gap"></div>
     ${grp([
       r('history', 'Ուղևորություններ'),
-      r('calendar-clock', 'Նախնական պատվերներ', '<span class="count">1</span>'),
+      r('calendar-clock', 'Նախնական պատվերներ', `<span class="count">${Object.keys(ECO.BOOKINGS).length}</span>`),
       r('map-pin', 'Հասցեներ', '<span class="val">3</span>'),
-      r('wallet', 'Հաշվեկշիռ', `<span class="val">${debt ? A(DEBT) : A(0)}</span>`, debt ? { t2: 'Չմարված պարտք', t2c: 'warn' } : { t2: ECO.COMPANY.name }),
+      r('wallet', 'Վճարում', `<span class="val">${debt ? A(DEBT) : ''}</span>`, debt ? { t2: 'Պարտք', t2c: 'warn' } : { t2: ECO.COMPANY.name }),
     ])}
     <div class="gap"></div>
     ${grp([r('languages', 'Լեզու', '<span class="val">Հայերեն</span>'), r('sun-moon', 'Թեմա', '<span class="val">Ավտոմատ</span>')])}
@@ -140,32 +140,32 @@
       ...(all === true || all === 'failed' ? [r('heart', 'Մայրիկի մոտ', `<button class="rm" aria-label="Հեռացնել Մայրիկի մոտ">${R.i('circle-minus')}</button>`, { t2: 'Դավթաշեն, 3-րդ թաղ. 14', chev: false, btn: false })] : []),
       r('plus', 'Ավելացնել հասցե', '', { chev: false, cls: 'add' }),
     ])}
-    ${all === 'failed' ? `<div class="toast" role="status">${R.i('circle-alert')}Հասցեն հեռացնել չստացվեց<button class="undo">Կրկնել</button></div>` : all ? '' : `<div class="toast" role="status">${R.i('check')}Հասցեն հեռացվեց<button class="undo">Հետարկել</button></div>`}</div>`
+    ${all === 'failed' ? `<div class="toast" role="status">${R.i('circle-alert')}Չհաջողվեց հեռացնել<button class="undo">Կրկնել</button></div>` : all ? '' : `<div class="toast" role="status">${R.i('check')}Հասցեն հեռացվեց<button class="undo">Հետարկել</button></div>`}</div>`
 
-  const wallet = (debt) => `<div class="page">${back()}<h1 class="large">Հաշվեկշիռ</h1>
+  const wallet = (debt) => `<div class="page">${back()}<h1 class="large">Վճարում</h1>
     <div class="bal">${debt
-      ? `<div class="k">${R.i('circle-alert')}Չմարված պարտք</div><div class="hero">${A(DEBT)}</div><div class="from">7 հոկտեմբերի ուղևորությունից</div>
-         <div class="note">${R.i('banknote')}<span><span class="n1" style="display:block">Վճարեք կանխիկ հաջորդ վարորդին</span><span class="n2">Վճարումը դեռ հասանելի չէ հավելվածում</span></span></div>`
+      ? `<div class="k">${R.i('circle-alert')}Պարտք</div><div class="hero">${A(DEBT)}</div><div class="from">7 հոկտ. ուղևորությունից</div>
+         <div class="note">${R.i('banknote')}<span><span class="n1" style="display:block">Վճարեք հաջորդ վարորդին՝ կանխիկ</span></span></div>`
       : `<div class="k ok">${R.i('circle-check')}Պարտք չկա</div><div class="hero">${A(0)}</div><div class="from">Բոլոր ուղևորությունները վճարված են</div>`}</div>
     <div class="sect">Վճարման եղանակ</div>
     ${grp([
       r('banknote', ECO.PAY.cash.label, `<span class="def">${R.i('check')}Հիմնական</span>`, { chev: false, btn: false, cls: 'cash' }),
-      r('building-2', ECO.COMPANY.name, '', { chev: false, btn: false, t2: 'Ընկերության հաշիվ · ընտրվում է պատվիրելիս' }),
+      r('building-2', ECO.COMPANY.name, '', { chev: false, btn: false, t2: 'Ընտրվում է պատվիրելիս' }),
       r('wallet', ECO.PAY.card.label, `<span class="soon">${ECO.PAY.soon}</span>`, { chev: false, btn: false, cls: 'off' }),
     ])}</div>`
 
   /* delete-blocked variants: account.deleteBlocked as the title, the API's reason as the body (account.blocked*). */
   const blocked = (ic, why, cta) => over(`<div class="grabber"></div><div class="badge warn">${R.i('triangle-alert')}</div>
-          <div class="mhead"><span class="h-title">Հաշիվը հնարավոր չէ ջնջել հիմա</span></div>
-          <div class="reason">${R.i(ic)}<span class="txt"><span class="t2 wrap" style="font:var(--t-body);color:var(--ink)">${why}</span></span></div>
+          <div class="mhead"><span class="h-title">Հաշիվը հիմա չի ջնջվի</span></div>
+          <div class="reason">${R.i(ic)}<span class="txt"><span class="t1">${why}</span></span></div>
           <div class="btns"><button class="btn btn-brand">${cta}</button><button class="btn btn-quiet">Փակել</button></div>`)
 
   Rider.page({
     title: 'Rider · Account',
-    sub: 'Profile, saved places, balance with an honest “card payments coming”, language, theme, sign out and deletion — all one tap from the list',
+    sub: 'Profile, saved places, payment (a debt said plainly, card honestly «Շուտով»), language, theme, sign out and deletion — all one tap from the list',
     states: [
       { id: 'main', group: 'Account', label: 'Account', note: 'Delete is a visible row. Debt is a word plus colour, never colour alone. Help (call the office, questions) and Legal (terms, privacy) sit above sign-out, as both stores expect', html: () => main() },
-      { id: 'main-company', group: 'Account', label: 'Company rider', note: 'A rider linked to a company on account: the balance row names the company. The choice itself is made per ride on the order sheet', html: () => main(false) },
+      { id: 'main-company', group: 'Account', label: 'Company rider', note: 'A rider linked to a company on account: the payment row names the company. The choice itself is made per ride on the order sheet', html: () => main(false) },
       { id: 'help', group: 'Account', label: 'Help', note: 'A person first: the office phone is one tap. Questions and legal pages open in the browser',
         html: () => `<div class="page">${back('Օգնություն')}<div class="gap"></div>
           ${grp([r('phone', 'Զանգել գրասենյակ', '<span class="val">010 55-55-55</span>', { chev: false }), r('circle-help', 'Հաճախ տրվող հարցեր')])}
@@ -174,18 +174,17 @@
       { id: 'name', group: 'Account', label: 'Edit name', note: 'One field; the driver greets the rider by it',
         html: () => `<div class="page on-surface">${back('Անուն')}<div class="form">
           <div class="field focus"><span class="num"><span class="lbl">Անուն</span><span class="v">${ECO.CUSTOMER.name}<span class="caret"></span></span></span></div>
-          <button class="btn btn-brand">Պահպանել</button></div>${R.keyboard()}</div>` },
+          <button class="btn btn-brand">Պահել</button></div>${R.keyboard()}</div>` },
       { id: 'places', group: 'Places', label: 'Saved places', note: 'Remove is visible on every row (44pt), not a hidden swipe', html: () => places(true) },
       { id: 'place-removed', group: 'Places', label: 'Removed + undo', note: 'No confirm dialog: the undo is the safety net', html: () => places(false) },
       { id: 'place-add', group: 'Places', label: 'Save a place', note: 'R64, drawn ahead: offered on the done screen and from a search result («Պահպանել հասցեն»). The address is fixed; the rider picks Home, Work or Other and, for Other, types a name. Home and Work replace the old ones (the sheet says so). One primary, keyboard up (new strings)',
         html: () => `<div data-overlay aria-hidden="true" inert style="position:absolute;inset:0">${places(true)}</div><div class="scrim"></div>
           <section class="sheet modal r pa-sheet" role="dialog" aria-modal="true">${mhead('Պահպանել հասցեն')}
             <div class="pa-addr">${R.i('map-pin')}<span class="tx"><span class="t1">${ECO.RIDE.pickup}</span><span class="t2">${ECO.RIDE.pickupNote}</span></span></div>
-            <div class="pa-lbl">Անվանում</div>
-            <div class="pa-chips" role="radiogroup" aria-label="Անվանում">
+                        <div class="pa-chips" role="radiogroup" aria-label="Անվանում">
               <button class="chip tog" role="radio" aria-checked="false">${R.i('house')}Տուն</button><button class="chip tog" role="radio" aria-checked="false">${R.i('briefcase')}Աշխատանք</button><button class="chip tog" role="radio" aria-checked="true" aria-pressed="true">${R.i('heart')}Այլ</button></div>
-            <div class="field focus"><span class="num"><span class="lbl">Անուն</span><span class="v">Մարզասրահ<span class="caret"></span></span></span></div>
-            <div class="btns"><button class="btn btn-brand">Պահպանել</button></div></section>${R.keyboard()}` },
+            <div class="field focus"><span class="num"><span class="lbl">Անվանում</span><span class="v">Մարզասրահ<span class="caret"></span></span></span></div>
+            <div class="btns"><button class="btn btn-brand">Պահել</button></div></section>${R.keyboard()}` },
       { id: 'place-remove-failed', group: 'Places', label: 'Remove failed', note: 'R64, real string (account.placeDeleteFailed): the row comes back and the toast offers a retry. Neutral, not red: nothing was lost', html: () => places('failed') },
       { id: 'wallet', group: 'Balance', label: 'Debt', note: 'account.debtNote said plainly; the linked company is listed (AccountSheets.tsx WalletSheet), card is shown as «Շուտով», not hidden', html: () => wallet(true) },
       { id: 'wallet-clear', group: 'Balance', label: 'Clear', html: () => wallet(false) },
@@ -197,18 +196,18 @@
         html: () => over(`${mhead('Դուրս գա՞լ')}<p class="lede">Հաջորդ անգամ մուտք կգործեք կոդով</p>
           <div class="btns"><button class="btn btn-danger">Դուրս գալ</button><button class="btn btn-quiet">Չեղարկել</button></div>`) },
       { id: 'delete', group: 'Leave', label: 'Delete account', note: 'account.deleteConfirm, and what goes with it',
-        html: () => over(`${mhead('Ջնջե՞լ հաշիվը')}<p class="lede">Այս գործողությունը անշրջելի է</p>
+        html: () => over(`${mhead('Ջնջե՞լ հաշիվը')}<p class="lede">Սա հնարավոր չէ հետարկել</p>
           <div class="loss"><div>${R.i('user-round')}Անունը և հեռախոսահամարը</div><div>${R.i('map-pin')}Պահպանված հասցեները</div><div>${R.i('history')}Ուղևորությունների պատմությունը</div></div>
           <div class="btns"><button class="btn btn-danger">${R.i('trash-2')}Ջնջել հաշիվը</button><button class="btn btn-quiet">Չեղարկել</button></div>`) },
       { id: 'delete-blocked', group: 'Leave', label: 'Delete blocked', note: 'account.deleteBlocked, with the reason and the way to clear it',
         html: () => over(`<div class="grabber"></div><div class="badge warn">${R.i('triangle-alert')}</div>
-          <div class="mhead"><span class="h-title">Հաշիվը հնարավոր չէ ջնջել հիմա</span></div>
-          <div class="reason">${R.i('wallet')}<span class="txt"><span class="t1">Չմարված պարտք</span><span class="t2">${A(DEBT)} · 7 հոկտեմբերի</span></span></div>
-          <div class="btns"><button class="btn btn-brand">Դիտել հաշվեկշիռը</button><button class="btn btn-quiet">Փակել</button></div>`) },
+          <div class="mhead"><span class="h-title">Հաշիվը հիմա չի ջնջվի</span></div>
+          <div class="reason">${R.i('wallet')}<span class="txt"><span class="t1">Պարտք՝ ${A(DEBT)}</span><span class="t2">7 հոկտ. ուղևորությունից</span></span></div>
+          <div class="btns"><button class="btn btn-brand">Դիտել պարտքը</button><button class="btn btn-quiet">Փակել</button></div>`) },
       { id: 'delete-blocked-ride', group: 'Leave', label: 'Delete blocked · ride', note: 'R63, real (account.blockedRide): a ride is still running. The way out is the ride itself',
-        html: () => blocked('car-front', 'Ընթացիկ ուղևորությունը նախ պետք է ավարտվի կամ չեղարկվի', 'Բացել ուղևորությունը') },
+        html: () => blocked('car-front', 'Նախ ավարտեք ընթացիկ ուղևորությունը', 'Բացել ուղևորությունը') },
       { id: 'delete-blocked-other', group: 'Leave', label: 'Delete blocked · other', note: 'R63, real (account.blockedOther): any other refusal. The office decides, so the action is the office phone',
-        html: () => blocked('headset', 'Հիմա հնարավոր չէ։ Կապվեք գրասենյակի հետ', 'Զանգել գրասենյակ') },
+        html: () => blocked('headset', 'Կապվեք գրասենյակի հետ', 'Զանգել գրասենյակ') },
     ],
   })
 </script>

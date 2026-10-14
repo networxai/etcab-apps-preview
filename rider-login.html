@@ -82,7 +82,7 @@
       ${clear ? `<button class="clear" aria-label="Մաքրել">${R.i('circle-x')}</button>` : ''}</div>`
   const phonePage = ({ v = PH, ph, fcls = 'focus', clear = true, btn = '<button class="btn btn-brand">Ուղարկել կոդը</button>', note = '', extra = '' }) =>
     `<div class="page on-surface">${hero()}<div class="form">
-      <h1 class="large">Մուտք</h1><p class="lead">Մուտքագրեք համարը, կուղարկենք վեցանիշ կոդ</p>
+      <h1 class="large">Մուտք</h1><p class="lead">Կոդը կուղարկենք SMS-ով</p>
       ${field({ v, ph, cls: fcls, clear })}${note}${btn}</div>${R.keypad()}</div>${extra}`
 
   const boxes = (ds, cls = '', focusAt = -1) => `<div class="otp ${cls}" role="group" aria-label="Վեցանիշ կոդ">${[0, 1, 2, 3, 4, 5].map((i) =>
@@ -121,10 +121,10 @@
           '<div class="toast" role="status" style="top:62px">' + R.i('check') + 'Կոդն ուղարկվեց</div>') },
 
       { id: 'locked', group: 'Code', label: 'Locked out', note: 'R08 (drawn ahead: the API answers 429 and the app shows only «Կոդը սխալ է»). After the last wrong attempt the boxes go quiet, the wait is a number, and the ways out are a new number or a person. Amber icon: a rule, not a failure',
-        html: () => codePage(`${boxes('482971', 'off')}<div class="notice amber" role="status">${R.i('lock')}<div><b>Փորձերը սպառվեցին</b><span>Նոր կոդ կարող եք խնդրել <span class="mono">4:59</span> հետո</span></div></div>
+        html: () => codePage(`${boxes('482971', 'off')}<div class="notice amber" role="status">${R.i('lock')}<div><b>Փորձերը սպառվեցին</b><span>Նոր կոդ՝ <span class="mono">4:59</span> հետո</span></div></div>
           <div class="resend"><button class="link">Փոխել համարը</button><button class="link" style="color:var(--ink)">${R.i('phone', 'style="width:18px;height:18px;margin-right:6px"')}Զանգել դիսպետչերին</button></div>`) },
       { id: 'expired', group: 'Phone', label: 'Session ended', note: 'R07 (drawn ahead: _layout.tsx replaces to /login silently). Said once, in place, with the number kept: nothing the rider saved is lost, so the line says so',
-        html: () => phonePage({ fcls: '', clear: false, note: `<div class="notice" role="status">${R.i('log-out')}<div><b>Մուտքի ժամկետն ավարտվել է</b><span>Մուտք գործեք նույն համարով․ ուղևորություններն ու հասցեները պահված են</span></div></div>` }) },
+        html: () => phonePage({ fcls: '', clear: false, note: `<div class="notice" role="status">${R.i('log-out')}<div><b>Մուտք գործեք կրկին</b><span>Ուղևորություններն ու հասցեները պահված են</span></div></div>` }) },
       { id: 'name', group: 'First sign-in', label: 'Name', note: 'Only on the first sign-in; the driver greets the rider by it',
         html: () => `<div class="page on-surface">
           <nav class="nav"><span class="navend"></span><span class="navttl"></span><button class="navbtn" aria-label="Բաց թողնել" style="width:auto;padding:0 8px;font:var(--t-body-strong);color:var(--ink-2)">Հետո</button></nav>
@@ -137,7 +137,7 @@
           <div class="form" style="margin-top:var(--s2);margin-bottom:0"><h1 class="large">Ինչպե՞ս դիմենք ձեզ</h1>
           <div class="field focus" style="padding-left:var(--s4)"><span class="num"><span class="lbl">Անուն</span><span class="v">Աննա<span class="caret"></span></span></span></div>
           <button class="btn btn-brand">Շարունակել</button>
-          <div class="consent">Շարունակելով՝ ընդունում եք Eco Taxi-ի պայմաններն ու գաղտնիության քաղաքականությունը
+          <div class="consent">Շարունակելով՝ ընդունում եք պայմաններն ու գաղտնիության քաղաքականությունը
             <div class="lk"><button>${R.i('file-text')}Պայմաններ</button><button>${R.i('shield')}Գաղտնիություն</button></div></div></div>${R.keyboard()}</div>` },
     ],
   })

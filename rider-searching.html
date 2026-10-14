@@ -81,13 +81,13 @@
   const noCars = (o, ctx) => `<div class="map" id="map" aria-label="Քարտեզ"></div>
           <section class="sheet r nocar" id="sheet"><div class="grabber"></div>
             ${ctx ? `<div class="ctx">${R.i('calendar-clock')}${ctx}</div>` : ''}
-            <h2 class="h-title">Ազատ մեքենա դեռ չկա</h2><div class="h-sub">Դիսպետչերը շարունակում է որոնել</div>
+            <h2 class="h-title">Ազատ մեքենա դեռ չկա</h2><div class="h-sub">Որոնումը շարունակվում է</div>
             <div class="bar" role="progressbar" aria-label="Որոնում"></div>${order(o)}
             <div class="btns"><button class="btn btn-brand">${R.i('phone')}Զանգել դիսպետչերին</button><button class="btn btn-quiet">Չեղարկել</button></div></section>`
 
   const sheet = (title, sub, extra = '') => `<div class="map" id="map" aria-label="Քարտեզ"></div>
     <section class="sheet r" id="sheet"><div class="grabber"></div>
-      <h2 class="h-title">${title}</h2><div class="h-sub">${sub}</div>${extra}
+      <h2 class="h-title">${title}</h2>${sub ? `<div class="h-sub">${sub}</div>` : ''}${extra}
       <div class="bar" role="progressbar" aria-label="${title}"></div>${order()}
       <button class="btn btn-quiet">Չեղարկել</button></section>`
 
@@ -108,10 +108,10 @@
     sub: 'A calm pulse from the pickup over our real nearby cars; the order summary stays visible; cancel is always one tap',
     states: [
       { id: 'searching', label: 'Searching', note: 'Real cars on the map, not a decorative spinner. Reduce Motion: a still ring',
-        html: () => sheet('Որոնում ենք մեքենա', 'Ընտրում ենք մեքենա ձեզ համար', `<div class="nearby">${R.i('car-front')}4 մեքենա մոտակայքում</div>`),
+        html: () => sheet('Որոնում ենք մեքենա', '', `<div class="nearby">${R.i('car-front')}4 մեքենա մոտակայքում</div>`),
         map: searchMap() },
       { id: 'answering', label: 'Driver answering', note: 'An offer is out: that one car shows its line to the pickup',
-        html: () => sheet('Վարորդը պատասխանում է…', 'Սովորաբար տևում է մի քանի վայրկյան'),
+        html: () => sheet('Վարորդը պատասխանում է…', 'Մի քանի վայրկյան'),
         map: searchMap({ cars: CARS.slice(1), pulse: false, offer: true }) },
       { id: 'no-cars', label: 'No free car yet', note: 'Real Searching.tsx (exhausted): said plainly, the dispatcher keeps searching, so the one primary is a call to a person and cancel stays. No "book for later" and no retry: neither exists in the app',
         html: () => noCars(RD), map: searchMap({ cars: [], pulse: false }) },
@@ -124,10 +124,10 @@
         } },
       { id: 'cancel-confirm', label: 'Cancel?', note: 'Keeping the search is the easy target; cancel is red, not hidden',
         html: () => `<div class="map" id="map" aria-label="Քարտեզ"></div><div class="scrim"></div>
-          <section class="sheet r modal" id="sheet" role="dialog" aria-label="Չեղարկե՞լ որոնումը"><div class="grabber"></div>
-            <div class="mhead"><h2 class="h-title">Չեղարկե՞լ որոնումը</h2></div>
+          <section class="sheet r modal" id="sheet" role="dialog" aria-label="Չեղարկե՞լ պատվերը"><div class="grabber"></div>
+            <div class="mhead"><h2 class="h-title">Չեղարկե՞լ պատվերը</h2></div>
             <div class="h-sub">Մեքենան դեռ չի նշանակվել</div>
-            <div class="btns"><button class="btn btn-quiet">Շարունակել որոնումը</button><button class="btn btn-danger">Չեղարկել</button></div></section>`,
+            <div class="btns"><button class="btn btn-quiet">Շարունակել որոնումը</button><button class="btn btn-danger">Չեղարկել պատվերը</button></div></section>`,
         map: searchMap() },
     ],
   })

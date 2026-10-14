@@ -14,15 +14,17 @@
   /* Mirrors apps/operator components/admin/operators.tsx + operator-row.tsx + operator-panels.tsx + operator-create.tsx (§11).
      An operator is an email, a role and a state. Row actions, in fixed slots so rows line up: Disable/Enable (visible —
      reversible, ends their console at the next request), then the reveal actions (opacity on :hover/:focus-within, so the
-     keyboard reaches them): reset password (an inline panel: it ends every open session), reset authenticator (two-press
-     ArmButton; they enrol again at next login), delete (an inline confirm; final, the email stays taken). Your own row cannot
-     be disabled or deleted. No modals. Admin only; a dispatcher is redirected (?as=dispatcher draws the alternative). */
+     keyboard reaches them): reset password (an inline panel: it ends every open session), «Վերակայել երկքայլ մուտքը»
+     (owner decision 8, 2026-10-14: no backup codes exist, so this is how a lost phone is handled — a two-press ArmButton,
+     confirmed in place, never a modal; they enrol again at next sign-in), delete (an inline confirm; final, the email stays taken). Your own row cannot
+     be disabled or deleted. No modals. Admin only; a dispatcher is redirected (?as=dispatcher draws the alternative;
+     decision 10: a dispatcher's rail keeps Rides and Requests). */
   .ops td { height: 44px; }
   .ops .em { display: flex; align-items: center; gap: 10px; min-width: 0; }
   .ops .em .mono { font-size: 13px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; }
   .ops .em .self { font: var(--c-small); color: var(--ink-faint); }
   .ops .nm { font: var(--c-small); color: var(--ink-faint); display: block; }
-  .ops .acts { display: grid; grid-template-columns: 96px 172px 236px 96px; gap: 6px; justify-content: end; align-items: center; }
+  .ops .acts { display: grid; grid-template-columns: 96px 172px 240px 96px; gap: 6px; justify-content: end; align-items: center; }
   .ops .acts > span { display: flex; justify-content: flex-start; }
   .ops tr.panel td { background: var(--surface-alt); height: auto; padding-top: 10px; padding-bottom: 12px; white-space: normal; }
   .pnl { display: flex; flex-direction: column; gap: 10px; max-width: 900px; }
@@ -37,7 +39,7 @@
   .denied h2 { font: var(--c-title); }
   .denied p { font: var(--c-body); color: var(--ink-muted); }
   .ahead { display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border-radius: var(--r-tag); background: var(--info-soft); color: var(--ink); box-shadow: inset 0 0 0 1px var(--info); font: 500 12px/16px var(--font); }
-  @media (max-width: 1400px) { .ops .acts { grid-template-columns: 96px 40px 236px 40px; } .ops .lbl-s { display: none; } .ops col.c-acts { width: 460px !important; } .hide-s { display: none; } }
+  @media (max-width: 1400px) { .ops .acts { grid-template-columns: 96px 40px 240px 40px; } .ops .lbl-s { display: none; } .ops col.c-acts { width: 460px !important; } .hide-s { display: none; } }
 </style>
 </head>
 <body>
@@ -54,7 +56,7 @@
 </div>
 <script>
   /* ?state= (none) the list, you are Գոհար Մ. (admin) · add (the create row: email, role, password ≥ 12) · reset (the
-     password panel under Մարիամ Հ.'s row) · totp (Սոնա Ա.'s «Վերակայել նույնականացումը» armed) · totp-done (the neutral
+     password panel under Մարիամ Հ.'s row) · totp (Սոնա Ա.'s «Վերակայել երկքայլ մուտքը» armed) · totp-done (the neutral
      row message after) · delete (the confirm panel under a disabled account) ; ?as=dispatcher (C51: a dispatcher who
      follows a link to an admin-only page). */
   const q = new URLSearchParams(location.search)
@@ -66,15 +68,14 @@
 
   if (disp) {
     /* What a dispatcher's rail shows (console-sidebar.tsx DISPATCHER_SECTIONS): the admin-only entries are not offered. */
-    const allow = ['dispatch', 'rides', 'drivers', 'vehicles', 'partners', 'topups', 'customer', 'companies']
+    const allow = ['overview', 'dispatch', 'rides', 'requests', 'drivers', 'vehicles', 'partners', 'topups', 'customer', 'companies']
     document.querySelectorAll('.nav .scroll a').forEach((a) => { const id = (a.getAttribute('href') || '').split('.html')[0]; if (!allow.includes(id)) a.remove() })
     document.querySelectorAll('.nav .scroll .group').forEach((g) => { let n = g.nextElementSibling; if (!n || !n.matches('a')) g.remove() })
     document.querySelector('.bar h1').textContent = 'Օպերատորներ'
     document.getElementById('list').innerHTML = `<div class="denied"><div class="box">
-      <span class="ahead">նախագիծ · այսօր՝ անձայն վերահղում դեպի Դիսպետչեր</span>
-      <div class="notice neutral"><i data-lucide="lock"></i><span>Այս էջը ադմինի համար է։ Դուք մուտք եք գործել որպես դիսպետչեր (${ECO.OPERATORS[0].email})։</span></div>
-      <p>Օպերատորներին ավելացնում, անջատում և վերակայում է ադմինը։ Եթե ձեզ մուտք է պետք, դիմեք ադմինին։</p>
-      <div style="display:flex;gap:8px"><a class="btn primary" href="dispatch.html?theme=${THEME}" style="text-decoration:none"><i data-lucide="arrow-left"></i>Վերադառնալ հերթ</a></div></div></div>`
+      <span class="ahead">նախագիծ · այսօր՝ վերահղում Դիսպետչեր</span>
+      <div class="notice neutral"><i data-lucide="lock"></i><span>Միայն ադմինի համար · դուք դիսպետչեր եք (<span class="mono">${ECO.OPERATORS[0].email}</span>)</span></div>
+      <div style="display:flex;gap:8px"><a class="btn primary" href="dispatch.html?theme=${THEME}" style="text-decoration:none"><i data-lucide="arrow-left"></i>Դեպի հերթ</a><a class="btn secondary" href="rides.html?theme=${THEME}" style="text-decoration:none">Պատվերներ</a><a class="btn secondary" href="requests.html?theme=${THEME}" style="text-decoration:none">Հարցումներ</a></div></div></div>`
     icons(); document.documentElement.dataset.mapReady = 'none'
   } else {
     document.getElementById('count').textContent = OPS.length
@@ -89,23 +90,23 @@
         <td><span class="acts">
           <span>${self ? '' : `<button class="btn secondary s" aria-label="${o.disabled ? 'Միացնել' : 'Անջատել'} — ${o.email}">${o.disabled ? 'Միացնել' : 'Անջատել'}</button>`}</span>
           <span><button class="btn ghost s${self || on ? '' : ' rev-act'}" aria-expanded="${st === 'reset' && on}" aria-label="Փոխել գաղտնաբառը — ${o.email}" title="Փոխել գաղտնաբառը — ${o.email}"><i data-lucide="key-round"></i><span class="lbl-s">Փոխել գաղտնաբառը</span></button></span>
-          <span>${self ? '' : `<button class="btn s ${totpArmed ? 'armed' : 'ghost' + (on ? '' : ' rev-act')}" aria-label="${totpArmed ? 'Հաստատե՞լ ' : ''}Վերակայել նույնականացումը — ${o.email}"><i data-lucide="shield-off"></i>${totpArmed ? 'Հաստատե՞լ' : 'Վերակայել նույնականացումը'}</button>`}</span>
+          <span>${self ? '' : `<button class="btn s ${totpArmed ? 'armed' : 'ghost' + (on ? '' : ' rev-act')}" aria-label="${totpArmed ? 'Վերակայե՞լ' : 'Վերակայել երկքայլ մուտքը'} — ${o.email}"><i data-lucide="shield-off"></i>${totpArmed ? 'Վերակայե՞լ երկքայլ մուտքը' : 'Վերակայել երկքայլ մուտքը'}</button>`}</span>
           <span>${self ? '' : `<button class="btn danger s${on && st === 'delete' ? '' : ' rev-act'}" aria-expanded="${st === 'delete' && on}" aria-label="Ջնջել — ${o.email}" title="Ջնջել — ${o.email}"><i data-lucide="trash-2"></i><span class="lbl-s">Ջնջել</span></button>`}</span>
         </span></td></tr>`
-      if (on && st === 'reset') h += `<tr class="panel"><td colspan="4"><div class="pnl"><div class="notice amber"><i data-lucide="triangle-alert"></i><span><b>${o.email}</b> — Փոփոխությունը փակում է այդ հաշվի բոլոր բաց նստաշրջանները, ներառյալ հենց հիմա օգտագործվողը: Նա նորից մուտք է գործում նոր գաղտնաբառով:</span></div>
+      if (on && st === 'reset') h += `<tr class="panel"><td colspan="4"><div class="pnl"><div class="notice amber"><i data-lucide="triangle-alert"></i><span><b class="mono">${o.email}</b> · բոլոր բաց մուտքերը կփակվեն, նաև հիմա աշխատողը</span></div>
           <div class="r"><div><span class="label">Նոր գաղտնաբառ</span><div class="input focus" style="width:300px"><span class="val">••••••••••</span></div><p class="hint">Առնվազն 12 նիշ · 10 / 12</p></div>
-            <div style="padding-top:20px;display:flex;gap:6px"><button class="btn primary s" disabled style="opacity:.5">Պահպանել գաղտնաբառը</button><button class="btn ghost s">Չեղարկել</button></div></div></div></td></tr>`
-      if (on && st === 'delete') h += `<tr class="panel"><td colspan="4"><div class="pnl"><div class="notice red"><i data-lucide="triangle-alert"></i><span><b>${o.email}</b> — Ջնջումը վերջնական է — հաշիվը հետ չի վերականգնվում, իսկ նրա էլ. հասցեն մնում է զբաղված, այնպես որ նույն մարդուն նույն հասցեով նորից ավելացնել չի լինի:</span></div>
-          <div style="display:flex;gap:6px"><button class="btn danger-fill s"><i data-lucide="trash-2"></i>Հաստատել ջնջումը</button><button class="btn ghost s">Չեղարկել</button></div></div></td></tr>`
-      if (on && st === 'totp-done') h += `<tr class="rowmsg"><td colspan="4"><div class="notice neutral" role="status"><i data-lucide="check"></i><span>Նույնականացումը վերակայվեց, նստաշրջանները փակվեցին։ Հաջորդ մուտքին այն նորից կկարգավորի։</span></div></td></tr>`
+            <div style="padding-top:20px;display:flex;gap:6px"><button class="btn primary s" disabled style="opacity:.5">Պահել գաղտնաբառը</button><button class="btn ghost s">Չեղարկել</button></div></div></div></td></tr>`
+      if (on && st === 'delete') h += `<tr class="panel"><td colspan="4"><div class="pnl"><div class="notice red"><i data-lucide="triangle-alert"></i><span><b class="mono">${o.email}</b> · ջնջումը վերջնական է․ այս հասցեով նորից ավելացնել չի լինի</span></div>
+          <div style="display:flex;gap:6px"><button class="btn danger-fill s"><i data-lucide="trash-2"></i>Ջնջել վերջնականապես</button><button class="btn ghost s">Չեղարկել</button></div></div></td></tr>`
+      if (on && st === 'totp-done') h += `<tr class="rowmsg"><td colspan="4"><div class="notice neutral" role="status"><i data-lucide="check"></i><span>Երկքայլ մուտքը վերակայվեց, բաց մուտքերը փակվեցին · հաջորդ մուտքին կմիացնի նորից</span></div></td></tr>`
       return h
     }
     const add = st === 'add' ? `<tr class="addrow"><td colspan="4"><div class="inl" style="flex-wrap:wrap">
         <div class="input focus" style="width:280px" role="textbox" aria-label="Էլ. փոստ"><span class="val mono">nare@ecotaxi.am</span></div>
         <div class="input" style="width:172px" role="combobox" aria-label="Դեր"><span class="val">Դիսպետչեր</span><i data-lucide="chevrons-up-down"></i></div>
         <div style="position:relative"><div class="input" style="width:220px" role="textbox" aria-label="Գաղտնաբառ"><span class="val">••••••••••••••</span></div></div>
-        <button class="btn primary s"><i data-lucide="check"></i>Ավելացնել օպերատոր <span class="kbd">↵</span></button><button class="btn ghost s">Չեղարկել</button>
-        <span class="faint" style="font:var(--c-small);flex-basis:100%">Առաջին մուտքին կկարգավորի նույնականացումը</span></div></td></tr>` : ''
+        <button class="btn primary s"><i data-lucide="check"></i>Ավելացնել <span class="kbd">↵</span></button><button class="btn ghost s">Չեղարկել</button>
+        <span class="faint" style="font:var(--c-small);flex-basis:100%">Գաղտնաբառ՝ առնվազն 12 նիշ · առաջին մուտքին կմիացնի երկքայլ մուտքը</span></div></td></tr>` : ''
     document.getElementById('list').innerHTML = `
       <div class="toolrow">
         <div class="input" style="width:260px"><i data-lucide="search"></i><span class="val ph">օր. anna@eco.am</span><span class="kbd">/</span></div>
@@ -116,11 +117,10 @@
         <span class="sp"></span>
         <button class="btn secondary" aria-expanded="${st === 'add'}" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր օպերատոր <span class="kbd">N</span></button>
       </div>
-      <div class="warns"><div class="notice neutral"><i data-lucide="info"></i><span>Անջատումը միանգամից դուրս է բերում օպերատորին — նրա կոնսոլը դադարում է աշխատել հենց հաջորդ հարցումին, նույնիսկ զանգի ընթացքում: Սա հետ շրջելի է:</span></div></div>
+      <div class="warns"><div class="notice neutral"><i data-lucide="info"></i><span>Անջատելը դուրս է բերում անմիջապես, նույնիսկ զանգի ընթացքում · հետ շրջելի է</span></div></div>
       <div class="scroll-y grow" data-truncate>
         <table class="tbl ops" aria-label="Օպերատորներ"><colgroup><col><col style="width:140px"><col style="width:132px"><col style="width:640px" class="c-acts"></colgroup>
-          <thead><tr><th>Էլ. փոստ</th><th>Դեր</th><th>Կարգավիճակ</th><th></th></tr></thead><tbody>${add}${OPS.map(row).join('')}</tbody></table>
-        <p class="explain" style="padding-bottom:12px">Չեք կարող անջատել կամ ջնջել ձեր սեփական հաշիվը: Այդպես վարվող ադմինը ֆլոտին կթողնի առանց իր իսկ կոնսոլ մտնելու ճանապարհի:</p></div>`
+          <thead><tr><th>Էլ. փոստ</th><th>Դեր</th><th>Վիճակ</th><th></th></tr></thead><tbody>${add}${OPS.map(row).join('')}</tbody></table></div>`
     /* The signed-in operator on this page is the admin. */
     const me = document.querySelector('.nav .me .who')
     if (me) me.innerHTML = '<b>Գոհար Մինասյան</b><span>Ադմին</span>'

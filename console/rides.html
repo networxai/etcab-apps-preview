@@ -76,9 +76,9 @@
           <div class="seg"><button class="on">Այսօր</button><button>Երեկ</button><button>7 օր</button><button>30 օր</button></div>
           <div class="input" style="width:220px"><i data-lucide="search"></i><span class="val ph">Հեռախոս, հասցե կամ #</span><span class="kbd">/</span></div>
           <span style="flex:1"></span>
-          <span class="chip">Փաթեթ <i data-lucide="chevron-down"></i></span>
+          <span class="chip">Սակագին <i data-lucide="chevron-down"></i></span>
           <span class="chip">Վճարում <i data-lucide="chevron-down"></i></span>
-          <button class="btn secondary s icon" aria-label="Արտահանել CSV"><i data-lucide="download"></i></button>
+          <button class="btn secondary s icon" aria-label="Ներբեռնել CSV"><i data-lucide="download"></i></button>
         </div>
         <div class="filters" style="padding-top:6px;padding-bottom:6px">
           <span class="chip on" id="chip-all">Բոլորը <span class="c num">126</span></span>
@@ -86,12 +86,12 @@
           <span class="chip">Ավարտված <span class="c num">104</span></span>
           <span class="chip">Չեղարկված <span class="c num">9</span></span>
           <span class="chip">Վարորդ չկա <span class="c num">4</span></span>
-          <span class="chip" id="chip-sched"><i data-lucide="calendar-clock"></i>Պլանավորված <span class="c num">6</span></span>
+          <span class="chip" id="chip-sched"><i data-lucide="calendar-clock"></i>Նախնական <span class="c num">6</span></span>
         </div>
         <div class="scroll-y grow">
           <table class="tbl rt">
             <colgroup><col style="width:68px"><col><col style="width:118px"><col style="width:150px"><col style="width:140px"><col style="width:92px"></colgroup>
-            <thead><tr><th>Ժամը</th><th>Երթուղի</th><th>Փաթեթ</th><th>Վարորդ</th><th>Վիճակ</th><th class="r">Գին</th></tr></thead>
+            <thead><tr><th>Ժամը</th><th>Երթուղի</th><th>Սակագին</th><th>Վարորդ</th><th>Վիճակ</th><th class="r">Գին</th></tr></thead>
             <tbody id="rows"></tbody>
           </table>
         </div>
@@ -104,7 +104,7 @@
               <a class="btn ghost icon s" href="#" aria-label="Բացել ամբողջ էջով"><i data-lucide="maximize-2"></i></a><button class="btn ghost icon s" aria-label="Փակել (Esc)"><i data-lucide="x"></i></button></div>
             <h2>Հանրապետության հրապարակ</h2>
             <div class="dest"><i data-lucide="arrow-right"></i><span>Կասկադ, Թամանյան փ.</span></div>
-            <div class="dest num" style="font-size:12px"><span class="mono">14:07</span>·<span class="mono">077 41-22-08</span>·<span>Զանգ</span>·<span>Անի Դ.</span></div>
+            <div class="dest num" style="font-size:12px"><span class="mono">14:07</span>·<span class="mono">077 41-22-08</span>·<span>Հեռախոսով</span>·<span>Անի Դ.</span></div>
             <div class="acts">
               <button class="btn secondary s">Վերանշանակել <span class="kbd">A</span></button>
               <button class="btn secondary s">Փոխել վիճակը…</button>
@@ -116,14 +116,14 @@
             <h3>Վարորդ</h3>
             <div class="drv"><span class="car m" id="drvcar"></span>
               <div style="min-width:0"><div class="nm">Արամ Պետրոսյան</div>
-                <div class="meta"><span class="plate">01 ET 001</span><span class="pill"><i data-lucide="car"></i>Պարկի</span></div>
+                <div class="meta"><span class="plate">01 ET 001</span><span class="pill"><i data-lucide="car"></i>Ավտոպարկի</span></div>
                 <div class="meta mono faint" style="font-size:12px">093 44-55-66</div></div>
               <button class="btn secondary icon" aria-label="Զանգել վարորդին"><i data-lucide="phone"></i></button></div>
           </div>
           <div class="sec">
-            <h3>Գին · Նախապես հայտարարված</h3>
+            <h3>Գին · նախապես հաշվարկված</h3>
             <dl class="kv">
-              <dt>Eco City · բազային</dt><dd>600 ֏</dd>
+              <dt>Eco City · նստեցում</dt><dd>600 ֏</dd>
               <dt>2,1 կմ × 90 ֏</dt><dd>189 ֏</dd>
               <dt>4 ր × 12 ֏</dt><dd>48 ֏</dd>
               <dt>Կլորացում (100 ֏)</dt><dd>−37 ֏</dd>
@@ -187,44 +187,44 @@
     const BR = [
       ['', '10:00', 'Հալաբյան 41', 'Զվարթնոց օդանավակայան', '041 33-21-90', 'B-0889', 'vip', 'Դավիթ Կարապետյան', '09 DK 118', ['ok', 'Վարորդը մեկնեց'], 5200],
       ['', B.kom.time, B.kom.pickup, B.kom.drop, B.kom.phone, B.kom.id, 'city', B.kom.driver.name, B.kom.driver.plate, null, B.kom.fare],
-      ['Շբթ', B.bag.time, B.bag.pickup, B.bag.drop, B.bag.phone, B.bag.id, 'city', B.bag.driver.name, B.bag.driver.plate, ['bad', 'Չեմ հասցնի'], B.bag.fare],
+      ['Շբթ', B.bag.time, B.bag.pickup, B.bag.drop, B.bag.phone, B.bag.id, 'city', B.bag.driver.name, B.bag.driver.plate, ['bad', 'Չի հասցնի'], B.bag.fare],
       ['Շբթ', A.time, A.pickup, A.drop, A.phone, A.id, 'city', A.driver.name, A.driver.plate, null, A.fare, 1],
-      ['Կիր', B.sun.time, B.sun.pickup, B.sun.drop, B.sun.phone, B.sun.id, 'partner', null, null, ['bad', 'Վարորդ չկա'], B.sun.fare],
-      ['Երկ', B.co.time, B.co.pickup, B.co.drop, B.co.phone, B.co.id, 'city', null, null, null, B.co.fare],
+      ['Կիր', B.sun.time, B.sun.pickup, B.sun.drop, B.sun.phone, B.sun.id, 'partner', null, null, ['', 'Ավտոմատ · ' + B.sun.activates], B.sun.fare],
+      ['Երկ', B.co.time, B.co.pickup, B.co.drop, B.co.phone, B.co.id, 'city', null, null, ['', 'Ավտոմատ · ' + B.co.activates], B.co.fare],
     ]
     document.getElementById('rows').innerHTML = BR.map(([day, t, a, b, ph, id, tier, drv, pl, st, f, on]) => `<tr class="${on ? 'on' : ''}">
       <td><span class="when2">${day ? `<span class="dd">${day}</span>` : ''}<span class="mono">${t}</span></span></td>
       <td><div class="route"><span class="l1">${a}<span class="arr">→</span>${b}</span><span class="l2"><span class="mono">${ph}</span> · <span class="mono">#${id}</span></span></div></td>
       <td><span class="tiercell"><span class="car xs">${carImg(tier)}</span><span class="trunc">${tierById(tier).name.replace('Eco ', '')}</span></span></td>
-      <td>${drv ? `<span class="drvcell"><span class="nm"><span>${drv.split(' ')[0]} ${drv.split(' ')[1][0]}.</span><span>${pl}</span></span></span>` : '<span class="faint">Չնշանակված</span>'}</td>
-      <td>${st ? `<span class="pill ${st[0]}">${st[0] === 'bad' ? '<i data-lucide="circle-alert"></i>' : '<i class="d"></i>'}${st[1]}</span>` : '<span class="pill l-scheduled" style="color:var(--lane)"><i data-lucide="calendar-clock"></i>Պլան.</span>'}</td>
+      <td>${drv ? `<span class="drvcell"><span class="nm"><span>${drv.split(' ')[0]} ${drv.split(' ')[1][0]}.</span><span>${pl}</span></span></span>` : '<span class="faint">—</span>'}</td>
+      <td>${st ? `<span class="pill ${st[0]}">${st[0] === 'bad' ? '<i data-lucide="circle-alert"></i>' : '<i class="d"></i>'}${st[1]}</span>` : '<span class="pill l-scheduled" style="color:var(--lane)"><i data-lucide="calendar-clock"></i>Նախնական</span>'}</td>
       <td class="r mono">${amd(f)}</td></tr>`).join('')
     document.querySelector('.rt thead th').textContent = 'Երբ'
     const dp = document.getElementById('dp')
-    dp.setAttribute('aria-label', 'Ամրագրում #' + A.id)
+    dp.setAttribute('aria-label', 'Նախնական պատվեր #' + A.id)
     dp.innerHTML = `<div class="scroll-y grow">
       <div class="top">
-        <div class="id"><span class="mono faint">#${A.id}</span><span class="pill l-scheduled" style="color:var(--lane)"><i data-lucide="calendar-clock"></i>Պլանավորված · <span class="mono">Շբթ ${A.time}</span></span><span style="flex:1"></span>
+        <div class="id"><span class="mono faint">#${A.id}</span><span class="pill l-scheduled" style="color:var(--lane)"><i data-lucide="calendar-clock"></i>Նախնական · <span class="mono">Շբթ ${A.time}</span></span><span style="flex:1"></span>
           <button class="btn ghost icon s" aria-label="Փակել (Esc)"><i data-lucide="x"></i></button></div>
         <h2>${A.pickup}</h2>
         <div class="dest"><i data-lucide="arrow-right"></i><span>${A.drop}</span></div>
-        <div class="dest num" style="font-size:12px"><span class="mono">${A.phone}</span>·<span>${A.rider}</span>·<span>Հավելված</span>·<span>ամրագրվեց <span class="mono">${A.booked.replace('Այսօր, ', '')}</span></span></div>
+        <div class="dest num" style="font-size:12px"><span class="mono">${A.phone}</span>·<span>${A.rider}</span>·<span>Հավելվածից</span>·<span>ստեղծվեց <span class="mono">${A.booked.replace('Այսօր, ', '')}</span></span></div>
         <div class="acts">
           <button class="btn secondary s">Վերանշանակել <span class="kbd">A</span></button>
           <button class="btn secondary s">Ազատել վարորդին</button>
-          <button class="btn danger s" aria-label="Չեղարկել ամրագրումը՝ ${A.pickup}, Շբթ ${A.time}">Չեղարկել ամրագրումը</button>
+          <button class="btn danger s" aria-label="Չեղարկել նախնական պատվերը՝ ${A.pickup}, Շբթ ${A.time}">Չեղարկել պատվերը</button>
         </div>
       </div>
       <div class="sec">
         <h3>Մանրամասներ</h3>
         <div class="bform">
           <div class="full"><label class="label">Ե՞րբ</label><div class="input focus"><i data-lucide="calendar"></i><span class="val mono">10.10 08:30</span><button class="btn ghost icon s" aria-label="Օրացույց"><i data-lucide="calendar-days"></i></button></div>
-            <p class="reads">Ամրագրվում է <span class="mono">Շբթ, 10 հոկտեմբերի, 08:30</span></p></div>
+            <p class="reads">Նստեցում՝ <span class="mono">Շբթ, 10 հոկտ., 08:30</span></p></div>
           <div class="full"><label class="label">Որտեղից</label><div class="input"><span class="val">${A.pickup}, Արաբկիր</span></div></div>
           <div class="full"><label class="label">Ուր</label><div class="input"><span class="val">${A.drop}</span></div></div>
           <div><label class="label">Համաձայնեցված գին</label><div class="input"><span class="val ph mono">օր. 2400</span><span class="faint">֏</span></div></div>
           <div><label class="label">Սակագնով</label><div class="input" style="box-shadow:none;background:var(--surface-alt)"><span class="val mono">≈ ${amd(A.fare)}</span></div></div>
-          <div class="full foot"><span class="faint grow" style="font:var(--c-small)">${A.tier} · ${ECO.km(A.km)} · ${A.min} ր · Կանխիկ</span><button class="btn secondary s" disabled style="opacity:.55">Պահպանել</button></div>
+          <div class="full foot"><span class="faint grow" style="font:var(--c-small)">${A.tier} · ${ECO.km(A.km)} · ${A.min} ր · Կանխիկ</span><button class="btn secondary s" disabled style="opacity:.55">Պահել</button></div>
         </div>
       </div>
       <div class="mini"><div class="maphost" style="position:absolute;inset:0"><div id="map"></div></div></div>
@@ -232,13 +232,13 @@
         <h3>Նախապես նշանակված վարորդ</h3>
         <div class="drv"><span class="car m" id="drvcar"></span>
           <div style="min-width:0"><div class="nm">${A.driver.name}</div>
-            <div class="meta"><span class="plate">${A.driver.plate}</span><span class="pill"><i data-lucide="car"></i>Պարկի</span></div>
+            <div class="meta"><span class="plate">${A.driver.plate}</span><span class="pill"><i data-lucide="car"></i>Ավտոպարկի</span></div>
             <div class="meta mono faint" style="font-size:12px">${A.driver.phone}</div></div>
           <button class="btn secondary icon" aria-label="Զանգել վարորդին"><i data-lucide="phone"></i></button></div>
         <dl class="kv" style="margin-top:10px">
           <dt>Նոր պատվերներ չեն գա</dt><dd class="mono">${A.held}-ից</dd>
           <dt>Կարող է մեկնել</dt><dd class="mono">${A.held}-ից</dd>
-          <dt>Ակտիվացում</dt><dd class="mono">${A.activates}</dd>
+          <dt>Ավտոմատ որոնում</dt><dd>${A.tier} · <span class="mono">${A.activates}</span>-ին · ${A.driver.short}-ն առաջինը</dd>
         </dl>
       </div>
       <div class="sec" style="border:0">
@@ -247,8 +247,8 @@
       </div></div>`
   }
   document.getElementById('drvcar').innerHTML = carImg('city', 'Eco City, ID.3')
-  const TL = [['14:07', 'l-unassigned', 'Ընդունված', 'Անի Դ.'], ['14:07', 'l-searching', 'Որոնում', 'համակարգ'], ['14:08', 'l-searching', 'Առաջարկ · հրաժարվեց <span class="why">Հեռու է</span>', 'Վահե Ս.'], ['14:09', 'l-active', 'Նշանակված', 'Արամ Պ. · ալիք 2'], ['14:12', 'l-active', 'Ճանապարհին', 'Արամ Պ.'], ['14:16', 'l-active', 'Տեղում', 'Արամ Պ.'], ['14:19', 'l-active', 'Ուղևորի հետ', 'Արամ Պ.']]
-  if (BOOK) TL.splice(0, TL.length, ['9:38', 'l-scheduled', 'Ամրագրվեց', 'հաճախորդ · հավելված'], ['9:40', 'l-scheduled', 'Նախապես նշանակվեց Սուրեն Մ.', 'Անի Դ.'])
+  const TL = [['14:07', 'l-unassigned', 'Ընդունված', 'Անի Դ.'], ['14:07', 'l-searching', 'Որոնում', 'համակարգ'], ['14:08', 'l-searching', 'Առաջարկ · մերժեց <span class="why">Հեռու է</span>', 'Էդգար Պ.'], ['14:09', 'l-active', 'Նշանակված', 'Արամ Պ. · ալիք 2'], ['14:12', 'l-active', 'Ճանապարհին', 'Արամ Պ.'], ['14:16', 'l-active', 'Տեղում', 'Արամ Պ.'], ['14:19', 'l-active', 'Ուղևորի հետ', 'Արամ Պ.']]
+  if (BOOK) TL.splice(0, TL.length, ['9:38', 'l-scheduled', 'Ստեղծվեց', 'ուղևոր · հավելված'], ['9:40', 'l-scheduled', 'Նախապես նշանակվեց Սուրեն Մ.', 'Անի Դ.'])
   document.getElementById('tl').innerHTML = TL.map(([t, l, w, who]) => `<span class="t">${t}</span><i class="d ${l}"></i><span>${w}</span><span class="who">${who}</span>`).join('')
   icons()
   if (BOOK) {

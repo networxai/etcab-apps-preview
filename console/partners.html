@@ -10,7 +10,7 @@
 <script src="console.js"></script>
 <script src="console-audit.js"></script>
 <style>
-  /* Two layouts of one screen. Overview: list + 420 panel. Wallet: the list narrows to name + balance and the
+  /* Two layouts of one screen. Overview: list + 420 panel. Balance (?tab=wallet): the list narrows to name + balance and the
      panel takes the room, because the top-up form and the ledger are worked side by side. Never a modal. */
   .content { grid-template-columns: minmax(0, 1fr) 420px; }
   .wide .content { grid-template-columns: 300px minmax(0, 1fr); }
@@ -57,7 +57,7 @@
 <div class="screen" id="screen">
   <div class="main">
     <header class="bar">
-      <span class="crumb">Գործընկերներ <i data-lucide="chevron-right"></i></span><h1>Գործընկեր վարորդներ</h1>
+      <h1>Գործընկերներ</h1>
       <span class="crumb num hide-w">12 · առցանց 6</span>
       <div class="live"></div>
     </header>
@@ -73,31 +73,37 @@
   if (wide) document.getElementById('screen').classList.add('wide')
   shell('partners')
   const P = PARTNERS, p = P[sel], T = tierById(p.tier)
+  /* Owner #3: a partner's balance rules (fee, warn below, stop below) are per tariff, set in one place — Միջնորդավճարներ
+     (feeplans.html) — and read from ECO.PARTNER.rules. console.js calls Eco Comfort 'partner'; kit.js calls it 'comfort'. */
+  const R = (t) => ECO.PARTNER.rules[t === 'partner' ? 'comfort' : t]
+  const tone = (b, t) => (b < R(t).blockBelow ? ['warn', 'Կանգնած', 'lock'] : b < R(t).warnBelow ? ['warn', 'Ցածր', 'triangle-alert'] : null)
+  const bal = (b, t) => { const x = tone(b, t); return x ? `<span class="pill ${x[0]} bal" title="${x[1]}"><i data-lucide="${x[2]}"></i><span class="mono">${amd(b)}</span></span>` : `<span class="mono">${amd(b)}</span>` }
+  const r = R(p.tier), stopped = p.bal < r.blockBelow
   const docPill = (d) => d === 'ok' ? '' : d === 'warn' ? '<span class="pill warn"><i data-lucide="clock"></i>9 օր</span>' : '<span class="pill bad"><i data-lucide="circle-alert"></i>Ժամկետանց</span>'
 
   /* ── List ── */
   const filters = `<div class="filters">
-      <div class="input" style="width:${wide ? '100%' : '240px'}"><i data-lucide="search"></i><span class="val ph">Անուն, հեռախոս, կոդ</span><span class="kbd">/</span></div>
+      <div class="input" style="width:${wide ? '100%' : '240px'}"><i data-lucide="search"></i><span class="val ph">Անուն, հեռախոս, վճարման կոդ</span><span class="kbd">/</span></div>
       ${wide ? '' : '<span style="flex:1"></span><button class="btn secondary s"><i data-lucide="plus"></i>Նոր գործընկեր</button>'}</div>
     ${wide ? '' : `<div class="filters" style="padding-top:6px;padding-bottom:6px">
-      <span class="chip on">Բոլորը <span class="c num">12</span></span><span class="chip">Արգելափակված <span class="c num">2</span></span>
-      <span class="chip">Քիչ մնացորդ <span class="c num">4</span></span><span class="chip">Հաստատման սպասող <span class="c num">3</span></span>
-      <span class="chip">Լրացող փաստաթուղթ <span class="c num">3</span></span></div>`}`
+      <span class="chip on">Բոլորը <span class="c num">12</span></span><span class="chip"><i data-lucide="lock"></i>Կանգնած <span class="c num">2</span></span>
+      <span class="chip">Ցածր հաշվեկշիռ <span class="c num">2</span></span><span class="chip">Սպասում է հաստատման <span class="c num">3</span></span>
+      <span class="chip">Փաստաթուղթը լրանում է <span class="c num">3</span></span></div>`}`
   const rows = wide
-    ? P.map((x, i) => `<div class="mini${i === sel ? ' on' : ''}"><span class="av">${x.ini}</span><span class="nm" title="${x.name}">${x.name.split(' ')[0]} ${x.name.split(' ')[1][0]}.</span>${balCell(x.bal)}</div>`).join('')
-    : `<table class="tbl pt"><colgroup><col><col class="c-car" style="width:96px"><col style="width:128px"><col style="width:120px"><col style="width:116px"><col style="width:112px"></colgroup>
-      <thead><tr><th>Գործընկեր</th><th>Մեքենա</th><th>Հաստատում</th><th>Փաստաթղթեր</th><th>Հերթապահ.</th><th class="r">Մնացորդ</th></tr></thead><tbody>${P.map((x, i) => {
+    ? P.map((x, i) => `<div class="mini${i === sel ? ' on' : ''}"><span class="av">${x.ini}</span><span class="nm" title="${x.name}">${x.name.split(' ')[0]} ${x.name.split(' ')[1][0]}.</span>${bal(x.bal, x.tier)}</div>`).join('')
+    : `<table class="tbl pt"><colgroup><col><col class="c-car" style="width:96px"><col style="width:136px"><col style="width:128px"><col style="width:116px"><col style="width:112px"></colgroup>
+      <thead><tr><th>Գործընկեր</th><th>Մեքենա</th><th>Հաստատում</th><th>Փաստաթղթեր</th><th>Վիճակ</th><th class="r">Հաշվեկշիռ</th></tr></thead><tbody>${P.map((x, i) => {
         const [at, aw, ai] = APPR[x.appr], [st, sw] = DSTATE[x.state]
         return `<tr class="${i === sel ? 'on' : ''}"><td><span class="who"><span class="av">${x.ini}</span><span class="nm"><b>${x.name}</b><span>${x.phone}</span></span></span></td>
-          <td><span class="plate">${x.plate}</span></td>
-          <td><span class="pill ${at}"><i data-lucide="${ai}"></i>${aw}</span></td><td>${docPill(x.docs) || '<span class="pill ok"><i data-lucide="circle-check"></i>Կարգին</span>'}</td><td><span class="pill ${st}"><i class="d"></i>${sw}</span></td><td class="r">${balCell(x.bal)}</td></tr>`
+          <td><span style="display:flex;flex-direction:column;align-items:flex-start;gap:2px"><span class="plate">${x.plate}</span><span class="faint" style="font:var(--c-small);white-space:nowrap">${tierById(x.tier).name}</span></span></td>
+          <td><span class="pill ${at}"><i data-lucide="${ai}"></i>${aw}</span></td><td>${docPill(x.docs) || '<span class="pill ok"><i data-lucide="circle-check"></i>Կարգին</span>'}</td><td><span class="pill ${st}"><i class="d"></i>${sw}</span></td><td class="r">${bal(x.bal, x.tier)}</td></tr>`
       }).join('')}</tbody></table>`
   document.getElementById('list').innerHTML = filters + `<div class="scroll-y grow" data-truncate>${rows}</div>`
 
   /* ── Detail ── */
   const [at, aw, ai] = APPR[p.appr], [st, sw] = DSTATE[p.state]
   const balTxt = amd(p.bal)
-  const tabs = [['overview', 'Ընդհանուր'], ['wallet', 'Դրամապանակ'], ['car', 'Մեքենա'], ['docs', 'Փաստաթղթեր'], ['rides', 'Պատվերներ'], ['rating', '4,8']]
+  const tabs = [['overview', 'Ընդհանուր'], ['wallet', 'Հաշվեկշիռ'], ['car', 'Մեքենա'], ['docs', 'Փաստաթղթեր'], ['rides', 'Պատվերներ'], ['rating', '4,8']]
   const head = `
     <div class="head"><span class="av l">${p.ini}</span>
       <div style="min-width:0"><h2>${p.name}</h2>
@@ -105,79 +111,83 @@
       <button class="btn ghost icon s" aria-label="Փակել (Esc)"><i data-lucide="x"></i></button></div>
     <div class="tabsl" role="tablist">${tabs.map(([k, l]) => `<a href="?theme=${THEME}&p=${sel}&tab=${k}" role="tab" aria-selected="${k === tab}" class="${k === tab ? 'on' : ''}" ${k === 'rating' ? 'aria-label="Գնահատական 4,8"' : ''}>${k === 'rating' ? '<i data-lucide="star"></i>' : ''}${l}</a>`).join('')}</div>`
 
+  /* Owner #7: a suspended partner's pre-orders go back to dispatch by themselves — the panel states it as a fact, no step. */
+  const notice = p.appr === 'suspended'
+    ? `<div style="margin:12px var(--inset) 0"><div class="notice amber"><i data-lucide="pause"></i><span><b>Կասեցված է <span class="num">12.10</span>-ից</b> · Սարգիս Ա.<br><span style="display:inline-flex;gap:6px;align-items:center"><i data-lucide="calendar-clock" style="width:16px;height:16px"></i>2 նախնական պատվեր վերադարձվեց հերթ</span></span></div></div>`
+    : stopped ? `<div style="margin:12px var(--inset) 0"><div class="notice amber"><i data-lucide="lock"></i><span><b>Պատվերները կանգնած են</b> <span class="num">10.10, 18:40</span>-ից · լիցքավորում՝ առնվազն <b class="num">${amd(r.blockBelow - p.bal)}</b></span></div></div>` : ''
   const overview = `
-    ${p.bal < 0 ? `<div style="margin:12px var(--inset) 0"><div class="notice amber"><i data-lucide="lock"></i><span>Արգելափակված է պատվերներից՝ <span class="num">10.10, 18:40</span>-ից։ Ընթացիկ պատվերն ավարտվել է։ Բացելու համար լիցքավորեք առնվազն <b class="num">${amd(-p.bal)}</b>։</span></div></div>` : ''}
+    ${notice}
     <div class="blk">
-      <h3><i data-lucide="wallet"></i>Դրամապանակ<span class="end code"><span class="faint" style="font-weight:400">Վճարման կոդ</span><span class="tag">${p.code}</span><button class="btn ghost icon s" aria-label="Պատճենել կոդը"><i data-lucide="copy"></i></button></span></h3>
-      <div class="bigbal${p.bal < 0 ? ' neg' : ''}" style="margin-top:4px">${balTxt}</div>
-      <div class="faint" style="font:var(--c-small)">Արգելափակում՝ ${amd(ECO.PARTNER.blockBelow)}-ից ցածր · զգուշացում՝ ${amd(ECO.PARTNER.warnBelow)}-ից ցածր (~1 օրվա վճար)</div>
-      <div style="display:flex;gap:6px;margin-top:12px"><a class="btn primary" href="?theme=${THEME}&p=${sel}&tab=wallet" style="text-decoration:none">Գրանցել լիցքավորում</a><a class="btn secondary" href="?theme=${THEME}&p=${sel}&tab=wallet" style="text-decoration:none">Գրանցամատյան</a></div>
+      <h3><i data-lucide="wallet"></i>Հաշվեկշիռ<span class="end code"><span class="faint" style="font-weight:400">Վճարման կոդ</span><span class="tag">${p.code}</span><button class="btn ghost icon s" aria-label="Պատճենել կոդը"><i data-lucide="copy"></i></button></span></h3>
+      <div class="bigbal${stopped ? ' neg' : ''}" style="margin-top:4px">${balTxt}</div>
+      <div class="faint" style="font:var(--c-small)">${T.name} · զգուշացում՝ ${amd(r.warnBelow)}-ից ցածր · կանգ՝ ${amd(r.blockBelow)}-ից ցածր · <a href="feeplans.html?theme=${THEME}" style="color:var(--brand-text)">կանոններ</a></div>
+      <div style="display:flex;gap:6px;margin-top:12px"><a class="btn primary" href="?theme=${THEME}&p=${sel}&tab=wallet" style="text-decoration:none">Գրանցել լիցքավորում</a><a class="btn secondary" href="?theme=${THEME}&p=${sel}&tab=wallet" style="text-decoration:none">Պատմություն</a></div>
     </div>
     <div class="blk">
       <h3><i data-lucide="car"></i>Մեքենա<span class="end pill ${at}" style="height:20px"><i data-lucide="${ai}"></i>${aw}</span></h3>
       <div class="shift"><span class="car" style="width:100%;height:76px">${carImg(p.tier, T.name)}</span>
-        <dl class="facts"><dt>Համարանիշ</dt><dd><span class="plate">${p.plate}</span></dd><dt>Մոդել</dt><dd>${p.model.split(' · ')[0]}</dd><dt>Դաս</dt><dd>${T.name}</dd><dt>Հաստատել է</dt><dd>Սարգիս Ա.</dd></dl></div>
+        <dl class="facts"><dt>Համարանիշ</dt><dd><span class="plate">${p.plate}</span></dd><dt>Մոդել</dt><dd>${p.model.split(' · ')[0]}</dd><dt>Սակագին</dt><dd>${T.name}</dd><dt>Հաստատել է</dt><dd>Սարգիս Ա.</dd></dl></div>
     </div>
     <div class="blk">
-      <h3><i data-lucide="percent"></i>Վճարի պլան<span class="end"><a class="btn ghost s" href="feeplans.html?theme=${THEME}">Գործընկեր ստանդարտ</a></span></h3>
-      <dl class="kv2"><dt>${T.name}</dt><dd><b>15%</b> պատվերի գնից</dd><dt>Հարկային տողեր</dt><dd class="faint">անջատված</dd><dt>Այսօր</dt><dd>3 պատվեր · վճար <b>1 110 ֏</b></dd></dl>
+      <h3><i data-lucide="percent"></i>Միջնորդավճար<span class="end"><a class="btn ghost s" href="feeplans.html?theme=${THEME}">${T.name}<i data-lucide="arrow-right"></i></a></span></h3>
+      <dl class="kv2"><dt>Դրույք</dt><dd><b>${r.fee}%</b> պատվերի գնից</dd><dt>Հարկեր</dt><dd class="faint">անջատված</dd><dt>Այսօր</dt><dd>3 պատվեր · <b>1 110 ֏</b></dd></dl>
     </div>
     <div class="blk" style="margin-bottom:12px">
       <h3><i data-lucide="file-text"></i>Փաստաթղթեր<span class="end pill warn" style="height:20px"><i data-lucide="clock"></i>1 լրանում է</span></h3>
       <div class="docs" data-truncate>
         <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>Վարորդական վկայական</b><span>licence.pdf</span></span><span class="pill ok">Մինչև <span class="num">14.04.2028</span></span><span></span></div>
-        <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>ԱՊՊԱ ապահովագրություն</b><span>osago.pdf</span></span><span class="pill warn">Մինչև <span class="num">20.10.2026</span></span><span></span></div>
-        <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>Տեխանձնագիր</b><span>tech-passport.pdf</span></span><span class="pill">ժամկետ չունի</span><span></span></div>
+        <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>Ապահովագրություն (ԱՊՊԱ)</b><span>osago.pdf</span></span><span class="pill warn">Մինչև <span class="num">20.10.2026</span></span><span></span></div>
+        <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>Տեխանձնագիր</b><span>tech-passport.pdf</span></span><span class="pill">Առանց ժամկետի</span><span></span></div>
       </div>
     </div>`
 
-  /* Ledger, newest first; running balance; ride fees at 15% of the fare (Eco Comfort, standard plan). */
+  /* History, newest first; running balance; fees at Eco Comfort's 15% (ECO.PARTNER.rules.comfort). */
   const L = [
-    ['10.10 19:02', 'fee', 'Վճար · #R-20288', 'Eco Comfort · 15% × 2 400 ֏', '—', -360, -1200],
-    ['10.10 18:40', 'fee', 'Վճար · #R-20281', '15% × 1 900 ֏ · մնացորդը անցավ 0-ից՝ արգելափակվեց', '—', -285, -840],
-    ['10.10 17:55', 'fee', 'Վճար · #R-20270', '15% × 3 100 ֏', '—', -465, -555],
-    ['09.10', 'fees', 'Վճարներ · 12 պատվեր', 'բացել պատվերները', '—', -2980, -90],
-    ['08.10 12:14', 'adj', 'Ճշգրտում', 'Պատճառ՝ «#R-20190 վեճ, ուղևորը չներկայացավ»', 'Սարգիս Ա.', 500, 2890],
-    ['08.10', 'fees', 'Վճարներ · 14 պատվեր', 'բացել պատվերները', '—', -3610, 2390],
-    ['05.10 10:31', 'rev', 'Հետարկում', 'ՔԳ-000398 · պատճառ՝ «Կրկնակի գրանցում»', 'Սարգիս Ա.', -5000, 6000],
+    ['10.10 19:02', 'fee', 'Միջնորդավճար · #R-20288', 'Eco Comfort · 15% × 2 400 ֏', '—', -360, -1200],
+    ['10.10 18:40', 'fee', 'Միջնորդավճար · #R-20281', '15% × 1 900 ֏ · 0-ից ցածր, պատվերները կանգնեցին', '—', -285, -840],
+    ['10.10 17:55', 'fee', 'Միջնորդավճար · #R-20270', '15% × 3 100 ֏', '—', -465, -555],
+    ['09.10', 'fees', 'Միջնորդավճար · 12 պատվեր', 'ցույց տալ պատվերները', '—', -2980, -90],
+    ['08.10 12:14', 'adj', 'Ճշգրտում', '«#R-20190 վեճ, ուղևորը չեկավ»', 'Սարգիս Ա.', 500, 2890],
+    ['08.10', 'fees', 'Միջնորդավճար · 14 պատվեր', 'ցույց տալ պատվերները', '—', -3610, 2390],
+    ['05.10 10:31', 'rev', 'Չեղարկում', 'ՔԳ-000398 · «Կրկնակի գրանցում»', 'Սարգիս Ա.', -5000, 6000],
     ['05.10 10:02', 'cash', 'Կանխիկ լիցքավորում', 'Անդորրագիր ՔԳ-000398', 'Մարիամ Հ.', 5000, 11000, 'rev'],
-    ['04.10', 'fees', 'Վճարներ · 02–04.10 · 38 պատվեր', 'բացել պատվերները', '—', -14000, 6000],
-    ['02.10 09:40', 'bank', 'Փոխանցում', 'Ամերիաբանկ · կոդ 000041', 'Անի Դ.', 20000, 20000],
+    ['04.10', 'fees', 'Միջնորդավճար · 02–04.10 · 38 պատվեր', 'ցույց տալ պատվերները', '—', -14000, 6000],
+    ['02.10 09:40', 'bank', 'Բանկային փոխանցում', 'Ամերիաբանկ · կոդ 000041', 'Անի Դ.', 20000, 20000],
   ]
-  const KIND = { fee: ['receipt', 'Վճար'], fees: ['receipt', 'Վճարներ'], adj: ['sliders-horizontal', 'Ճշգրտում'], rev: ['undo-2', 'Հետարկում'], cash: ['banknote', 'Կանխիկ'], bank: ['landmark', 'Փոխանցում'] }
+  const KIND = { fee: ['receipt'], fees: ['receipt'], adj: ['sliders-horizontal'], rev: ['undo-2'], cash: ['banknote'], bank: ['landmark'] }
   const sgn = (v) => (v < 0 ? '−' : '+') + amd(Math.abs(v))
   const wallet = `
     <div class="wgrid">
       <section class="topup" aria-label="Գրանցել լիցքավորում">
         <h3><i data-lucide="wallet"></i>Գրանցել լիցքավորում</h3>
-        <div class="seg" role="radiogroup" aria-label="Եղանակ"><button class="on" role="radio" aria-checked="true"><i data-lucide="banknote"></i>Կանխիկ</button><button role="radio" aria-checked="false"><i data-lucide="landmark"></i>Բանկային փոխանցում</button></div>
+        <div class="seg" role="radiogroup" aria-label="Եղանակ"><button class="on" role="radio" aria-checked="true"><i data-lucide="banknote"></i>Կանխիկ</button><button role="radio" aria-checked="false"><i data-lucide="landmark"></i>Փոխանցում</button></div>
         <div><label class="label">Գումար</label><div class="input l focus"><span class="val mono" style="font-size:15px">10 000</span><span class="faint">֏</span></div>
           <div class="quick"><span class="chip">5 000</span><span class="chip on">10 000</span><span class="chip">20 000</span><span class="chip">50 000</span></div></div>
         <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div><label class="label">Անդորրագիր №</label><div class="input"><span class="val mono">ՔԳ-000413</span><i data-lucide="lock" title="ինքնաշխատ"></i></div></div>
+          <div><label class="label">Անդորրագիր №</label><div class="input"><span class="val mono">ՔԳ-000413</span><i data-lucide="lock" title="ավտոմատ"></i></div></div>
           <div><label class="label">Ստացել է</label><div class="input"><span class="val">Անի Դ.</span></div></div>
         </div>
         <div><label class="label">Նշում <span class="faint" style="font-weight:400">· ոչ պարտադիր</span></label><div class="input"><span class="val ph">օր. Հանձնեց կինը</span></div></div>
         <div style="display:flex;gap:16px;flex-wrap:wrap"><span class="check on"><i class="b"></i>SMS անդորրագիր՝ <span class="mono">${p.phone}</span></span><span class="check on"><i class="b"></i>Տպել</span></div>
-        <div class="after"><span class="muted">Նոր մնացորդ</span><b>8 800 ֏</b></div>
-        <div class="notice neutral" style="margin-top:-4px"><i data-lucide="lock-open"></i><span>Արգելափակումը կհանվի անմիջապես։</span></div>
+        <div class="after"><span class="muted">Նոր հաշվեկշիռ</span><b>8 800 ֏</b></div>
+        <div class="notice neutral" style="margin-top:-4px"><i data-lucide="lock-open"></i><span>Պատվերները կվերսկսվեն անմիջապես</span></div>
         <div class="btns"><a class="btn ghost" href="?theme=${THEME}&p=${sel}&tab=overview" style="text-decoration:none">Չեղարկել</a><button class="btn primary">Գրանցել 10 000 ֏ <span class="kbd">↵</span></button></div>
       </section>
-      <section class="ledger" aria-label="Գրանցամատյան">
+      <section class="ledger" aria-label="Պատմություն">
         <div class="sums">
-          <div class="kpi"><span class="k">Մնացորդ</span><span class="v" style="color:var(--warning)">−1 200 ֏</span></div>
+          <div class="kpi"><span class="k">Հաշվեկշիռ</span><span class="v" style="color:var(--warning)">−1 200 ֏</span></div>
           <div class="kpi"><span class="k">Լիցքավորումներ</span><span class="v">20 000 ֏</span></div>
-          <div class="kpi"><span class="k">Վճարներ</span><span class="v">−21 700 ֏</span></div>
+          <div class="kpi"><span class="k">Միջնորդավճար</span><span class="v">−21 700 ֏</span></div>
           <div class="kpi"><span class="k">Ճշգրտումներ</span><span class="v">+500 ֏</span></div>
         </div>
         <div class="ltool"><div class="seg"><button class="on">Հոկտեմբեր</button><button>Սեպտեմբեր</button></div><span style="flex:1"></span>
-          <button class="btn secondary s"><i data-lucide="sliders-horizontal"></i>Ճշգրտում</button><button class="btn secondary s"><i data-lucide="download"></i>Քաղվածք<i data-lucide="chevron-down"></i></button></div>
+          <button class="btn secondary s"><i data-lucide="sliders-horizontal"></i>Ճշգրտել</button><button class="btn secondary s"><i data-lucide="download"></i>Ներբեռնել քաղվածք<i data-lucide="chevron-down"></i></button></div>
         <div class="scroll-y grow">
-          <table class="tbl lg"><colgroup><col style="width:72px"><col><col style="width:80px"><col style="width:84px"><col style="width:88px"></colgroup>
-            <thead><tr><th>Օր</th><th>Գործողություն</th><th>Ով</th><th class="r">Գումար</th><th class="r">Մնացորդ</th></tr></thead>
+          <table class="tbl lg"><colgroup><col style="width:72px"><col><col style="width:88px"><col style="width:88px"><col style="width:92px"></colgroup>
+            <thead><tr><th>Օր</th><th>Ինչ</th><th>Ով</th><th class="r">Գումար</th><th class="r">Հաշվեկշիռ</th></tr></thead>
             <tbody>${L.map(([d, k, w, s2, who, v, b, cls]) => `<tr class="${cls || ''}"><td><span class="what"><span class="mono" style="font-size:12px;color:var(--ink)">${d.split(' ')[0]}</span><span class="mono">${d.split(' ')[1] || ''}</span></span></td>
               <td class="desc"><span class="what"><b><i data-lucide="${KIND[k][0]}" style="width:14px;height:14px;vertical-align:-2px;margin-right:6px;color:var(--ink-faint)"></i>${w}</b><span>${s2}</span></span></td><td>${who}</td><td class="r mono ${v > 0 ? 'plus' : ''}">${sgn(v)}</td><td class="r mono ${b < 0 ? 'neg' : ''}">${(b < 0 ? '−' : '') + amd(Math.abs(b))}</td></tr>`).join('')}
-              <tr><td class="mono">01.10</td><td colspan="3" class="faint">Մնացորդ ամսվա սկզբին</td><td class="r mono">0 ֏</td></tr></tbody></table>
+              <tr><td class="mono">01.10</td><td colspan="3" class="faint">Հաշվեկշիռը ամսվա սկզբին</td><td class="r mono">0 ֏</td></tr></tbody></table>
         </div>
       </section>
     </div>`

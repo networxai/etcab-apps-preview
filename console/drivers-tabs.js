@@ -1,12 +1,14 @@
 /* drivers.html detail tabs and actions (coverage C29, C30). Loaded after the page script; re-renders the docked panel.
-   ?tab=rides | money | docs | rating      (C29) — real driver-detail.tsx has Overview + Money; Rides and Rating are drawn ahead
+   ?tab=rides | shifts | docs | rating     (C29) — Rides, Shifts and Rating are drawn ahead. `money` is kept as an alias of
+   `shifts`: owner #3 (2026-10-14) — a fleet driver has no balance, so the real driver-money.tsx / driver-ledger.tsx /
+   record-payment.tsx / driver-payout.tsx (fleet settlement) are to be removed, not drawn.
    ?action=create | code | offline | shift | deletion   (C30) — use with &d=N to pick the driver the action is about
    Real: fleet-drivers.tsx (create), driver-login-code.tsx, driver-end-shift.tsx / fleet.forceOfflineWarning, driver-account.tsx,
-   driver-money.tsx, driver-ledger.tsx, record-payment.tsx, driver-payout.tsx, driver-documents.tsx.
+   driver-documents.tsx.
    Strings: lib/i18n.ts + money-i18n.ts hy. Dangerous actions are ArmButtons (two presses, visible), never a dialog. */
 (function () {
   const QS = new URLSearchParams(location.search)
-  const TAB = QS.get('tab'), ACT = QS.get('action')
+  const TAB = QS.get('tab') === 'money' ? 'shifts' : QS.get('tab'), ACT = QS.get('action')
   if (!TAB && !ACT) return
   document.head.insertAdjacentHTML('beforeend', `<style>
     .cm { display: grid; grid-template-columns: 52px minmax(0, 1fr); column-gap: 10px; row-gap: 4px; padding: 10px 0; border-bottom: 1px solid var(--line-soft); }
@@ -29,6 +31,10 @@
     .xblk h3 { font: var(--c-head); display: flex; align-items: center; gap: 6px; }
     .xblk h3 svg { width: 16px; height: 16px; }
     .xblk p { font: var(--c-body); color: var(--ink-muted); margin-top: 4px; }
+    .lt col.r { width: 56px; } .lt col.c { width: 72px; }
+    @media (max-width: 1400px) { .lt col.a { width: 76px; } .lt col.c { width: 64px; } .lt col.r { width: 54px; } }
+    .sum { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; white-space: nowrap; }
+    .sum b { font: var(--c-kpi); font-variant-numeric: tabular-nums; } .sum span { font: var(--c-small); color: var(--ink-faint); }
     .code { font: 600 32px/40px var(--mono); letter-spacing: .08em; margin: 8px 0 4px; }
     .armed { background: var(--danger-c) !important; color: var(--danger-ink) !important; }
     .opts2 > div { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 44px; padding: 4px 8px; border-radius: 6px; }
@@ -53,15 +59,15 @@
   /* ── C29 Rides: commitments first (bookings this driver holds, Release one press from the row), then today's rides. ── */
   if (TAB === 'rides') {
     setTab(1); clearBelow()
-    add(`<div class="blk"><h3><i data-lucide="calendar-clock"></i>Պարտավորություններ<span class="end faint" style="font-weight:400">նախապես նշանակված</span></h3>
+    add(`<div class="blk"><h3><i data-lucide="calendar-clock"></i>Նախնական պատվերներ<span class="end faint" style="font-weight:400">նշանակված են իրեն</span></h3>
       <div class="cm"><time><small>Այսօր</small>${B.kom.time}</time><span class="a">${B.kom.pickup} → ${B.kom.drop}</span>
-        <span class="m"><span class="mono">${B.kom.phone}</span>·<span class="mono">#${B.kom.id}</span>·<span>ազատ մինչև ${B.kom.held}</span></span>
+        <span class="m"><span class="mono">${B.kom.phone}</span>·<span class="mono">#${B.kom.id}</span>·<span>նոր պատվերներ չեն գա ${B.kom.held}-ից</span></span>
         <span class="b"><button class="btn secondary s">Ազատել</button></span></div>
       <div class="cm"><time><small>Շբթ</small>${B.bag.time}</time><span class="a">${B.bag.pickup} → ${B.bag.drop}</span>
         <span class="m"><span class="mono">${B.bag.phone}</span>·<span class="mono">#${B.bag.id}</span><span class="pill bad" style="height:20px"><i data-lucide="clock-alert"></i>Չեմ հասցնի · 09:31</span></span>
         <span class="b"><button class="btn secondary s">Ազատել</button><button class="btn secondary s">Վերանշանակել <span class="kbd">A</span></button><button class="btn ghost s">Թողնել իրեն</button></span></div>
       <div class="cm"><time><small>Կիր</small>11:30</time><span class="a">Կոմիտասի պող. 49 → Էրեբունի օդանավակայան</span>
-        <span class="m"><span class="mono">091 44-02-17</span>·<span class="mono">#B-0930</span>·<span>ազատ մինչև 11:00</span></span>
+        <span class="m"><span class="mono">091 44-02-17</span>·<span class="mono">#B-0930</span>·<span>նոր պատվերներ չեն գա 11:00-ից</span></span>
         <span class="b"><button class="btn secondary s">Ազատել</button></span></div></div>
     <div class="blk" style="margin-bottom:12px"><h3><i data-lucide="list"></i>Այսօր<span class="end faint num" style="font-weight:400">1 պատվեր · 1 200 ֏ · 1 ընթացքում</span></h3>
       <table class="lt"><colgroup><col class="w"><col><col class="a"></colgroup><tbody>
@@ -70,39 +76,34 @@
       </tbody></table></div>`)
   }
 
-  /* ── C29 Money (driver-money.tsx, fleet): balance as the fleet sees it, the plan, «Գրանցել վճարում» open inline,
-     payout and the ledger with its reverse ArmButton. Adjustment is drawn ahead (an entry kind, no form). ── */
-  if (TAB === 'money') {
+  /* ── C29 Shifts (owner #3: no balance for a fleet driver). What the driver did, per shift: car, hours, rides, fares and
+     the cash taken. Facts only — no owed, limit, settlement, adjustment or ledger. ── */
+  if (TAB === 'shifts') {
     setTab(2); clearBelow()
-    add(`<div class="blk wallet"><h3><i data-lucide="wallet"></i>Մնացորդ<span class="end pill warn" style="height:20px"><i data-lucide="triangle-alert"></i>Ցածր հաշվեկշիռ</span></h3>
-      <div class="bal num">−2 964 <small>֏</small></div>
-      <dl class="rows"><dt>Վճարի պլան</dt><dd>Պարկի ստանդարտ 20%</dd><dt>Կանխիկ պատվերները դադարում են՝ ցածր</dt><dd class="mono">−10 000 ֏</dd><dt>Զգուշացում՝ ցածր</dt><dd class="mono">−2 000 ֏</dd><dt>Վճարման կոդ</dt><dd class="mono">000012</dd></dl>
-      <div class="btns"><button class="btn secondary s" style="box-shadow:inset 0 0 0 2px var(--ink)" aria-expanded="true"><i data-lucide="banknote"></i>Գրանցել վճարում</button><button class="btn secondary s">Վճարել վարորդին</button><button class="btn ghost s">Ճշգրտում</button></div>
-      <form class="frm" onsubmit="return false" aria-label="Գրանցել վճարում">
-        <div class="two"><div><label class="label">Գումար</label><div class="input focus"><span class="val mono">2 964</span><span class="faint">֏</span></div></div>
-          <div><label class="label">Եղանակ</label><div class="input"><span class="val">Կանխիկ՝ գրասենյակում</span><i data-lucide="chevron-down"></i></div></div></div>
-        <div><label class="label">Հղում <span class="faint" style="font-weight:400">· ոչ պարտադիր</span></label><div class="input"><span class="val ph">Անդորրագրի համարը կամ բանկային քաղվածքի հղումը</span></div></div>
-        <div class="btns"><button class="btn ghost s">Փակել</button><button class="btn primary s">Գրանցել վճարումը</button></div></form></div>
-    <div class="blk" style="margin-bottom:12px"><h3><i data-lucide="list"></i>Շարժեր<span class="end faint" style="font-weight:400">Վերջին 50-ը՝ նորերը վերևում</span></h3>
-      <table class="lt"><colgroup><col class="w"><col><col class="a"></colgroup><thead><tr><th>Երբ</th><th>Ինչ</th><th class="n">Գումար</th></tr></thead><tbody>
-      ${[['14:19', 'Պատվերի վճար', 'Պատվեր #R-20417 · Համակարգ', -160], ['12:20', 'Պատվերի վճար', 'Պատվեր #R-20380 · Համակարգ', -180], ['11:30', 'Պատվերի վճար', 'Պատվեր #R-20358 · Համակարգ', -140],
-        ['10:52', 'Պատվերի վճար', 'Պատվեր #R-20331 · Համակարգ', -240], ['09:51', 'Պատվերի վճար', 'Պատվեր #R-' + ECO.RIDE.no + ' · Համակարգ', -220],
-        ['Երկ.', 'Հաշվարկ', 'Անի Դավթյան · անդ. 4471', 3120, 1], ['Երկ.', 'Ճշգրտում', 'Գոհար Մինասյան · «վառելիքի փոխհատուցում»', 500]]
-        .map(([t, w, s, a, rev]) => `<tr><td class="mono">${t}</td><td>${w}<small>${s}</small>${rev ? '<small><button class="btn ghost s" style="height:24px;padding:0 6px;margin-top:2px">Չեղարկել</button></small>' : ''}</td><td class="n mono">${amd(a)}</td></tr>`).join('')}
+    const S = [['Այսօր', '01 ET 001', '08:12–', '6 ժ 14 ր', 9, 14820, 6200, 1], ['Հնգ', '01 ET 001', '07:55–17:40', '9 ժ 45 ր', 14, 21300, 9800], ['Չրք', '01 ET 002', '08:05–16:30', '8 ժ 25 ր', 12, 17900, 7400],
+      ['Երք', '01 ET 001', '12:00–21:10', '9 ժ 10 ր', 13, 19600, 11200], ['Երկ', '01 ET 001', '08:00–15:20', '7 ժ 20 ր', 10, 14100, 5100]]
+    add(`<div class="blk"><h3><i data-lucide="calendar-range"></i>Այս շաբաթ<span class="end faint" style="font-weight:400">5 հերթափոխ · 41 ժ</span></h3>
+      <div class="sum"><b>${amd(87720)}</b><span class="num">58 պատվեր · կանխիկ ${amd(39700)}</span></div></div>
+    <div class="blk" style="margin-bottom:12px"><h3><i data-lucide="list"></i>Հերթափոխեր<span class="end faint" style="font-weight:400">Ավտոպարկի վարորդը հաշվեկշիռ չունի</span></h3>
+      <table class="lt"><colgroup><col class="w"><col><col class="r"><col class="a"><col class="c"></colgroup>
+      <thead><tr><th>Օր</th><th>Մեքենա · ժամեր</th><th class="n">Պատվեր</th><th class="n">Գին</th><th class="n">Կանխիկ</th></tr></thead><tbody>
+      ${S.map(([d, pl, t, h, r, f, c, live]) => `<tr><td>${d}</td><td><span class="plate" style="height:20px">${pl}</span><small class="mono" title="${t}">${h}${live ? ' · հիմա' : ''}</small></td>
+        <td class="n mono">${r}</td><td class="n mono">${amd(f)}</td><td class="n mono">${amd(c)}</td></tr>`).join('')}
       </tbody></table></div>`)
   }
 
   /* ── C29 Documents (driver-documents.tsx): the list with expiry, the expired one flagged, and the add form open. ── */
   if (TAB === 'docs') {
+    /* Owner #5: the page script opens this tab on Վահե (ECO.DOCS.blocked) — orders stopped on expired insurance, the new
+       photo waiting on «Հաստատել». The add form below is the office uploading on a driver's behalf. */
     setTab(3)
     const blk = [...dp.querySelectorAll('.blk')].find((b) => b.querySelector('.docs'))
-    clearBelow(); add(blk.outerHTML)
+    const stop = dp.querySelector('.notice.amber')
+    clearBelow(); if (stop) add(stop.parentElement.outerHTML); add(blk.outerHTML)
     const nb = dp.querySelector('.docs').closest('.blk')
-    nb.querySelector('h3 .end').outerHTML = '<span class="end pill bad" style="height:20px"><i data-lucide="circle-alert"></i>Ժամկետանց՝ բժշկական</span>'
-    nb.querySelector('.docs').insertAdjacentHTML('afterbegin', '<div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="t"><b>Բժշկական տեղեկանք</b><span>medical-2025.pdf</span></span><span class="pill bad">Ժամկետանց՝ <span class="num">01.10.2026</span></span><button class="btn ghost icon s" aria-label="Ներբեռնել"><i data-lucide="download"></i></button></div>')
-    nb.querySelector('.dropz').outerHTML = `<form class="frm" onsubmit="return false" aria-label="Ավելացնել փաստաթուղթ"><div class="two"><div><label class="label">Փաստաթղթի տեսակ</label><div class="input focus"><span class="val">Բժշկական տեղեկանք</span><i data-lucide="chevron-down"></i></div></div>
+    nb.querySelector('.dropz').outerHTML = `<form class="frm" onsubmit="return false" aria-label="Ավելացնել փաստաթուղթ"><div class="two"><div><label class="label">Տեսակ</label><div class="input focus"><span class="val">Բժշկական տեղեկանք</span><i data-lucide="chevron-down"></i></div></div>
       <div><label class="label">Ժամկետ</label><div class="input"><span class="val mono">01.10.2027</span></div></div></div>
-      <div class="dropz"><i data-lucide="file-check"></i>medical-2026.pdf · 412 ԿԲ</div><div class="btns"><button class="btn ghost s">Չեղարկել</button><button class="btn primary s">Ավելացնել փաստաթուղթ</button></div></form>`
+      <div class="dropz"><i data-lucide="file-check"></i>medical-2026.pdf · 412 ԿԲ</div><div class="btns"><button class="btn ghost s">Չեղարկել</button><button class="btn primary s">Ավելացնել</button></div></form>`
     nb.style.marginBottom = '12px'
   }
 
@@ -116,7 +117,7 @@
     <div class="blk" style="margin-bottom:12px"><h3><i data-lucide="message-square"></i>Մեկնաբանություններ</h3>
       <table class="lt"><colgroup><col class="w"><col><col class="a"></colgroup><tbody>
       ${[['Այսօր', '«Մաքուր մեքենա, ճշտապահ»', '#R-' + ECO.RIDE.no, 5], ['Երեկ', '«Շատ արագ էր վարում»', '#R-20188 · դիտված է՝ Մարիամ Հ.', 2], ['Երք.', '«Օգնեց ճամպրուկով»', '#R-20011', 5]]
-        .map(([t, c, s, n]) => `<tr><td>${t}</td><td>${c}<small class="mono">${s}</small></td><td class="n">${n <= 2 ? `<span class="pill warn" style="height:20px">★${n}</span>` : `<span class="mono">★${n}</span>`}</td></tr>`).join('')}
+        .map(([t, c, s, n]) => `<tr><td>${t}</td><td>${c}<small class="mono">${s}</small></td><td class="n">${n <= ECO.DISPATCH.lowRating.max ? `<span class="pill warn" style="height:20px">★${n}</span>` : `<span class="mono">★${n}</span>`}</td></tr>`).join('')}
       </tbody></table></div>`)
   }
 
@@ -126,41 +127,41 @@
     document.querySelector('.filters').insertAdjacentHTML('afterend', `<form class="newrow" onsubmit="return false" aria-label="Նոր վարորդ">
       <div><span class="lbl">Հեռախոս</span><div class="input focus"><i data-lucide="phone"></i><span class="val mono">077 18-44-90</span></div></div>
       <div><span class="lbl">Անուն</span><div class="input"><span class="val ph">օր. Արմեն Սարգսյան</span></div></div>
-      <div style="display:flex;gap:6px"><button class="btn ghost s">Չեղարկել</button><button class="btn primary s">Ավելացնել վարորդ</button></div>
+      <div style="display:flex;gap:6px"><button class="btn ghost s">Չեղարկել</button><button class="btn primary s">Ավելացնել</button></div>
       <span class="faint" style="font:var(--c-small);grid-column:1 / -1">Մուտքի կոդը՝ SMS-ով</span></form>`)
     const nb = document.querySelector('.filters .btn'); if (nb) nb.style.boxShadow = 'inset 0 0 0 2px var(--ink)'
   }
   if (ACT === 'code') {
-    afterActs(`<section class="xblk" aria-label="Տրամադրել մուտքի կոդ"><h3><i data-lucide="key-round"></i>Տրամադրել մուտքի կոդ</h3>
-      <p>երբ SMS-ը չի աշխատում — կարդացե՛ք այս թվերը վարորդին</p>
+    afterActs(`<section class="xblk" aria-label="Մուտքի կոդ"><h3><i data-lucide="key-round"></i>Մուտքի կոդ</h3>
+      <p>SMS-ը չի հասնում․ թելադրեք կոդը վարորդին</p>
       <div class="code" aria-label="Կոդը՝ 4 8 2 9 1 7">482 917</div>
       <div class="row-flex" style="gap:8px;font:var(--c-small);color:var(--ink-muted)">Գործում է մինչև <span class="mono" style="color:var(--ink)">14:36</span><span style="flex:1"></span><button class="btn secondary s"><i data-lucide="copy"></i>Պատճենել</button></div>
-      <p style="font:var(--c-small)">Ցուցադրվում է մեկ անգամ։ Կորցնելու դեպքում տրամադրե՛ք նորը։</p></section>`)
+      <p style="font:var(--c-small)">Ցույց է տրվում մեկ անգամ</p></section>`)
     dp.querySelector('.acts .btn').style.boxShadow = 'inset 0 0 0 2px var(--ink)'
   }
   if (ACT === 'offline') {
-    /* driver-end-shift.tsx: «Ավարտել հերթապահությունը», armed: the second press ends it. The warning sits beside it. */
+    /* driver-end-shift.tsx: «Ավարտել հերթափոխը», armed: the second press ends it. The warning sits beside it. */
     const b = [...dp.querySelectorAll('.acts .btn')].pop()
-    b.outerHTML = arm('Ավարտել հերթապահությունը', '<i data-lucide="power"></i>Հաստատե՞լ')
-    afterActs(`<section class="xblk" aria-label="Ավարտել հերթապահությունը" style="box-shadow:inset 0 0 0 1px var(--line-soft),inset 3px 0 0 var(--danger-c)"><h3><i data-lucide="power"></i>Ավարտել հերթապահությունը</h3>
-      <p>ավարտում է հերթապահությունը և ազատում մեքենան; ընթացիկ պատվերը կշարունակվի, կնշվի, և հերթապահությունը կփակվի դրանից հետո</p>
-      <p style="font:var(--c-small)">Լռում է <span class="mono">03:40</span>-ից · վերջին դիրքը՝ Ավան</p></section>`)
+    b.outerHTML = arm('Ավարտել հերթափոխը', '<i data-lucide="power"></i>Հաստատե՞լ')
+    afterActs(`<section class="xblk" aria-label="Ավարտել հերթափոխը" style="box-shadow:inset 0 0 0 1px var(--line-soft),inset 3px 0 0 var(--danger-c)"><h3><i data-lucide="power"></i>Ավարտել հերթափոխը</h3>
+      <p>Մեքենան կազատվի · ընթացիկ պատվերը կավարտվի նախ</p>
+      <p style="font:var(--c-small)">Կապ չկա <span class="mono">03:40</span>-ից · վերջին դիրքը՝ Ավան</p></section>`)
   }
   if (ACT === 'shift') {
     /* Drawn ahead (driver-shift#operator is its app side): the office opens a shift for a driver with a car. */
-    afterActs(`<section class="xblk" aria-label="Բացել հերթապահություն"><h3><i data-lucide="car"></i>Բացել հերթապահություն</h3>
-      <p>Ընտրեք մեքենան․ վարորդը կտեսնի «Բացել է դիսպետչերը»</p>
+    afterActs(`<section class="xblk" aria-label="Բացել հերթափոխ"><h3><i data-lucide="car"></i>Բացել հերթափոխ</h3>
+      <p>Ընտրեք մեքենան</p>
       <div class="opts2" role="listbox" aria-label="Մեքենաներ" style="margin-top:8px">
         <div class="on" role="option" aria-selected="true"><span class="car s">${carImg('city')}</span><span><span class="plate">19 MA 190</span> <span class="s">ID.3 · ազատ</span></span><span class="s">Eco City</span></div>
         <div role="option"><span class="car s">${carImg('kids')}</span><span><span class="plate">20 SK 202</span> <span class="s">ID.3 · ազատ</span></span><span class="s">Eco Kids</span></div>
-        <div class="held" role="option" aria-disabled="true"><span class="car s">${carImg('city')}</span><span><span class="plate">01 ET 001</span><span class="s" style="display:block;margin-top:2px">զբաղեցրել է՝ Արամ Պ.</span></span><span class="s">Eco City</span></div></div>
-      <div class="row-flex" style="justify-content:flex-end;gap:6px;margin-top:8px"><button class="btn ghost s">Չեղարկել</button><button class="btn primary s">Բացել հերթապահություն</button></div></section>`)
+        <div class="held" role="option" aria-disabled="true"><span class="car s">${carImg('city')}</span><span><span class="plate">01 ET 001</span><span class="s" style="display:block;margin-top:2px">զբաղված է՝ Արամ Պ.</span></span><span class="s">Eco City</span></div></div>
+      <div class="row-flex" style="justify-content:flex-end;gap:6px;margin-top:8px"><button class="btn ghost s">Չեղարկել</button><button class="btn primary s">Բացել հերթափոխ</button></div></section>`)
   }
   if (ACT === 'deletion') {
-    afterActs(`<section class="xblk" aria-label="Այս վարորդը խնդրել է ջնջել իր հաշիվը" style="box-shadow:inset 0 0 0 1px var(--line-soft),inset 3px 0 0 var(--warn)"><h3><i data-lucide="user-x"></i>Այս վարորդը խնդրել է ջնջել իր հաշիվը</h3>
-      <p>անունը, համարը և սարքերը կջնջվեն; պատվերներն ու գումարը կմնան</p>
-      <p style="font:var(--c-small)">Հայտը՝ հավելվածից, <span class="mono">8 հոկտ. 21:40</span> · մնացորդ՝ <span class="mono">0 ֏</span> · ընթացիկ պատվեր չկա</p>
-      <div class="row-flex" style="gap:8px;margin-top:8px">${arm('Համաձայնել և ջնջել հաշիվը', 'Հաստատե՞լ', 'Երկրորդ սեղմումը ջնջում է')}</div></section>`)
+    afterActs(`<section class="xblk" aria-label="Ջնջման հարցում" style="box-shadow:inset 0 0 0 1px var(--line-soft),inset 3px 0 0 var(--warning)"><h3><i data-lucide="user-x"></i>Խնդրում է ջնջել հաշիվը</h3>
+      <p>Կջնջվեն անունը, հեռախոսը, սարքերը · պատվերները կմնան</p>
+      <p style="font:var(--c-small)">Հավելվածից, <span class="mono">8 հոկտ. 21:40</span> · ընթացիկ պատվեր չկա</p>
+      <div class="row-flex" style="gap:8px;margin-top:8px">${arm('Ջնջել հաշիվը', 'Հաստատե՞լ', 'Երկրորդ սեղմումը ջնջում է')}</div></section>`)
   }
   if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 1.75 } })
 })()

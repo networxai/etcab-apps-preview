@@ -13,12 +13,12 @@
 <style>
   /* Mirrors apps/operator components/admin/dispatch-settings.tsx: five groups in one 48rem column, every field a number
      with its unit, no preview band. The Pre-bookings group gains the rider reminder (owner decision 2026-10-12, drawn
-     ahead: no rider push type and no config field yet). Money and Invoicing are the existing money-settings.tsx and
-     invoicing settings, shown here as tabs only. */
+     ahead: no rider push type and no config field yet). The «Ցածր գնահատական» group is owner decision 15 (2026-10-14):
+     1–3 ★ is low, a follow-up within 24 h, both configurable (ECO.DISPATCH.lowRating; drawn ahead). Money is the existing
+     money-settings.tsx. The Invoicing tab is gone (owner decision 11: no invoices); ?tab=invoicing opens Money. */
   .content { grid-template-columns: minmax(0, 1fr); }
   .page { overflow: hidden; }
   .col { width: 768px; max-width: 100%; padding: 4px var(--inset) 24px; display: flex; flex-direction: column; gap: 12px; }
-  .lead { font: var(--c-body); color: var(--ink-muted); max-width: 680px; }
   .grp { border-radius: var(--r-card); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-soft); }
   .grp > h2 { font: var(--c-head); padding: 12px var(--inset) 4px; }
   .grp > .ex { font: var(--c-small); color: var(--ink-muted); padding: 0 var(--inset) 8px; max-width: 680px; }
@@ -28,8 +28,8 @@
   .set .v { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
   .set .v .input { width: 120px; }
   .set .v .input .val { text-align: right; }
-  .set .u { font: var(--c-small); color: var(--ink-muted); width: 36px; white-space: nowrap; }
-  .set.new { background: var(--brand-tint); box-shadow: inset 3px 0 0 var(--brand-vivid); }
+  .set .u { font: var(--c-small); color: var(--ink-muted); width: 48px; white-space: nowrap; }
+  .set.new { box-shadow: inset 3px 0 0 var(--brand-vivid); }
   .set.new .l b { font-weight: 600; }
   .newtag { display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border-radius: var(--r-tag); background: var(--brand-fill); color: var(--brand-fill-ink); font: 500 12px/16px var(--font); margin-left: 6px; vertical-align: 1px; }
   .sum { font: var(--c-small); color: var(--ok-text); }
@@ -49,7 +49,6 @@
         <nav class="tabsl" style="margin-top:0" aria-label="Կարգավորումների բաժիններ">
           <a href="settings.html" data-tab="dispatch"><i data-lucide="activity"></i>Դիսպետչեր</a>
           <a href="settings.html?tab=money" data-tab="money"><i data-lucide="wallet"></i>Գումար</a>
-          <a href="settings.html?tab=invoicing" data-tab="invoicing"><i data-lucide="receipt-text"></i>Հաշիվներ</a>
         </nav>
         <div class="scroll-y grow"><div class="col" id="col"></div></div>
       </section>
@@ -64,26 +63,29 @@
   const SW = (l, on) => `<div class="set"><span class="l">${l}</span><span class="v"><span class="switch${on ? ' on' : ''}" role="switch" aria-checked="${on}"><i class="t"></i>${on ? 'Միացված' : 'Անջատված'}</span><span class="u"></span></span></div>`
   const G = (title, rows, ex) => `<section class="grp"><h2>${title}</h2>${ex ? `<p class="ex">${ex}</p>` : ''}${rows.join('')}</section>`
   const R = ECO.DISPATCH.reminderMin
-  const TAB = new URLSearchParams(location.search).get('tab') || 'dispatch'
+  const LR = ECO.DISPATCH.lowRating || { max: 3, followUpH: 24 }
+  const TABQ = new URLSearchParams(location.search).get('tab') || 'dispatch'
+  const TAB = TABQ === 'invoicing' ? 'money' : TABQ
   document.querySelectorAll('.tabsl a').forEach((a) => { a.href += (a.href.includes('?') ? '&' : '?') + 'theme=' + THEME; if (a.dataset.tab === TAB) { a.classList.add('on'); a.setAttribute('aria-current', 'page') } })
+  const NEW = (l, v, u, hint) => `<div class="set new"><span class="l"><b>${l}</b><span class="newtag">Նոր</span>${hint ? `<small>${hint}</small>` : ''}</span><span class="v"><span class="input"><span class="val mono">${v}</span></span><span class="u">${u}</span></span></div>`
   if (TAB === 'dispatch') document.getElementById('col').innerHTML = `
-    <p class="lead">Ինչպես է համակարգն ընտրում վարորդին յուրաքանչյուր պատվերի համար՝ ով է թեկնածու, ինչպես են դասակարգվում, ինչպես են ուղարկվում առաջարկները։</p>
-    ${G('Առաքում', [SW('Ավտոմատ առաքում ստեղծելիս', true)])}
-    ${G('Ո՞վ է թեկնածու', [N('Շառավղի քայլերը', '2, 4, 7', 'կմ', 'Թվեր՝ ստորակետով բաժանված, օրինակ՝ «2, 4, 7»։'), SW('Մեքենայի դասը պետք է համընկնի', true), N('Նվազագույն վարկանիշ', '', '', '', 'օր. 4.5'), N('Բաց առաջարկներ մեկ վարորդի', '1', '')])}
-    ${G('Ինչպե՞ս են դասակարգվում', [N('Մոտիկություն', '0.7', ''), N('Պարապ ժամանակ', '0.3', ''), N('Ընդունման տոկոս', '0', ''), N('Վարկանիշ', '0', ''),
-      '<div class="set"><span class="l">Կշիռների գումարը</span><span class="v"><span class="sum mono">1.0</span><span class="u"></span></span></div>',
-      N('Մոտիկության սահման', '5', 'կմ'), N('Պարապ ժամանակի սահման', '30', 'րոպե')], 'Չորս կշիռների գումարը պետք է լինի 1: Ընդունման տոկոսը և վարկանիշը մեկնարկին 0 են, քանի որ դեռ բավարար պատմություն չկա — բարձրացրեք, երբ լինի:')}
-    ${G('Ինչպե՞ս են ուղարկվում առաջարկները', [N('Ալիքներ (վարորդ մեկ ալիքում)', '1, 1, 1', ''), SW('Հարկադիր նշանակում (առանց ընդունման)', false), N('Առաջարկի սպասման ժամկետ', '20', 'վրկ'), N('Հաստատման պատուհան', '30', 'վրկ'), N('Բացակա՝ բաց թողած առաջարկներից հետո', '3', '')],
-      'Ալիքները հենց առաջարկի ռազմավարությունն են: «1, 1, 1»-ը հարցնում է երեք վարորդի հերթով; «3»-ը՝ երեքին միանգամից; վարորդների թվից մեծ մեկ թիվը՝ բոլորին:')}
-    ${G('Նախնական պատվերներ', [N('Ակտիվացնել պատվերը մինչ', '15', 'րոպե'), N('Պահել վարորդին մինչ', '30', 'րոպե'), N('Վարորդը կարող է մեկնել մինչ', '', 'րոպե', '', 'ինչպես պահելը'),
-      `<div class="set new"><span class="l"><b>Հիշեցում ուղևորին նախնական պատվերից առաջ</b><span class="newtag">Նոր</span><small>Ուղևորը ստանում է ծանուցում՝ ժամը, հասցեն և նշանակված մեքենան։ 0՝ անջատված</small></span><span class="v"><span class="input focus"><span class="val mono">${R}</span></span><span class="u">րոպե</span></span></div>`])}
-    <div class="foot"><button class="btn primary">Պահպանել</button><button class="btn secondary">Վերականգնել լռելյայնը</button><span class="pill warn">Չպահպանված</span><span class="rev">Տարբերակ 14</span></div>`
+    ${G('Բաշխում', [SW('Ավտոմատ փնտրել վարորդ', true)])}
+    ${G('Ո՞վ է թեկնածու', [N('Որոնման շառավիղներ', '2, 4, 7', 'կմ', 'Ստորակետով՝ օր. 2, 4, 7'), SW('Սակագինը պետք է համընկնի', true), N('Նվազագույն գնահատական', '', '', '', 'օր. 4,5'), N('Միաժամանակ առաջարկներ վարորդին', '1', '')])}
+    ${G('Ինչպե՞ս են դասակարգվում', [N('Մոտիկություն', '0,7', ''), N('Սպասման տևողություն', '0,3', ''), N('Ընդունման տոկոս', '0', ''), N('Գնահատական', '0', ''),
+      '<div class="set"><span class="l">Կշիռների գումարը</span><span class="v"><span class="sum mono">1,0</span><span class="u"></span></span></div>',
+      N('Մոտիկության սահման', '5', 'կմ'), N('Սպասման սահման', '30', 'րոպե')], 'Գումարը՝ 1 · ընդունումն ու գնահատականը՝ 0, քանի դեռ պատմություն չկա')}
+    ${G('Ինչպե՞ս են ուղարկվում առաջարկները', [N('Ալիքներ՝ վարորդ ալիքում', '1, 1, 1', ''), SW('Նշանակել առանց ընդունման', false), N('Առաջարկի ժամանակ', '20', 'վրկ'), N('Հաստատման ժամանակ', '30', 'վրկ'), N('Բացակա՝ բաց թողնելուց հետո', '3', 'անգամ')],
+      '«1, 1, 1»՝ երեքին հերթով · «3»՝ երեքին միասին')}
+    ${G('Նախնական պատվերներ', [N('Սկսել որոնումը', '15', 'րոպե', 'նստեցումից առաջ'), N('Պահել նշանակված վարորդին', '30', 'րոպե', 'նստեցումից առաջ'), N('Վարորդը կարող է սկսել', '', 'րոպե', 'նստեցումից առաջ', 'ինչպես վերևում'),
+      NEW('Հիշեցում ուղևորին', R, 'րոպե', 'ժամը, հասցեն և մեքենան · 0՝ անջատված')])}
+    ${G('Ցածր գնահատական', [NEW('Ցածր է՝ 1-ից մինչև', LR.max, '★', 'այս ուղևորությունները գալիս են Հարցումներ'), NEW('Պատասխանել', LR.followUpH, 'ժամում', 'դիսպետչերը զանգում է ուղևորին')])}
+    <div class="foot"><button class="btn primary">Պահել</button><button class="btn secondary">Վերականգնել լռելյայնը</button><span class="pill warn">Չպահված</span><span class="rev">Տարբերակ 14</span></div>`
   if (TAB !== 'dispatch') window.drawMoneyTab(TAB)
   icons()
-  /* The page opens on what this state is about: the Pre-bookings group with the new reminder row (the real page is one
-     scrolling column; the operator has scrolled to it). */
+  /* The page opens on what this state is about: the pre-order reminder and the low-rating group (the real page is one
+     scrolling column; the operator has scrolled to them). */
   document.fonts.ready.then(() => {
-    const box = document.querySelector('.page .scroll-y'), row = document.querySelector('.set.new')
+    const box = document.querySelector('.page .scroll-y'), row = [...document.querySelectorAll('.set.new')].pop()
     if (!row) return
     box.scrollTop += row.getBoundingClientRect().top - box.getBoundingClientRect().top - box.clientHeight / 2 + row.offsetHeight / 2
   })

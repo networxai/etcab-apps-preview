@@ -16,7 +16,9 @@
      their card). Plate / model / class / owner edit in place; «Հիմա» is who is driving it on an open shift. A partner car's
      approval is decided here too: Approve is one press; Reject / Suspend open an inline panel under the row (reason + a
      two-press ArmButton), never a modal. Retire is the row's reveal action (opacity, so it stays in the keyboard's reach)
-     and is armed: «Հանել · պատվերները կմնան». Class = the tier list, as everywhere in v2 (review X10). */
+     and is armed: «Հանել · պատվերները կմնան». Class = the tariff (owner #9). Owner #6: a partner has exactly one car, and
+     it arrives from the partner app for approval — so «Նոր մեքենա» adds an ավտոպարկի car only (no owner picker).
+     Style pass 2026-10-14: an in-service car carries no pill (a column of green pills said nothing); only exceptions do. */
   .tbl.vt td { height: 44px; }
   .vt .plate { font-family: var(--mono); }
   .vt .acts { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
@@ -24,6 +26,8 @@
   .vt .own a { color: var(--ink); text-decoration: none; font: var(--c-strong); overflow: hidden; text-overflow: ellipsis; }
   .vt .own a:hover { text-decoration: underline; }
   .vt .co { color: var(--ink-muted); }
+  .vt .ok-t { color: var(--ink-muted); font: var(--c-body); }
+  .vt .typ.partner { padding: 0 4px; }
   .vt tr.dec td { background: var(--surface-alt); }
   .vt tr.panel td { background: var(--surface-alt); height: auto; padding-top: 10px; padding-bottom: 12px; white-space: normal; }
   .decide { display: flex; align-items: flex-start; gap: 8px; }
@@ -74,12 +78,12 @@
   const ALL = [...PART, ...FLEET].sort((a, b) => rank(a) - rank(b))
   document.getElementById('count').textContent = ALL.length
   const selPlate = st === 'retire-refused' ? '01 ET 001' : '50 LT 650'
-  const named = (verb, v) => `${verb} — ${v.plate}`
+  const named = (verb, v) => `${verb} · ${v.plate}`
 
   const statePill = (v) => {
-    if (v.retired) return '<span class="pill"><i class="d"></i>Հանված</span>'
-    if (v.owner && v.appr !== 'approved') { const [tone, word, ic] = { pending: ['warn', 'Սպասում է հաստատման', 'clock'], rejected: ['', 'Մերժված', 'x'], suspended: ['warn', 'Կասեցված', 'pause'] }[v.appr]; return `<span class="pill ${tone}"><i data-lucide="${ic}"></i>${word}</span>` }
-    return '<span class="pill ok"><i class="d"></i>Շահագործման մեջ</span>'
+    if (v.retired) return '<span class="pill"><i data-lucide="archive"></i>Հանված</span>'
+    if (v.owner && v.appr !== 'approved') { const [tone, word, ic] = { pending: ['warn', 'Սպասում է', 'clock'], rejected: ['', 'Մերժված', 'x'], suspended: ['warn', 'Կասեցված', 'pause'] }[v.appr]; return `<span class="pill ${tone}"><i data-lucide="${ic}"></i>${word}</span>` }
+    return '<span class="ok-t">Աշխատում է</span>'
   }
   const acts = (v) => {
     if (disp) return ''
@@ -95,38 +99,39 @@
     const T = tierById(v.tier)
     let h = `<tr class="${v.retired ? 'off ' : ''}${on ? 'on' : ''}"><td><span class="plate">${v.plate}</span></td><td>${v.model}</td>
       <td><span class="carcell"><span class="car xs">${carImg(v.tier)}</span>${T.name}</span></td>
-      <td>${v.owner ? `<span class="own"><span class="typ partner" title="Գործընկեր" aria-label="Գործընկեր"><i data-lucide="handshake"></i></span><a href="partners.html?theme=${THEME}" aria-label="Բացել գործընկերոջ քարտը — ${v.owner.name}">${v.owner.name}</a></span>` : '<span class="co">Ընկերության</span>'}</td>
-      <td>${v.now ? `<span class="who"><span class="av" style="width:24px;height:24px;font-size:11px">${v.now.ini}</span><span>${v.now.name.split(' ')[0]} ${v.now.name.split(' ')[1][0]}.</span></span>` : '<span class="dash" title="Ոչ ոք չի վարում">—</span>'}</td>
+      <td>${v.owner ? `<span class="own"><span class="typ partner" title="Գործընկեր" aria-label="Գործընկեր"><i data-lucide="handshake"></i></span><a href="partners.html?theme=${THEME}&p=${PARTNERS.indexOf(v.owner)}" aria-label="Բացել գործընկերոջ քարտը · ${v.owner.name}">${v.owner.name}</a></span>` : '<span class="co">Ավտոպարկ</span>'}</td>
+      <td>${v.now ? `<span class="who"><span class="av" style="width:24px;height:24px;font-size:11px">${v.now.ini}</span><span>${v.now.name.split(' ')[0]} ${v.now.name.split(' ')[1][0]}.</span></span>` : '<span class="faint" title="Ոչ ոք չի վարում">—</span>'}</td>
       <td>${statePill(v)}</td><td><span class="acts">${acts(v)}</span></td></tr>`
     if (on && st === 'reject') h += `<tr class="panel"><td colspan="7"><div class="decide" data-testid="vehicle-decision">
         <div class="f"><div class="input err focus" role="textbox" aria-label="Պատճառ" aria-invalid="true"><span class="val ph">Ինչ պետք է ուղղի գործընկերը</span></div><p class="hint err" role="status">Պարտադիր է</p></div>
-        <button class="btn s armed">Մերժել · գործընկերը չի կարող վարել</button><button class="btn ghost s">Չեղարկել</button></div></td></tr>`
-    if (on && st === 'retire-refused') h += `<tr class="panel"><td colspan="7"><div class="notice amber rowmsg" role="status"><i data-lucide="triangle-alert"></i><span>Այս մեքենայով վարորդ է հերթապահում։ Նախ տեղափոխեք նրան այլ մեքենա կամ ավարտեք հերթապահությունը, ապա հանեք։</span></div></td></tr>`
+        <button class="btn s armed">Մերժել · գործընկերը չի կարող աշխատել</button><button class="btn ghost s">Չեղարկել</button></div></td></tr>`
+    if (on && st === 'retire-refused') h += `<tr class="panel"><td colspan="7"><div class="notice amber rowmsg" role="status"><i data-lucide="triangle-alert"></i><span>Այս մեքենայով հերթափոխ է բաց՝ Արամ Պ. · նախ ավարտեք հերթափոխը կամ փոխեք մեքենան</span></div></td></tr>`
     return h
   }
   const n = (f) => ALL.filter(f).length
-  const chips = TIERS.filter((t) => ALL.some((v) => v.tier === t.id)).map((t) => `<span class="chip" role="button" aria-pressed="false">${t.name} <span class="c num">${n((v) => v.tier === t.id && !v.retired)}</span></span>`).join('')
+  /* One filter line: state as a segmented control, tariff as one picker (six tariff chips wrapped the toolbar to two lines). */
   const add = st === 'add' ? `<tr class="addrow"><td colspan="7"><div class="inl">
       <div class="input focus" style="width:132px" role="textbox" aria-label="Համարանիշ"><span class="val">01 ET 024</span></div>
       <div class="input" style="width:200px" role="textbox" aria-label="Մոդել"><span class="val" style="font-family:var(--font)">Volkswagen ID.3</span></div>
-      <div class="select input" style="width:150px" role="combobox" aria-label="Դաս"><span class="val" style="font-family:var(--font)">Eco City</span><i data-lucide="chevrons-up-down"></i></div>
-      <div class="select input" style="width:220px" role="combobox" aria-label="Սեփականատեր"><span class="val ph" style="font-family:var(--font)">Ընկերության</span><i data-lucide="chevrons-up-down"></i></div>
-      <button class="btn primary s"><i data-lucide="check"></i>Ավելացնել մեքենա <span class="kbd">↵</span></button><button class="btn ghost s">Չեղարկել</button>
-      <span class="hintx hide-s">Վարորդը կցում է հերթափոխը սկսելիս</span></div></td></tr>` : ''
+      <div class="select input" style="width:150px" role="combobox" aria-label="Սակագին"><span class="val" style="font-family:var(--font)">Eco City</span><i data-lucide="chevrons-up-down"></i></div>
+      <span class="co" style="display:inline-flex;align-items:center;gap:6px;font:var(--c-body);color:var(--ink-muted)"><i data-lucide="building-2"></i>Ավտոպարկ</span>
+      <button class="btn primary s"><i data-lucide="check"></i>Ավելացնել <span class="kbd">↵</span></button><button class="btn ghost s">Չեղարկել</button>
+      <span class="hintx hide-s">Գործընկերոջ մեքենան գալիս է հավելվածից՝ հաստատման</span></div></td></tr>` : ''
 
   document.getElementById('list').innerHTML = `
     <div class="toolrow">
-      <div class="input" style="width:260px"><i data-lucide="search"></i><span class="val ph">օր. 35 SO 042 կամ Prius</span><span class="kbd">/</span></div>
-      <div role="group" aria-label="Զտիչներ" class="row-flex" style="gap:6px;flex-wrap:wrap">
-        <span class="chip" role="button" aria-pressed="false"><i data-lucide="clock"></i>Սպասում է հաստատման <span class="c num">${n((v) => v.owner && v.appr === 'pending')}</span></span>${chips}
-        <span class="chip" role="button" aria-pressed="false">Հանված <span class="c num">${n((v) => v.retired)}</span></span></div>
+      <div class="input" style="width:260px"><i data-lucide="search"></i><span class="val ph">Համարանիշ կամ մոդել</span><span class="kbd">/</span></div>
+      <div class="seg" role="tablist" aria-label="Վիճակ"><button class="on">Բոլորը <span class="c num">${n((v) => !v.retired)}</span></button><button><i data-lucide="clock"></i>Սպասում է <span class="c num">${n((v) => v.owner && v.appr === 'pending')}</span></button><button>Կասեցված <span class="c num">${n((v) => v.owner && v.appr === 'suspended')}</span></button><button>Հանված <span class="c num">${n((v) => v.retired)}</span></button></div>
+      <div class="select input" style="width:168px" role="combobox" aria-label="Սակագին"><span class="val">Բոլոր սակագները</span><i data-lucide="chevrons-up-down"></i></div>
+      <span class="chip" role="button" aria-pressed="false"><i data-lucide="building-2"></i>Ավտոպարկ <span class="c num">${n((v) => !v.owner && !v.retired)}</span></span>
+      <span class="chip" role="button" aria-pressed="false"><i data-lucide="handshake"></i>Գործընկեր <span class="c num">${n((v) => v.owner)}</span></span>
       <span class="sp"></span>
-      ${disp ? '' : `<button class="btn secondary" aria-expanded="${st === 'add'}" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր մեքենա <span class="kbd">N</span></button>`}
+      ${disp ? '' : `<button class="btn secondary s" aria-expanded="${st === 'add'}" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր մեքենա <span class="kbd">N</span></button>`}
     </div>
-    ${disp ? '<p class="explain" style="padding-top:0;padding-bottom:10px">Մեքենա ավելացնել, հաստատել և հանել կարող է ադմինը։ Դիսպետչերը տեսնում է, ով ինչ մեքենայով է։</p>' : ''}
+    ${disp ? '<p class="explain" style="padding-top:0;padding-bottom:10px;display:flex;gap:6px;align-items:center"><i data-lucide="eye" style="width:16px;height:16px"></i>Միայն դիտում · ավելացնում, հաստատում և հանում է ադմինը</p>' : ''}
     <div class="scroll-y grow" data-truncate>
-      <table class="tbl vt" aria-label="Մեքենաներ"><colgroup><col style="width:116px"><col class="c-model"><col style="width:160px"><col class="c-owner" style="width:220px"><col class="c-now" style="width:150px"><col style="width:196px"><col style="width:220px"></colgroup>
-        <thead><tr><th>Համարանիշ</th><th>Մոդել</th><th>Դաս</th><th>Սեփականատեր</th><th>Հիմա</th><th>Վիճակ</th><th></th></tr></thead>
+      <table class="tbl vt" aria-label="Մեքենաներ"><colgroup><col style="width:116px"><col class="c-model"><col style="width:160px"><col class="c-owner" style="width:220px"><col class="c-now" style="width:150px"><col style="width:164px"><col style="width:200px"></colgroup>
+        <thead><tr><th>Համարանիշ</th><th>Մոդել</th><th>Սակագին</th><th>Սեփականատեր</th><th>Վարում է</th><th>Վիճակ</th><th aria-label="Գործողություններ"></th></tr></thead>
         <tbody>${add}${ALL.map(row).join('')}</tbody></table></div>`
   icons()
   /* Open on the row the state is about. */

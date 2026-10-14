@@ -286,3 +286,17 @@
 .offer .tags .chip.co { background: var(--brand-soft); color: var(--ink); }
 .offer .tags .chip.co svg { color: var(--brand-ink); }
 .offer .tags { flex-wrap: wrap; }
+
+/* ── 2026-10-14: notifications inbox (owner #4) and the insurance block (owner #5) ──
+   Unread = a brand dot with a surface ring on the bell (home) or a count pill (account row); never colour alone:
+   the inbox also sets unread titles in 600. */
+.fab .udot { position: absolute; top: 9px; right: 10px; width: 10px; height: 10px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 2px var(--surface); }
+.cnt { min-width: 24px; height: 24px; padding: 0 7px; border-radius: var(--r-pill); background: var(--brand); color: var(--on-brand);
+  font: 600 13px/24px var(--font); text-align: center; font-variant-numeric: tabular-nums; flex: none; }
+/* Three-step strip: where a blocked driver stands on the way back to orders (upload → office check → orders). */
+.steps3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.steps3 i { height: 6px; border-radius: 3px; background: var(--surface-3); display: block; }
+.steps3 i.on { background: var(--warn); }
+.steps3 i.done { background: var(--ink); }
+.steps3-l { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 6px; font: var(--t-caption); color: var(--ink-2); white-space: nowrap; }
+.steps3-l b { color: var(--ink); font-weight: 600; }

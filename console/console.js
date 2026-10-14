@@ -27,18 +27,20 @@
      on the rider home) is renamed «Բիզնես գործընկերներ» so the word means one thing in this nav.
      Groups marked fold:true render collapsed unless they hold the active page (keeps the nav inside 900px). ── */
   const NAV = [
-    { items: [['overview', 'layout-dashboard', 'Ընդհանուր'], ['dispatch', 'activity', 'Դիսպետչեր', '2', true], ['rides', 'list', 'Պատվերներ'], ['requests', 'inbox', 'Հարցումներ', '4', true]] },
+    { items: [['overview', 'layout-dashboard', 'Ընդհանուր'], ['dispatch', 'activity', 'Դիսպետչերական', '2', true], ['rides', 'list', 'Պատվերներ'], ['requests', 'inbox', 'Հարցումներ', '3', true]] },
     { group: 'Ավտոպարկ', items: [['drivers', 'users', 'Վարորդներ', '30'], ['vehicles', 'car', 'Մեքենաներ', '28'], ['tariffs', 'tag', 'Սակագներ'], ['zones', 'map', 'Գոտիներ']] },
-    { group: 'Գործընկերներ', items: [['partners', 'handshake', 'Գործընկերներ', '12'], ['approvals', 'badge-check', 'Հաստատումներ', '3', true], ['topups', 'wallet', 'Լիցքավորումներ'], ['feeplans', 'percent', 'Վճարի պլաններ']] },
-    { group: 'Ֆինանսներ', items: [['settlement', 'receipt', 'Հաշվարկներ' /* nav.billing in lib/i18n.ts → /admin/billing */], ['customers', 'user-check', 'Հաճախորդներ'], ['companies', 'building-2', 'Ընկերություններ'], ['invoices', 'receipt-text', 'Հաշիվների ձևավորում'], ['fiscal', 'scroll-text', 'Ֆիսկալ հերթ'], ['reports', 'chart-column', 'Հաշվետվություններ']] },
-    { group: 'Ուղևորի հավելված', fold: true, items: [['promotions', 'megaphone', 'Ակցիաներ'], ['bizpartners', 'store', 'Բիզնես գործընկերներ'], ['apptexts', 'smartphone', 'Տեքստեր և կապ']] },
-    { group: 'Կառավարում', fold: true, items: [['operators', 'user-cog', 'Օպերատորներ'], ['integrations', 'plug', 'Ինտեգրումներ'], ['audit', 'history', 'Աուդիտ'], ['settings', 'settings', 'Կարգավորումներ']] },
+    { group: 'Գործընկերներ', items: [['partners', 'handshake', 'Գործընկերներ', '12'], ['approvals', 'badge-check', 'Հաստատումներ', '3', true], ['topups', 'wallet', 'Լիցքավորումներ'], ['feeplans', 'percent', 'Միջնորդավճարներ']] },
+    /* Owner 2026-10-14: fleet drivers have no balance (#3), so fleet billing plans («Հաշվարկներ», billing.html) are gone;
+       no invoicing (#11), so «Հաշիվների ձևավորում» is gone — company reports live on the company page and in Reports. */
+    { group: 'Ֆինանսներ', items: [['customers', 'user-check', 'Ուղևորներ'], ['companies', 'building-2', 'Ընկերություններ'], ['monthly', 'calendar-check', 'Ըստ ամսի'], ['fiscal', 'scroll-text', 'Ֆիսկալ կտրոններ'], ['reports', 'chart-column', 'Հաշվետվություններ']] },
+    { group: 'Ուղևորի հավելված', fold: true, items: [['promotions', 'megaphone', 'Գովազդներ'], ['bizpartners', 'store', 'Գովազդատուներ'], ['apptexts', 'smartphone', 'Տեքստեր և կապ']] },
+    { group: 'Կառավարում', fold: true, items: [['operators', 'user-cog', 'Օպերատորներ'], ['integrations', 'plug', 'Ինտեգրումներ'], ['audit', 'history', 'Մատյան'], ['settings', 'settings', 'Կարգավորումներ']] },
   ]
-  const PAGES = ['overview', 'dispatch', 'rides', 'drivers', 'tariffs', 'partners', 'approvals', 'topups', 'feeplans', 'companies', 'company', 'invoices', 'settings',
+  const PAGES = ['overview', 'dispatch', 'rides', 'drivers', 'tariffs', 'partners', 'approvals', 'topups', 'feeplans', 'companies', 'company', 'monthly', 'settings',
     /* p1p2 pass: the remaining real routes, plus the planned Requests inbox. */
-    'requests', 'vehicles', 'zones', 'settlement', 'customers', 'reports', 'promotions', 'operators', 'integrations', 'audit', 'search']
+    'requests', 'vehicles', 'zones', 'customers', 'reports', 'promotions', 'operators', 'integrations', 'audit', 'search']
   /* Nav ids whose file is named after the real route rather than the nav word. */
-  const FILE = { settlement: 'billing', customers: 'customer' }
+  const FILE = { customers: 'customer' }
   const href = (id) => (PAGES.includes(id) ? `${FILE[id] || id}.html?theme=${THEME}` : '#')
 
   window.shell = function (active) {
@@ -73,17 +75,17 @@
     const live = document.querySelector('.bar .live')
     if (live) live.insertAdjacentHTML('beforeend', `
       <a class="pill bad" href="dispatch.html?theme=${THEME}" style="text-decoration:none" aria-label="2 խնդիր հերթում"><i data-lucide="circle-alert"></i><span class="num">2</span> խնդիր</a>
-      <span class="pill ok" title="WebSocket միացված է"><i class="d"></i>Ուղիղ</span>
+      <span class="pill ok" title="Կապը կենդանի է"><i class="d"></i>Կապ կա</span>
       <span class="row-flex" style="gap:0" aria-label="Աշխատում են՝ 3 դիսպետչեր">
         <span class="av" style="width:24px;height:24px;font-size:11px">ԱԴ</span><span class="av" style="width:24px;height:24px;font-size:11px;margin-left:-6px">ՄՀ</span><span class="av" style="width:24px;height:24px;font-size:11px;margin-left:-6px">ՍԱ</span>
       </span>
-      <button class="btn ghost icon" aria-label="Ձայներ՝ միացված (յուրաքանչյուր իրադարձություն առանձին)"><i data-lucide="volume-2"></i></button>
-      <button class="btn ghost s" aria-label="Լեզու">Հայ</button>
+      <button class="btn ghost icon" aria-label="Ձայնը միացված է"><i data-lucide="volume-2"></i></button>
+      <button class="btn ghost s" aria-label="Լեզու">ՀՅ</button>
       <a class="btn ghost icon" href="?theme=${THEME === 'dark' ? 'light' : 'dark'}" aria-label="Թեմա"><i data-lucide="${THEME === 'dark' ? 'sun' : 'moon'}"></i></a>`)
 
     /* Review chrome (C1): no floating switcher over product content. The index link docks in the top bar beside the
        real theme toggle, which already switches ?theme=. */
-    if (live) live.insertAdjacentHTML('afterbegin', `<a class="btn ghost s mocklink" href="index.html?theme=${THEME}" title="Մոքափների ինդեքս">Ինդեքս</a>`)
+    if (live) live.insertAdjacentHTML('afterbegin', `<a class="btn ghost s mocklink" href="index.html?theme=${THEME}" title="Բոլոր էջերը">Ինդեքս</a>`)
     if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 1.75 } })
   }
   window.icons = () => window.lucide && lucide.createIcons({ attrs: { 'stroke-width': 1.75 } })
@@ -96,7 +98,7 @@
     ['Լիլիթ Մանուկյան', 'ԼՄ', '077 18-30-22', '18 OL 220', 'kids', 'free', [40.1772, 44.5040]],
     ['Գագիկ Ավետիսյան', 'ԳԱ', '055 20-44-19', '34 LS 108', 'partner', 'ride', [40.1925, 44.5021]],
     ['Նարեկ Հովհաննիսյան', 'ՆՀ', '098 23-55-90', '07 AB 913', 'business', 'free', [40.1745, 44.5212]],
-    ['Վահե Սարգսյան', 'ՎՍ', '091 77-31-08', '55 SM 620', 'city', 'away', [40.1702, 44.4988]],
+    ['Վահե Սարգսյան', 'ՎՍ', '091 77-31-08', '55 SM 620', 'city', 'off' /* ECO.DOCS.blocked: orders stopped, insurance expired 05.10 */, [40.1702, 44.4988]],
     ['Արմեն Գրիգորյան', 'ԱԳ', '099 11-22-33', '35 OS 512', 'van', 'ride', [40.1960, 44.4935]],
     ['Տիգրան Աբրահամյան', 'ՏԱ', '093 60-12-48', '12 TT 304', 'city', 'ride', [40.1810, 44.5265]],
     ['Կարեն Մելքոնյան', 'ԿՄ', '077 50-12-12', '44 KM 771', 'partner', 'free', [40.1890, 44.5190]],
@@ -104,10 +106,11 @@
     ['Հայկ Սահակյան', 'ՀՍ', '096 48-71-02', '61 HS 450', 'city', 'lost', [40.2010, 44.5080]],
     ['Էդգար Պողոսյան', 'ԷՊ', '095 14-28-63', '27 EP 336', 'city', 'free', [40.1700, 44.5170]],
   ].map(([name, ini, phone, plate, tier, state, ll], i) => ({ name, ini, phone, plate, tier, state, ll,
-    /* Owner, 2026-10-11: fleet drivers drive our cars; partner drivers own theirs and keep a prepaid wallet. */
+    /* Owner, 2026-10-11: fleet drivers drive our cars; partners own one car each and keep a prepaid balance.
+       Owner 2026-10-14 (#3): fleet drivers have NO balance — wallet is set for partners only. */
     type: [3, 4, 8, 9, 11].includes(i) ? 'partner' : 'fleet',
     wallet: { 3: 18400, 4: 2600, 8: -1200, 9: 41000, 11: 7300 }[i] }))
-  window.DTYPE = { fleet: ['Պարկի', 'Պարկի վարորդ', 'car'], partner: ['Գործընկեր', 'Գործընկեր վարորդ', 'handshake'] }
+  window.DTYPE = { fleet: ['Ավտոպարկի', 'Ավտոպարկի վարորդ', 'car'], partner: ['Գործընկեր', 'Գործընկեր', 'handshake'] }
   /* ── Partners (owner 2026-10-11): own car, prepaid wallet, blocked below 0, warned below ~1 day of fees (3 000 ֏).
      code = «Վճարման կոդ», the API's driver.paymentReference: six digits, zero-padded (ECO.PARTNER.ref). car: [tier render, model, plate, approval]. ── */
   window.WARN_BELOW = ECO.PARTNER.warnBelow /* one threshold, shared with the partner app (review X4) */
@@ -127,13 +130,16 @@
   ].map(([name, ini, phone, code, bal, state, [tier, model, plate, appr], docs]) => ({ name, ini, phone, code, bal, state, tier, model, plate, appr, docs }))
   window.APPR = { approved: ['ok', 'Հաստատված', 'badge-check'], pending: ['warn', 'Սպասում է', 'clock'], rejected: ['bad', 'Մերժված', 'x'], suspended: ['warn', 'Կասեցված', 'pause'] /* a domain state, amber like blocked (X5) */ }
   /* Blocked is amber + lock on every surface (X5): a domain refusal, not a failure. */
-  window.balTone = (b) => (b < ECO.PARTNER.blockBelow ? ['warn', 'Արգելափակված', 'lock'] : b < WARN_BELOW ? ['warn', 'Քիչ է', 'triangle-alert'] : null)
+  /* Owner #3: the thresholds are the partner's tariff's (ECO.PARTNER.rules); console id 'partner' = kit id 'comfort'. */
+  window.tierRules = (id) => (ECO.PARTNER.rules || {})[id === 'partner' ? 'comfort' : id] || { warnBelow: WARN_BELOW, blockBelow: ECO.PARTNER.blockBelow }
+  window.tierPre = (id) => ((ECO.TIERS || []).find((x) => x.id === (id === 'partner' ? 'comfort' : id)) || { preorders: true }).preorders
+  window.balTone = (b, tier) => { const r = tierRules(tier || 'comfort'); return b < r.blockBelow ? ['warn', 'Կանգնած', 'lock'] : b < r.warnBelow ? ['warn', 'Ցածր', 'triangle-alert'] : null }
   /* Balance cell: amount + marker. Low/blocked carry an icon and a word, never colour alone. */
-  window.balCell = (b) => {
-    const t = balTone(b), txt = amd(b)
+  window.balCell = (b, tier) => {
+    const t = balTone(b, tier), txt = amd(b)
     return t ? `<span class="pill ${t[0]} bal"><i data-lucide="${t[2]}"></i><span class="mono">${txt}</span></span>` : `<span class="mono">${txt}</span>`
   }
   window.DSTATE = {
-    free: ['ok', 'Ազատ'], ride: ['', 'Պատվերով'], away: ['warn', 'Դադարի մեջ'], lost: ['bad', 'Լռում է'], off: ['', 'Անջատված'],
+    free: ['ok', 'Ազատ'], ride: ['', 'Պատվերով'], away: ['warn', 'Բացակա'], lost: ['bad', 'Կապ չկա'], off: ['', 'Անցանց'],
   }
 })()

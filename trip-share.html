@@ -62,7 +62,7 @@
   const RD = ECO.RIDE, DV = RD.driver
   const ended = new URLSearchParams(location.search).get('state') === 'ended'
   const plate = (no) => `<span class="plate" role="img" aria-label="Համարանիշ ${no}"><span class="eu" aria-hidden="true"><i></i><b>AM</b></span><span class="no">${no}</span></span>`
-  const head = (on) => `<header class="top"><img src="assets/eco/logo-wide.png" alt="Eco Taxi" width="112" height="20"><span class="live ${on ? '' : 'off'}"><i></i>${on ? 'Կենդանի' : 'Ավարտված'}</span></header>`
+  const head = (on) => `<header class="top"><img src="assets/eco/logo-wide.png" alt="Eco Taxi" width="112" height="20"><span class="live ${on ? '' : 'off'}"><i></i>${on ? 'Ուղիղ' : 'Ավարտված'}</span></header>`
   const cta = `<a class="btn btn-quiet" href="#">Պատվիրել Eco Taxi</a>`
   document.getElementById('w').innerHTML = ended
     ? `${head(false)}<div class="done-hero"><span class="badge"><i data-lucide="flag"></i></span><h1>Ուղևորությունն ավարտված է</h1>
@@ -72,7 +72,7 @@
     : `${head(true)}<div class="mapbox"><div id="map" aria-label="Մեքենան քարտեզին"></div></div>
        <div class="card">
          <div class="who">${RD.rider.name}ն ուղևորվում է</div>
-         <div class="eta"><b>${RD.dropAt}</b><span>ժամանում · ${RD.riding.left} րոպե</span></div>
+         <div class="eta"><b>${RD.dropAt}</b><span>ժամանում՝ ${RD.riding.left} րոպեից</span></div>
          <div class="stops"><div class="stop"><i></i>${RD.pickup}<span class="tm">${RD.pickupAt}</span></div><div class="stop"><i class="b"></i>${RD.drop}<span class="tm">${RD.dropAt}</span></div></div>
          <div class="drv"><span class="avatar ini" aria-hidden="true">${DV.ini}</span><span class="nm"><span class="n1">${DV.first}</span><span class="n2">${DV.carHy}</span></span>${plate(DV.plate)}</div>
          <div class="fine"><i data-lucide="link-2-off"></i><span>Հղումն անջատվում է ուղևորության ավարտին</span></div>

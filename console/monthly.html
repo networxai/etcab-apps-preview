@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Companies by month</title>
+<link rel="stylesheet" href="console.css">
+<link rel="stylesheet" href="corporate.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="company-report.js"></script>
+<script src="console-audit.js"></script>
+</head>
+<body>
+<!-- Cross-company overview (owner decision 11 + Q11, 2026-10-14: no invoices). The report itself lives on the company
+     page (?tab=report) and in reports.html?company=1; this page only lists every company for one month. One row per company for
+     one month: rides, amount, credit in use, the optional «Վճարված» mark (who and when), Excel / CSV / PDF and
+     «Ուղարկել». The accountant works here; the dispatcher never needs it.
+     monthly.html                 September 2026 (closed): six marked paid, two not
+     monthly.html?month=2026-10   October so far: open month, the mark is not offered yet
+     monthly.html?state=paid      Գլոբալ Լոջիսթիքս just ticked: who and when appear under the box
+     monthly.html?state=send      «Ուղարկել» open under Արարատ Սոֆթ: address from the company page, files, send
+     monthly.html?state=sent      the neutral row message after sending -->
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <span class="crumb">Ֆինանսներ <i data-lucide="chevron-right"></i></span><h1>Ընկերություններ՝ ըստ ամսի</h1>
+      <div class="live"></div>
+    </header>
+    <div class="content one">
+      <section class="card page" aria-label="Ընկերությունների ամիսները" id="page"></section>
+    </div>
+  </div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search)
+  const st = q.get('state') || ''
+  const OPEN = q.get('month') === '2026-10'
+  shell('monthly')
+  const amd = ECO.amd
+  const M = OPEN ? CO.MONTHS[1] : CO.MONTHS[0]
+  const L = CO.LIST.filter((c) => !c.closed).map((c) => ({ ...c, m: OPEN ? c.oct : c.sep }))
+  if (st === 'paid') L[1].m = { ...L[1].m, paidOn: 'այսօր, 9:41', by: 'Գոհար Մ.' }
+  const rides = L.reduce((a, c) => a + c.m.rides, 0), total = L.reduce((a, c) => a + c.m.amount, 0)
+  const billable = L.filter((c) => c.m.rides), paidN = billable.filter((c) => c.m.paidOn).length
+  const pick = st === 'send' || st === 'sent' ? 0 : st === 'paid' ? 1 : -1
+
+  const head = `<div class="toolrow" style="gap:12px">
+      <span class="month" role="group" aria-label="Ամիս"><a class="btn ghost icon s" href="?theme=${THEME}" aria-label="Նախորդ ամիս"${OPEN ? '' : ' aria-disabled="true" style="opacity:.4"'}><i data-lucide="chevron-left"></i></a><span class="lbl">${M.label}</span><a class="btn ghost icon s" href="?theme=${THEME}&month=2026-10" aria-label="Հաջորդ ամիս"${OPEN ? ' aria-disabled="true" style="opacity:.4"' : ''}><i data-lucide="chevron-right"></i></a></span>
+      ${OPEN ? '<span class="pill"><i data-lucide="clock"></i>Մինչ այսօր</span>' : ''}
+      <span class="facts">
+        <span>Ուղևորություններ<b class="mono">${ECO.num(rides)}</b></span>
+        <span>Գումար<b class="mono">${amd(total)}</b></span>
+        ${OPEN ? '' : `<span>Վճարված<b class="mono">${paidN} / ${billable.length}</b></span>`}
+      </span>
+      <span class="sp"></span>
+      <button class="btn primary"><i data-lucide="file-spreadsheet"></i>Ներբեռնել Excel</button>
+      <button class="btn secondary">Ներբեռնել CSV</button>
+    </div>`
+
+  const send = (c) => `<tr class="under"><td colspan="7">${CO.sendPanel(c.name + ' · ' + M.label)}</td></tr>`
+  const sent = () => `<tr class="under"><td colspan="7">${CO.sentNote()}</td></tr>`
+
+  const rows = L.map((c, i) => {
+    const empty = !c.m.rides
+    return `<tr class="ro${i === pick ? ' on' : ''}">
+      <td><span class="co-stack"><a class="nm" href="company.html?theme=${THEME}&tab=report" title="${c.name}">${c.name}</a>${c.mode === 'prepaid' ? '<span class="pill">Կանխավճար</span>' : ''}</span></td>
+      <td class="c">${empty ? '<span class="dash">0</span>' : c.m.rides}</td>
+      <td class="m">${empty ? '<span class="dash">—</span>' : amd(c.m.amount)}</td>
+      <td>${CO.limitCell(c.used, c.limit)}</td>
+      <td>${CO.paidCell(c.m.paidOn, { empty, open: OPEN, by: c.m.by })}</td>
+      <td style="text-align:right">${empty ? '' : CO.exportBtns(c.name, true)}</td>
+      <td style="text-align:right">${empty ? '' : `<button class="btn ${i === pick && st === 'send' ? 'secondary' : 'ghost'} s" aria-expanded="${i === pick && st === 'send'}"><i data-lucide="send"></i>Ուղարկել</button>`}</td></tr>
+      ${i === pick && st === 'send' ? send(c) : i === pick && st === 'sent' ? sent(c) : ''}`
+  }).join('')
+
+  document.getElementById('page').innerHTML = head + `<div class="scroll-y grow" data-truncate>
+    <table class="tbl rep" aria-label="Ընկերություններ · ${M.label}"><colgroup><col><col style="width:150px"><col style="width:140px"><col style="width:160px"><col style="width:190px"><col style="width:196px"><col style="width:120px"></colgroup>
+      <thead><tr><th>Ընկերություն</th><th class="c">Ուղևորություններ</th><th class="m">Գումար</th><th>Սահմանաչափ</th><th>Վճարում</th><th style="text-align:right">Ներբեռնել</th><th aria-label="Ուղարկել"></th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr><td>Ընդամենը · ${L.length} ընկերություն</td><td class="c">${ECO.num(rides)}</td><td class="m">${amd(total)}</td><td colspan="4"></td></tr></tfoot></table></div>`
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

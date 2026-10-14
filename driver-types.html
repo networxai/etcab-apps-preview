@@ -44,34 +44,34 @@
 <body>
 <header>
   <h1>Fleet vs Partner: one app, two contents</h1>
-  <p>Same frame, same tokens, same at-speed button. A fleet driver drives our car on a shift; a «Գործընկեր» drives their own car on their own time and keeps a prepaid wallet. Only the content changes. Click a phone to open the live page.</p>
+  <p>Same frame, same tokens, same at-speed button. A fleet driver drives our car on a shift; a «Գործընկեր» drives their own car on their own time and keeps a prepaid balance («Հաշվեկշիռ»). Only partners have a balance. Only the content changes. Click a phone to open the live page.</p>
   <div class="bar" role="group" aria-label="Theme"><button data-t="light" aria-pressed="true">Day</button><button data-t="dark" aria-pressed="false">Night</button><a href="driver-index.html">All driver screens</a></div>
   <div class="same">
     <div><b>Identical</b><span>Map, status pill, offer, ride flow, morphing button, pre-orders, account, themes incl. Sun.</span></div>
-    <div><b>Differs: the car</b><span>Fleet picks a free car at shift open. Partner has one approved car and no picker.</span></div>
-    <div><b>Differs: the money</b><span>Fleet sees earnings and a balance settled at the office. Partner sees a wallet charged 15 % per ride (Eco Comfort).</span></div>
-    <div><b>Differs: the block</b><span>Fleet: debt over a limit. Partner: wallet below 0. The current ride always finishes.</span></div>
+    <div><b>Differs: the car</b><span>Fleet picks a free car at shift open. Partner has exactly one approved car and no picker.</span></div>
+    <div><b>Differs: the money</b><span>Fleet sees only what it earned: no balance, no top-up, no debt. Partner sees a balance charged 15 % per ride by his tariff (Eco Comfort).</span></div>
+    <div><b>Differs: the block</b><span>Both: expired insurance, until a new one is approved. Partner only: balance below 0. The current ride always finishes.</span></div>
   </div>
 </header>
 <main id="g"></main>
 <script>
   const ROWS = [
     ['Going online', 'one tap vs choose a car',
-      ['driver-shift', 'choose', 'Shift: choose the car'], ['driver-partner-home', 'normal', 'Home: «Գծում լինել»'],
-      [['First step', 'Choose a free car', 'One tap, own car'], ['Car', 'Fleet ID.3, any free', 'Tesla 44 KM 771, approved'], ['Ends with', 'End of shift', 'Off the line']],
+      ['driver-shift', 'choose', 'Shift: choose the car'], ['driver-partner-home', 'normal', 'Home: «Ընդունել պատվերներ»'],
+      [['First step', 'Choose a free car', 'One tap, own car'], ['Car', 'Fleet ID.3, any free', 'Tesla 44 KM 771, approved'], ['Ends with', 'End of shift', '«Դադարեցնել» (stop taking orders)']],
       'A partner never sees a fleet car; a fleet driver never sees a partner car (ADR-V1).'],
-    ['Home', 'earnings hero vs wallet hero',
+    ['Home', 'earnings hero vs balance hero',
       ['driver-home', '', 'Home, online'], ['driver-partner-home', 'online', 'Home, online'],
-      [['Hero number', 'Today 9 800 ֏', 'Wallet 18 450 ֏'], ['Second line', '7 rides', 'Today fee −1 470 ֏'], ['Visual', 'none', 'Runway bar, ≈ 8 days']],
+      [['Hero number', 'Earned today 9 800 ֏', 'Balance 18 450 ֏'], ['Second line', '7 rides', 'Today\'s fee −1 470 ֏'], ['Visual', 'none', 'Runway bar, ≈ 8 days']],
       'Both at-speed buttons are 76 px (the owner floor, DEC-13).'],
-    ['Money', 'balance vs prepaid wallet',
-      ['driver-earnings', 'owed', 'Earnings · balance'], ['driver-partner-wallet', 'main', 'Wallet'],
-      [['Word', 'Հաշվեկշիռ (balance)', 'Դրամապանակ (wallet)'], ['Charges', 'Commission + daily fee', '15 % per ride, by tier'], ['Paying in', 'At the office', 'Office cash, or bank transfer with the «Վճարման կոդ» 000041'], ['Taxes', 'not shown', 'Dashed «առաջարկ» line, off']],
-      'Same ledger account and sign rules (ADR-W3); only the words and the top-up path differ.'],
-    ['Blocked', 'debt limit vs below zero',
-      ['driver-home-states', 'blocked', 'Blocked: debt over limit'], ['driver-partner-home', 'blocked', 'Blocked: wallet below 0'],
-      [['Trigger', 'Owes over 5 000 ֏', 'Wallet under 0 ֏'], ['Warning before', 'Near the limit', 'Under 3 000 ֏ (≈ 1 day of fees)'], ['The one action', 'See the balance', '«Լիցքավորել»']],
-      'Tone is amber on both: a domain refusal, not a failure.'],
+    ['Money', 'earnings vs balance',
+      ['driver-earnings', 'today', 'Earnings · today'], ['driver-partner-wallet', 'main', 'Balance'],
+      [['Word', 'Վաստակ (earnings)', 'Հաշվեկշիռ (balance)'], ['Charges', 'none in the app: the office settles', '«Միջնորդավճար» 15 % per ride · Eco Comfort'], ['Paying in', 'nothing', 'Office cash, or bank transfer with the «Վճարման կոդ» 000041'], ['Taxes', 'not shown', 'Dashed «առաջարկ» line, off']],
+      'Fleet drivers have no balance at all (owner, 2026-10-14). The fee and the minimum balance come from the partner\'s tariff.'],
+    ['Blocked', 'insurance vs balance',
+      ['driver-home-states', 'insurance', 'Blocked: insurance expired'], ['driver-partner-home', 'blocked', 'Blocked: balance below 0'],
+      [['Trigger', 'Insurance expired', 'Balance under 0 ֏ (or insurance expired)'], ['Warning before', 'Document expiring banner', 'Under 3 000 ֏ · Eco Comfort'], ['The one action', 'Upload the new document', '«Լիցքավորեք հաշվեկշիռը»'], ['Lifted when', 'The office approves it', 'The top-up arrives']],
+      'Tone is amber on both: a domain refusal, not a failure. A partner\'s insurance block is driver-partner-car#suspended.'],
   ]
   let theme = 'light'
   const fig = (cls, label, [f, s, cap]) => '<figure class="' + cls + '"><span class="who"><i></i>' + label + '</span><a href="' + f + '.html?theme=' + theme + (s ? '&state=' + s : '') + '"><img loading="lazy" alt="' + label + ': ' + cap + '" src="shots/' + f + (s ? '-' + s : '') + '-' + theme + '.png"></a></figure>'

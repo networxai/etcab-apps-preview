@@ -17,9 +17,9 @@
 <style>
   .sheet { padding-bottom: 34px; }
   .fab.lg { width: 48px; height: 48px; }
-  .logo { position: absolute; z-index: 20; top: 75px; left: 50%; transform: translateX(-50%); width: 100px; height: 18px; }
+  .logo { position: absolute; z-index: 20; top: 76px; left: 50%; transform: translateX(-50%); width: 88px; height: 16px; } /* 88: keeps 12px clear of «Առցանց» */
   /* Off the line: the map steps back, so nobody reads it as "working". */
-  :root[data-state="offline"] #map > div, :root[data-state="blocked"] #map > div, :root[data-state="noshift"] #map > div { filter: grayscale(1) opacity(.7); }
+  :root[data-state="offline"] #map > div, :root[data-state="noshift"] #map > div, :root[data-state="insurance"] #map > div, :root[data-state="insurance-sent"] #map > div { filter: grayscale(1) opacity(.7); }
 
   .top { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
   .line { display: flex; align-items: center; gap: var(--s2); font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; }
@@ -88,22 +88,21 @@
   .connlost .tm { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--ink-2); }
   .spin { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--surface-3); border-top: 2px solid var(--ink-2); flex: none; }
 
-  /* Debt block */
-  .owed { display: flex; align-items: flex-end; justify-content: space-between; margin: var(--s4) 0 var(--s2); }
-  .owed .hero { color: var(--warn); }
-  .owed .lim { font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; padding-bottom: 6px; }
-  .meter { height: 6px; border-radius: 3px; background: var(--surface-3); position: relative; }
-  .meter i { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; border-radius: 3px; background: var(--warn); }
-  .meter b { position: absolute; top: -4px; bottom: -4px; width: 2px; left: 96%; background: var(--ink); border-radius: 1px; }
+  /* Insurance block (owner #5): orders stop until a new document is uploaded and the office approves it. Amber, never red:
+     it is a rule, not a failure. One block = icon + what + since when, a three-step strip, one 76px primary. */
+  .ins { display: flex; align-items: center; gap: var(--s3); margin: var(--s4) 0; }
+  .ins .ic { width: 48px; height: 48px; border-radius: 50%; background: var(--warn-soft); color: var(--warn); display: grid; place-items: center; flex: none; }
+  .ins .ic svg { width: 24px; height: 24px; }
+  .ins .t1 { font: var(--t-title); color: var(--ink); white-space: nowrap; }
+  .ins .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .steps3 { margin-top: var(--s1); }
+  .btn-text.call { margin-top: var(--s2); }
   .notice { margin-top: var(--s4); }
   /* ── p1p2 pass: online variants and edge states (D05, D09–D13, D42) ── */
   .wait { display: flex; align-items: center; gap: var(--s2); font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; }
   .wait .bars { display: inline-flex; gap: 3px; }
   .wait .bars i { width: 4px; height: 4px; border-radius: 2px; background: var(--ok-dot); }
   .wait .bars i:nth-child(2) { opacity: .6; } .wait .bars i:nth-child(3) { opacity: .3; }
-  .carpick { display: inline-flex; align-items: center; gap: 6px; height: 48px; padding: 0 12px; border-radius: 12px; background: var(--surface);
-    box-shadow: inset 0 0 0 1.5px var(--hairline); border: 1.5px dashed var(--ink-3); font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; flex: none; text-decoration: none; }
-  .carpick svg { width: 18px; height: 18px; }
   /* Location «While using» warning: amber banner over the map with the one fix (location-warning.tsx, Banner tone warn). */
   .locwarn { position: absolute; z-index: 25; top: 116px; left: 12px; right: 12px; border-radius: var(--r-card); background: var(--warn-soft);
     box-shadow: var(--e2); padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
@@ -134,17 +133,18 @@
   <div class="map" id="map" aria-label="Քարտեզ"></div>
 
   <div class="spill away" role="status" data-s="away"><span class="dot"></span>Բացակա</div>
-  <div class="spill" role="status" data-s="location lowfleet nomap newoffer docexpiry held"><span class="dot"></span>Գծում</div>
-  <div class="spill off" role="status" data-s="offline blocked noshift"><span class="dot"></span>Գծից դուրս</div>
-  <div class="spill lost" role="status" data-s="lost"><span class="dot"></span>Կապ չկա</div><!-- design-head: the pill never says Գծում while the link is down (§10.2, research move 6) -->
+  <div class="spill" role="status" data-s="location nomap newoffer docexpiry held"><span class="dot"></span>Առցանց</div>
+  <div class="spill off" role="status" data-s="offline noshift insurance insurance-sent"><span class="dot"></span>Անցանց</div>
+  <div class="spill lost" role="status" data-s="lost"><span class="dot"></span>Կապ չկա</div><!-- design-head: the pill never says Առցանց while the link is down (§10.2, research move 6) -->
   <div class="spill" role="status" data-s="active"><span class="dot"></span>Պատվերով</div>
   <div class="spill demo" role="status" data-s="demo"><span class="dot"></span>Փորձնական</div>
-  <button class="fab lg" style="top:60px;right:16px" aria-label="Հաշիվ"><i data-lucide="user-round"></i></button>
-  <img class="logo" id="logo" src="assets/eco/logo-wide.png" alt="Eco Taxi" width="100" height="18"><!-- hidden by script when the status pill grows into it («Կապ չկա»): two shapes, never one string -->
+  <a class="fab lg" style="top:60px;right:72px" href="driver-inbox.html" aria-label="Ծանուցումներ, 3 նոր"><i data-lucide="bell"></i><span class="udot" aria-hidden="true"></span></a>
+  <a class="fab lg" style="top:60px;right:16px" href="driver-account.html" aria-label="Հաշիվ"><i data-lucide="user-round"></i></a>
+  <img class="logo" id="logo" src="assets/eco/logo-wide.png" alt="Eco Taxi" width="88" height="16"><!-- hidden by script when the status pill grows into it («Կապ չկա»): two shapes, never one string -->
 
-  <div class="nomap" data-s="nomap" role="status"><div class="c"><span class="ic"><i data-lucide="map-pin-off"></i></span><span class="t">Քարտեզն անհասանելի է — հասցեները գործում են</span></div></div>
+  <div class="nomap" data-s="nomap" role="status"><div class="c"><span class="ic"><i data-lucide="map-pin-off"></i></span><span class="t">Քարտեզը հասանելի չէ</span><span class="s" style="font:var(--t-secondary);color:var(--ink-2)">Պատվերները գալիս են</span></div></div>
   <div class="locwarn" role="alert" data-s="location"><div class="h"><i data-lucide="map-pin"></i>Էկրանը փակելիս պատվերները դադարում են</div><button class="btn"><i data-lucide="settings"></i>Բացել կարգավորումները</button></div>
-  <div class="connlost" role="alert" data-s="lost"><i data-lucide="wifi-off"></i>Վերականգնվում է<span class="tm">0:48</span></div>
+  <div class="connlost" role="alert" data-s="lost"><i data-lucide="wifi-off"></i>Կապը վերականգնվում է<span class="tm">0:48</span></div>
 
   <button class="fab lg" id="recentre" data-not="nomap" style="right:16px" aria-label="Կենտրոնացնել ինձ վրա"><i data-lucide="locate-fixed"></i></button>
 
@@ -156,27 +156,26 @@
       <div class="line" data-s="lost"><span class="spin" aria-hidden="true"></span>Վերջին կապը՝ 09:40</div>
       <div class="line" data-s="active"><i data-lucide="navigation"></i>Ընթացիկ պատվեր</div>
       <div class="line" data-s="demo"><i data-lucide="graduation-cap"></i>Ուսուցում</div>
-      <div class="line warn" data-s="blocked"><i data-lucide="lock"></i>Արգելափակված է</div>
-      <div class="wait" data-s="location lowfleet nomap newoffer docexpiry"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>Սպասում ենք պատվերի</div>
-      <div class="line" data-s="noshift"><i data-lucide="car-front"></i>Հերթապահություն չկա</div>
-      <div class="line warn" data-s="held"><i data-lucide="pause"></i><span class="mono-t">10:05-ից</span> պատվերներ չեն լինի</div>
-      <a class="carpick" data-s="noshift" href="driver-shift.html?state=choose"><i data-lucide="plus"></i>Ընտրե՛ք մեքենան</a>
+            <div class="wait" data-s="location nomap newoffer docexpiry"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>Սպասում ենք պատվերի</div>
+      <div class="line" data-s="noshift"><i data-lucide="car-front"></i>Հերթափոխ չկա</div>
+      <div class="line warn" data-s="insurance"><i data-lucide="lock"></i>Պատվերները դադարեցված են</div>
+      <div class="line" data-s="insurance-sent"><i data-lucide="hourglass"></i>Ստուգում է գրասենյակը</div>
+      <div class="line warn" data-s="held"><i data-lucide="pause"></i><span class="mono-t">10:05-ից</span> զբաղված եք</div>
       <span class="mycar" data-not="noshift" aria-label="Volkswagen ID.3, 01 ET 001"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="plate">01 ET 001</span></span>
     </div>
 
     <!-- earnings hero: away, offline, lost -->
-    <div class="earn" data-s="away lost location lowfleet nomap docexpiry">
+    <div class="earn" data-s="away lost location nomap docexpiry">
       <div><div class="lbl">Այսօր</div><div class="hero">1 200<small>֏</small></div></div>
       <div class="side"><span class="count">1 պատվեր</span><button class="eye" aria-label="Թաքցնել գումարը"><i data-lucide="eye"></i></button></div>
     </div>
 
     <!-- away: why, in one line -->
-    <div class="notice warn" data-s="away" style="margin:0 0 var(--s4)"><i data-lucide="phone-missed"></i><div><b>Բաց եք թողել 2 պատվեր</b>Սեղմե՛ք՝ վերադառնալու համար</div></div>
+    <div class="notice warn" data-s="away" style="margin:0 0 var(--s4)"><i data-lucide="phone-missed"></i><div><b>Բաց եք թողել 2 պատվեր</b>Դուք «Բացակա» եք</div></div>
 
-    <!-- lowfleet: cash in hand nearing the fleet limit (wallet.lowFleet; amber, a reminder not a block) -->
-    <div class="notice warn" data-s="lowfleet" style="margin:0 0 var(--s4)"><i data-lucide="banknote"></i><div><b>Շուտով հանձնե՛ք կանխիկը գրասենյակում</b><span class="s">Կանխիկ՝ 4 300 ֏ · սահմանը՝ 5 000 ֏</span></div></div>
-    <!-- docexpiry: one document inside its 14-day window (drawn ahead: docs live at the office, D42) -->
-    <a class="notice warn doc" data-s="docexpiry" href="driver-account.html?state=docs" style="margin:0 0 var(--s4)"><i data-lucide="file-clock"></i><div><b>Տաքսու թույլտվությունը՝ 12 օրից</b><span class="s">մինչև 21.10.2026 · Գրասենյակում</span></div><i class="chev" data-lucide="chevron-right"></i></a>
+    <!-- docexpiry: one document inside its 14-day window (ECO.DOCS.aram: insurance 20.10, 11 days from 9 Oct). Owner #5: after
+         the date orders stop (state insurance), so the banner is the early warning and links to the upload. -->
+    <a class="notice warn doc" data-s="docexpiry" href="driver-account.html?state=docs" style="margin:0 0 var(--s4)"><i data-lucide="file-clock"></i><div><b>Ապահովագրությունը՝ 11 օրից</b><span class="s">Ժամկետը լրանում է <span data-eco="DOCS.aram.insurance">20.10.2026</span></span></div><i class="chev" data-lucide="chevron-right"></i></a>
     <!-- newoffer: the offer screen was left while the offer still runs; the card is the way back (HomeSheet onOpenOffer) -->
     <a class="pend" data-s="newoffer" href="driver-offer.html" aria-label="Նոր պատվեր, Մաշտոցի պող. 37"><span class="r"><span class="tg"><i data-lucide="bell-ring"></i>Նոր պատվեր</span><span class="km">1,4 կմ</span></span><span class="t1" data-eco="RIDE.pickup">Մաշտոցի պող. 37</span></a>
 
@@ -191,47 +190,55 @@
     <div data-s="demo"><div class="demo-steps" aria-label="Քայլ 2՝ 4-ից"><i class="on"></i><i class="on"></i><i></i><i></i></div>
       <div class="demo-lbl"><span>Ընդունել</span><span>Տեղում եմ</span><span>Սկսել</span><span>Ավարտել</span></div></div>
 
-    <!-- blocked: debt over the threshold (money spec §5.2) -->
-    <div data-s="blocked">
-      <div class="owed"><div><div class="lbl" style="font:var(--t-secondary);color:var(--ink-2)">Դուք պարտք եք</div><div class="hero">5 200<small>֏</small></div></div><span class="lim">սահմանը՝ 5 000 ֏</span></div>
-      <div class="meter" aria-hidden="true"><i></i><b></b></div>
-      <div class="notice warn"><i data-lucide="banknote"></i><div><b>Կանխիկ պատվերները դադարեցվել են</b><span class="s">Մարե՛ք 200 ֏՝ գիծ վերադառնալու համար</span></div></div>
+    <!-- insurance (owner #5, the 21 Oct scenario for Արամ: ECO.DOCS.aram.insurance ran out on 20.10): orders stop until a new
+         photo is uploaded AND the office approves it. insurance-sent: uploaded, waiting for the office. -->
+    <div data-s="insurance insurance-sent">
+      <div class="ins"><span class="ic"><i data-lucide="shield-alert"></i></span>
+        <div><div class="t1" data-s="insurance">Ապահովագրությունը ժամկետանց է</div><div class="t1" data-s="insurance-sent">Լուսանկարն ուղարկվեց</div>
+          <div class="t2" data-s="insurance"><span data-eco="DOCS.aram.insurance">20.10.2026</span>-ից · պատվերներ չեն գա</div><div class="t2" data-s="insurance-sent">Այսօր, 8:12 · պատվերները՝ հաստատումից հետո</div></div></div>
+      <div class="steps3" aria-label="Քայլ 1՝ 3-ից" data-s="insurance"><i class="on"></i><i></i><i></i></div>
+      <div class="steps3" aria-label="Քայլ 2՝ 3-ից" data-s="insurance-sent"><i class="done"></i><i class="on"></i><i></i></div>
+      <div class="steps3-l" data-s="insurance"><b>Վերբեռնել</b><span>Ստուգում</span><span>Պատվերներ</span></div>
+      <div class="steps3-l" data-s="insurance-sent"><span>Վերբեռնված</span><b>Ստուգում</b><span>Պատվերներ</span></div>
     </div>
 
     <div class="today" data-s="offline active demo noshift newoffer held">
       <span class="l">Այսօր · 1 պատվեր</span><span class="v">1 200 ֏</span>
     </div>
 
-    <a class="pre" href="driver-preorders.html" data-not="demo blocked" aria-label="Նախապես ամրագրված, 2">
+    <a class="pre" href="driver-preorders.html" data-not="demo insurance insurance-sent" aria-label="Նախնական պատվերներ, 3">
       <span class="ic"><i data-lucide="calendar-clock"></i></span>
-      <span class="txt"><span class="t1">Նախապես ամրագրված</span><span class="t2">Այսօր, 10:35 · Կոմիտասի պող. 49</span></span>
+      <span class="txt"><span class="t1">Նախնական պատվերներ</span><span class="t2">Այսօր, 10:35 · Կոմիտասի պող. 49</span></span>
       <span class="n">3</span><i class="chev" data-lucide="chevron-right"></i>
     </a>
 
-    <a class="go" href="driver-shift.html?state=choose" data-s="noshift"><i data-lucide="key-round"></i>Սկսել հերթապահությունը</a>
+    <a class="go" href="driver-shift.html?state=choose" data-s="noshift"><i data-lucide="key-round"></i>Սկսել հերթափոխը</a>
     <a class="go" href="driver-preorders.html?state=started" data-s="held"><i data-lucide="navigation"></i>Ճանապարհին եմ</a>
-    <button class="drive" data-s="location lowfleet nomap newoffer docexpiry"><i data-lucide="power"></i>Դուրս գալ գծից</button>
-    <button class="go" data-s="away"><i data-lucide="power"></i>Վերադառնալ գիծ</button>
-    <button class="go" data-s="offline"><i data-lucide="power"></i>Անցնել գիծ</button>
-    <button class="drive" data-s="lost"><i data-lucide="power"></i>Դուրս գալ գծից</button>
+    <button class="drive" data-s="location nomap newoffer docexpiry"><i data-lucide="power"></i>Դադարեցնել</button>
+    <button class="go" data-s="away"><i data-lucide="power"></i>Ընդունել պատվերներ</button>
+    <button class="go" data-s="offline"><i data-lucide="power"></i>Ընդունել պատվերներ</button>
+    <button class="drive" data-s="lost"><i data-lucide="power"></i>Դադարեցնել</button>
     <a class="go" href="driver-ride.html?state=enroute" data-s="active"><i data-lucide="navigation"></i>Վերադառնալ պատվերին</a>
     <button class="go ink" data-s="demo"><i data-lucide="flag"></i>Ավարտել փորձը</button>
-    <a class="go" href="driver-earnings.html?state=blocked" data-s="blocked"><i data-lucide="wallet"></i>Տեսնել հաշվեկշիռը</a>
+    <a class="go" href="driver-account.html?state=docs" data-s="insurance"><i data-lucide="camera"></i>Վերբեռնել ապահովագրությունը</a>
+    <button class="drive" data-s="insurance-sent"><i data-lucide="phone"></i>Զանգել դիսպետչերին</button>
+    <button class="btn-text call" data-s="insurance"><i data-lucide="phone"></i>Զանգել դիսպետչերին</button>
   </section>
 </main>
 <script src="audit.js"></script>
 <script>
   const st = D.init([
     ['away', 'Away (auto, missed offers)'], ['offline', 'Offline (off the line)'], ['lost', 'Connection lost'],
-    ['active', 'Active ride card'], ['demo', 'Practice ride running'], ['blocked', 'Blocked (debt over limit)'],
+    ['active', 'Active ride card'], ['demo', 'Practice ride running'],
     ['noshift', 'No open shift'], ['location', 'Location «while using» warning'], ['held', 'Held for a pre-order (T−30)'],
-    ['lowfleet', 'Fleet cash near limit'], ['nomap', 'Map unavailable'], ['newoffer', 'Pending offer card (left the offer)'], ['docexpiry', 'Document expiring (banner)'],
+    ['nomap', 'Map unavailable'], ['newoffer', 'Pending offer card (left the offer)'], ['docexpiry', 'Insurance expiring (banner, 11 days)'],
+    ['insurance', 'Insurance expired · orders stopped (21 Oct)'], ['insurance-sent', 'Insurance uploaded · office checking'],
   ])
-  statusBar(document.getElementById('s'), { held: '10:06', noshift: '7:58' }[st])
+  statusBar(document.getElementById('s'), { held: '10:06', noshift: '7:58', insurance: '8:05', 'insurance-sent': '8:14' }[st])
   icons()
   /* The logo stays only while the status pill keeps clear of it (12px). */
   const pill = [...document.querySelectorAll('.spill')].find((e) => !e.hidden), logo = document.getElementById('logo')
-  if (pill && pill.getBoundingClientRect().right + 12 > logo.getBoundingClientRect().left) logo.hidden = true
+  if (pill) document.fonts.ready.then(() => { logo.hidden = pill.getBoundingClientRect().right + 12 > logo.getBoundingClientRect().left })
   const sheetH = document.getElementById('sheet').offsetHeight
   document.getElementById('recentre').style.bottom = (sheetH + 12) + 'px'
   const me = [40.1823, 44.5072]
@@ -247,7 +254,7 @@
     htmlMarker(map, A[A.length - 1], '<div class="pin a"></div>', [18, 18])
     htmlMarker(map, A[12], meCar(40), [64, 64])
   } else {
-    htmlMarker(map, me, st === 'offline' || st === 'blocked' || st === 'noshift' ? `<div class="me">${carTop(-38, 'var(--ink-3)', 'rgb(255 255 255 / .75)')}</div>` : meCar(-38), [64, 64])
+    htmlMarker(map, me, ['offline', 'noshift', 'insurance', 'insurance-sent'].includes(st) ? `<div class="me">${carTop(-38, 'var(--ink-3)', 'rgb(255 255 255 / .75)')}</div>` : meCar(-38), [64, 64])
   }
   }
 </script>

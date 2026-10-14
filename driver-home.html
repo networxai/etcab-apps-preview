@@ -26,7 +26,7 @@
   .wait .bars i { width: 4px; height: 4px; border-radius: 2px; background: var(--ok-dot); }
   .wait .bars i:nth-child(2) { opacity: .6; } .wait .bars i:nth-child(3) { opacity: .3; }
 
-  .logo { position: absolute; z-index: 20; top: 75px; left: 50%; transform: translateX(-50%); width: 100px; height: 18px; }
+  .logo { position: absolute; z-index: 20; top: 76px; left: 50%; transform: translateX(-50%); width: 88px; height: 16px; } /* 88: keeps 12px clear of «Առցանց» */
   .top { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
   .mycar { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 6px 0 4px; border-radius: 10px; background: var(--surface-2); flex: none; }
   .mycar img { width: 52px; height: 30px; object-fit: contain; filter: drop-shadow(0 2px 2px var(--car-ground)); }
@@ -66,9 +66,10 @@
 <main class="screen" id="s">
   <div class="map" id="map" aria-label="Քարտեզ"></div>
 
-  <div class="status" role="status"><span class="dot"></span>Գծում</div>
-  <button class="fab lg" style="top:60px;right:16px" aria-label="Հաշիվ"><i data-lucide="user-round"></i></button>
-  <img class="logo" src="assets/eco/logo-wide.png" alt="Eco Taxi" width="100" height="18">
+  <div class="status" role="status"><span class="dot"></span>Առցանց</div>
+  <a class="fab lg" style="top:60px;right:72px" href="driver-inbox.html" aria-label="Ծանուցումներ, 3 նոր"><i data-lucide="bell"></i><span class="udot" aria-hidden="true"></span></a>
+  <a class="fab lg" style="top:60px;right:16px" href="driver-account.html" aria-label="Հաշիվ"><i data-lucide="user-round"></i></a>
+  <img class="logo" src="assets/eco/logo-wide.png" alt="Eco Taxi" width="88" height="16">
   <button class="fab lg" id="recentre" style="right:16px" aria-label="Կենտրոնացնել ինձ վրա"><i data-lucide="locate-fixed"></i></button>
 
   <section class="sheet" id="sheet">
@@ -81,13 +82,13 @@
       <div class="side"><span class="count">1 պատվեր</span><button class="eye" aria-label="Թաքցնել գումարը"><i data-lucide="eye"></i></button></div>
     </div>
 
-    <button class="pre" aria-label="Նախապես ամրագրված, 2" onclick="location.href='driver-preorders.html?theme='+THEME">
+    <button class="pre" aria-label="Նախնական պատվերներ, 3" onclick="location.href='driver-preorders.html?theme='+THEME">
       <span class="ic"><i data-lucide="calendar-clock"></i></span>
-      <span class="txt"><span class="t1">Նախապես ամրագրված</span><span class="t2">Այսօր, 10:35 · Կոմիտասի պող. 49</span></span>
+      <span class="txt"><span class="t1">Նախնական պատվերներ</span><span class="t2">Այսօր, 10:35 · Կոմիտասի պող. 49</span></span>
       <span class="n">3</span><i class="chev" data-lucide="chevron-right"></i>
     </button>
 
-    <button class="drive"><i data-lucide="power"></i>Դուրս գալ գծից</button>
+    <button class="drive"><i data-lucide="power"></i>Դադարեցնել</button>
   </section>
 </main>
 <script src="audit.js"></script>
@@ -95,6 +96,9 @@
   statusBar(document.getElementById('s'))
   D.init([['online', 'Online, waiting']])
   icons()
+  /* The logo stays only while the status pill keeps 12px clear of it (same rule as driver-home-states). */
+  const pill = document.querySelector('.status'), logo = document.querySelector('.logo')
+  document.fonts.ready.then(() => { logo.hidden = pill.getBoundingClientRect().right + 12 > logo.getBoundingClientRect().left })
   const sheetH = document.getElementById('sheet').offsetHeight
   document.getElementById('recentre').style.bottom = (sheetH + 12) + 'px'
   const me = [40.1823, 44.5072]

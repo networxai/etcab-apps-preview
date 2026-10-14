@@ -65,49 +65,52 @@
   const s = document.getElementById('s')
   const st = new URLSearchParams(location.search).get('state') || 'taken'
   const res = {
-    taken: { glyph: 'user-check', title: 'Պատվերն արդեն վերցրել են', sub: 'Վերադառնում ենք գլխավոր էջ' },
-    expired: { glyph: 'timer-off', title: 'Ժամանակը սպառվեց', sub: 'Եվս մեկը՝ և կնշվեք բացակա' },
-    declined: { glyph: 'check', title: 'Դուք հրաժարվեցիք', sub: 'Դուք գծում եք · «Հեռու է»' },
+    taken: { glyph: 'user-check', title: 'Այլ վարորդն ընդունեց', sub: 'Վերադառնում ենք գլխավոր էջ' },
+    expired: { glyph: 'timer-off', title: 'Ժամանակն անցավ', sub: 'Եվս մեկ բաց թողնված՝ և կդառնաք «Բացակա»' },
+    declined: { glyph: 'check', title: 'Մերժեցիք', sub: 'Առցանց եք · «Հեռու է»' },
   }[st]
   const home = `<a class="go quiet" href="driver-home.html?theme=${THEME}"><span class="drain" aria-hidden="true"></span><i data-lucide="house"></i>Գլխավոր</a>`
   /* preorder-now (owner ruling a, drawn ahead): Աննա pressed «Սկսել հիմա» on B-0912 at 9:52, standing at Կոմիտասի 22 where R-2417
-     just dropped her. Սուրեն, pre-assigned, gets the first offer; decline (with a reason) or expiry hands it to normal dispatch. */
+     just dropped her. Սուրեն, pre-assigned, gets the first offer; decline (with a reason) or expiry and the system searches on its own.
+     preorder-any (owner Q1, 2026-10-14): a due pre-order, or one started now, is searched AUTOMATICALLY among the drivers of its
+     tariff (ECO.TIERS, Eco City here), so any of them can get it as a normal call-like offer, tagged with the pre-order's time. */
   const B = ECO.BOOKINGS.air
-  const pre = { no: B.id, tier: B.tier, pickup: B.pickup, pickupNote: 'Աննա · նստել հիմա', drop: B.drop, dropNote: 'Մալաթիա-Սեբաստիա', approachMin: 7, approachKm: 2.6, km: B.km, min: B.min, fare: B.fare, pay: B.pay }
+  const pre = { no: B.id, tier: B.tier, pickup: B.pickup, pickupNote: 'Աննա · հիմա', drop: B.drop, dropNote: 'Մալաթիա-Սեբաստիա', approachMin: 7, approachKm: 2.6, km: B.km, min: B.min, fare: B.fare, pay: B.pay }
   const R = ECO.RIDE
   const ios = `<div class="ios" role="img" aria-label="Կողպված էկրան, ժամանակազգայուն ծանուցում">
       <div class="clk"><div class="d">Ուրբաթ, 9 հոկտեմբերի</div><div class="t">9:41</div></div>
       <div class="ntf" role="alert"><div class="h"><img src="assets/eco/mark.png" alt="">Eco Taxi<span class="ts"><i data-lucide="clock-alert"></i>Ժամանակազգայուն</span></div>
         <div class="t1">Նոր պատվեր · ${ECO.amd(R.fare)}</div><div class="t2">${R.pickup} · ${R.approachMin} րոպե · ${ECO.km(R.approachKm)}</div></div>
-      <div class="cap">Փակ հավելվածում պատվերը գալիս է ժամանակազգայուն ծանուցմամբ, ոչ թե զանգով։</div>
+      <div class="cap">Փակ հավելվածում՝ ծանուցում, ոչ թե զանգ</div>
       <div class="bar" aria-hidden="true"><span><i data-lucide="flashlight"></i></span><span><i data-lucide="camera"></i></span></div></div>`
   s.innerHTML = st === 'lock-ios' ? ios : D.offer(res ? { result: res, foot: home } : st === 'company' ? { secs: 9, pay: 'company' }
-    : st === 'preorder-now' ? { secs: 9, ride: pre, context: { text: 'Ձեր նախնական պատվերը · ուղևորը սկսում է հիմա' } } : st === 'lock-android' ? { secs: 6, context: { icon: 'lock', text: 'Կողպված էկրանին · ապակողպել պետք չէ' } } : { secs: 6 })
+    : st === 'preorder-now' ? { secs: 9, ride: pre, context: { text: 'Ձեր նախնական պատվերը · ուղևորը սկսեց հիմա' } }
+    : st === 'preorder-any' ? { secs: 9, ride: { ...pre, pickupNote: 'Աննա · ' + B.time + '-ին', approachMin: 9, approachKm: 3.4 }, context: { text: 'Նախնական պատվեր · ' + B.time } } : st === 'lock-android' ? { secs: 6, context: { icon: 'lock', text: 'Կողպված էկրանին · ապակողպել պետք չէ' } } : { secs: 6 })
     + (st === 'lock-android' ? '<span class="lockdot" aria-hidden="true"><i data-lucide="lock"></i></span>' : '') + (st === 'decline' ? `
   <div class="scrim" data-s="decline"></div>
-  <section class="sheet top" data-s="decline" role="dialog" aria-label="Ինչո՞ւ եք հրաժարվում">
+  <section class="sheet top" data-s="decline" role="dialog" aria-label="Ինչո՞ւ եք մերժում">
     <div class="grabber"></div>
-    <div class="dhead"><a class="btn-text" href="driver-offer.html?theme=${THEME}"><i data-lucide="chevron-left"></i>Ետ</a><span id="ring3" role="timer" aria-label="Մնաց 6 վայրկյան"></span></div>
-    <div class="stitle">Ինչո՞ւ եք հրաժարվում</div>
-    <div class="shint">Հպեք պատճառին՝ պատվերը կփոխանցվի</div>
+    <div class="dhead"><a class="btn-text" href="driver-offer.html?theme=${THEME}"><i data-lucide="chevron-left"></i>Հետ</a><span id="ring3" role="timer" aria-label="Մնաց 6 վայրկյան"></span></div>
+    <div class="stitle">Ինչո՞ւ եք մերժում</div>
+    <div class="shint">Հպեք պատճառին · պատվերը կանցնի այլ վարորդի</div>
     <div role="list">
       <button class="reason" role="listitem"><span>Հեռու է</span><i data-lucide="chevron-right"></i></button>
-      <button class="reason" role="listitem"><span>Ուղղությունը չի համապատասխանում</span><i data-lucide="chevron-right"></i></button>
-      <button class="reason" role="listitem"><span>Ընդմիջում եմ անում</span><i data-lucide="chevron-right"></i></button>
+      <button class="reason" role="listitem"><span>Իմ ուղղությամբ չէ</span><i data-lucide="chevron-right"></i></button>
+      <button class="reason" role="listitem"><span>Ընդմիջում եմ</span><i data-lucide="chevron-right"></i></button>
       <button class="reason" role="listitem"><span>Այլ պատճառ</span><i data-lucide="chevron-right"></i></button>
     </div>
   </section>` : '')
-  statusBar(s, st === 'preorder-now' ? '9:52' : undefined)
+  statusBar(s, st === 'preorder-now' ? '9:52' : st === 'preorder-any' ? '8:15' : undefined)
   D.init([
     ['taken', 'Taken by another driver'], ['expired', 'Expired (no answer)'], ['decline', 'Decline: one tap on a reason (ticking)'], ['declined', 'Declined, back on the line'], ['company', 'Company ride (paid by company)'],
-    ['preorder-now', 'Pre-order started now · first offer to its driver'], ['lock-android', 'Locked screen · Android full-screen'], ['lock-ios', 'Locked screen · iOS Time-Sensitive'],
+    ['preorder-now', 'Pre-order started now · first offer to its driver'], ['preorder-any', 'Pre-order due · offered to any Eco City driver'], ['lock-android', 'Locked screen · Android full-screen'], ['lock-ios', 'Locked screen · iOS Time-Sensitive'],
   ])
   const r3 = document.getElementById('ring3')
   if (r3) r3.outerHTML = D.ring(48, 4, .5, '<span class="v">6</span>', 'var(--warn)')
   icons()
   if (st === 'decline') for (const el of [s.querySelector('.offer')]) { el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true'); el.inert = true }
   if (st === 'lock-ios') D.noMap()
-  else if (st === 'preorder-now') {
+  else if (st === 'preorder-now' || st === 'preorder-any') {
     /* Trip geometry: DROUTES.air (Բաղրամյան 24 → Զվարթնոց) stands in for Կոմիտասի 22 → Զվարթնոց; the approach is a short
        dashed run into its start. */
     const T = DROUTES.air.pts, a0 = T[0]

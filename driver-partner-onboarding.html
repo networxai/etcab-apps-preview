@@ -12,7 +12,7 @@
 <script src="driver.js"></script>
 <style>
   /* First login of an office-created partner (ADR-V2): car pending → calm wait; then the approved moment.
-     The office took the first top-up in cash when it created the account, so the wallet is not empty on day one. */
+     The office took the first top-up in cash when it created the account, so the balance is not empty on day one. */
   .on-ground { background: var(--surface) !important; box-shadow: var(--e1); }
   .content { top: 70px; }
   .center { display: flex; flex-direction: column; align-items: center; text-align: center; }
@@ -50,6 +50,7 @@
   .fact { background: var(--surface); border-radius: var(--r-card); box-shadow: var(--e1); padding: var(--s3) var(--s4); text-align: left; display: flex; flex-direction: column; gap: 2px; }
   .fact .l { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
   .fact .l svg { width: 14px; height: 14px; }
+  .fact .c { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; }
   .fact b { font: var(--t-headline); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .idrow { display: flex; gap: var(--s2); align-items: center; justify-content: center; margin-top: var(--s3); }
   .foot { margin-top: auto; }
@@ -64,6 +65,8 @@
   .why .h { display: flex; align-items: center; gap: var(--s3); }
   .why .ic { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--warn-soft); color: var(--warn); }
   .why .ic svg { width: 20px; height: 20px; }
+  .why .ic.n { background: var(--surface-2); color: var(--ink); }
+  .why .h + .h { padding-top: var(--s3); border-top: 1px solid var(--hairline); }
   .why .t1 { font: var(--t-headline); color: var(--ink); }
   .why .t2 { font: var(--t-secondary); color: var(--ink-2); font-variant-numeric: tabular-nums; }
   .ask { display: flex; align-items: center; gap: var(--s3); min-height: 60px; }
@@ -107,11 +110,11 @@
       <div class="tli done" role="listitem"><span class="d"><i data-lucide="check"></i></span><span class="t1">Հաշիվը բացված է</span></div>
       <div class="tli done" role="listitem"><span class="d"><i data-lucide="check"></i></span><span class="t1">Փաստաթղթերն ուղարկված են</span></div>
       <div class="tli now" role="listitem"><span class="d"></span><span class="t1">Գրասենյակը ստուգում է</span><span class="end p-tag"><i data-lucide="clock"></i>այսօր</span></div>
-      <div class="tli" role="listitem"><span class="d"><i data-lucide="power"></i></span><span class="t1 dim">Գծում լինել</span></div>
+      <div class="tli" role="listitem"><span class="d"><i data-lucide="power"></i></span><span class="t1 dim">Ընդունել պատվերներ</span></div>
     </div>
     <div class="facts" data-s="pending">
-      <div class="fact"><span class="l"><i data-lucide="percent"></i>Վճար</span><b>15% · Eco Comfort</b></div>
-      <div class="fact"><span class="l"><i data-lucide="wallet"></i>Դրամապանակ</span><b>10 000 ֏</b></div>
+      <div class="fact"><span class="l"><i data-lucide="percent"></i>Միջնորդավճար</span><b>15 %</b><span class="c">Eco Comfort</span></div>
+      <div class="fact"><span class="l"><i data-lucide="wallet"></i>Հաշվեկշիռ</span><b>10 000 ֏</b><span class="c">Առաջին լիցքավորում</span></div>
     </div>
 
     <!-- ── approved ── -->
@@ -120,8 +123,8 @@
       <div class="h1">Հաստատված է</div>
       <div class="idrow"><span class="plate">44 KM 771</span><span class="p-tag brand"><i data-lucide="car-front"></i>Eco Comfort</span><span class="p-tag"><i data-lucide="handshake"></i>Գործընկեր</span></div>
       <div class="facts">
-        <div class="fact"><span class="l"><i data-lucide="percent"></i>Վճար</span><b>15% պատվերից</b></div>
-        <div class="fact"><span class="l"><i data-lucide="wallet"></i>Դրամապանակ</span><b>10 000 ֏</b></div>
+        <div class="fact"><span class="l"><i data-lucide="percent"></i>Միջնորդավճար</span><b>15 %</b><span class="c">Eco Comfort</span></div>
+        <div class="fact"><span class="l"><i data-lucide="wallet"></i>Հաշվեկշիռ</span><b>10 000 ֏</b><span class="c">Առաջին լիցքավորում</span></div>
       </div>
     </section>
 
@@ -147,27 +150,25 @@
       <div class="ask done"><span class="ic2"><i data-lucide="file-text"></i></span><span class="tx"><b>Հաշվառման վկայական</b><span>Ստուգված</span></span><span class="add ico" role="img" aria-label="Ստուգված"><i data-lucide="check"></i></span></div>
     </div>
 
-    <!-- ── suspended (P02): the office paused the partner account; money stays, orders stop ── -->
+    <!-- ── suspended (P02): the office paused the partner account; money stays, orders stop, and his pre-orders go back to dispatch on their own (owner decision 7, 2026-10-14: no button, he does nothing) ── -->
     <section class="center" data-s="suspended">
       <div class="halo"><img class="carimg" src="assets/eco/cars/partner.webp" alt="Tesla Model 3"><span class="badge warn"><i data-lucide="lock"></i></span></div>
       <div class="h1">Հաշիվը կասեցված է</div>
-      <div class="sub">Նոր պատվերներ՝ ոչ</div>
+      <div class="sub">Պատվերներ չեն գա</div>
     </section>
     <div class="card why" data-s="suspended">
-      <div class="h"><span class="ic"><i data-lucide="pause"></i></span><div><div class="t1">Գրասենյակի որոշմամբ</div><div class="t2">10 հոկտ., 09:05 · մինչև զանգը</div></div></div>
-    </div>
-    <div class="facts" data-s="suspended">
-      <div class="fact"><span class="l"><i data-lucide="wallet"></i>Դրամապանակ</span><b>18 450 ֏</b></div>
-      <div class="fact"><span class="l"><i data-lucide="calendar-clock"></i>Նախապես · 1</span><b>Հանձնված է</b></div>
+      <div class="h"><span class="ic"><i data-lucide="pause"></i></span><div><div class="t1">Գրասենյակի որոշմամբ</div><div class="t2">10 հոկտ., 09:05-ից</div></div></div>
+      <div class="h"><span class="ic n"><i data-lucide="calendar-clock"></i></span><div><div class="t1">1 նախնական պատվեր</div><div class="t2">Ավտոմատ վերադարձավ դիսպետչերին</div></div></div>
+      <div class="h"><span class="ic n"><i data-lucide="wallet"></i></span><div><div class="t1">Հաշվեկշիռ՝ 18 450 ֏</div><div class="t2">Գումարը մնում է ձեզ</div></div></div>
     </div>
 
     <!-- ── terms (P03): a new version of the partner terms; accept before going on the line ── -->
     <section data-s="terms">
       <div class="hd"><span class="ic"><i data-lucide="file-pen-line"></i></span><div><div class="ptitle" style="margin:0">Նոր պայմաններ</div><div class="psub">Գործընկերոջ պայմաններ · տարբերակ 3</div></div></div>
       <div class="card terms" role="list" aria-label="Ինչ է փոխվել">
-        <div class="ln" role="listitem"><i data-lucide="percent"></i><span class="tx"><b>Վճար՝ 15% պատվերից</b><span>Eco Comfort · առաջ՝ 17%</span></span><span class="nw">Նոր</span></div>
-        <div class="ln" role="listitem"><i data-lucide="lock"></i><span class="tx"><b>Կանգ՝ 0 ֏-ից ցածր</b><span>Զգուշացում՝ 3 000 ֏-ից</span></span></div>
-        <div class="ln" role="listitem"><i data-lucide="landmark"></i><span class="tx"><b>Հարկ՝ անջատված</b><span>Միացնելուց առաջ՝ ծանուցում</span></span></div>
+        <div class="ln" role="listitem"><i data-lucide="percent"></i><span class="tx"><b>Միջնորդավճար՝ 15 %</b><span>Eco Comfort · նախկինում՝ 17 %</span></span><span class="nw">Նոր</span></div>
+        <div class="ln" role="listitem"><i data-lucide="lock"></i><span class="tx"><b>Նվազագույն հաշվեկշիռ՝ 0 ֏</b><span>Զգուշացում՝ 3 000 ֏-ից ցածր</span></span></div>
+        <div class="ln" role="listitem"><i data-lucide="landmark"></i><span class="tx"><b>Հարկ՝ չի պահվում</b><span>Կծանուցենք նախօրոք</span></span></div>
       </div>
       <div class="vline">Ուժի մեջ է 15 հոկտ.-ից · նախորդը՝ տարբերակ 2</div>
     </section>
@@ -179,21 +180,21 @@
       <div class="sub">Հայտ № A-0007 · այսօր, 08:47</div>
     </section>
     <div class="card steps" data-s="applied" role="list" aria-label="Հաջորդ քայլերը">
-      <div class="tli done" role="listitem"><span class="d"><i data-lucide="check"></i></span><span class="t1">Հայտը՝ Hyundai Ioniq 5 · 19 HG 519</span></div>
+      <div class="tli done" role="listitem"><span class="d"><i data-lucide="check"></i></span><span class="t1">Hyundai Ioniq 5 · 19 HG 519</span></div>
       <div class="tli now" role="listitem"><span class="d"></span><span class="t1">Գրասենյակը կզանգի</span><span class="end p-tag"><i data-lucide="clock"></i>1 օրում</span></div>
-      <div class="tli" role="listitem"><span class="d"><i data-lucide="building-2"></i></span><span class="t1 dim">Փաստաթղթերը՝ գրասենյակում</span></div>
-      <div class="tli" role="listitem"><span class="d"><i data-lucide="power"></i></span><span class="t1 dim">Գծում լինել</span></div>
+      <div class="tli" role="listitem"><span class="d"><i data-lucide="building-2"></i></span><span class="t1 dim">Փաստաթղթեր՝ գրասենյակում</span></div>
+      <div class="tli" role="listitem"><span class="d"><i data-lucide="power"></i></span><span class="t1 dim">Ընդունել պատվերներ</span></div>
     </div>
     <div class="foot">
       <button class="btn btn-quiet on-ground lg" data-s="pending"><i data-lucide="phone"></i>Զանգել գրասենյակ</button>
-      <button class="go x" data-s="approved"><i data-lucide="power"></i>Գծում լինել</button>
+      <button class="go x" data-s="approved"><i data-lucide="power"></i>Ընդունել պատվերներ</button>
       <button class="btn-text" data-s="approved"><i data-lucide="file-text"></i>Պայմաններ</button>
       <button class="btn btn-brand" data-s="rejected"><i data-lucide="camera"></i>Նորից լուսանկարել</button>
       <button class="btn btn-brand" data-s="moreinfo"><i data-lucide="send"></i>Ուղարկել</button>
       <button class="btn btn-brand" data-s="terms"><i data-lucide="check"></i>Ընդունում եմ</button>
       <button class="btn btn-quiet on-ground lg" data-s="suspended applied"><i data-lucide="phone"></i>Զանգել գրասենյակ</button>
       <button class="btn-text" data-s="rejected moreinfo"><i data-lucide="phone"></i>Զանգել գրասենյակ</button>
-      <button class="btn-text" data-s="terms"><i data-lucide="file-text"></i>Ամբողջական տեքստը</button>
+      <button class="btn-text" data-s="terms"><i data-lucide="file-text"></i>Ամբողջ տեքստը</button>
     </div>
   </div>
 </main>

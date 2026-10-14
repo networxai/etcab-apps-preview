@@ -131,6 +131,7 @@
   .sos-rows { margin-top: var(--s2); display: flex; flex-direction: column; }
   .sos-rows .row { min-height: 56px; width: 100%; text-align: left; }
   .modal .btn-danger.sos112 { margin-top: var(--s4); }
+  .sos-rows .ic.sos-d { color: var(--danger); }
   /* destination changed by the dispatcher: the old fare struck, the new one in ink */
   .requote { display: flex; align-items: baseline; gap: var(--s2); margin-top: var(--s1); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .requote s { font: var(--t-secondary); color: var(--ink-2); }
@@ -149,6 +150,8 @@
   /* The one ride (kit.js ECO.RIDE): assigned 9:41, pickup 9:45, drop 9:51; Արամ Պետրոսյան, 01 ET 001. */
   const RD = ECO.RIDE, DV = RD.driver
   const SU = ECO.BOOKINGS.air.driver
+  /* The SOS moment (owner #2): ECO.SOS, the same alert the console raises on Dispatch. Fallback if kit.js predates it. */
+  const SOS = ECO.SOS || { at: '9:47', where: 'Մաշտոցի պող. 18', near: 'Մատենադարանից 300 մ' }
   const identity = (d = DV) => `<div class="ident"><div class="who">${R.plate(d.plate, true)}<span class="model">${d.carHy || d.car}</span></div>${R.car('city', 120, 60, d.car)}</div>`
   const face = (d) => d === DV ? R.avatar() : `<span class="avatar ini" role="img" aria-label="Վարորդ՝ ${d.name}">${d.ini}</span>`
   const driver = (d = DV) => `<div class="drv">${face(d)}<span class="nm"><span class="n1">${d.first}</span><span class="n2">${star}${d.rating}${d === DV ? ' · ' + ECO.num(1240) + ' ուղևորություն' : ''}</span></span></div>`
@@ -163,7 +166,7 @@
       <div class="head2"><div><div class="eta">${eta}</div><div class="status">${status}${clock ? ` · <b>${clock}</b>` : ''}</div></div></div>
       ${o.tags ? `<div class="tags">${o.tags}</div>` : ''}${o.cap ? `<div class="cap">${o.cap}</div>` : ''}
       ${identity(o.d)}${driver(o.d)}${acts(A_WAIT)}${o.after || ''}</section>`
-  const preTag = (t) => `<span class="tagp pre">${R.i('calendar-clock')}Նախնական պատվեր · նստել ${t}</span>`
+  const preTag = (t) => `<span class="tagp pre">${R.i('calendar-clock')}Նախնական պատվեր · ${t}-ին</span>`
   const notice = (body, icon = 'info') => `<div class="notice" role="status">${R.i(icon)}<span>${body}</span></div>`
 
   /* Approach map: the driver's dotted line to the pickup, our car on it, the pickup pin. frac = how far along the car is. */
@@ -269,7 +272,7 @@
         map: approachMap(.8) },
       { id: 'share', group: 'Messages and share', label: 'Share my trip', note: 'Owner 2026-10-12, drawn ahead: a live link (trip-share.html) that shows the car, the route and the arrival time, never the rider\'s phone. It stops working when the ride ends. Send = the system share sheet; copy is the quiet fallback',
         time: RD.riding.clock, html: () => modal('Կիսվել ուղևորությամբ', `<div class="sharecard">${R.trace('pickupToDrop', 72, 72, { pad: 10, grid: false })}
-            <span class="tx"><span class="t1">${DV.first} · ${DV.plate}</span><span class="t2">Ժամանում ${RD.dropAt}</span><span class="url">ecotaxi.am/r/7KQ2X</span></span></div>
+            <span class="tx"><span class="t1">${DV.first} · ${DV.plate}</span><span class="t2">Ժամանում՝ ${RD.dropAt}</span><span class="url">ecotaxi.am/r/7KQ2X</span></span></div>
           <div class="share-what">
             <div class="row"><span class="ic">${R.i('map-pin')}</span><span class="txt"><span class="t2">Մեքենան քարտեզին և ժամանման ժամը</span></span></div>
             <div class="row"><span class="ic">${R.i('eye-off')}</span><span class="txt"><span class="t2">Ձեր համարը չի երևում</span></span></div>
@@ -297,7 +300,7 @@
       { id: 'reassigned', group: 'Interrupted and variants', label: 'Driver gave it back', note: 'R50: the driver handed the ride back to dispatch (epoch bump), so the screen returns to Searching (real). The line «Վարորդը փոխվեց · որոնում ենք նորը» is drawn ahead (new string): today the card just disappears',
         time: '9:43', html: () => `<div class="map" id="map" aria-label="Քարտեզ"></div>
           <section class="sheet r" id="sheet"><div class="grabber"></div>
-            <h2 class="h-title">Որոնում ենք մեքենա</h2><div class="h-sub">Ընտրում ենք մեքենա ձեզ համար</div>
+            <h2 class="h-title">Որոնում ենք մեքենա</h2>
             <div class="sbar" role="progressbar" aria-label="Որոնում ենք մեքենա"></div>
             ${notice('Վարորդը փոխվեց · որոնում ենք նորը')}
             <div class="btns" style="margin-top:var(--s4)"><button class="btn btn-quiet">Չեղարկել</button></div></section>`,
@@ -307,7 +310,7 @@
           ;[[[.0024, -.0031], 58], [[-.0019, .0027], 214], [[.0029, .0022], 140]].forEach(([o, d]) => htmlMarker(m, [PICK[0] + o[0], PICK[1] + o[1]], carTop(d), [18, 34]))
         } },
       { id: 'cancel-failed', group: 'Interrupted and variants', label: 'Cancel failed', note: 'R53, real: the cancel did not go through (offline, or the ride moved). The ride stays exactly as it was and a neutral Notice says so; cancel stays one tap away',
-        time: '9:42', html: () => approachSheet(RD.approachMin + ' րոպե', 'Մեքենան ճանապարհին է', RD.pickupAt, { after: notice('Չեղարկումը չստացվեց։ Փորձեք կրկին') }), map: approachMap(.1) },
+        time: '9:42', html: () => approachSheet(RD.approachMin + ' րոպե', 'Մեքենան ճանապարհին է', RD.pickupAt, { after: notice('<b>Չեղարկումը չստացվեց</b>Պատվերը մնում է · փորձեք կրկին') }), map: approachMap(.1) },
 
       { id: 'carstale', group: 'Interrupted and variants', label: 'Car position stale', note: 'R51, real (DriverCard.tsx: ride.carStale, tone warn): the network is fine but the driver\'s phone has stopped reporting. No banner (that is offline\'s); a warn tag on the card, the car faded at its last fix, and the ETA hedged with «≈». Call stays one tap away',
         time: '9:43', html: () => approachSheet('≈ 3 րոպե', 'Մեքենան ճանապարհին է', RD.pickupAt, { tags: `<span class="tagp warn">${R.i('map-pin-off')}Մեքենայի դիրքը թարմացված չէ</span>` }),
@@ -324,7 +327,7 @@
           <button class="fab" style="top:62px;right:16px" aria-label="Անվտանգություն">${R.i('shield')}</button>
           <section class="sheet r" id="sheet"><div class="grabber"></div>
             <div class="head2"><div><div class="eta">5 րոպե</div><div class="status">Ճանապարհին · ժամանում <b>9:52</b></div></div></div>
-            ${notice('<b>Դիսպետչերը փոխեց նպատակակետը</b>Ձեր խնդրանքով՝ Կոմիտասի պող. 28', 'route')}
+            ${notice('<b>Դիսպետչերը փոխեց նպատակակետը</b>Ձեր խնդրանքով', 'route')}
             <div class="trip"><span class="sq"></span><span class="to"><span class="t1">Կոմիտասի պող. 28</span><span class="requote"><s>${R.amd(RD.fare)}</s><b>${R.amd(1200)}</b><span class="t2">· նոր գին</span></span></span></div>
             <div class="mini">${R.car('city', 64, 32, '')}${R.plate(DV.plate)}<span class="nm">${DV.first}</span></div></section>`,
         map: (s) => {
@@ -334,16 +337,16 @@
           htmlMarker(m, DROP, '<div class="pin-b"></div>', [18, 18])
           htmlMarker(m, k.ll, carTop(k.deg), [18, 34])
         } },
-      { id: 'sos', group: 'In the ride', label: 'Safety (SOS)', note: 'R56, drawn ahead (no API): the riding screen\'s shield opens it. 112 is the one red action (tel:112); the alert to the dispatcher sends the ride, the plate and the live position; share is the same live link as #share. Where you are and which car is said first, so it can be read out on the phone (new strings)',
-        time: '9:48', html: () => `<div class="map" id="map" aria-label="Քարտեզ"></div><div class="scrim"></div>
+      { id: 'sos', group: 'In the ride', label: 'Safety (SOS)', note: 'R56, drawn ahead (no API): the riding screen\'s shield opens it. 112 is the one red action (tel:112); the alert lands at the top of console Dispatch at once (owner #2: ride, driver, live position; the dispatcher presses «Լուծված է»), and the row says so; share is the same live link as #share. Where you are and which car is said first, so it can be read out on the phone (new strings)',
+        time: SOS.at, html: () => `<div class="map" id="map" aria-label="Քարտեզ"></div><div class="scrim"></div>
           <section class="sheet r modal" id="sheet" role="dialog" aria-label="Անվտանգություն"><div class="grabber"></div>
             <div class="mhead"><h2 class="h-title">Անվտանգություն</h2><button class="xbtn" aria-label="Փակել">${R.i('x')}</button></div>
-            <div class="sos-where">${R.i('map-pin')}<span class="tx"><span class="t1">Մաշտոցի պող., Մատենադարանի մոտ</span><span class="t2">${DV.plate} · ${DV.carHy}</span></span></div>
+            <div class="sos-where">${R.i('map-pin')}<span class="tx"><span class="t1">${SOS.where}</span><span class="t2">${SOS.near} · ${DV.plate}</span></span></div>
             <button class="btn btn-danger sos112">${R.i('phone')}Զանգել 112</button>
             <div class="sos-rows">
-              <button class="row"><span class="ic">${R.i('siren')}</span><span class="txt"><span class="t1">Ահազանգ դիսպետչերին</span><span class="t2">Կուղարկենք ուղևորությունը և ձեր դիրքը</span></span></button>
+              <button class="row"><span class="ic sos-d">${R.i('siren')}</span><span class="txt"><span class="t1">Տեղեկացնել դիսպետչերին</span><span class="t2">Կտեսնի անմիջապես՝ ձեզ և մեքենան</span></span></button>
               <div class="divider"></div>
-              <button class="row"><span class="ic">${R.i('share-2')}</span><span class="txt"><span class="t1">Կիսվել ուղևորությամբ</span><span class="t2">Ուղիղ հղում մտերիմին</span></span></button>
+              <button class="row"><span class="ic">${R.i('share-2')}</span><span class="txt"><span class="t1">Կիսվել ուղևորությամբ</span><span class="t2">Ուղիղ հղում հարազատին</span></span></button>
             </div></section>`,
         map: (s) => {
           const k = at(T, .45), rest = T.slice(k.i)
@@ -355,10 +358,10 @@
         time: ECO.BOOKINGS.air.assignedAt, html: () => approachSheet(ECO.BOOKINGS.air.etaMin + ' րոպե', 'Մեքենան ճանապարհին է', '08:18', { d: { ...SU, carHy: SU.car }, pre: preTag(ECO.BOOKINGS.air.time) }),
         map: toBooking(.55, ECO.BOOKINGS.air.pickup) },
       { id: 'early', group: 'From a pre-order', label: 'Driver started early', note: 'R43, drawn ahead (ADR-P1: the driver may start from T−30): Սուրեն pressed «Ճանապարհին եմ» at 08:02. The status says so in words and the caption takes the hurry out: the pickup is still 08:30 (new strings)',
-        time: '08:03', html: () => approachSheet('12 րոպե', 'Վարորդը ճանապարհին է', 'նստել ' + ECO.BOOKINGS.air.time, { d: { ...SU, carHy: SU.car }, pre: preTag(ECO.BOOKINGS.air.time), cap: 'Վարորդը կսպասի մինչև ' + ECO.BOOKINGS.air.time + '-ը։ Շտապել պետք չէ' }),
+        time: '08:03', html: () => approachSheet('12 րոպե', 'Վարորդը շուտ դուրս եկավ', '08:15', { d: { ...SU, carHy: SU.car }, pre: preTag(ECO.BOOKINGS.air.time), cap: 'Կսպասի մինչև ' + ECO.BOOKINGS.air.time + ' · շտապել պետք չէ' }),
         map: toBooking(.2, ECO.BOOKINGS.air.pickup) },
       { id: 'downgraded', group: 'From a pre-order', label: 'Company → personal', note: 'R44, real (BillingNotice, receipt.downgraded.over_limit): Monday\'s company booking (ECO.BOOKINGS.co) activated after the company limit ran out, so the ride is the rider\'s, paid in cash. One neutral Notice, never red',
-        time: '08:47', html: () => approachSheet('5 րոպե', 'Մեքենան ճանապարհին է', '08:52', { pre: preTag(ECO.BOOKINGS.co.time), after: notice('Այս ուղևորության համար վճարում եք դուք, քանի որ ընկերության հաշվի սահմանաչափը սպառված է։ Վճարեք վարորդին։') }),
+        time: '08:47', html: () => approachSheet('5 րոպե', 'Մեքենան ճանապարհին է', '08:52', { pre: preTag(ECO.BOOKINGS.co.time), after: notice('<b>Վճարում եք դուք · կանխիկ</b>Ընկերության սահմանաչափը սպառված է') }),
         map: toBooking(.4, ECO.BOOKINGS.co.pickup) },
     ],
   })

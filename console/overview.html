@@ -37,13 +37,17 @@
   .mixr .v { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .mixr .v span { color: var(--ink-faint); margin-left: 4px; }
   .att { display: flex; flex-direction: column; }
-  .att a { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 52px; padding: 6px var(--inset); border-bottom: 1px solid var(--line-soft); text-decoration: none; color: var(--ink); }
+  .att a { position: relative; display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 48px; padding: 6px var(--inset) 6px 19px; border-bottom: 1px solid var(--line-soft); text-decoration: none; color: var(--ink); }
+  .att a::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--line-soft); }
+  .att a.bad::before { background: var(--lane-problems); } .att a.warn::before { background: var(--warn); }
+  .att a:hover { background: var(--surface-alt); }
   .att a:last-child { border-bottom: 0; }
-  .att .ic { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; }
-  .att .ic.w { background: var(--warning-surface); color: var(--warning); } .att .ic.r { background: var(--danger-soft); color: var(--danger-c); } .att .ic.n { background: var(--surface-alt); color: var(--ink-muted); }
+  .att a > svg { width: 16px; height: 16px; color: var(--ink-muted); }
   .att .t { display: flex; flex-direction: column; min-width: 0; }
   .att .t b { font: var(--c-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .att .t span { font: var(--c-small); color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .att .late { color: var(--lane-problems); font-weight: 600; }
+  .att .neg { color: var(--warning); font-weight: 600; }
   .mapkey { position: absolute; top: 12px; left: 12px; z-index: 5; display: flex; gap: 2px; padding: 4px; border-radius: var(--r-pill); background: var(--surface); box-shadow: var(--e2); }
   .mapkey span { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; font: var(--c-label); white-space: nowrap; }
   .mapkey i { width: 8px; height: 8px; border-radius: 50%; }
@@ -74,29 +78,26 @@
         <div class="chart" id="chart"></div>
       </section>
 
-      <section class="card" aria-label="Ըստ փաթեթի">
-        <div class="card-h"><h2>Ըստ փաթեթի</h2><span class="sub">պատվերներ · բաժին</span></div>
+      <section class="card" aria-label="Ըստ սակագնի">
+        <div class="card-h"><h2>Ըստ սակագնի</h2><span class="sub">պատվերներ · բաժին</span></div>
         <div class="mix" id="mix"></div>
         <div class="card-h payh" style="border-top:1px solid var(--line-soft);height:36px"><h2>Ըստ վճարման</h2><span class="sub">հասույթի բաժին</span></div>
         <div class="mix" id="pay"></div>
       </section>
 
       <section class="card" aria-label="Ավտոպարկը հիմա">
-        <div class="card-h"><h2>Ավտոպարկը հիմա</h2><span class="sub">թարմացվում է ուղիղ</span><span class="end"><a class="btn ghost s" href="dispatch.html">Դիսպետչեր <i data-lucide="arrow-right"></i></a></span></div>
+        <div class="card-h"><h2>Ավտոպարկը հիմա</h2><span class="sub">ուղիղ</span><span class="end"><a class="btn ghost s" href="dispatch.html">Դիսպետչերական <i data-lucide="arrow-right"></i></a></span></div>
         <div class="maphost"><div id="map"></div>
-          <div class="mapkey" data-overlay><span><i style="background:var(--brand)"></i>Ազատ <b class="num">11</b></span><span><i style="background:var(--ink)"></i>Պատվերով <b class="num">7</b></span><span><i style="background:var(--ink-faint)"></i>Դադար <b class="num">1</b></span></div>
+          <div class="mapkey" data-overlay><span><i style="background:var(--brand)"></i>Ազատ <b class="num">11</b></span><span><i style="background:var(--ink)"></i>Պատվերով <b class="num">7</b></span><span><i style="background:var(--ink-faint)"></i>Բացակա <b class="num">1</b></span></div>
         </div>
       </section>
 
-      <section class="card" aria-label="Պահանջում է որոշում">
-        <div class="card-h"><h2>Պահանջում է որոշում</h2><span class="sub num">5</span><span class="end"><a class="btn ghost s" href="#">Հարցումներ <i data-lucide="arrow-right"></i></a></span></div>
-        <div class="att scroll-y" data-truncate>
-          <a href="dispatch.html"><span class="ic r"><i data-lucide="circle-alert"></i></span><span class="t"><b>Տիգրան Մեծի 67 · վարորդը չի գտնում ուղևորին</b><span>Դիսպետչեր · Խնդիրներ</span></span><span class="mono" style="color:var(--lane-problems);font-weight:600">07:34</span></a>
-          <a href="drivers.html"><span class="ic w"><i data-lucide="file-text"></i></span><span class="t"><b>Գագիկ Ավետիսյան · ԱՊՊԱ-ն լրանում է</b><span>Փաստաթուղթ · 20.10.2026</span></span><span class="pill warn">9 օր</span></a>
-          <a href="partners.html?tab=wallet"><span class="ic w"><i data-lucide="lock"></i></span><span class="t"><b>Կարեն Մելքոնյան · դրամապանակը բացասական է</b><span>Գործընկեր վարորդ · արգելափակված է պատվերներից</span></span><span class="mono" style="color:var(--warning);font-weight:600">−1 200 ֏</span></a>
-          <a href="#"><span class="ic n"><i data-lucide="user-x"></i></span><span class="t"><b>Հայկ Սահակյան · խնդրել է ջնջել հաշիվը</b><span>Ջնջման հայտ · 2 օր առաջ</span></span><i data-lucide="chevron-right" class="faint"></i></a>
-          <a href="#"><span class="ic n"><i data-lucide="star"></i></span><span class="t"><b>Ցածր գնահատական · #R-20398 · 2 ★</b><span>«Մեքենան այլ էր» · 24 ժ SLA</span></span><i data-lucide="chevron-right" class="faint"></i></a>
-        </div>
+      <section class="card" aria-label="Պետք է որոշում">
+        <div class="card-h"><h2>Պետք է որոշում</h2><span class="sub num">5</span><span class="end"><a class="btn ghost s" href="requests.html">Հարցումներ <i data-lucide="arrow-right"></i></a></span></div>
+        <!-- One row per thing a person must decide; the spine carries the tone (red = a ride in trouble, amber = a
+             refusal waiting on someone), the icon stays ink. No tinted tiles. Fleet drivers carry no money (owner #3):
+             the only balance here is a partner's. -->
+        <div class="att scroll-y" data-truncate id="att"></div>
       </section>
     </div>
   </div>
@@ -126,6 +127,17 @@
   const pay = [['cash', 86], ['company', 14]].map(([k, v]) => [ECO.PAY[k].icon, ECO.PAY[k].short || ECO.PAY[k].label, v])
   document.querySelector('[data-eco=today]').textContent = ECO.DAY.today + ' · 00:00–14:26 · Երևան'
   document.getElementById('pay').innerHTML = pay.map(([ic, n, v]) => `<div class="mixr"><span style="display:grid;place-items:center;color:var(--ink-faint)"><i data-lucide="${ic}"></i></span><span class="n">${n}</span><span><span class="bar" style="display:block;width:${v / 86 * 100}%"></span></span><span class="v">${v}%</span></div>`).join('')
+  /* «Պետք է որոշում»: the same facts as Dispatch (problems), Requests and Partners. */
+  const LOW = (ECO.DISPATCH && ECO.DISPATCH.lowRating) || { max: 3, followUpH: 24 }
+  const DOC = (ECO.DOCS && ECO.DOCS.blocked) || { short: 'Վահե Ս.', expired: '05.10.2026', uploaded: '9:20' }
+  const ATT = [
+    ['bad', 'dispatch.html', 'circle-alert', 'Տիգրան Մեծի 67 · ուղևորը չեկավ', 'Դիսպետչերական · Խնդիրներ', '<span class="mono late">07:34</span>'],
+    ['bad', 'dispatch.html?state=problems', 'star', `Ցածր գնահատական · ★ 2 · Արշակունյաց 2`, `«Կոպիտ էր» · Տիգրան Ա. · շեմը՝ 1–${LOW.max} ★`, `<span class="pill warn"><i data-lucide="clock"></i>${LOW.followUpH - 2} ժ</span>`],
+    ['warn', 'requests.html?item=doc', 'shield-alert', `${DOC.short} · ապահովագրությունը ժամկետանց է`, `Նոր լուսանկար՝ ${DOC.uploaded} · պատվերները դադարեցված են`, '<span class="pill warn">Ստուգել</span>'],
+    ['warn', 'partners.html?tab=wallet', 'lock', `${ECO.PARTNER.name} · հաշվեկշիռը բացասական է`, 'Գործընկեր · պատվերները դադարեցված են', `<span class="mono neg">${amd(ECO.TOPUP.before)}</span>`],
+    ['', 'requests.html', 'user-x', `${ECO.RIDE.driver.name} · ջնջել հաշիվը`, 'Ջնջման հարցում · երեկ, 15:10', '<i data-lucide="chevron-right" class="faint"></i>'],
+  ]
+  document.getElementById('att').innerHTML = ATT.map(([tone, href, ic, t, sub, end]) => `<a href="${href}" class="${tone}"><i data-lucide="${ic}"></i><span class="t"><b>${t}</b><span>${sub}</span></span>${end}</a>`).join('')
   icons()
 
   const map = makeMap(document.getElementById('map'), { fit: [[40.168, 44.490], [40.204, 44.530]], padTL: [24, 48], padBR: [24, 24], badge: { bottom: '12px', right: '12px' } })

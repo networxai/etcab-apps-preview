@@ -56,7 +56,7 @@
       <div class="live"></div>
     </header>
     <div class="content">
-      <div class="ph"><p>Տարածքները, որոնք գինը կարող է անվանել — օդանավակայան, քաղաք, դրանից դուրս</p>
+      <div class="ph"><p>Սակագների գոտիներ՝ քաղաք, օդանավակայան, կենտրոն</p>
         <span class="end" id="phend"></span></div>
       <section class="card mapcard" aria-label="Գոտիների քարտեզ">
         <div class="maphost"><div id="map"></div><div class="tools" id="tools"></div></div>
@@ -79,18 +79,17 @@
     { id: 'ctr', name: 'Կենտրոն', used: [], pts: [[40.1925, 44.5030], [40.1910, 44.5230], [40.1745, 44.5240], [40.1740, 44.5030]] },
   ]
   const sel = Z[1]
-  document.getElementById('phend').innerHTML = EDIT ? '<span class="pill warn"><i data-lucide="pencil"></i>Չպահպանված</span><button class="btn secondary" aria-keyshortcuts="N" aria-disabled="true" style="opacity:.5"><i data-lucide="plus"></i>Նոր գոտի<span class="kbd">N</span></button>'
-    : '<button class="btn secondary" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր գոտի<span class="kbd">N</span></button>'
+  document.getElementById('phend').innerHTML = EDIT ? '<span class="pill warn"><i data-lucide="pencil"></i>Չպահված</span><button class="btn secondary" aria-keyshortcuts="N" aria-disabled="true" style="opacity:.5"><i data-lucide="plus"></i>Նոր գոտի<span class="kbd">N</span></button>'
+    : '<button class="btn primary" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր գոտի<span class="kbd">N</span></button>'
   const T = (icon, label, on) => `<button class="${on ? 'on' : ''}" aria-label="${label}" title="${label}" aria-pressed="${!!on}"><i data-lucide="${icon}"></i></button>`
-  document.getElementById('tools').innerHTML = `<div class="bar2" role="toolbar" aria-label="Գծագրման գործիքներ">${T('hand', 'Տեղափոխել և ուղղել', true)}${T('pen-line', 'Գծել ազատ ձեռքով')}${T('square', 'Գծել ուղղանկյուն')}${T('circle', 'Գծել շրջան')}<span class="sep"></span>${T('undo-2', 'Հետարկել վերջին կետը')}${T('eraser', 'Մաքրել գծագիրը')}</div>`
-    + (EDIT ? '<div class="hint">Քաշե՛ք համարակալված անկյունը՝ տեղափոխելու։ Սեղմե՛ք՝ նոր կետ ավելացնելու։</div>' : '')
+  document.getElementById('tools').innerHTML = `<div class="bar2" role="toolbar" aria-label="Գծագրման գործիքներ">${T('hand', 'Տեղափոխել և ուղղել', true)}${T('pen-line', 'Գծել ազատ ձեռքով')}${T('square', 'Գծել ուղղանկյուն')}${T('circle', 'Գծել շրջան')}<span class="sep"></span>${T('undo-2', 'Չեղարկել վերջին կետը')}${T('eraser', 'Մաքրել գծագիրը')}</div>`
+    + (EDIT ? '<div class="hint">Քաշեք անկյունը՝ տեղափոխելու · սեղմեք՝ նոր կետի համար</div>' : '')
   const panel = document.getElementById('panel')
   if (!EDIT) {
     panel.innerHTML = `<div class="card-h"><h2>Գոտիներ</h2><span class="sub mono">${Z.length}</span></div><div class="scroll-y grow"><ul class="zones">${Z.map((z) => `
       <li class="zone" style="--zc:${COL[z.id]}"><span class="sw"></span><span class="nm">${z.name}</span>
-        <span class="acts"><button class="btn ghost s" aria-label="Խմբագրել ${z.name}">Խմբագրել</button><button class="btn danger s" aria-label="Ջնջել ${z.name}" ${z.used.length ? 'aria-disabled="true" style="opacity:.5"' : ''}>Ջնջել</button></span>
-        <span class="use">${z.used.length ? 'Օգտագործում են՝ ' + z.used.join(', ') : 'Ոչ մի սակագին չի օգտագործում'}</span>
-        ${z.used.length ? '<span class="dim">Չի կարող ջնջվել, քանի դեռ սակագինն այն անվանում է։</span>' : ''}</li>`).join('')}</ul></div>`
+        <span class="acts"><button class="btn ghost s" aria-label="Խմբագրել ${z.name}">Խմբագրել</button><button class="btn danger s" aria-label="Ջնջել ${z.name}" ${z.used.length ? `aria-disabled="true" title="Սակագինն օգտագործում է" style="opacity:.5"` : ''}>Ջնջել</button></span>
+        <span class="use">${z.used.length ? (z.used.length > 2 ? `${z.used.length} սակագին` : z.used.join(', ')) + ' · ջնջել չի լինի' : 'Չի օգտագործվում'}</span></li>`).join('')}</ul></div>`
   } else {
     /* ?edit=1: the airport zone open; corner 3 was dragged south-east (unsaved). */
     panel.innerHTML = `<div class="card-h"><h2>Խմբագրել ${sel.name}</h2></div><div class="scroll-y grow"><div class="ed" style="--zc:${COL.air}">
@@ -98,9 +97,9 @@
       <div class="pts"><span></span><span class="h">Լայնություն</span><span class="h">Երկայնություն</span><span></span>
         ${sel.pts.map((p, i) => `<span class="vx">${i + 1}</span><span class="input${i === 2 ? ' focus' : ''}"><span class="val">${p[0].toFixed(6)}</span></span><span class="input${i === 2 ? ' focus' : ''}"><span class="val">${p[1].toFixed(6)}</span></span><button class="btn ghost icon s" aria-label="Հեռացնել կետ ${i + 1}"><i data-lucide="x"></i></button>`).join('')}</div>
       <button class="btn secondary s" style="align-self:flex-start"><i data-lucide="plus"></i>Ավելացնել կետ</button>
-      <div class="used">Օգտագործում են՝ ${sel.used.map((u) => `<span class="pill">${u}</span>`).join('')}</div>
-      <div class="notice neutral"><i data-lucide="info"></i><span>Աստիճաններ, մինչև վեց տասնորդական նիշ — օրինակ՝ 40.177612 կամ 44.512590։</span></div>
-    </div></div><div class="edf"><button class="btn primary">Պահպանել գոտին</button><button class="btn secondary">Չեղարկել</button></div>`
+      <div class="used">Օգտագործում է՝ ${sel.used.map((u) => `<span class="pill">${u}</span>`).join('')}</div>
+      <span class="faint" style="font:var(--c-small)">Աստիճաններ՝ մինչև 6 նիշ կետից հետո, օր. 40.177612</span>
+    </div></div><div class="edf"><button class="btn primary">Պահել գոտին</button><button class="btn secondary">Չեղարկել</button></div>`
   }
   const fit = EDIT ? sel.pts : Z.flatMap((z) => z.pts)
   const map = makeMap(document.getElementById('map'), { fit, padTL: EDIT ? [96, 96] : [64, 64], padBR: [48, 48], badge: { bottom: '12px', right: '12px' } })

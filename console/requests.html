@@ -11,39 +11,56 @@
 <script src="console-audit.js"></script>
 <style>
   /* Requests inbox (C49) — DRAWN AHEAD: there is no route. 2026-10-11-console-gaps.md §3 puts it in the top nav group
-     with an alarm badge, OUT of the live queue (§9.8: the queue holds rides, nothing else). One list of things an operator
-     must decide, each a row that opens in a docked panel (never a modal), the decision one click deep. The nav badge counts
-     only rows that need a decision (4); «soon» rows and refusals are information and do not ring.
-     ?tab=fiscal (C50, also ahead): the fiscal-receipt and unsettled-ride exception queues. */
+     with an alarm badge, OUT of the live queue (§9.8: the queue holds rides, nothing else). Dispatchers and admins both
+     see it (owner #10). One list of things an operator must decide, each a row that opens in a docked panel (never a
+     modal), the decision one click deep. The nav badge counts only rows that need a decision (3); «soon» rows and the
+     app's blacklist refusals are information and do not ring (owner #12).
+     Rows are built like the queue's: a 3px tone spine, a 16px ink icon, two lines, the time in its own mono column.
+     ?tab=fiscal (C50, also ahead): the fiscal-receipt and unsettled-ride exception queues.
+     ?item= delete · car · doc (owner #5: Վահե Ս.'s new insurance photo) · bl (owner #12) */
   .content { grid-template-columns: minmax(0, 1fr) 440px; grid-template-rows: minmax(0, 1fr); }
-  .grp-h { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 var(--inset); background: var(--surface-alt); font: var(--c-label); color: var(--ink-muted); border-bottom: 1px solid var(--line-soft); }
-  .grp-h .n { font: 500 12px/16px var(--mono); }
-  .rq { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; padding: 8px var(--inset); border-bottom: 1px solid var(--line-soft); min-height: 56px; }
-  .rq .ic { grid-row: 1 / span 2; width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; background: var(--surface-alt); color: var(--ink-muted); box-shadow: inset 0 0 0 1px var(--line-soft); }
-  .rq .ic.warn { background: var(--warning-surface); color: var(--warning); box-shadow: none; }
-  .rq .ic.bad { background: var(--danger-soft); color: var(--danger-c); box-shadow: none; }
+  .grp-h { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 8px; height: 28px; padding: 0 var(--inset) 0 19px; background: var(--surface); border-bottom: 1px solid var(--line-soft); font: 600 12px/16px var(--font); color: var(--ink-muted); }
+  .grp-h .n { font: 500 12px/16px var(--mono); color: var(--ink-faint); }
+  .rq { position: relative; display: grid; grid-template-columns: 16px minmax(0, 1fr) 64px 112px; gap: 2px 10px; align-items: center; padding: 8px var(--inset) 8px 19px; border-bottom: 1px solid var(--line-soft); min-height: 52px; text-decoration: none; color: inherit; }
+  .rq::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--line-soft); }
+  .rq.bad::before { background: var(--lane-problems); } .rq.warn::before { background: var(--warn); }
+  .rq:hover { background: var(--surface-alt); }
+  .rq > svg { grid-row: 1 / span 2; width: 16px; height: 16px; color: var(--ink-muted); }
+  .rq.bl > svg { color: var(--warning); }
   .rq .t { font: var(--c-strong); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .rq .s { grid-column: 2; font: var(--c-small); color: var(--ink-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .rq .w { grid-row: 1 / span 2; grid-column: 3; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-  .rq .w .mono { font-size: 12px; color: var(--ink-muted); }
-  .rq.on { background: var(--surface-alt); box-shadow: inset 3px 0 0 var(--brand-vivid); }
+  .rq .when { grid-row: 1 / span 2; grid-column: 3; font: 400 12px/16px var(--mono); color: var(--ink-muted); text-align: right; white-space: nowrap; }
+  .rq .st { grid-row: 1 / span 2; grid-column: 4; justify-self: end; }
+  .rq.on { background: var(--surface-alt); box-shadow: inset 0 0 0 1px var(--line-strong); }
   .rq.info .t { font-weight: 400; }
-  .ptr { display: flex; align-items: center; gap: 10px; padding: 10px var(--inset); border-bottom: 1px solid var(--line-soft); text-decoration: none; color: var(--ink); font: var(--c-body); }
+  .ptr { display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 var(--inset) 0 19px; border-bottom: 1px solid var(--line-soft); text-decoration: none; color: var(--ink); font: var(--c-body); }
+  .ptr:hover { background: var(--surface-alt); }
   .ptr .n { margin-left: auto; font: 500 12px/16px var(--mono); color: var(--ink-muted); }
-  .ptr svg { color: var(--ink-muted); }
+  .ptr svg { width: 16px; height: 16px; color: var(--ink-muted); }
   .dp2 .hd { padding: 14px var(--inset) 0; }
   .dp2 .hd .k { font: var(--c-label); color: var(--ink-muted); display: flex; gap: 6px; align-items: center; }
+  .dp2 .hd .k svg { width: 14px; height: 14px; }
   .dp2 .hd h2 { font: var(--c-title); margin-top: 4px; }
-  .dp2 .hd .meta { font: var(--c-small); color: var(--ink-muted); margin-top: 2px; }
-  .facts { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 6px 12px; font: var(--c-body); margin-top: 8px; }
+  .dp2 .hd .meta { display: flex; align-items: center; gap: 6px; font: var(--c-small); color: var(--ink-muted); margin-top: 4px; }
+  .facts { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 6px 12px; font: var(--c-body); margin-top: 8px; }
   .facts dt { color: var(--ink-muted); } .facts dd { min-width: 0; }
   .chk { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-top: 8px; font: var(--c-body); }
-  .chk li { display: flex; gap: 8px; align-items: flex-start; }
-  .chk .ok { color: var(--ok-text); } .chk .no { color: var(--warning); }
+  .chk li { display: flex; gap: 8px; align-items: center; }
+  .chk svg { width: 16px; height: 16px; flex: none; }
+  .chk .ok { color: var(--ok-text); } .chk .no { color: var(--warning); } .chk .x { color: var(--ink-faint); }
   .acts2 a.btn { text-decoration: none; }
   .acts2 { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px var(--inset); border-top: 1px solid var(--line-soft); margin-top: auto; }
+  .acts2 .notice { width: 100%; }
   .tl2 { list-style: none; margin-top: 8px; display: flex; flex-direction: column; gap: 6px; font: var(--c-body); }
-  .tl2 li { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 8px; } .tl2 .mono { color: var(--ink-muted); font-size: 12px; }
+  .tl2 li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px; } .tl2 .mono { color: var(--ink-muted); font-size: 12px; }
+  /* Document check (owner #5): the photo beside the old date; the new expiry is typed from the photo. */
+  .docpair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .docpair figure { border-radius: var(--r-ctl); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-soft); overflow: hidden; }
+  .docpair .ph { height: 104px; display: grid; place-items: center; background: var(--surface-alt); color: var(--ink-faint); }
+  .docpair .ph svg { width: 24px; height: 24px; }
+  .docpair figcaption { display: flex; flex-direction: column; padding: 6px 8px; font: var(--c-small); color: var(--ink-muted); }
+  .docpair figcaption b { font: var(--c-strong); color: var(--ink); }
+  .docpair .old .ph { opacity: .6; }
   .ft td { height: 48px; }
   .two { display: flex; flex-direction: column; min-width: 0; } .two b { font: var(--c-strong); overflow: hidden; text-overflow: ellipsis; } .two span { font: var(--c-small); color: var(--ink-muted); overflow: hidden; text-overflow: ellipsis; }
 </style>
@@ -52,7 +69,8 @@
 <div class="screen" id="screen">
   <div class="main">
     <header class="bar">
-      <span class="crumb">Գործառնություններ <i data-lucide="chevron-right"></i></span><h1>Հարցումներ</h1>
+      <h1>Հարցումներ</h1>
+      <span class="crumb num" id="crumb"></span>
       <div class="live"></div>
     </header>
     <div class="content">
@@ -71,62 +89,85 @@
   const TAB = q.get('tab') === 'fiscal' ? 'fiscal' : 'all'
   const ITEM = q.get('item') || 'delete'
   const R = ECO.RIDE, BL = ECO.BLACKLIST, F = ECO.FISCAL
-  document.getElementById('tabs').innerHTML = `<a href="requests.html?theme=${THEME}" class="${TAB === 'all' ? 'on' : ''}"${TAB === 'all' ? ' aria-current="page"' : ''}><i data-lucide="inbox"></i>Որոշում է պետք <span class="c">4</span></a>
+  /* Shared facts the coordinator is adding to kit.js (ECO.DOCS); fallbacks keep the page drawable until they land. */
+  const DOCS = ECO.DOCS || { aram: { insurance: '20.10.2026', permit: '21.10.2026' }, blocked: { name: 'Վահե Սարգսյան', short: 'Վահե Ս.', doc: 'insurance', expired: '05.10.2026', uploaded: '9:20' } }
+  const V = DOCS.blocked
+  document.getElementById('crumb').textContent = `${ECO.DAY.today} · ${ECO.DAY.now}`
+  document.getElementById('tabs').innerHTML = `<a href="requests.html?theme=${THEME}" class="${TAB === 'all' ? 'on' : ''}"${TAB === 'all' ? ' aria-current="page"' : ''}><i data-lucide="inbox"></i>Որոշում է պետք <span class="c">3</span></a>
     <a href="requests.html?theme=${THEME}&tab=fiscal" class="${TAB === 'fiscal' ? 'on' : ''}"${TAB === 'fiscal' ? ' aria-current="page"' : ''}><i data-lucide="scroll-text"></i>Ֆիսկալ և չհաշվարկված <span class="c">3</span></a>`
-  const row = (id, icon, tone, title, sub, when, pill, info) => `<a href="requests.html?theme=${THEME}&item=${id}" class="rq${id === ITEM ? ' on' : ''}${info ? ' info' : ''}" style="text-decoration:none;color:inherit">
-    <span class="ic ${tone}"><i data-lucide="${icon}"></i></span><span class="t">${title}</span><span class="s">${sub}</span>
-    <span class="w"><span class="mono">${when}</span>${pill || ''}</span></a>`
+  const row = (id, icon, tone, title, sub, when, pill, info) => `<a href="requests.html?theme=${THEME}&item=${id}" class="rq ${tone}${id === ITEM ? ' on' : ''}${info ? ' info' : ''}">
+    <i data-lucide="${icon}"></i><span class="t">${title}</span><span class="s">${sub}</span>
+    <span class="when">${when}</span><span class="st">${pill || ''}</span></a>`
   const gh = (t, n) => `<div class="grp-h">${t}<span class="n">${n}</span></div>`
   const detail = document.getElementById('detail')
   if (TAB === 'all') {
-    /* Facts match the apps: Արամ's deletion request (driver-account#deleterequested, «Հայց · 15:10»), his insurance expired
-       02.10 and permit 21.10 (driver-account#docs), Վահե's expired and Լիլիթ's 9-day document (drivers.html), the wrong-car
-       button «Սխալ մեքենա է» (driver-shift#operator), and the blacklisted caller refused in the rider app (ECO.BLACKLIST). */
+    /* Facts match the apps: Արամ's deletion request (driver-account#deleterequested, 15:10 yesterday); Արամ's insurance is
+       VALID until 20.10 and his permit until 21.10 (ECO.DOCS.aram) — both only «soon». Վահե Ս.'s insurance expired 05.10;
+       orders stop until a new document is approved, and he sent a photo at 9:20 (owner #5). The wrong-car button «Սխալ
+       մեքենա է» (driver-shift#operator); the blacklisted caller refused in the rider app (ECO.BLACKLIST, owner #12). */
     document.getElementById('list').innerHTML =
-      gh('Որոշում է պետք', 4)
-      + row('delete', 'user-x', 'bad', `Ջնջման հայտ · ${R.driver.name}`, 'Այս վարորդը խնդրել է ջնջել իր հաշիվը', 'երեկ 15:10', '<span class="pill warn"><i data-lucide="clock"></i>Դեռ ոչ</span>')
-      + row('car', 'car-front', 'warn', 'Սխալ մեքենա · Տիգրան Աբրահամյան', 'Հերթափոխը բացվել է 35 OS 512-ով · նստած է 12 TT 304-ում', '08:47', '<span class="pill warn">Հերթափոխ</span>')
-      + row('doc1', 'shield-alert', 'bad', `Ապահովագրությունը ժամկետանց է · ${R.driver.short}`, `Ժամկետանց է՝ 02.10.2026 · ${R.driver.plate}`, '7 օր', '<span class="pill bad">Ժամկետանց</span>')
-      + row('doc2', 'file-x', 'bad', 'Վկայականը ժամկետանց է · Վահե Սարգսյան', 'Ժամկետանց է՝ 05.10.2026', '4 օր', '<span class="pill bad">Ժամկետանց</span>')
-      + gh('Տեղեկություն', 4)
-      + row('soon1', 'file-clock', '', `Տաքսու թույլտվություն · ${R.driver.short}`, 'մինչև 21.10.2026', '12 օր', '', 1)
-      + row('soon2', 'file-clock', '', 'Ապահովագրություն · Լիլիթ Մանուկյան', 'մինչև 18.10.2026', '9 օր', '', 1)
-      + row('soon3', 'file-clock', '', 'Տեխզննում · Վարդան Մանուկյան', 'մինչև 18.10.2026', '9 օր', '', 1)
-      + row('bl', 'ban', '', `Սև ցուցակ · մերժվեց հավելվածում · ${BL.name}`, `<span class="mono">${BL.phone}</span> · ${BL.reason}`, BL.refusedAt, '', 1)
+      gh('Որոշում է պետք', 3)
+      + row('doc', 'shield-alert', 'warn', `Ապահովագրությունը ժամկետանց է · նոր լուսանկար · ${V.name}`, `Ժամկետանց՝ ${V.expired} · պատվերները դադարեցված են`, V.uploaded, '<span class="pill warn">Ստուգել</span>')
+      + row('car', 'car-front', 'warn', 'Սխալ մեքենա · Տիգրան Աբրահամյան', 'Հերթափոխը՝ 35 OS 512 · իրականում՝ 12 TT 304', '08:47', '<span class="pill warn">Հերթափոխ</span>')
+      + row('delete', 'user-x', '', `Ջնջել հաշիվը · ${R.driver.name}`, 'Վարորդը խնդրել է ջնջել իր հաշիվը', 'երեկ', '<span class="pill"><i data-lucide="lock"></i>Բաց հերթափոխ</span>')
+      + gh('Տեղեկություն', 5)
+      + row('bl', 'octagon-alert', 'bl', `Սև ցուցակ · ${BL.name} փորձեց պատվիրել`, `<span class="mono">${BL.phone}</span> · հավելվածը մերժեց`, BL.refusedAt, '', 1)
+      + row('soon1', 'file-clock', '', `Ապահովագրություն · ${R.driver.short}`, `մինչև ${DOCS.aram.insurance}`, '11 օր', '', 1)
+      + row('soon2', 'file-clock', '', `Տաքսու թույլտվություն · ${R.driver.short}`, `մինչև ${DOCS.aram.permit}`, '12 օր', '', 1)
+      + row('soon3', 'file-clock', '', 'Ապահովագրություն · Լիլիթ Մանուկյան', 'մինչև 18.10.2026', '9 օր', '', 1)
+      + row('soon4', 'file-clock', '', 'Տեխզննում · Վարդան Մանուկյան', 'մինչև 18.10.2026', '9 օր', '', 1)
       + gh('Այլ բաժիններում', '')
-      + `<a class="ptr" href="approvals.html?theme=${THEME}"><i data-lucide="badge-check"></i>Գործընկերների մեքենաներ և հայտեր՝ Հաստատումներում<span class="n">3</span><i data-lucide="chevron-right"></i></a>`
-      + `<a class="ptr" href="topups.html?theme=${THEME}"><i data-lucide="wallet"></i>Բանկային փոխանցումներ՝ համադրման սպասող<span class="n">2</span><i data-lucide="chevron-right"></i></a>`
+      + `<a class="ptr" href="approvals.html?theme=${THEME}"><i data-lucide="badge-check"></i>Հաստատումներ · գործընկերների մեքենաներ<span class="n">3</span><i data-lucide="chevron-right"></i></a>`
+      + `<a class="ptr" href="topups.html?theme=${THEME}"><i data-lucide="wallet"></i>Լիցքավորումներ · չհամադրված փոխանցումներ<span class="n">2</span><i data-lucide="chevron-right"></i></a>`
     if (ITEM === 'car') {
-      detail.innerHTML = `<div class="hd"><span class="k"><i data-lucide="car-front"></i>Սխալ մեքենա · 08:47</span><h2>Տիգրան Աբրահամյան</h2><div class="meta mono">093 60-12-48</div></div>
-        <div class="blk"><h3>Ինչ է հայտնել վարորդը</h3><dl class="facts"><dt>Բացել է</dt><dd>Մարիամ Հովսեփյան · 08:41</dd><dt>Համակարգում</dt><dd><span class="plate">35 OS 512</span> · Eco Van</dd><dt>Իրականում</dt><dd><span class="plate">12 TT 304</span> · Eco City</dd></dl>
-          <p class="meta" style="margin-top:8px;font:var(--c-small);color:var(--ink-muted)">Մինչ սա ուղղվի, առաջարկները գալիս են Eco Van-ի դասով, իսկ ուղևորը տեսնում է սխալ համարանիշ։</p></div>
-        <div class="blk"><h3>35 OS 512-ը հիմա</h3><dl class="facts"><dt>Վարորդ</dt><dd>Արմեն Գրիգորյան · ազատ է հերթափոխից</dd><dt>Պատվեր</dt><dd><span class="faint">—</span></dd></dl></div>
-        <div class="acts2"><button class="btn primary"><i data-lucide="repeat"></i>Վերաբացել հերթափոխը 12 TT 304-ով</button><button class="btn secondary"><i data-lucide="phone"></i>Զանգել</button><button class="btn ghost">Փակել՝ առանց փոփոխության</button></div>`
+      detail.innerHTML = `<div class="hd"><span class="k"><i data-lucide="car-front"></i>Սխալ մեքենա · 08:47</span><h2>Տիգրան Աբրահամյան</h2><div class="meta"><span class="mono">093 60-12-48</span>·<span>Ավտոպարկի վարորդ</span></div></div>
+        <div class="blk"><h3>Ինչ է հայտնել վարորդը</h3><dl class="facts"><dt>Հերթափոխը բացեց</dt><dd>Մարիամ Հովսեփյան · <span class="mono">08:41</span></dd><dt>Համակարգում</dt><dd><span class="plate">35 OS 512</span> · Eco Van</dd><dt>Իրականում</dt><dd><span class="plate">12 TT 304</span> · Eco City</dd></dl>
+          <ul class="chk"><li><i data-lucide="circle-alert" class="no"></i><span>Առաջարկները գալիս են Eco Van սակագնով</span></li><li><i data-lucide="circle-alert" class="no"></i><span>Ուղևորը տեսնում է սխալ համարանիշ</span></li></ul></div>
+        <div class="blk"><h3>35 OS 512-ը հիմա</h3><dl class="facts"><dt>Վարորդ</dt><dd>Արմեն Գրիգորյան · հերթափոխում չէ</dd><dt>Պատվեր</dt><dd><span class="faint">—</span></dd></dl></div>
+        <div class="acts2"><button class="btn primary"><i data-lucide="repeat"></i>Բացել հերթափոխը 12 TT 304-ով</button><button class="btn secondary"><i data-lucide="phone"></i>Զանգել վարորդին</button><button class="btn ghost">Փակել առանց փոփոխության</button></div>`
+    } else if (ITEM === 'doc') {
+      /* Owner #5: an expired document blocks orders until a new one is uploaded AND approved. The dispatcher reads the
+         new date off the photo, types it, and approves; «Մերժել» asks for a reason the driver sees in the app. */
+      detail.innerHTML = `<div class="hd"><span class="k"><i data-lucide="shield-alert"></i>Ապահովագրություն · նոր լուսանկար · ${V.uploaded}</span><h2>${V.name}</h2><div class="meta"><span class="mono">091 77-31-08</span>·<span>Ավտոպարկի վարորդ</span>·<span class="plate">55 SM 620</span></div></div>
+        <div class="blk"><h3>Ապահովագրություն (ԱՊՊԱ)<span class="end pill warn" style="height:20px"><i data-lucide="lock"></i>Պատվերները դադարեցված են</span></h3>
+          <div class="docpair"><figure class="old"><div class="ph"><i data-lucide="file-x"></i></div><figcaption><b>Հինը</b>Ժամկետանց՝ ${V.expired}</figcaption></figure>
+            <figure><div class="ph"><i data-lucide="file-image"></i></div><figcaption><b>Նոր լուսանկար</b>Ուղարկվեց այսօր՝ ${V.uploaded}</figcaption></figure></div>
+          <div style="margin-top:12px"><label class="label">Վավեր է մինչև</label><div class="input focus" style="width:180px"><i data-lucide="calendar"></i><span class="val mono">05.10.2027</span></div></div></div>
+        <div class="blk"><h3>Պատմություն</h3><ul class="tl2"><li><span class="mono">05.10</span><span>Ժամկետը լրացավ · պատվերները դադարեցվեցին</span></li><li><span class="mono">${V.uploaded}</span><span>Վարորդը ուղարկեց նոր լուսանկար</span></li></ul></div>
+        <div class="acts2"><div class="notice amber"><i data-lucide="lock"></i><span>Պատվերներ չի ստանա, մինչև չհաստատեք</span></div>
+          <button class="btn primary"><i data-lucide="check"></i>Հաստատել</button><button class="btn secondary">Մերժել</button><a class="btn ghost" href="drivers.html?theme=${THEME}">Վարորդի քարտը<i data-lucide="arrow-right"></i></a></div>`
+    } else if (ITEM === 'bl') {
+      /* Owner #12: the app refused the order by itself; nothing to decide. Amber octagon (owner #13), never red. */
+      detail.innerHTML = `<div class="hd"><span class="k"><i data-lucide="octagon-alert" style="color:var(--warning)"></i>Սև ցուցակ · հավելվածը մերժեց · ${BL.refusedAt}</span><h2>${BL.name}</h2><div class="meta"><span class="mono">${BL.phone}</span>·<span>Ուղևոր</span></div></div>
+        <div class="blk"><h3>Ինչու է սև ցուցակում</h3><dl class="facts"><dt>Պատճառ</dt><dd>${BL.reason}</dd><dt>Ավելացրել է</dt><dd>${BL.by} · ${BL.since}</dd><dt>Այսօր</dt><dd>Փորձեց պատվիրել հավելվածից · <span class="mono">${BL.refusedAt}</span></dd></dl></div>
+        <div class="acts2"><div class="notice neutral"><i data-lucide="info"></i><span>Պատվերը չընդունվեց · որոշում պետք չէ</span></div>
+          <a class="btn secondary" href="customer.html?theme=${THEME}&state=blacklisted">Ուղևորի քարտը<i data-lucide="arrow-right"></i></a></div>`
     } else {
-      detail.innerHTML = `<div class="hd"><span class="k"><i data-lucide="user-x"></i>Ջնջման հայտ · երեկ, 15:10</span><h2>${R.driver.name}</h2><div class="meta mono">${R.driver.phone} · Պարկի վարորդ</div></div>
-        <div class="blk"><h3>Այս վարորդը խնդրել է ջնջել իր հաշիվը</h3><p style="font:var(--c-body);margin-top:6px">անունը, համարը և սարքերը կջնջվեն; պատվերներն ու գումարը կմնան</p>
-          <ul class="chk"><li><i data-lucide="circle-alert" class="no"></i><span>Հերթափոխը բաց է · <span class="plate">${R.driver.plate}</span> · R-${R.no} ընթացքում</span></li>
-            <li><i data-lucide="circle-alert" class="no"></i><span>Հաշվարկը բաց է՝ <b class="mono">−3 850 ֏</b> · կանխիկից պահում</span></li>
-            <li><i data-lucide="info"></i><span>Նախնական պատվերներ՝ 2 · ազատել նախքան ջնջելը</span></li></ul></div>
-        <div class="blk"><h3>Պատմություն</h3><ul class="tl2"><li><span class="mono">15:10</span><span>Վարորդը հաշվի ջնջում պահանջեց</span></li><li><span class="mono">15:11</span><span>Հայտը եկավ Հարցումներ</span></li></ul></div>
-        <div class="acts2"><div class="notice amber" style="width:100%"><i data-lucide="triangle-alert"></i><span>Դեռ ոչ — վարորդն ունի ընթացիկ պատվեր կամ չկարգավորված հաշիվ</span></div>
-          <button class="btn danger" aria-disabled="true" style="opacity:.5">Համաձայնել և ջնջել հաշիվը</button><a class="btn secondary" href="drivers.html?theme=${THEME}">Բացել վարորդին<i data-lucide="arrow-right"></i></a></div>`
+      /* Fleet drivers carry no money (owner #3): nothing to settle, so the only blockers are the open shift and the
+         pre-orders he holds. */
+      detail.innerHTML = `<div class="hd"><span class="k"><i data-lucide="user-x"></i>Ջնջել հաշիվը · երեկ, 15:10</span><h2>${R.driver.name}</h2><div class="meta"><span class="mono">${R.driver.phone}</span>·<span>Ավտոպարկի վարորդ</span></div></div>
+        <div class="blk"><h3>Ինչ կլինի</h3><ul class="chk"><li><i data-lucide="trash-2" class="x"></i><span>Անունը, հեռախոսը և սարքերը՝ կջնջվեն</span></li><li><i data-lucide="archive" class="x"></i><span>Պատվերները և գնահատականները՝ կմնան</span></li></ul></div>
+        <div class="blk"><h3>Նախքան ջնջելը</h3><ul class="chk"><li><i data-lucide="circle-alert" class="no"></i><span>Հերթափոխը բաց է · <span class="plate">${R.driver.plate}</span> · R-${R.no} ընթացքում</span></li>
+            <li><i data-lucide="circle-alert" class="no"></i><span>Նախնական պատվերներ՝ 2 · ազատել</span></li></ul></div>
+        <div class="blk"><h3>Պատմություն</h3><ul class="tl2"><li><span class="mono">15:10</span><span>Վարորդը խնդրեց ջնջել հաշիվը</span></li></ul></div>
+        <div class="acts2"><div class="notice amber"><i data-lucide="triangle-alert"></i><span>Նախ փակեք հերթափոխը և ազատեք նախնական պատվերները</span></div>
+          <button class="btn danger" disabled style="opacity:.5">Ջնջել հաշիվը</button><a class="btn secondary" href="drivers.html?theme=${THEME}">Վարորդի քարտը<i data-lucide="arrow-right"></i></a></div>`
     }
   } else {
     /* C50, drawn ahead (no fiscal API yet): receipts the e-HDM did not take, and rides whose money did not settle. */
     document.getElementById('list').innerHTML = gh('Ֆիսկալ կտրոններ · չթողարկված', 2)
-      + `<table class="tbl ft"><colgroup><col style="width:96px"><col><col style="width:96px"><col style="width:150px"></colgroup><thead><tr><th>Պատվեր</th><th>Պատճառ</th><th class="r">Գումար</th><th></th></tr></thead><tbody>
-        <tr class="on"><td class="mono">R-2402</td><td><span class="two"><b>ՀԴՄ-ն չպատասխանեց</b><span>3 փորձ · վերջինը 09:36</span></span></td><td class="r mono">${ECO.amd(1300)}</td><td class="r"><button class="btn secondary s"><i data-lucide="rotate-cw"></i>Կրկին փորձել</button></td></tr>
-        <tr><td class="mono">R-2396</td><td><span class="two"><b>Վաճառողի ՀՎՀՀ-ն լրացված չէ</b><span>Կարգավորումներ → Հաշիվներ</span></span></td><td class="r mono">${ECO.amd(900)}</td><td class="r"><a class="btn ghost s" href="settings.html?theme=${THEME}&tab=invoicing">Ուղղել</a></td></tr></tbody></table>`
+      + `<table class="tbl ft"><colgroup><col style="width:96px"><col><col style="width:96px"><col style="width:132px"></colgroup><thead><tr><th>Պատվեր</th><th>Պատճառ</th><th class="r">Գումար</th><th></th></tr></thead><tbody>
+        <tr class="on"><td class="mono">R-2402</td><td><span class="two"><b>ՀԴՄ-ն չպատասխանեց</b><span>3 փորձ · վերջինը՝ 09:36</span></span></td><td class="r mono">${ECO.amd(1300)}</td><td class="r"><button class="btn secondary s"><i data-lucide="rotate-cw"></i>Կրկնել</button></td></tr>
+        <tr><td class="mono">R-2396</td><td><span class="two"><b>Վաճառողի ՀՎՀՀ-ն լրացված չէ</b><span>Կարգավորումներ → Գումար</span></span></td><td class="r mono">${ECO.amd(900)}</td><td class="r"><a class="btn ghost s" href="settings.html?theme=${THEME}&tab=money">Լրացնել</a></td></tr></tbody></table>`
       + gh('Չհաշվարկված պատվերներ', 1)
-      + `<table class="tbl ft"><colgroup><col style="width:96px"><col><col style="width:96px"><col style="width:150px"></colgroup><tbody>
-        <tr><td class="mono">R-2388</td><td><span class="two"><b>Ընկերության պատվեր՝ գինն անհայտ</b><span>${ECO.COMPANY.short} · հաշվիչով գնահատում ${ECO.amd(3000)}</span></span></td><td class="r mono"><span class="faint">—</span></td><td class="r"><button class="btn secondary s">Նշել գինը</button></td></tr></tbody></table>`
+      + `<table class="tbl ft"><colgroup><col style="width:96px"><col><col style="width:96px"><col style="width:132px"></colgroup><tbody>
+        <tr><td class="mono">R-2388</td><td><span class="two"><b>Ընկերության պատվեր · գինն անհայտ</b><span>${ECO.COMPANY.short} · գնահատված՝ ${ECO.amd(3000)}</span></span></td><td class="r mono"><span class="faint">—</span></td><td class="r"><button class="btn secondary s">Նշել գինը</button></td></tr></tbody></table>`
       + gh('Վերջին թողարկվածները', '')
       + `<div class="ptr"><i data-lucide="circle-check"></i>R-${F.ride} · կտրոն <span class="mono">${F.no}</span> · ${F.device}<span class="n">${F.at}</span></div>`
     detail.innerHTML = `<div class="hd"><span class="k"><i data-lucide="scroll-text"></i>Ֆիսկալ կտրոն · չթողարկված</span><h2>R-2402 · ${ECO.amd(1300)}</h2><div class="meta">Ավարտվել է 09:31 · Կանխիկ · Գագիկ Ավետիսյան</div></div>
       <div class="blk"><h3>Փորձեր</h3><ul class="tl2"><li><span class="mono">09:31</span><span>Ուղարկվեց ՀԴՄ-ին · պատասխան չկա</span></li><li><span class="mono">09:33</span><span>Կրկին · պատասխան չկա</span></li><li><span class="mono">09:36</span><span>Կրկին · պատասխան չկա</span></li></ul></div>
-      <div class="blk"><h3>Ինչ է տեսնում ուղևորը</h3><p style="font:var(--c-body);margin-top:6px">Անդորրագիրը՝ առանց ֆիսկալ համարի, «Կտրոնը պատրաստվում է» նշումով։</p></div>
-      <div class="acts2"><div class="notice red" style="width:100%"><i data-lucide="circle-alert"></i><span>ՀԴՄ-ն երեք անգամ չպատասխանեց</span></div><button class="btn primary"><i data-lucide="rotate-cw"></i>Կրկին փորձել</button><button class="btn secondary">Նշել որպես ձեռքով թողարկված</button></div>`
+      <div class="blk"><h3>Ինչ է տեսնում ուղևորը</h3><p style="font:var(--c-body);margin-top:6px">Անդորրագիր՝ առանց ֆիսկալ համարի · «Կտրոնը պատրաստվում է»</p></div>
+      <div class="acts2"><div class="notice red"><i data-lucide="circle-alert"></i><span>ՀԴՄ-ն երեք անգամ չպատասխանեց</span></div><button class="btn primary"><i data-lucide="rotate-cw"></i>Կրկնել</button><button class="btn secondary">Նշել՝ թողարկված ձեռքով</button></div>`
   }
   icons()
   document.documentElement.dataset.mapReady = 'none'

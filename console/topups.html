@@ -13,6 +13,8 @@
   .content { grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
   .strip2 { grid-column: 1 / 3; flex-direction: row; }
   .strip2 .kpi { flex: 1; border-right: 1px solid var(--line-soft); }
+  .strip2 .kpi .v { font: 600 20px/28px var(--font); font-variant-numeric: tabular-nums; } /* one hero per screen: none here, the tables are the content */
+  .strip2 .kpi .v small { font: 500 13px/18px var(--font); }
   .till { flex: 1.5 !important; display: grid !important; grid-template-columns: auto auto auto auto; align-items: center; gap: 4px 12px; }
   .till .k { grid-column: 1 / 5; }
   .till .input { width: 112px; }
@@ -42,31 +44,31 @@
     <div class="content">
       <section class="card strip2" aria-label="Օրվա ամփոփում">
         <div class="kpi"><span class="k"><i data-lucide="banknote"></i>Կանխիկ</span><span class="v">46 000<small>֏</small></span><span class="s">5 լիցքավորում</span></div>
-        <div class="kpi"><span class="k"><i data-lucide="landmark"></i>Փոխանցում</span><span class="v">30 000<small>֏</small></span><span class="s">2 գրանցված · 2 սպասում</span></div>
+        <div class="kpi"><span class="k"><i data-lucide="landmark"></i>Բանկային փոխանցում</span><span class="v">30 000<small>֏</small></span><span class="s">2 գրանցված · 3 սպասում է</span></div>
         <div class="kpi"><span class="k">Ընդամենը</span><span class="v">76 000<small>֏</small></span><span class="s">8 գործընկեր</span></div>
         <div class="kpi till"><span class="k">Դրամարկղ · օրվա փակում</span>
-          <span class="muted">Սպասվող</span><b class="num">46 000 ֏</b>
-          <span class="muted">Հաշվված</span><span class="input"><span class="val mono">46 000</span><span class="faint">֏</span></span>
+          <span class="muted">Ըստ գրանցումների</span><b class="num">46 000 ֏</b>
+          <span class="muted">Հաշվել ենք</span><span class="input"><span class="val mono">46 000</span><span class="faint">֏</span></span>
           <span class="pill ok" style="grid-column:1 / 3"><i data-lucide="circle-check"></i>Տարբերություն՝ 0 ֏</span><button class="btn secondary s" style="grid-column:3 / 5;justify-self:end">Փակել դրամարկղը</button></div>
       </section>
 
       <section class="card" aria-label="Այսօրվա լիցքավորումները">
         <div class="card-h"><h2>Այսօր գրանցված</h2><span class="sub num">8</span><span class="end"><button class="btn ghost s"><i data-lucide="download"></i>CSV</button></span></div>
         <div class="scroll-y grow">
-          <table class="tbl tt"><colgroup><col style="width:64px"><col><col style="width:112px"><col style="width:112px"><col style="width:92px"><col style="width:116px"></colgroup>
+          <table class="tbl tt"><colgroup><col style="width:64px"><col><col style="width:96px"><col style="width:104px"><col style="width:84px"><col style="width:112px"></colgroup>
             <thead><tr><th>Ժամը</th><th>Գործընկեր</th><th>Եղանակ</th><th>Անդորրագիր</th><th>Գրանցել է</th><th class="r">Գումար</th></tr></thead>
             <tbody id="today"></tbody></table>
         </div>
       </section>
 
-      <section class="card" aria-label="Բանկային փոխանցումների համադրում">
-        <div class="card-h"><h2>Բանկային փոխանցումներ</h2><span class="sub trunc">Ameriabank · 11.10, 09:00</span><span class="end"><button class="btn secondary s"><i data-lucide="upload"></i>Ներմուծել</button></span></div>
+      <section class="card" aria-label="Բանկային փոխանցումներ">
+        <div class="card-h"><h2>Բանկային փոխանցումներ</h2><span class="sub trunc">Ամերիաբանկ · 11.10, 09:00</span><span class="end"><button class="btn secondary s"><i data-lucide="upload"></i>Ներմուծել</button></span></div>
         <div class="scroll-y grow" data-truncate>
           <table class="tbl bk"><colgroup><col><col style="width:96px"><col style="width:188px"></colgroup>
-            <thead><tr><th>Վճարող · նպատակ</th><th class="r">Գումար</th><th>Համադրում՝ ըստ կոդի</th></tr></thead>
+            <thead><tr><th>Վճարող · նշում</th><th class="r">Գումար</th><th>Ըստ վճարման կոդի</th></tr></thead>
             <tbody id="bank"></tbody></table>
         </div>
-        <div style="padding:10px var(--inset);border-top:1px solid var(--line-soft)"><div class="notice neutral"><i data-lucide="info"></i><span>Յուրաքանչյուր գործընկեր ունի իր վեցանիշ վճարման կոդը (օր.՝ 000041), նույնը, ինչ հավելվածում։ Բացատները չեն խանգարում։ Կոդով փոխանցումը համընկնում է ինքնաշխատ, բայց մնացորդին ավելանում է միայն օպերատորի «Գրանցել»-ից հետո։</span></div></div>
+        <div style="padding:10px var(--inset);border-top:1px solid var(--line-soft)"><div class="notice neutral"><i data-lucide="info"></i><span>Գտնում ենք ըստ «Վճարման կոդի» <span class="mono">000041</span> · հաշվեկշռին ավելանում է «Գրանցել»-ից հետո</span></div></div>
       </section>
     </div>
   </div>
@@ -86,8 +88,8 @@
   document.getElementById('today').innerHTML = T.map(([t, i, m, ref, who, v, rev]) => {
     const p = PARTNERS[i]
     return `<tr class="${rev || ''}"><td class="mono">${t}</td><td><span class="who2"><b>${p.name}</b><span>${p.code}</span></span></td>
-      <td><span class="meth"><i data-lucide="${m === 'cash' ? 'banknote' : 'landmark'}"></i>${m === 'cash' ? 'Կանխիկ' : 'Փոխանցում'}</span></td>
-      <td class="mono">${ref}</td><td>${who}</td><td class="r mono">${rev ? '<span class="pill" title="Հետարկված՝ կրկնակի գրանցում">հետարկված</span>' : `<span class="plus">+${amd(v)}</span>`}</td></tr>`
+      <td><span class="meth"><i data-lucide="${m === 'cash' ? 'banknote' : 'landmark'}"></i>${m === 'cash' ? 'Կանխիկ' : 'Բանկ'}</span></td>
+      <td class="mono">${ref}</td><td>${who}</td><td class="r mono">${rev ? '<span class="pill" title="Չեղարկված՝ կրկնակի գրանցում">Չեղարկված</span>' : `<span class="plus">+${amd(v)}</span>`}</td></tr>`
   }).join('')
   const B = [
     ['ԳՈՌ ՄԱՐՏԻՐՈՍՅԱՆ', 'Լիցքավորում <mark>000052</mark>', 15000, 'match', 9],
@@ -97,7 +99,7 @@
     ['ԴԱՎԻԹ ԿԱՐԱՊԵՏՅԱՆ', '<mark>000042</mark>', 10000, 'done', 3],
   ]
   document.getElementById('bank').innerHTML = B.map(([payer, purpose, v, st, i]) => {
-    const m = st === 'match' ? `<div class="match"><span class="pill brand" style="height:20px"><i data-lucide="link"></i>${PARTNERS[i].name.split(' ')[0]} ${PARTNERS[i].name.split(' ')[1][0]}.</span><button class="btn primary s">Գրանցել</button></div>`
+    const m = st === 'match' ? `<div class="match"><span class="pill brand" style="height:20px"><i data-lucide="link"></i>${PARTNERS[i].name.split(' ')[0]} ${PARTNERS[i].name.split(' ')[1][0]}.</span><button class="btn secondary s">Գրանցել</button></div>`
       : st === 'none' ? `<div class="match"><span class="pill warn" style="height:20px"><i data-lucide="circle-help"></i>Կոդ չկա</span><button class="btn secondary s">Ընտրել գործընկեր<i data-lucide="chevron-down"></i></button></div>`
       : `<div class="match"><span class="pill ok" style="height:20px"><i data-lucide="circle-check"></i>Գրանցված</span><span class="faint" style="font:var(--c-small)">${PARTNERS[i].name.split(' ')[0]} · Մարիամ Հ.</span></div>`
     return `<tr><td><span class="purpose"><b>${payer}</b><span>${purpose}</span></span></td><td class="r mono">${amd(v)}</td><td>${m}</td></tr>`

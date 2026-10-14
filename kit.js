@@ -43,19 +43,37 @@
     PAY: {
       cash: { label: 'Կանխիկ', icon: 'banknote', live: true },
       company: { label: 'Ընկերության հաշվին', short: 'Ընկերություն', icon: 'building-2', live: true },
-      card: { label: 'Քարտով', icon: 'credit-card', live: false },
+      card: { label: 'Քարտ', icon: 'credit-card', live: false },
       idram: { label: 'Idram', live: false }, telcell: { label: 'Telcell', live: false },
       soon: 'Շուտով',
     },
 
     /* Corporate client used on every surface (rider booking, receipt, console Companies). */
     COMPANY: { name: 'Արարատ Սոֆթ ՍՊԸ', short: 'Արարատ Սոֆթ', tin: '02612345', refLabel: 'Ծախսերի կոդ', ref: 'MKT-204',
-      rider: 'Աննա Հակոբյան', limit: 300000, used: 184600, invoice: 'INV-2026-00065', due: '24 հոկտ.' },
+      rider: 'Աննա Հակոբյան', limit: 300000, used: 184600, email: 'finance@araratsoft.am',
+      /* Owner 2026-10-14 (#11): no invoices in the product. The fleet tracks each month and sends the client a report;
+         accounting invoices outside ETCAB. paid = the optional «Վճարված» mark. */
+      months: [
+        { key: '2026-09', label: 'Սեպտեմբեր 2026', rides: 214, amount: 268400, paid: true, paidOn: '6 հոկտ.' },
+        { key: '2026-10', label: 'Հոկտեմբեր 2026', rides: 131, amount: 184600, paid: false, open: true },
+      ] },
+
+    /* Tariffs (= car class, owner #9). preorders: may this tariff be booked in advance (owner #1, set in console
+       Tariffs; illustrative values). A due pre-order is searched automatically among this tariff's drivers (Q1). */
+    TIERS: [
+      { id: 'city', name: 'Eco City', preorders: true }, { id: 'comfort', name: 'Eco Comfort', preorders: true },
+      { id: 'kids', name: 'Eco Kids', preorders: false }, { id: 'business', name: 'Eco Business', preorders: true },
+      { id: 'van', name: 'Eco Van', preorders: false }, { id: 'vip', name: 'Eco Vip', preorders: true },
+    ],
 
     /* Partner (own car, prepaid wallet). Reference = the API's driver.paymentReference: six digits, zero-padded
        (migration 20261011100000_driver_payment_reference), labelled «Վճարման կոդ» in both the app and the console.
-       Blocked below 0 ֏, warned below 3 000 ֏ (the Standard fee plan), and both are amber: a domain refusal, not a failure. */
-    PARTNER: { name: 'Կարեն Մելքոնյան', ref: '000041', refLabel: 'Վճարման կոդ', warnBelow: 3000, blockBelow: 0,
+       Blocked below 0 ֏, warned below 3 000 ֏ (Eco Comfort's rule, ECO.PARTNER.rules.comfort; the flat values are its aliases), and both are amber: a domain refusal, not a failure. */
+    /* rules: owner #3 — partner balance rules are per tariff (console Tariffs / Fee plans). Karen drives Eco Comfort. */
+    PARTNER: { name: 'Կարեն Մելքոնյան', ref: '000041', refLabel: 'Վճարման կոդ', tier: 'comfort', warnBelow: 3000, blockBelow: 0,
+      rules: { city: { fee: 15, warnBelow: 2000, blockBelow: 0 }, comfort: { fee: 15, warnBelow: 3000, blockBelow: 0 },
+        kids: { fee: 16, warnBelow: 3000, blockBelow: 0 }, business: { fee: 18, warnBelow: 4000, blockBelow: 0 },
+        van: { fee: 18, warnBelow: 4000, blockBelow: 0 }, vip: { fee: 20, warnBelow: 5000, blockBelow: 0 } },
       bank: { name: 'Ամերիաբանկ', holder: 'Էկո Տաքսի ՍՊԸ', account: '1570 0412 3456 4417', accountMasked: '1570 •••• 4417' },
       office: { address: 'Կոմիտասի պող. 38', hours: 'Երկ–Շբթ · 09:00–20:00' } },
 
@@ -69,7 +87,15 @@
     /* The fleet's dispatcher desk (dispatcherPhone() in both apps' config; rider-account already shows it) and the
        console settings the apps obey. reminderMin: owner decision 2026-10-12, a rider reminder push N minutes before a
        pre-order, set in console Settings → Dispatch (drawn ahead: no push type yet). */
-    DISPATCH: { phone: '010 55-55-55', reminderMin: 30 },
+    /* lowRating: owner #15 — 1–3 ★ is low, follow up within 24 h; both set in console Settings → Dispatch. */
+    DISPATCH: { phone: '010 55-55-55', reminderMin: 30, lowRating: { max: 3, followUpH: 24 } },
+    /* Rider SOS (owner #2): the walkthrough ride while riding at 9:47; a red alert on console Dispatch until «Լուծված է». */
+    SOS: { ride: '2417', at: '9:47', from: 'rider', name: 'Աննա', phone: '091 23-45-67', driver: 'Արամ Պ.', plate: '01 ET 001',
+      where: 'Մաշտոցի պող. 18', near: 'Մատենադարանից 300 մ' },
+    /* Documents (owner #5: expired insurance stops orders until a new one is uploaded and approved). Արամ is valid
+       (the app's block state is the 21 Oct scenario); the console's live example is Վահե. */
+    DOCS: { aram: { insurance: '20.10.2026', permit: '21.10.2026' },
+      blocked: { name: 'Վահե Սարգսյան', short: 'Վահե Ս.', doc: 'insurance', expired: '05.10.2026', uploaded: '9:20' } },
 
     /* ── p1p2 pass: facts that two surfaces show. ── */
     /* The rider ECO.RIDE.rider as the console's customer record knows her (admin/customers/[id]); the rider app's
@@ -78,7 +104,7 @@
       places: { home: 'Կոմիտասի պող. 22', work: 'Վազգեն Սարգսյանի 26/1' } },
     /* A blacklisted caller (§10.11): refused by the rider app at order (book.blacklisted), flagged at console intake
        (blacklist-notice.tsx), and listed in the Requests inbox as «refused at order». */
-    BLACKLIST: { phone: '096 70-11-58', name: 'Գևորգ Ս.', reason: 'Երեք անգամ չներկայացավ, վարորդի հետ վեճ', since: '2 հոկտ.', by: 'Անի Դավթյան', refusedAt: '9:12' },
+    BLACKLIST: { phone: '096 70-11-58', name: 'Գևորգ Ս.', reason: 'Երեք անգամ չեկավ, վիճել է վարորդի հետ', since: '2 հոկտ.', by: 'Անի Դավթյան', refusedAt: '9:12' },
     /* Console operators (shell avatar ԱԴ/ՄՀ/ՍԱ). Roles follow the API's operator roles. The API's operator has an email,
        not a name (operators.tsx lists by email); the names are the console shell's, drawn ahead. */
     OPERATORS: [
@@ -110,7 +136,7 @@
         assignedAt: '08:12', startedAt: '08:02', etaMin: 6,
         /* Owner ruling 2026-10-12 (a): when the rider presses «Սկսել հիմա», the pre-assigned driver gets the first offer
            (the normal offer screen, 20 s); if he declines or lets it expire the ride goes to normal dispatch. Drawn ahead. */
-        startNow: { at: '9:52', offerSec: 20, first: 'Սուրեն Մ.', fallback: 'dispatch' } },
+        startNow: { at: '9:52', offerSec: 20, first: 'Սուրեն Մ.', fallback: 'auto' /* Q1: then automatic search among Eco City drivers */ } },
       /* A booking whose pre-assigned driver was blocked: problemReason → the rider's warn tag «Մեքենան դեռ նշանակված չէ»,
          the console's driver_blocked pill. */
       sun: { id: 'B-0917', who: 'rider', when: 'կիրակի, 19:00', day: 'Կիրակի, 11 հոկտ.', iso: '2026-10-11T19:00', time: '19:00', held: '18:30', activates: '18:45',

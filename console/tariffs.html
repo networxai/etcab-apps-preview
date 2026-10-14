@@ -13,7 +13,7 @@
   .content { grid-template-columns: minmax(0, 1fr) 348px; }
   .col { display: flex; flex-direction: column; gap: var(--gap); min-height: 0; overflow-y: auto; scrollbar-width: thin; }
   .col > .card { flex: none; overflow: visible; }
-  .tier { display: grid; grid-template-columns: 16px 124px minmax(0, 1fr) 132px 236px; gap: 12px; align-items: center; min-height: 80px; padding: 8px var(--inset) 8px 10px; border-bottom: 1px solid var(--line-soft); }
+  .tier { display: grid; grid-template-columns: 16px 124px minmax(0, 1fr) 160px 236px; gap: 12px; align-items: center; min-height: 80px; padding: 8px var(--inset) 8px 10px; border-bottom: 1px solid var(--line-soft); }
   .tier:last-child { border-bottom: 0; }
   .tier .grip { color: var(--ink-faint); }
   .slot { position: relative; width: 124px; height: 64px; border-radius: var(--r-ctl); background: var(--surface-alt); display: grid; place-items: center; }
@@ -27,8 +27,9 @@
   .tier .nm b { font: var(--c-head); white-space: nowrap; }
   .tier .nm span { font: var(--c-small); color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tier .nm .tag { text-overflow: clip; overflow: visible; }
-  .tier .tar { display: flex; flex-direction: column; gap: 2px; min-width: 0; font: var(--c-small); color: var(--ink-faint); white-space: nowrap; }
-  .tier .tar b { font: var(--c-strong); color: var(--ink); }
+  /* Owner #1: may this tariff be booked in advance (ECO.TIERS[].preorders). */
+  .tier .pre { display: flex; flex-direction: column; gap: 4px; min-width: 0; font: var(--c-small); color: var(--ink-faint); white-space: nowrap; }
+  .tier .pre .switch { font: var(--c-body); }
   .tier .pic { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
   .tier .pic .row-flex { gap: 4px; }
   .tier .pic .note { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; }
@@ -43,8 +44,10 @@
   .mx .tc { display: flex; align-items: center; gap: 8px; }
   .mx .tc b { font: var(--c-strong); }
   .mx .ex { font-weight: 600; color: var(--ink); }
+  .mx td.pre { text-align: left; font: var(--c-body); }
+  .mx td.pre svg { width: 16px; height: 16px; vertical-align: -3px; margin-right: 4px; }
   /* Rider preview: the same card the rider app draws (apps v2 rider-tiers, owner rule: horizontal snap row with a peek) */
-  .pv { background: var(--ground); border-radius: var(--r-card); margin: var(--inset); padding: 12px 0 12px 12px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--line-soft); }
+  .pv { background: var(--ground); border-radius: var(--r-card); margin: 8px var(--inset) var(--inset); padding: 12px 0 12px 12px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--line-soft); }
   .pv .rowc { display: flex; gap: 8px; }
   .rc { position: relative; flex: none; width: 132px; padding: 12px; border-radius: var(--r-card); background: var(--surface-2); display: flex; flex-direction: column; }
   .rc.on { background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink); }
@@ -55,7 +58,14 @@
   .rc .tick { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; }
   .rc .tick svg { width: 13px; height: 13px; stroke-width: 2.25; }
   .pvl { font: var(--c-label); color: var(--ink-faint); padding: 0 var(--inset); }
+  .pvh { display: flex; align-items: center; gap: 6px; font: var(--c-label); color: var(--ink-muted); padding: 12px var(--inset) 0; }
+  .pvh svg { width: 16px; height: 16px; }
+  .pv + .pvn { margin-top: -8px; }
+  .pvn { display: flex; align-items: center; gap: 6px; font: var(--c-small); color: var(--ink-muted); padding: 0 var(--inset) 4px; }
+  .pvn svg { width: 16px; height: 16px; flex: none; }
   .where { padding: 0 var(--inset) var(--inset); display: grid; gap: 8px; }
+  aside.card { overflow-y: auto; scrollbar-width: thin; }
+  @media (max-height: 860px) { .where, .pvl { display: none; } }
   .where div { display: flex; align-items: center; gap: 10px; font: var(--c-body); color: var(--ink-muted); }
   .where .car { width: 56px; height: 30px; }
 </style>
@@ -69,32 +79,37 @@
     </header>
     <div class="content">
       <div class="col">
-        <section class="card" aria-label="Փաթեթներ">
-          <div class="card-h"><h2>Փաթեթներ</h2><span class="sub">Հերթականությունը՝ ինչպես ուղևորը տեսնում է · Alt+↑ / Alt+↓</span>
-            <span class="end"><button class="btn secondary s"><i data-lucide="plus"></i>Ավելացնել փաթեթ</button></span></div>
+        <section class="card" aria-label="Սակագներ">
+          <div class="card-h"><h2>Սակագներ</h2><span class="sub">Հերթականությունը՝ ինչպես հավելվածում · Alt+↑ / Alt+↓</span>
+            <span class="end"><button class="btn secondary s"><i data-lucide="plus"></i>Ավելացնել սակագին <span class="kbd">N</span></button></span></div>
           <div id="tiers" data-truncate></div>
-          <div class="hint"><i data-lucide="image-up"></i>PNG, WebP կամ JPEG · մինչև 1 ՄԲ · թափանցիկ ֆոն, ¾ առջևից։ Առանց նկարի հավելվածը ցույց է տալիս ներկառուցված պատկերը, հետո՝ ուրվագիծը։</div>
+          <div class="hint"><i data-lucide="calendar-clock"></i>Նախնական պատվերը ժամին ավտոմատ գնում է այս սակագնի վարորդներին · նախ՝ նշանակված վարորդին, եթե կա</div>
+          <div class="hint"><i data-lucide="image-up"></i>PNG, WebP, JPEG · մինչև 1 ՄԲ · թափանցիկ ֆոն · մեքենան ¾ առջևից<span style="flex:1"></span><i data-lucide="percent"></i>Գործընկերների միջնորդավճարը՝ <a href="feeplans.html" style="color:var(--brand-text)">Միջնորդավճարներ →</a></div>
         </section>
-        <section class="card" aria-label="Գործող սակագներ">
-          <div class="card-h"><h2>Գործող սակագներ</h2><span class="sub">Նախապես հայտարարված գին · կլորացում 100 ֏</span>
-            <span class="end"><button class="btn secondary s"><i data-lucide="plus"></i>Նոր սակագին <span class="kbd">N</span></button></span></div>
+        <section class="card" aria-label="Գներ">
+          <div class="card-h"><h2>Գներ</h2><span class="sub">Գինը հայտնի է նախապես · կլորացում 100 ֏ · <span class="num">09.10</span>-ից</span>
+            <span class="end"><button class="btn secondary s"><i data-lucide="pencil"></i>Փոխել գները</button></span></div>
           <table class="tbl mx">
-            <colgroup><col style="width:168px"><col><col style="width:84px"><col style="width:84px"><col style="width:84px"><col style="width:96px"><col style="width:132px"></colgroup>
-            <thead><tr><th>Փաթեթ</th><th>Սակագին</th><th>Բազային</th><th>Կմ</th><th>Րոպե</th><th>Նվազագույն</th><th>2,1 կմ · 4 ր</th></tr></thead>
+            <colgroup><col><col style="width:80px"><col style="width:72px"><col style="width:72px"><col style="width:100px"><col style="width:148px"><col style="width:120px"></colgroup>
+            <thead><tr><th>Սակագին</th><th>Բազային</th><th>Կմ</th><th>Րոպե</th><th>Նվազագույն</th><th style="text-align:left">Նախնական պատվեր</th><th>2,1 կմ · 4 ր</th></tr></thead>
             <tbody id="mx"></tbody>
           </table>
         </section>
       </div>
       <aside class="card" aria-label="Նախադիտում">
         <div class="card-h"><h2>Ինչպես է տեսնում ուղևորը</h2></div>
+        <div class="pvh"><i data-lucide="zap"></i>Հիմա</div>
         <div class="pv" data-peek><div class="rowc" id="pv"></div></div>
-        <div class="pvl">Նույն նկարը նաև այստեղ</div>
+        <div class="pvh" style="padding-top:0"><i data-lucide="calendar-clock"></i>Նախապես</div>
+        <div class="pv" data-peek><div class="rowc" id="pv2"></div></div>
+        <div class="pvn" id="pvn"></div>
+        <div class="pvl" style="margin-top:8px">Նույն նկարը նաև այստեղ</div>
         <div class="where" style="margin-top:8px">
-          <div><span class="car s" id="w1"></span>Դիսպետչերի ընտրիչ՝ նոր պատվեր</div>
-          <div><span class="car s" id="w2"></span>Վարորդի հավելված՝ հերթափոխի մեքենա</div>
+          <div><span class="car s" id="w1"></span>Դիսպետչեր՝ նոր պատվեր</div>
+          <div><span class="car s" id="w2"></span>Վարորդի հավելված՝ մեքենա</div>
           <div><span class="car s" id="w3"></span>Պատվերի և վարորդի քարտեր</div>
         </div>
-        <div style="margin:auto var(--inset) var(--inset)"><div class="notice neutral"><i data-lucide="info"></i><span>Նկարը փոխվում է անմիջապես. ուղևորները նորը կտեսնեն հաջորդ բացման ժամանակ։</span></div></div>
+        <div style="margin:auto var(--inset) var(--inset)"><div class="notice neutral"><i data-lucide="info"></i><span>Նոր նկարը ուղևորը կտեսնի հավելվածը նորից բացելիս</span></div></div>
       </aside>
     </div>
   </div>
@@ -103,23 +118,30 @@
   shell('tariffs')
   const pic = {
     uploaded: (t) => ({ slot: `<span class="src">Վերբեռնված</span>`, cls: '', acts: `<div class="row-flex"><button class="btn secondary s" aria-label="Փոխարինել նկարը ${t.name}"><i data-lucide="upload"></i>Փոխարինել</button><button class="btn ghost s" aria-label="Հեռացնել նկարը ${t.name}"><i data-lucide="trash-2"></i>Հեռացնել</button></div><span class="note num">webp · 38 ԿԲ · 09.10</span>` }),
-    icon: (t) => ({ slot: `<span class="src">Ներկառուցված</span>`, cls: '', acts: `<button class="btn secondary s" aria-label="Վերբեռնել նկար ${t.name}"><i data-lucide="upload"></i>Վերբեռնել նկար</button><span class="note">հիմա՝ հավելվածի պատկերը</span>` }),
+    icon: (t) => ({ slot: `<span class="src">Ներկառուցված</span>`, cls: '', acts: `<button class="btn secondary s" aria-label="Վերբեռնել նկար ${t.name}"><i data-lucide="upload"></i>Վերբեռնել նկար</button><span class="note">հիմա՝ հավելվածի նկարը</span>` }),
     uploading: (t) => ({ slot: `<span class="prog"><i></i></span>`, cls: 'busy', acts: `<div class="row-flex"><button class="btn secondary s" disabled aria-disabled="true" style="opacity:.55"><i data-lucide="loader"></i>Վերբեռնվում է…</button></div><span class="note num">van.webp · 62%</span>` }),
-    refused: (t) => ({ slot: `<span class="src">Ներկառուցված</span>`, cls: 'err', acts: `<button class="btn secondary s focus-ring" aria-describedby="err-vip" aria-label="Վերբեռնել նկար ${t.name}"><i data-lucide="upload"></i>Վերբեռնել նկար</button><span class="fe" id="err-vip"><i data-lucide="circle-alert"></i>Նկարը 1 ՄԲ-ից մեծ է։</span>` }),
+    refused: (t) => ({ slot: `<span class="src">Ներկառուցված</span>`, cls: 'err', acts: `<button class="btn secondary s focus-ring" aria-describedby="err-vip" aria-label="Վերբեռնել նկար ${t.name}"><i data-lucide="upload"></i>Վերբեռնել նկար</button><span class="fe" id="err-vip"><i data-lucide="circle-alert"></i>Նկարը 1 ՄԲ-ից մեծ է</span>` }),
   }
-  const tariffName = { city: 'Eco City · օրական', partner: 'Eco Comfort', kids: 'Eco Kids', business: 'Eco Business', van: 'Eco Van', vip: 'Eco Vip' }
+  /* Owner #1: pre-orders per tariff, from ECO.TIERS (console.js calls Eco Comfort 'partner', kit.js 'comfort'). */
+  const pre = (t) => ECO.TIERS.find((x) => x.id === (t.id === 'partner' ? 'comfort' : t.id)).preorders
+  const sw = (t) => `<span class="switch${pre(t) ? ' on' : ''}" role="switch" aria-checked="${pre(t)}" aria-label="Նախնական պատվեր՝ ${t.name}"><i class="t"></i>${pre(t) ? 'Միացված' : 'Անջատված'}</span>`
   document.getElementById('tiers').innerHTML = TIERS.map((t) => {
     const p = pic[t.pic](t)
     return `<div class="tier"><i data-lucide="grip-vertical" class="grip"></i>
       <span class="slot ${p.cls}"><span class="car">${carImg(t.id, t.name)}</span>${p.slot}</span>
       <span class="nm"><b>${t.name}</b><span>${t.blurb} · ${t.seats} տեղ</span></span>
-      <span class="tar">Գործող սակագին<b>${tariffName[t.id]}</b><span class="num">09.10-ից</span></span>
+      <span class="pre">Նախնական պատվեր${sw(t)}</span>
       <span class="pic">${p.acts}</span></div>`
   }).join('')
-  document.getElementById('mx').innerHTML = TIERS.map((t) => `<tr><td><span class="tc"><span class="car xs">${carImg(t.id)}</span><b>${t.name}</b></span></td><td class="trunc">${tariffName[t.id]}</td>
-    <td>${nf(t.base)}</td><td>${t.km}</td><td>${t.min}</td><td>${nf(t.floor)}</td><td class="ex">${amd(fare(t, 2.1, 4))}</td></tr>`).join('')
+  document.getElementById('mx').innerHTML = TIERS.map((t) => `<tr><td><span class="tc"><span class="car xs">${carImg(t.id)}</span><b>${t.name}</b></span></td>
+    <td>${nf(t.base)}</td><td>${t.km}</td><td>${t.min}</td><td>${nf(t.floor)}</td>
+    <td class="pre">${pre(t) ? '<i data-lucide="calendar-check"></i>Այո' : '<span class="faint"><i data-lucide="calendar-x"></i>Ոչ</span>'}</td><td class="ex">${amd(fare(t, 2.1, 4))}</td></tr>`).join('')
   const eta = [3, 4, 7, 6, 9, 8]
   document.getElementById('pv').innerHTML = TIERS.map((t, i) => `<div class="rc${i === 4 ? ' on' : ''}" ${i > 1 ? 'data-peek' : ''}><span class="car">${carImg(t.id)}</span>${i === 4 ? '<span class="tick"><i data-lucide="leaf"></i></span>' : ''}<b>${t.name}</b><span class="m"><span class="num">${eta[i]} րոպե</span><span class="num">${t.seats}</span></span><span class="p">${amd(fare(t, 2.1, 4))}</span></div>`).slice(3).join('')
+  /* «Նախապես» offers only the tariffs that allow it; the rest are named in one line (as rider-book draws it). */
+  const card = (t, i, on) => `<div class="rc${on ? ' on' : ''}" ${i > 1 ? 'data-peek' : ''}><span class="car">${carImg(t.id)}</span><b>${t.name}</b><span class="m"><span class="num">${t.seats} տեղ</span></span><span class="p">${amd(fare(t, 2.1, 4))}</span></div>`
+  document.getElementById('pv2').innerHTML = TIERS.filter(pre).map((t, i) => card(t, i, i === 0)).join('')
+  document.getElementById('pvn').innerHTML = `<i data-lucide="calendar-x"></i>${TIERS.filter((t) => !pre(t)).map((t) => t.name).join(', ')}՝ միայն հիմա`
   ;['w1', 'w2', 'w3'].forEach((id) => { document.getElementById(id).innerHTML = carImg('van') })
   icons()
   document.documentElement.dataset.mapReady = 'none'

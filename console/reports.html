@@ -5,16 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Reports</title>
 <link rel="stylesheet" href="console.css">
+<link rel="stylesheet" href="corporate.css">
 <script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
 <script src="../kit.js"></script>
 <script src="console.js"></script>
+<script src="company-report.js"></script>
 <script src="console-audit.js"></script>
 <style>
   /* Mirrors apps/operator components/admin/daily-report.tsx + report-ledger.tsx (§9.6, Ledger archetype): the window in
      the fleet's days (Այսօր / Երեկ / from–to, spelled out in words), driver and company filters, «Ներբեռնել CSV», the total
      beside a bounded table (MAX_DRAWN 300; the CSV carries all), and twelve fixed columns. The quote-vs-metered column is
-     drawn EMPTY with its reason, never hidden (report.varianceExplains). With a company chosen, the same export is the
-     corporate CSV the accountant asks for (C44). Admin-only at the API, both routes, and audited (report.rides_view/export). */
+     drawn EMPTY with its reason, never hidden (report.varianceExplains). Admin-only at the API, both routes, and audited
+     (report.rides_view/export).
+     ?company=1 is the company report (owner decision 11 + Q11, 2026-10-14; no invoices): a company and a period (month
+     or chosen days), the rides with employee, route, tariff, cost code and price, totals, Excel / CSV / PDF and
+     «Ուղարկել ընկերությանը». The same table as company.html?tab=statement (company-report.js). */
   .content { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
   .hd { display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap; padding: 10px var(--inset); border-bottom: 1px solid var(--line-soft); }
   .hd label { display: flex; flex-direction: column; }
@@ -36,25 +41,25 @@
   .pm svg { width: 14px; height: 14px; color: var(--ink-muted); }
   .prob { color: var(--warning); font: var(--c-small); }
   .two { display: flex; flex-direction: column; min-width: 0; } .two b { font: var(--c-strong); overflow: hidden; text-overflow: ellipsis; } .two span { font: 400 12px/16px var(--mono); color: var(--ink-muted); }
-  .cut td { height: 40px; color: var(--ink-muted); font: var(--c-small); text-align: center; white-space: normal; }
+  .rt .cut td { height: 40px; color: var(--ink-muted); font: var(--c-small); text-align: center; white-space: normal; }
 </style>
 </head>
 <body>
 <div class="screen" id="screen">
   <div class="main">
     <header class="bar">
-      <span class="crumb">Ֆինանսներ <i data-lucide="chevron-right"></i></span><h1>Օրվա պատվերների հաշվետվություն</h1>
+      <span class="crumb">Ֆինանսներ <i data-lucide="chevron-right"></i></span><h1>Հաշվետվություններ</h1>
       <div class="live"></div>
     </header>
     <div class="content">
       <section class="card" aria-labelledby="t1">
-        <h2 id="t1" class="sr">Օրվա պատվերների հաշվետվություն</h2>
+        <h2 id="t1" class="sr">Հաշվետվություն</h2>
         <div class="hd" id="hd"></div>
         <div class="win" id="win"></div>
-        <div class="var"><i data-lucide="info"></i><span>Հայտարարված և հաշվարկված գնի տարբերությունը դեռ չի չափվում — հաշվարկված գները գալիս են ֆինանսական ենթահամակարգի հետ: Սյունը ցույց է տրվում դատարկ, ոչ թե թաքցվում, որովհետև դատարկ վանդակը նշանակում է «չի չափվել», իսկ բացակայող սյունը կկարդացվեր որպես «տարբերություն չկա»:</span></div>
-        <div class="scroll-y grow" data-truncate>
-          <table class="tbl rt"><colgroup><col style="width:72px"><col style="width:116px"><col style="width:100px"><col style="width:80px"><col style="width:64px"><col style="width:120px"><col style="width:11%"><col style="width:8%"><col style="width:88px"><col><col><col style="width:8%"></colgroup>
-            <thead><tr><th>Վերցված</th><th>Կարգավիճակ</th><th class="n">Հայտարարված</th><th class="n">Գանձված</th><th class="n vh"><abbr title="Հայտարարված / հաշվարկված" style="text-decoration:none">Հայտ. / հաշվ.</abbr></th><th>Վճարում</th><th>Հաճախորդ</th><th>Վարորդ</th><th>Մեքենա</th><th>Վերցնելու վայր</th><th>Հասցե</th><th>Խնդիր</th></tr></thead>
+        <div class="var" id="var"><i data-lucide="info"></i><span>«Գին / հաշվ.»՝ դեռ չի չափվում․ դատարկ է, ոչ թե զրո</span></div>
+        <div class="scroll-y grow" data-truncate id="body">
+          <table class="tbl rt"><colgroup><col style="width:64px"><col style="width:136px"><col style="width:100px"><col style="width:80px"><col style="width:64px"><col style="width:120px"><col style="width:11%"><col style="width:8%"><col style="width:88px"><col><col><col style="width:8%"></colgroup>
+            <thead><tr><th>Ժամ</th><th>Վիճակ</th><th class="n">Գին</th><th class="n">Գանձված</th><th class="n vh"><abbr title="Գինը՝ հաշվարկվածի դիմաց" style="text-decoration:none">Գին / հաշվ.</abbr></th><th>Վճարում</th><th>Ուղևոր</th><th>Վարորդ</th><th>Մեքենա</th><th>Որտեղից</th><th>Ուր</th><th>Խնդիր</th></tr></thead>
             <tbody id="rows"></tbody></table>
         </div>
       </section>
@@ -63,11 +68,12 @@
 </div>
 <script>
   shell('reports')
-  const CO = new URLSearchParams(location.search).get('company') === '1'
+  const CV = new URLSearchParams(location.search).get('company') === '1' /* the company report */
+  const SEND = CV && new URLSearchParams(location.search).get('state') === 'send' /* «Ուղարկել ընկերությանը» open inline */
   const C = ECO.COMPANY
   /* Yesterday (8 Oct): a plausible Friday-eve day for the fleet. Every ride is fixed_upfront, so «Գանձված» equals the quote
      and the variance cell stays empty — measured nowhere yet. Company rides carry C.ref in the CSV. */
-  const ST = { done: ['ok', 'Ավարտված'], cancelled: ['', 'Չեղարկված'], noshow: ['warn', 'Չներկայացավ'], nocar: ['bad', 'Մեքենա չգտնվեց'] }
+  const ST = { done: ['ok', 'Ավարտված'], cancelled: ['', 'Չեղարկված'], noshow: ['warn', 'Ուղևորը չեկավ'], nocar: ['bad', 'Մեքենա չգտնվեց'] }
   const ADDR = ['Մաշտոցի պող. 37', 'Կոմիտասի պող. 22', 'Հանրապետության հր.', 'Կասկադ', 'Աբովյան 12', 'Թումանյան 21', 'Վազգեն Սարգսյանի 26/1', 'Բաղրամյան պող. 24', 'Զվարթնոց օդանավակայան', 'Սայաթ-Նովա 5', 'Հալաբյան 41', 'Արշակունյաց 34', 'Տիգրան Մեծի 50', 'Կիևյան 8', 'Ամիրյան 4']
   const CUST = [['Աննա Հ.', '091 23-45-67'], ['Լուսինե Գ.', '098 51-20-44'], ['Արմեն Ս.', '077 41-22-08'], ['Գայանե Մ.', '093 82-17-55'], ['Տիգրան Ա.', '055 60-31-12'], ['Նունե Կ.', '094 18-90-03'], ['Սերգեյ Վ.', '099 70-44-21'], ['Մարինե Ա.', '096 33-12-87']]
   const rows = []
@@ -80,26 +86,41 @@
     rows.push({ t: String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0'), st, fare: st === 'nocar' ? null : fare, final: st === 'done' ? fare : st === 'noshow' ? 500 : null,
       pay: co ? 'company' : 'cash', cust: co ? [ECO.CUSTOMER.short, ECO.CUSTOMER.phone] : CUST[i % CUST.length], drv: st === 'nocar' ? null : d.name.split(' ')[0] + ' ' + d.name.split(' ')[1][0] + '.', plate: st === 'nocar' ? null : d.plate,
       a: co ? ECO.CUSTOMER.places.home : ADDR[i % ADDR.length], b: co ? ECO.CUSTOMER.places.work : ADDR[(i * 7 + 3) % ADDR.length],
-      prob: st === 'noshow' ? 'Ուղևորը չներկայացավ' : st === 'nocar' ? 'Ազատ մեքենա չկար' : i === 6 ? 'Ցածր գնահատական' : '' })
+      prob: st === 'noshow' ? 'Ուղևորը չեկավ' : st === 'nocar' ? 'Ազատ մեքենա չկար' : i === 6 ? 'Ցածր գնահատական · 2 ★' : '' })
   }
-  const L = CO ? rows.filter((r) => r.pay === 'company') : rows
-  const total = CO ? 6 : 186
   const F = (label, v, cls, icon) => `<label><span class="label">${label}</span><span class="input ${cls || ''}">${icon ? `<i data-lucide="${icon}"></i>` : ''}<span class="val">${v}</span>${icon ? '' : '<i data-lucide="chevron-down"></i>'}</span></label>`
-  document.getElementById('hd').innerHTML = `<div class="seg" role="group" aria-label="Օր"><button>Այսօր</button><button class="on">Երեկ</button></div>
-    ${F('Սկսած', '08.10.2026', '', 'calendar')}${F('Մինչև', '08.10.2026', '', 'calendar')}
-    ${F('Վարորդ', 'Բոլոր վարորդները', 'w')}${F('Ընկերություն', CO ? C.short : 'Բոլոր ընկերությունները', 'w' + (CO ? ' focus' : ''))}
-    <span class="end"><button class="btn ${CO ? 'primary' : 'secondary'}"><i data-lucide="download"></i>Ներբեռնել CSV</button></span>`
-  document.getElementById('win').innerHTML = `<span><b>Հինգշաբթի, 8 հոկտեմբերի 2026</b>, 00:00 – 24:00 · Երևանի ժամով</span>${CO ? `<span class="pill brand"><i data-lucide="building-2"></i>${C.name} · ${C.refLabel}՝ սյունակ CSV-ում</span>` : ''}
-    <span class="tot">Պատվերներ այս ժամանակահատվածում: <b class="mono">${total}</b></span>`
-  const dash = '<span class="faint">—</span>'
-  document.getElementById('rows').innerHTML = L.map((r) => {
-    const [tone, word] = ST[r.st]
-    return `<tr><td class="mono">${r.t}</td><td><span class="pill ${tone}"><i class="d"></i>${word}</span></td>
-      <td class="n mono">${r.fare ? ECO.num(r.fare) : dash}</td><td class="n mono">${r.final ? ECO.num(r.final) : dash}</td><td class="n vc mono">—</td>
-      <td><span class="pm"><i data-lucide="${r.pay === 'company' ? 'building-2' : 'banknote'}"></i>${r.pay === 'company' ? ECO.PAY.company.short : ECO.PAY.cash.label}</span></td>
-      <td><span class="two"><b>${r.cust[0]}</b><span class="mono">${r.cust[1]}</span></span></td><td>${r.drv || dash}</td><td>${r.plate ? `<span class="plate">${r.plate}</span>` : dash}</td>
-      <td>${r.a}</td><td>${r.b}</td><td>${r.prob ? `<span class="prob">${r.prob}</span>` : ''}</td></tr>`
-  }).join('') + (CO ? '' : `<tr class="cut"><td colspan="12">Ցուցադրվում է առաջին ${L.length}-ը ${total}-ից: CSV ֆայլը պարունակում է բոլորը:</td></tr>`)
+  const KIND = `<div class="seg" role="tablist" aria-label="Հաշվետվություն"><button role="tab" class="${CV ? '' : 'on'}" aria-selected="${!CV}" onclick="location.search='?theme=${THEME}'">Պատվերներ</button><button role="tab" class="${CV ? 'on' : ''}" aria-selected="${CV}" onclick="location.search='?theme=${THEME}&company=1'">Ընկերություններ</button></div>`
+  if (CV) {
+    /* Company report: Արարատ Սոֆթ, September 2026 (closed). One primary: send to the company. */
+    const M = CO.MONTHS[0]
+    document.getElementById('hd').innerHTML = `${KIND}
+      ${F('Ընկերություն', C.name, 'w focus')}
+      <div class="seg" role="radiogroup" aria-label="Ժամանակահատված"><button role="radio" aria-checked="false">Օգոստոս</button><button class="on" role="radio" aria-checked="true">Սեպտեմբեր</button><button role="radio" aria-checked="false">Հոկտեմբեր</button><button role="radio" aria-checked="false"><i data-lucide="calendar-range"></i>Ընտրել օրերը</button></div>
+      <span class="end"><span class="xp" style="gap:6px"><button class="btn secondary"><i data-lucide="file-spreadsheet"></i>Excel</button><button class="btn secondary">CSV</button><button class="btn secondary">PDF</button></span>
+        <button class="btn ${SEND ? 'secondary' : 'primary'}" aria-expanded="${SEND}"><i data-lucide="send"></i>Ուղարկել ընկերությանը</button></span>`
+    document.getElementById('win').innerHTML = `<span class="facts"><span>Ժամանակահատված<b>01.09–30.09.2026</b></span><span>Ուղևորություններ<b class="mono">${M.rides}</b></span><span>Գումար<b class="mono">${ECO.amd(M.amount)}</b></span>
+      <span>Վճարում<b style="font:var(--c-body);padding-top:2px">${CO.paidCell(M.paid ? M.paidOn : null)}</b></span></span>
+      <span class="tot"><i data-lucide="at-sign" style="width:14px;height:14px;vertical-align:-2px"></i> <span class="mono">${CO.EMAIL}</span></span>`
+    const v = document.getElementById('var')
+    if (SEND) { v.className = 'pad'; v.style.cssText = 'padding:12px var(--inset);border-bottom:1px solid var(--line-soft)'; v.innerHTML = CO.sendPanel(C.short + ' · ' + M.label) } else v.remove()
+    document.getElementById('body').innerHTML = CO.table(M, 22)
+  } else {
+    const L = rows, total = 186
+    document.getElementById('hd').innerHTML = `${KIND}<div class="seg" role="group" aria-label="Օր"><button>Այսօր</button><button class="on">Երեկ</button></div>
+      ${F('Սկսած', '08.10.2026', '', 'calendar')}${F('Մինչև', '08.10.2026', '', 'calendar')}
+      ${F('Վարորդ', 'Բոլոր վարորդները', 'w')}${F('Ընկերություն', 'Բոլորը', 'w')}
+      <span class="end"><button class="btn primary"><i data-lucide="download"></i>Ներբեռնել CSV</button></span>`
+    document.getElementById('win').innerHTML = `<span><b>Հինգշաբթի, 8 հոկտ. 2026</b> · 00:00–24:00</span><span class="tot">Պատվերներ՝ <b class="mono">${total}</b></span>`
+    const dash = '<span class="faint">—</span>'
+    document.getElementById('rows').innerHTML = L.map((r) => {
+      const [tone, word] = ST[r.st]
+      return `<tr><td class="mono">${r.t}</td><td><span class="pill ${tone}"><i class="d"></i>${word}</span></td>
+        <td class="n mono">${r.fare ? ECO.num(r.fare) : dash}</td><td class="n mono">${r.final ? ECO.num(r.final) : dash}</td><td class="n vc mono">—</td>
+        <td><span class="pm"><i data-lucide="${r.pay === 'company' ? 'building-2' : 'banknote'}"></i>${r.pay === 'company' ? ECO.PAY.company.short : ECO.PAY.cash.label}</span></td>
+        <td><span class="two"><b>${r.cust[0]}</b><span class="mono">${r.cust[1]}</span></span></td><td>${r.drv || dash}</td><td>${r.plate ? `<span class="plate">${r.plate}</span>` : dash}</td>
+        <td>${r.a}</td><td>${r.b}</td><td>${r.prob ? `<span class="prob">${r.prob}</span>` : ''}</td></tr>`
+    }).join('') + `<tr class="cut"><td colspan="12">Ցուցադրված է ${L.length}-ը ${total}-ից · CSV-ում բոլորն են</td></tr>`
+  }
   icons()
   document.documentElement.dataset.mapReady = 'none'
 </script>

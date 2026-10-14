@@ -114,7 +114,7 @@
 
     <div class="places" id="places"></div>
 
-    <div class="partners" aria-label="Առաջարկներ">
+    <div class="partners" aria-label="Գովազդներ">
       <div class="track">
         <article class="ad" data-photo data-scrim="0:0,0.2:0,0.55:0.6,1:0.82">
           <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=700&h=340&q=80&auto=format&fit=crop" alt="">
@@ -162,11 +162,11 @@
   }
   const plate = (no) => `<span class="plate" role="img" aria-label="Համարանիշ ${no}"><span class="eu" aria-hidden="true"><i></i><b>AM</b></span><span class="no">${no}</span></span>`
   const live = active === 'preorder'
-    ? { t1: 'Վարորդը նշանակված է', t2: ECO.BOOKINGS.air.driver.short + ' · նստել ' + ECO.BOOKINGS.air.time, plate: ECO.BOOKINGS.air.driver.plate, time: ECO.BOOKINGS.air.assignedAt }
+    ? { t1: 'Վարորդը նշանակված է', t2: ECO.BOOKINGS.air.driver.short + ' · ' + ECO.BOOKINGS.air.time + '-ին', plate: ECO.BOOKINGS.air.driver.plate, time: ECO.BOOKINGS.air.assignedAt }
     : active ? { t1: 'Մեքենան ճանապարհին է', t2: ECO.RIDE.driver.short + ' · ' + ECO.RIDE.approachMin + ' րոպե', plate: ECO.RIDE.driver.plate, time: '9:42' } : null
   if (live) document.getElementById('live').innerHTML = `<button class="livecard" aria-label="Ընթացիկ ուղևորություն՝ ${live.t1}, ${live.t2}, ${live.plate}"><span class="lv" aria-hidden="true"></span>
       <span class="txt"><span class="t1">${live.t1}</span><span class="t3">${plate(live.plate)}<span class="t2">${live.t2}</span></span></span><i data-lucide="chevron-right"></i></button>`
-  const rows = fresh ? [['history', '', 'Ձեր վերջին ուղևորությունները կերևան այստեղ', 'first', '']] : live ? [['house', 'Տուն', 'Կոմիտասի պող. 22', '', '≈ 9 րոպե']] : pre
+  const rows = fresh ? [['history', '', 'Ձեր ուղևորությունները կերևան այստեղ', 'first', '']] : live ? [['house', 'Տուն', 'Կոմիտասի պող. 22', '', '≈ 9 րոպե']] : pre
     ? [['calendar-clock', 'Վաղը, 08:30', 'Զվարթնոց օդանավակայան', 'soon', '<i data-lucide="chevron-right" style="width:20px;height:20px;color:var(--ink-3)"></i>'],
        ['house', 'Տուն', 'Կոմիտասի պող. 22', '', '≈ 9 րոպե']]
     : [['house', 'Տուն', 'Կոմիտասի պող. 22', '', '≈ 9 րոպե'],

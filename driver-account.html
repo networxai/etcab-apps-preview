@@ -25,6 +25,8 @@
   .mycar .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
   .mycar .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .group + .group { margin-top: var(--s4); }
+  .shiftcar { display: flex; align-items: center; gap: var(--s2); margin-top: var(--s2); font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .shiftcar .plate { height: 24px; line-height: 24px; font-size: 13px; padding: 0 6px; }
   .row .end { color: var(--ink-2); }
   .t1.danger { color: var(--danger); }
   .ver { font: var(--t-caption); color: var(--ink-3); text-align: center; margin-top: var(--s5); white-space: nowrap; font-variant-numeric: tabular-nums; }
@@ -46,7 +48,7 @@
   .doc .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .fix { margin-bottom: var(--s4); padding: var(--s4); display: flex; flex-direction: column; gap: var(--s3); }
   .fix .h { display: flex; align-items: center; gap: var(--s3); }
-  .fix .h .ic { width: 40px; height: 40px; border-radius: 50%; background: var(--danger-soft); color: var(--danger); display: grid; place-items: center; flex: none; }
+  .fix .h .ic { width: 40px; height: 40px; border-radius: 50%; background: var(--warn-soft); color: var(--warn); display: grid; place-items: center; flex: none; }
   .fix .h .ic svg { width: 20px; height: 20px; }
   .fix .t1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
   .fix .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
@@ -169,7 +171,7 @@
 <body>
 <main class="screen page" id="s">
   <div class="appbar" id="bar">
-    <button class="iconbtn" aria-label="Ետ"><i data-lucide="arrow-left"></i></button>
+    <button class="iconbtn" aria-label="Հետ"><i data-lucide="arrow-left"></i></button>
   </div>
 
   <div class="content" id="content">
@@ -177,20 +179,22 @@
     <section data-s="main signout">
       <div class="who">
         <span class="av" aria-hidden="true">ԱՊ</span>
-        <div><div class="name">Արամ Պետրոսյան</div><div class="ph">+374 93 44 55 66</div></div>
+        <div><div class="name">Արամ Պետրոսյան</div><div class="ph">+374 93 44 55 66</div>
+          <div class="shiftcar"><span class="plate">01 ET 001</span>Volkswagen ID.3 · Eco City</div></div>
       </div>
-      <div class="card mycar"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="txt"><span class="t1">Volkswagen ID.3</span><span class="t2">Eco City</span></span><span class="plate">01 ET 001</span></div>
+      <!-- The car is the open shift's (§4.3), so it is one line under the name, not a card (2026-10-14: room for «Ծանուցումներ»). -->
       <div class="group">
-        <div class="row"><span class="ic"><i data-lucide="file-text"></i></span><span class="txt"><span class="t1">Փաստաթղթեր</span></span><span class="tag warn"><i data-lucide="clock"></i>12 օր</span><i class="chev" data-lucide="chevron-right"></i></div>
+        <a class="row" href="driver-inbox.html" style="text-decoration:none"><span class="ic"><i data-lucide="bell"></i></span><span class="txt"><span class="t1">Ծանուցումներ</span></span><span class="cnt" aria-label="3 նոր">3</span><i class="chev" data-lucide="chevron-right"></i></a>
+        <a class="row" href="?state=docs" style="text-decoration:none"><span class="ic"><i data-lucide="file-text"></i></span><span class="txt"><span class="t1">Փաստաթղթեր</span></span><span class="tag warn"><i data-lucide="clock"></i>11 օր</span><i class="chev" data-lucide="chevron-right"></i></a>
         <div class="row"><span class="ic"><i data-lucide="languages"></i></span><span class="txt"><span class="t1">Լեզու</span></span><span class="end">Հայերեն</span><i class="chev" data-lucide="chevron-right"></i></div>
         <div class="row"><span class="ic"><i data-lucide="sun-moon"></i></span><span class="txt"><span class="t1">Թեմա</span></span><span class="end">Ավտոմատ</span><i class="chev" data-lucide="chevron-right"></i></div>
         <div class="row"><span class="ic"><i data-lucide="graduation-cap"></i></span><span class="txt"><span class="t1">Փորձնական պատվեր</span></span><i class="chev" data-lucide="chevron-right"></i></div>
-        <div class="row"><span class="ic"><i data-lucide="activity"></i></span><span class="txt"><span class="t1">Հերթապահության տվյալներ</span></span><i class="chev" data-lucide="chevron-right"></i></div>
+        <div class="row"><span class="ic"><i data-lucide="activity"></i></span><span class="txt"><span class="t1">Հերթափոխի տվյալներ</span></span><i class="chev" data-lucide="chevron-right"></i></div>
       </div>
       <div class="group">
         <div class="row"><span class="ic"><i data-lucide="life-buoy"></i></span><span class="txt"><span class="t1">Օգնություն և իրավական</span></span><i class="chev" data-lucide="chevron-right"></i></div>
         <div class="row"><span class="ic"><i data-lucide="log-out"></i></span><span class="txt"><span class="t1">Դուրս գալ</span></span></div>
-        <div class="row"><span class="ic danger"><i data-lucide="user-x"></i></span><span class="txt"><span class="t1 danger">Ջնջել իմ հաշիվը</span></span></div>
+        <div class="row"><span class="ic danger"><i data-lucide="user-x"></i></span><span class="txt"><span class="t1 danger">Ջնջել հաշիվը</span></span></div>
       </div>
       <div class="ver">Տարբերակ 2.3.1 (241)</div>
     </section>
@@ -198,13 +202,15 @@
     <!-- ── documents ── -->
     <section data-s="docs">
       <div class="ptitle">Փաստաթղթեր</div>
-      <div class="psub" style="margin-bottom:var(--s5)">Ստուգում է ընկերությունը</div>
+      <div class="psub" style="margin-bottom:var(--s5)">Ստուգում է գրասենյակը</div>
+      <!-- Owner #5: an expired insurance stops orders until a new photo is approved. ECO.DOCS.aram: valid until 20.10, so
+           on 9 Oct this is the early warning (amber); the block itself is driver-home-states#insurance (21 Oct). -->
       <div class="card fix">
-        <div class="h"><span class="ic"><i data-lucide="shield-alert"></i></span><div><div class="t1">Ապահովագրություն</div><div class="t2">Ժամկետանց է՝ 02.10.2026</div></div></div>
-        <button class="btn btn-brand"><i data-lucide="camera"></i>Թարմացնել</button>
+        <div class="h"><span class="ic"><i data-lucide="shield-alert"></i></span><div><div class="t1">Ապահովագրություն</div><div class="t2">մինչև <span data-eco="DOCS.aram.insurance">20.10.2026</span> · 11 օր</div></div></div>
+        <button class="btn btn-brand"><i data-lucide="camera"></i>Վերբեռնել նորը</button>
       </div>
       <div class="group">
-        <div class="doc"><span class="ic"><i data-lucide="file-badge"></i></span><span class="txt"><span class="t1">Տաքսու թույլտվություն</span><span class="t2">մինչև 21.10.2026</span></span><span class="tag warn"><i data-lucide="clock"></i>12 օր</span></div>
+        <div class="doc"><span class="ic"><i data-lucide="file-badge"></i></span><span class="txt"><span class="t1">Տաքսու թույլտվություն</span><span class="t2">մինչև <span data-eco="DOCS.aram.permit">21.10.2026</span></span></span><span class="tag warn"><i data-lucide="clock"></i>12 օր</span></div>
         <div class="doc"><span class="ic"><i data-lucide="id-card"></i></span><span class="txt"><span class="t1">Վարորդական իրավունք</span><span class="t2">մինչև 14.03.2029</span></span><span class="tag ok solo" role="img" aria-label="Վավեր"><i data-lucide="check"></i></span></div>
         <div class="doc"><span class="ic"><i data-lucide="stethoscope"></i></span><span class="txt"><span class="t1">Բժշկական տեղեկանք</span><span class="t2">մինչև 30.06.2027</span></span><span class="tag ok solo" role="img" aria-label="Վավեր"><i data-lucide="check"></i></span></div>
         <div class="doc"><span class="ic"><i data-lucide="car-front"></i></span><span class="txt"><span class="t1">Տեխզննում · 01 ET 001</span><span class="t2">մինչև 18.05.2027</span></span><span class="tag ok solo" role="img" aria-label="Վավեր"><i data-lucide="check"></i></span></div>
@@ -230,7 +236,7 @@
         <button class="card tile" role="radio" aria-checked="false"><span class="pv night" aria-hidden="true"><span class="mp"></span><span class="sh"><span class="ln"></span><span class="bt"></span></span></span><span class="lb"><span class="rd"></span><span class="t1">Գիշեր</span></span><span class="t2">միշտ մուգ</span></button>
         <button class="card tile" role="radio" aria-checked="false"><span class="pv sun" aria-hidden="true"><span class="mp"></span><span class="sh"><span class="ln"></span><span class="bt"></span></span></span><span class="lb"><span class="rd"></span><span class="t1">Արև</span></span><span class="t2">առավելագույն կոնտրաստ</span></button>
       </div>
-      <div class="notice" style="margin-top:var(--s5)"><i data-lucide="sun"></i><div>«Արև»՝ ուղիղ արևի տակ․ սև տեքստ, հաստ եզրեր, առանց ստվերների։</div></div>
+      <div class="notice" style="margin-top:var(--s5)"><i data-lucide="sun"></i><div>«Արև»՝ ուղիղ արևի տակ · սև տեքստ, հաստ եզրեր</div></div>
     </section>
 
     <!-- ── practice ride ── -->
@@ -245,9 +251,9 @@
         <img class="carimg" src="assets/eco/cars/city.webp" alt="">
       </div>
       <div class="demo-t">Փորձնական պատվեր</div>
-      <div class="demo-s">Չի ազդում եկամտի վրա</div>
+      <div class="demo-s">Իրական ուղևոր և գումար չկա</div>
       <div class="steps">
-        <div class="step"><span class="b"><i data-lucide="bell-ring"></i></span>Առաջարկ</div>
+        <div class="step"><span class="b"><i data-lucide="bell-ring"></i></span>Պատվեր</div>
         <div class="step"><span class="b"><i data-lucide="navigation"></i></span>Ճանապարհ</div>
         <div class="step"><span class="b"><i data-lucide="flag"></i></span>Ավարտ</div>
       </div>
@@ -262,35 +268,36 @@
       <div class="center">
         <span class="bigic danger"><i data-lucide="user-x"></i></span>
         <div class="h2">Ջնջե՞լ հաշիվը</div>
-        <div class="sub">Անունն ու համարը կջնջվեն, պատվերները կմնան ընկերությունում։</div>
+        <div class="sub">Անունն ու համարը կջնջվեն</div>
       </div>
       <div class="group fate">
         <div class="row"><span class="ic danger"><i data-lucide="x"></i></span><span class="txt"><span class="t1">Անուն, հեռախոսահամար</span></span></div>
         <div class="row"><span class="ic danger"><i data-lucide="x"></i></span><span class="txt"><span class="t1">Սարքի և ծանուցումների տվյալներ</span></span></div>
-        <div class="row"><span class="ic ok"><i data-lucide="archive"></i></span><span class="txt"><span class="t1">Պատվերներ և վճարումներ</span><span class="t2">պահվում են օրենքով</span></span></div>
+        <div class="row"><span class="ic ok"><i data-lucide="archive"></i></span><span class="txt"><span class="t1">Պատվերների պատմություն</span><span class="t2">պահվում է օրենքով</span></span></div>
       </div>
       <span class="grow"></span>
       <div class="foot">
-        <button class="btn btn-danger-quiet">Այո՛, ջնջե՛ք իմ հաշիվը</button>
-        <button class="btn btn-quiet on-ground">Պահել հաշիվը</button>
+        <button class="btn btn-danger-quiet">Ջնջել հաշիվը</button>
+        <button class="btn btn-quiet on-ground">Չջնջել</button>
       </div>
     </section>
 
-    <!-- ── delete blocked (D36, account.deleteBlocked): a debt or an open ride stops it; the way forward is the balance ── -->
+    <!-- ── delete blocked (D36, account.deleteBlocked): an open ride stops it. Owner #3: a fleet driver has no balance, so
+         debt is never a reason here; the way forward is the ride. ── -->
     <section data-s="deleteblocked" class="grow" style="display:flex;flex-direction:column">
       <div class="center">
         <span class="bigic warn"><i data-lucide="lock"></i></span>
-        <div class="h2">Ջնջե՞լ հաշիվը</div>
-        <div class="sub">Դեռ ոչ — ավարտե՛ք պատվերը կամ մարե՛ք պարտքը</div>
+        <div class="h2">Դեռ հնարավոր չէ</div>
+        <div class="sub">Նախ ավարտեք պատվերը</div>
       </div>
       <div class="group fate">
-        <div class="row"><span class="ic warn"><i data-lucide="banknote"></i></span><span class="txt"><span class="t1">Պարտք՝ 5 200 ֏</span><span class="t2">Հանձնե՛ք գրասենյակում</span></span></div>
-        <div class="row"><span class="ic ok"><i data-lucide="check"></i></span><span class="txt"><span class="t1">Ընթացիկ պատվեր չկա</span></span></div>
+        <div class="row"><span class="ic warn"><i data-lucide="navigation"></i></span><span class="txt"><span class="t1">Ընթացիկ պատվեր</span><span class="t2"><span data-eco="RIDE.pickup">Մաշտոցի պող. 37</span> · 9:41-ից</span></span></div>
+        <div class="row"><span class="ic ok"><i data-lucide="check"></i></span><span class="txt"><span class="t1">Նախնական պատվերներ չկան</span></span></div>
       </div>
       <span class="grow"></span>
       <div class="foot">
-        <a class="btn btn-brand" href="driver-earnings.html?state=blocked" style="text-decoration:none"><i data-lucide="wallet"></i>Տեսնել հաշվեկշիռը</a>
-        <button class="btn btn-quiet on-ground">Պահել հաշիվը</button>
+        <a class="btn btn-brand" href="driver-ride.html?state=enroute" style="text-decoration:none"><i data-lucide="navigation"></i>Վերադառնալ պատվերին</a>
+        <button class="btn btn-quiet on-ground">Չջնջել</button>
       </div>
     </section>
 
@@ -299,13 +306,13 @@
       <div class="ptitle" style="margin-bottom:var(--s4)">Օգնություն</div>
       <div class="card callcard"><span class="txt"><span class="t1">Դիսպետչեր</span><span class="t2"><span data-eco="DISPATCH.phone">010 55-55-55</span> · 24/7</span></span><button class="ph" aria-label="Զանգել դիսպետչերին"><i data-lucide="phone"></i></button></div>
       <div class="group">
-        <div class="row"><span class="ic"><i data-lucide="key-round"></i></span><span class="txt"><span class="t1">Հերթապահության սկիզբ</span></span><i class="chev" data-lucide="chevron-right"></i></div>
+        <div class="row"><span class="ic"><i data-lucide="key-round"></i></span><span class="txt"><span class="t1">Ինչպես սկսել հերթափոխը</span></span><i class="chev" data-lucide="chevron-right"></i></div>
         <div class="row"><span class="ic"><i data-lucide="bell-off"></i></span><span class="txt"><span class="t1">Պատվերներ չեն գալիս</span></span><i class="chev" data-lucide="chevron-right"></i></div>
-        <div class="row"><span class="ic"><i data-lucide="banknote"></i></span><span class="txt"><span class="t1">Կանխիկի հանձնում</span></span><i class="chev" data-lucide="chevron-right"></i></div>
-        <div class="row"><span class="ic"><i data-lucide="package-search"></i></span><span class="txt"><span class="t1">Մոռացված իր մեքենայում</span></span><i class="chev" data-lucide="chevron-right"></i></div>
+        <div class="row"><span class="ic"><i data-lucide="file-text"></i></span><span class="txt"><span class="t1">Փաստաթղթերի թարմացում</span></span><i class="chev" data-lucide="chevron-right"></i></div>
+        <div class="row"><span class="ic"><i data-lucide="package-search"></i></span><span class="txt"><span class="t1">Ուղևորը իր է մոռացել</span></span><i class="chev" data-lucide="chevron-right"></i></div>
       </div>
       <div class="group">
-        <div class="row"><span class="ic danger"><i data-lucide="siren"></i></span><span class="txt"><span class="t1">Արտակարգ դեպք</span><span class="t2">պատվերի ընթացքում՝ «Ավելին»-ում</span></span><span class="end">112</span></div>
+        <div class="row"><span class="ic danger"><i data-lucide="siren"></i></span><span class="txt"><span class="t1">Անվտանգություն · SOS</span><span class="t2">Պատվերի ժամանակ՝ «Ավելին»-ում</span></span><span class="end">112</span></div>
       </div>
       <div class="gl">Իրավական</div>
       <div class="group">
@@ -318,10 +325,10 @@
     <section data-s="legal" class="legal">
       <div class="ptitle">Գաղտնիության քաղաքականություն</div>
       <div class="meta">Տարբերակ 3 · ուժի մեջ՝ 1 սեպտ. 2026</div>
-      <h3>Ինչ ենք հավաքում</h3><p>Անուն, հեռախոս, մեքենա, դիրքը՝ միայն հերթապահության ընթացքում։</p>
-      <h3>Ինչու</h3><p>Ամենամոտ պատվերն ուղարկելու, վճարները հաշվելու և անվտանգության համար։</p>
-      <h3>Ով է տեսնում</h3><p>Ընկերության դիսպետչերները և ձեր ուղևորը՝ միայն պատվերի ընթացքում։</p>
-      <h3>Ջնջում</h3><p>Հաշիվ › Ջնջել իմ հաշիվը։ Պատվերները պահվում են օրենքով։</p>
+      <h3>Ինչ ենք հավաքում</h3><p>Անուն, հեռախոս, մեքենա, դիրքը՝ միայն հերթափոխի ընթացքում։</p>
+      <h3>Ինչու</h3><p>Ամենամոտ պատվերն ուղարկելու և անվտանգության համար։</p>
+      <h3>Ով է տեսնում</h3><p>Դիսպետչերները և ձեր ուղևորը՝ միայն պատվերի ընթացքում։</p>
+      <h3>Ջնջում</h3><p>Հաշիվ › Ջնջել հաշիվը։ Պատվերները պահվում են օրենքով։</p>
       <div class="foot" style="margin-top:var(--s5)"><button class="btn btn-quiet on-ground"><i data-lucide="external-link"></i>Բացել կայքում</button></div>
     </section>
 
@@ -329,7 +336,7 @@
     <section data-s="update" class="grow" style="display:flex;flex-direction:column">
       <div class="center" style="margin-top:96px">
         <span class="bigic neutral"><i data-lucide="circle-arrow-up"></i></span>
-        <div class="h2">Թարմացրե՛ք հավելվածը</div>
+        <div class="h2">Թարմացրեք հավելվածը</div>
         <div class="sub">Այս տարբերակով պատվերներ չեն գա</div>
         <span class="tag warn" style="margin-top:var(--s4)"><i data-lucide="smartphone"></i><span id="u-ver"></span></span>
       </div>
@@ -342,12 +349,12 @@
 
     <!-- ── diagnostics (D37): the real screen, an internal tool — build lines, the shift report, Copy ── -->
     <section data-s="diag">
-      <div class="ptitle">Հերթապահության տվյալներ</div>
-      <div class="psub" style="margin-bottom:var(--s4)">ընկերության համար — ուղարկե՛ք չափված հերթապահության վերջում</div>
+      <div class="ptitle">Հերթափոխի տվյալներ</div>
+      <div class="psub" style="margin-bottom:var(--s4)">Ուղարկեք գրասենյակին հերթափոխի վերջում</div>
       <div class="card diag">
-        <div class="kv">Ավտոպարկ<b>eco · 2.3.1 (241)</b></div>
+        <div class="kv">Տարբերակ<b>eco · 2.3.1 (241)</b></div>
         <div class="kv">API<b>v1 · 2026-10-08</b></div>
-        <div class="kv">Հերթապահություն<b>08:02-ից · 01 ET 001</b></div>
+        <div class="kv">Հերթափոխ<b>08:02-ից · 01 ET 001</b></div>
         <div class="kv">Դիրքի կետեր<b>1 284</b></div>
         <div class="kv">Ամենաերկար բացը<b>38 վրկ · 08:51</b></div>
         <div class="kv">Դիրքը ֆոնում<b>Միշտ</b></div>
@@ -359,7 +366,7 @@
 
     <!-- ── rating + past rides (D41, drawn ahead: no driver rating or history endpoint) ── -->
     <section data-s="rating">
-      <div class="ptitle">Վարկանիշ</div>
+      <div class="ptitle">Գնահատական</div>
       <div class="rate"><span class="v" data-eco="RIDE.driver.rating">4,9</span><span class="s"><span class="stars" aria-hidden="true"><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i></span><br>վերջին 100 գնահատական</span></div>
       <div class="bars5" aria-label="Գնահատականների բաշխում">
         <div class="b5"><span>5</span><span class="t"><i style="width:88%"></i></span><span>88</span></div>
@@ -380,31 +387,31 @@
     <section data-s="deleterequested" class="grow" style="display:flex;flex-direction:column">
       <div class="center">
         <span class="bigic neutral"><i data-lucide="hourglass"></i></span>
-        <div class="h2">Հայցն ուղարկված է</div>
-        <div class="sub">Սպասում է ընկերության հաստատմանը</div>
+        <div class="h2">Հարցումն ուղարկվեց</div>
+        <div class="sub">Սպասում է գրասենյակի հաստատմանը</div>
       </div>
       <div class="card tl">
-        <div class="tli done"><span class="d"><i data-lucide="check"></i></span><div><div class="t1">Հայց</div><div class="t2">Այսօր, 15:10</div></div></div>
-        <div class="tli now"><span class="d"></span><div><div class="t1">Ընկերության հաստատում</div><div class="t2">Հաշվարկներից հետո</div></div></div>
+        <div class="tli done"><span class="d"><i data-lucide="check"></i></span><div><div class="t1">Հարցում</div><div class="t2">Այսօր, 15:10</div></div></div>
+        <div class="tli now"><span class="d"></span><div><div class="t1">Գրասենյակի հաստատում</div><div class="t2">Սովորաբար՝ 1 օրում</div></div></div>
         <div class="tli"><span class="d"><i data-lucide="user-x"></i></span><div><div class="t1">Անձնական տվյալների ջնջում</div><div class="t2">Ծանուցում կստանաք</div></div></div>
       </div>
       <span class="grow"></span>
-      <button class="btn btn-quiet on-ground">Չեղարկել հայցը</button>
+      <button class="btn btn-quiet on-ground">Չեղարկել հարցումը</button>
     </section>
   </div>
 
   <!-- ── sign-out blocked by an open shift ── -->
   <div class="scrim" data-s="signout"></div>
-  <section class="sheet top" data-s="signout" role="dialog" aria-label="Հերթապահությունը բաց է">
+  <section class="sheet top" data-s="signout" role="dialog" aria-label="Հերթափոխը բաց է">
     <div class="grabber"></div>
     <div class="so">
       <span class="bigic warn"><i data-lucide="lock"></i></span>
-      <div class="h2">Հերթապահությունը բաց է</div>
-      <div class="sub">Նախ ավարտեք հերթապահությունը</div>
+      <div class="h2">Հերթափոխը բաց է</div>
+      <div class="sub">Նախ ավարտեք հերթափոխը</div>
       <div class="shiftrow"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="txt"><span class="t1"><span class="plate">01 ET 001</span></span><span class="t2" style="margin-top:4px">08:02-ից · 7 ժ 12 ր</span></span></div>
     </div>
     <div class="foot">
-      <button class="btn btn-brand lg">Ավարտել հերթապահությունը</button>
+      <button class="btn btn-brand lg">Ավարտել հերթափոխը</button>
       <button class="btn locked" aria-disabled="true"><i data-lucide="lock"></i>Դուրս գալ</button>
     </div>
   </section>
@@ -416,7 +423,7 @@
     ['main', 'Account'], ['docs', 'Documents · expiry'], ['language', 'Language'], ['theme', 'Theme · incl. Sun'],
     ['demo', 'Practice ride'], ['demorunning', 'Practice ride · running'], ['delete', 'Delete account'],
     ['deleterequested', 'Deletion requested'], ['signout', 'Sign out · blocked by shift'],
-    ['deleteblocked', 'Delete blocked · debt or ride'], ['help', 'Help · dispatcher, FAQ, legal'], ['legal', 'Privacy policy'],
+    ['deleteblocked', 'Delete blocked · open ride'], ['help', 'Help · dispatcher, FAQ, legal'], ['legal', 'Privacy policy'],
     ['update', 'Update required'], ['diag', 'Shift diagnostics'], ['rating', 'Rating + past rides'],
   ])
   const uv = document.getElementById('u-ver'); if (uv) uv.textContent = ECO.APP.driver.have + ' · նվազագույնը՝ ' + ECO.APP.driver.min

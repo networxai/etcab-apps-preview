@@ -53,7 +53,7 @@
       <div class="live"></div>
     </header>
     <div class="content">
-      <section class="card" aria-label="Սպասող հայտեր">
+      <section class="card" aria-label="Սպասում են հաստատման">
         <div class="card-h" style="padding:0 12px"><div class="seg"><button class="on">Մեքենաներ <span class="c num">3</span></button><button>Գործընկերներ <span class="c num">1</span></button></div>
           </div>
         <div class="scroll-y grow" id="queue2" data-truncate></div>
@@ -71,30 +71,30 @@
   ]
   document.getElementById('queue2').innerHTML = Q.map(([p, when, docs, m], i) => `<div class="qi${i === 0 ? ' on' : ''}" tabindex="0">
       <span class="car">${carImg(p.tier)}</span><b>${p.model.split(' · ').slice(0, 2).join(' · ')}</b><span class="s"><span class="plate" style="height:20px">${p.plate}</span><span class="trunc">${p.name}</span></span>
-      <span class="r2"><span>${when}</span><span class="pill ${docs < 6 ? 'warn' : 'ok'}" style="height:20px">${docs}/6 փաստաթուղթ</span></span></div>`).join('')
+      <span class="r2"><span>${when}</span><span class="pill ${docs < 6 ? 'warn' : 'ok'}" style="height:20px">${docs < 6 ? '<i data-lucide="clock"></i>' : '<i data-lucide="circle-check"></i>'}${docs}/6 փաստաթուղթ</span></span></div>`).join('')
   const p = PARTNERS[8]
   const docs = [
-    ['paper', 'Տեխանձնագիր · առջև', 'tp-front.jpg', 'ok'], ['paper', 'Տեխանձնագիր · հետև', 'tp-back.jpg', 'ok'], ['paper', 'ԱՊՊԱ · 14.03.2027', 'osago.pdf', 'ok'],
+    ['paper', 'Տեխանձնագիր · առջև', 'tp-front.jpg', 'ok'], ['paper', 'Տեխանձնագիր · հետև', 'tp-back.jpg', 'ok'], ['paper', 'Ապահովագրություն · 14.03.2027', 'osago.pdf', 'ok'],
     ['car', 'Լուսանկար · առջևից', 'front.jpg', 'ok'], ['car', 'Լուսանկար · կողքից', 'side.jpg', 'ok'], ['none', 'Լուսանկար · սրահ', 'չի վերբեռնվել', 'miss'],
   ]
   document.getElementById('detail').innerHTML = `
     <div class="ah"><span class="car">${carImg('partner', 'Tesla Model Y')}</span>
       <div style="min-width:0"><h2>Tesla Model Y · <span class="plate" style="vertical-align:3px">${p.plate}</span></h2>
-        <div class="meta"><span class="pill warn"><i data-lucide="clock"></i>Սպասում է հաստատման</span><span class="typ partner"><i data-lucide="handshake"></i>${p.name}</span><span class="faint" style="font:var(--c-small)">ներկայացվել է երեկ, 16:20</span></div>
+        <div class="meta"><span class="pill warn"><i data-lucide="clock"></i>Սպասում է հաստատման</span><span class="typ partner"><i data-lucide="handshake"></i>${p.name}</span><span class="faint" style="font:var(--c-small)">ուղարկել է երեկ, 16:20</span></div>
         <dl><dt>Տարի</dt><dd>2023</dd><dt>Գույն</dt><dd>մոխրագույն</dd><dt>Նստատեղ</dt><dd>4 + վարորդ</dd><dt>VIN</dt><dd class="mono">•••• 4821</dd></dl></div>
-      <a class="btn ghost s" href="partners.html?theme=${THEME}&p=8">Գործընկերի էջը <i data-lucide="arrow-right"></i></a></div>
+      <a class="btn ghost s" href="partners.html?theme=${THEME}&p=8">Գործընկերոջ էջը <i data-lucide="arrow-right"></i></a></div>
     <div class="scroll-y grow">
-      <div class="sect"><h3>Փաստաթղթեր <span class="sub">5 / 6 · սեղմեք՝ ամբողջ չափով</span></h3>
+      <div class="sect"><h3>Փաստաթղթեր <span class="sub">5 / 6 · սեղմեք՝ մեծացնելու համար</span></h3>
         <div class="docgrid">${docs.map(([k, t, f, st]) => `<div class="dt"><div class="pv">${k === 'paper' ? '<span class="paper"><i style="width:60%"></i><i></i><i></i><i style="width:80%"></i><i></i><i style="width:40%"></i></span>' : k === 'car' ? `<span class="car">${carImg('partner')}</span><span class="tag2">օրինակ</span>` : '<i data-lucide="image-off" style="color:var(--ink-faint)"></i>'}</div>
-          <div class="cap"><b>${t}</b>${st === 'ok' ? '<span class="check on" style="font-size:12px"><i class="b"></i>Ստուգված</span>' : '<span class="pill warn" style="height:20px;align-self:flex-start">Պակասում է</span>'}</div></div>`).join('')}</div>
+          <div class="cap"><b>${t}</b>${st === 'ok' ? '<span class="check on" style="font-size:12px"><i class="b"></i>Ստուգված</span>' : '<span class="pill warn" style="height:20px;align-self:flex-start"><i data-lucide="image-off"></i>Չկա</span>'}</div></div>`).join('')}</div>
       </div>
-      <div class="sect" style="border:0"><h3>Դաս <span class="sub">սահմանում է օպերատորը հաստատելիս, ոչ թե գործընկերը</span></h3>
-        <div class="classes" role="radiogroup" aria-label="Մեքենայի դաս">${TIERS.map((t) => `<span class="chip${t.id === 'partner' ? ' on' : ''}" role="radio" aria-checked="${t.id === 'partner'}">${t.cls}</span>`).join('')}</div>
-        <div class="result"><span class="car">${carImg('partner')}</span><span>Կստանա պատվերներ՝ <b>Eco Comfort</b> փաթեթով · վճար՝ <b>15%</b> (Գործընկեր ստանդարտ)</span></div>
+      <div class="sect" style="border:0"><h3>Սակագին <span class="sub">ընտրում է օպերատորը, ոչ թե գործընկերը</span></h3>
+        <div class="classes" role="radiogroup" aria-label="Սակագին">${TIERS.map((t) => `<span class="chip${t.id === 'partner' ? ' on' : ''}" role="radio" aria-checked="${t.id === 'partner'}">${t.cls}</span>`).join('')}</div>
+        <div class="result"><span class="car">${carImg('partner')}</span><span>Պատվերներ՝ <b>Eco Comfort</b> · միջնորդավճար՝ <b>${ECO.PARTNER.rules.comfort.fee}%</b> · զգուշացում՝ <span class="num">${amd(ECO.PARTNER.rules.comfort.warnBelow)}</span>-ից ցածր</span></div>
       </div>
     </div>
     <div class="decide">
-      <div><label class="label">Մերժման պատճառ <span class="faint" style="font-weight:400">· պարտադիր, կուղարկվի գործընկերոջը</span></label>
+      <div><label class="label">Մերժման պատճառ <span class="faint" style="font-weight:400">· պարտադիր, գործընկերը կտեսնի</span></label>
         <div class="input"><span class="val ph">օր. Սրահի լուսանկարը չկա</span></div></div>
       <div class="acts"><button class="btn danger" aria-disabled="true" title="Նախ գրեք պատճառը" style="opacity:.55">Մերժել</button><button class="btn secondary">Խնդրել լրացնել</button><button class="btn primary">Հաստատել՝ Eco Comfort <span class="kbd">↵</span></button></div>
     </div>`

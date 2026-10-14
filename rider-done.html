@@ -85,6 +85,7 @@
 <body>
 <script>
   const S = R.i('star')
+  const LOW = (ECO.DISPATCH && ECO.DISPATCH.lowRating && ECO.DISPATCH.lowRating.max) || 3 /* the top of the low band: 3 ★ */
   const nav = `<nav class="nav"><span class="navend"></span><span class="navttl">Ուղևորությունն ավարտված է</span><button class="navbtn" aria-label="Փակել">${R.i('x')}</button></nav>`
   /* The one ride (kit.js ECO.RIDE): picked up 9:45, dropped 9:51, 4,3 km, 6 min, 1 100 ֏. */
   const RD = ECO.RIDE, DV = RD.driver, C = ECO.COMPANY
@@ -97,14 +98,14 @@
       <div class="st"><span class="m"><span class="sq"></span></span><span class="tx"><span class="t1">${RD.drop}</span><span class="t2">${RD.dropAt} · ${ECO.km(RD.km)} · ${RD.min} րոպե</span></span></div></div></div>
     <div class="fare"><span class="n">${R.amd(RD.fare)}</span>${paidChip(pay)}</div>`
   /* Eco City, fixed_upfront: 600 + 90·4,3 + 12·6 = 1 059 → rounded to 100 ֏. Line names are the app's fare.* strings. */
-  const breakdown = (pay = 'cash') => `<div class="bd" aria-label="Վճարի մանրամասները">
-    <div class="l"><span>Նստելու վճար</span><span>${R.amd(600)}</span></div>
+  const breakdown = (pay = 'cash') => `<div class="bd" aria-label="Գնի մանրամասները">
+    <div class="l"><span>Նստեցում</span><span>${R.amd(600)}</span></div>
     <div class="l"><span>Ըստ կիլոմետրի · ${ECO.km(RD.km)}</span><span>${R.amd(387)}</span></div>
     <div class="l"><span>Ըստ րոպեի · ${RD.min} րոպե</span><span>${R.amd(72)}</span></div>
     <div class="l"><span>Կլորացում</span><span>+${R.amd(41)}</span></div>
     <div class="l tot"><span>Ընդամենը</span><span>${R.amd(RD.fare)}</span></div></div>
     ${pay === 'company' ? `<div class="billed">${R.i('building-2')}<span>Վճարում է՝ ${C.name}</span></div>` : ''}`
-  const collapsed = `<button class="bdrow"><span>Վճարի մանրամասները</span>${R.i('chevron-down')}</button>`
+  const collapsed = `<button class="bdrow"><span>Գնի մանրամասները</span>${R.i('chevron-down')}</button>`
   const who = `<div class="who">${R.avatar()}<span class="nm"><span class="n1">${DV.first}</span><span class="n2">${DV.car} · ${DV.plate}</span></span></div>`
   const stars = (n) => `<div class="stars" role="radiogroup" aria-label="Գնահատեք վարորդին">${[1, 2, 3, 4, 5].map((i) =>
     `<button class="${i <= n ? 'on' : ''}" role="radio" aria-checked="${i === n}" aria-label="${i} աստղ">${S}</button>`).join('')}</div>`
@@ -134,8 +135,8 @@
         html: () => page(`${tripHead()}${collapsed}${who}${stars(5)}<div class="q" style="text-align:center">Ի՞նչը դուր եկավ</div>
           ${chips(['Մաքուր մեքենա', 'Զգույշ վարում', 'Հաճելի զրույց', 'Ճշտապահ', 'Լավ երաժշտություն'], [0, 1])}`,
           '<button class="btn btn-brand">Ուղարկել</button><button class="btn-text">Բաց թողնել</button>') },
-      { id: 'low', label: 'Low rating', note: 'Under five: what went wrong, one tap each. Goes to the dispatcher, not only to a score',
-        html: () => page(`${tripHead()}${collapsed}${who}${stars(3)}<div class="q" style="text-align:center">Ի՞նչը չստացվեց</div>
+      { id: 'low', label: 'Low rating', note: 'Owner #15: 1–3 ★ is low (ECO.DISPATCH.lowRating.max, console Settings → Dispatch); drawn at 3 ★. What went wrong, one tap each; it reaches the dispatcher for a follow-up within 24 h, not only a score. 4 ★ gets the compliments row, as 5 ★',
+        html: () => page(`${tripHead()}${collapsed}${who}${stars(LOW)}<div class="q" style="text-align:center">Ի՞նչը չստացվեց</div>
           ${chips(['Ուշացավ', 'Անզգույշ վարում', 'Մեքենան մաքուր չէր', 'Երկար երթուղի', 'Անհարմար զրույց'], [1])}`,
           '<button class="btn btn-brand">Ուղարկել</button><button class="btn-text">Բաց թողնել</button>') },
       { id: 'fiscal', label: 'Fiscal receipt', time: '9:52', note: 'R58, drawn ahead (no fiscal API yet; the console\'s «Ֆիսկալ հերթ» holds the ones that failed to issue). Reached from «Ստացական» on Thanks and from the History receipt. The receipt as issued (ECO.FISCAL): seller, ՀՎՀՀ, ՀԴՄ, number, time, the one service line, total, method and the tax office\'s QR. Share sends the PDF (system share sheet); nothing else on screen (new strings)',
@@ -144,7 +145,7 @@
             <div class="seller">${ECO.FISCAL.seller}</div>
             <div class="meta">
               <div class="m"><span>ՀՎՀՀ</span><b>${ECO.FISCAL.tin}</b></div>
-              <div class="m"><span>Սարք</span><b>${ECO.FISCAL.device}</b></div>
+              <div class="m"><span>ՀԴՄ</span><b>${ECO.FISCAL.device}</b></div>
               <div class="m"><span>Կտրոն №</span><b>${ECO.FISCAL.no}</b></div>
               <div class="m"><span>Ամսաթիվ</span><b>${ECO.FISCAL.at}</b></div>
             </div>

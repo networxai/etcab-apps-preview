@@ -12,7 +12,8 @@
 <script src="driver.js"></script>
 <style>
   /* My car (ADR-V1): the partner's own car. The office sets the tier at approval; the partner never picks it.
-     A car whose required document expires is suspended at the business-day boundary. Parked page: 52 / 48. */
+     A car whose required document expires is suspended at the business-day boundary. Parked page: 52 / 48.
+     Exactly one car per partner (owner decision 6, 2026-10-14): no picker, no «my cars» list. #register is only reached from #none. */
   .on-ground { background: var(--surface) !important; box-shadow: var(--e1); }
   .hero-car { padding: var(--s4); margin-top: var(--s2); }
   .stage { position: relative; height: 124px; display: grid; place-items: end center; }
@@ -50,9 +51,10 @@
   .fix .h { display: flex; align-items: center; gap: var(--s3); }
   .fix .h .ic { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; }
   .fix .h .ic svg { width: 20px; height: 20px; }
-  .fix .h .ic.danger { background: var(--danger-soft); color: var(--danger); }
   .fix .h .ic.warn { background: var(--warn-soft); color: var(--warn); }
   .fix .t1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .fix .h + .h { padding-top: var(--s3); border-top: 1px solid var(--hairline); }
+  .fix .h .ic.n { background: var(--surface-2); color: var(--ink); }
   .fix .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
   .doc { display: flex; align-items: center; gap: var(--s3); min-height: 60px; }
@@ -63,10 +65,10 @@
   .doc .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
   .doc .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .p-tag.solo { width: 28px; padding: 0; justify-content: center; }
-  /* p1p2: suspended (P13), none (P14), register (P15, drawn ahead), choose (P16). */
+  /* p1p2: suspended (P13), none (P14), register (P15, drawn ahead: the one car of a partner who has none). */
   :root[data-state="suspended"] .stage img { filter: grayscale(.85) opacity(.75) drop-shadow(0 3px 3px var(--car-ground)); }
-  :root[data-state="none"] .hero-car, :root[data-state="register"] .hero-car, :root[data-state="choose"] .hero-car,
-  :root[data-state="none"] .docs, :root[data-state="register"] .docs, :root[data-state="choose"] .docs { display: none; }
+  :root[data-state="none"] .hero-car, :root[data-state="register"] .hero-car,
+  :root[data-state="none"] .docs, :root[data-state="register"] .docs { display: none; }
   .nocar { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--s1); padding: var(--s6) 0 var(--s2); }
   .nocar .ei { width: 72px; height: 72px; border-radius: 50%; background: var(--surface); box-shadow: var(--e1); color: var(--ink-2); display: grid; place-items: center; margin-bottom: var(--s2); }
   .nocar .ei svg { width: 32px; height: 32px; }
@@ -84,24 +86,16 @@
   .shot.ok svg { color: var(--ok); }
   .shot.todo { box-shadow: inset 0 0 0 1.5px var(--hairline); background: transparent; }
   .regfoot { margin-top: auto; padding-top: var(--s3); }
-  .pick { display: flex; align-items: center; gap: var(--s3); min-height: 84px; width: 100%; text-align: left; }
-  .group .pick + .pick { border-top: 1px solid var(--hairline); }
-  .pick img { width: 88px; height: 40px; flex: none; }
-  .pick .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-  .pick .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
-  .pick .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
-  .pick .rd { width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--ink-3); flex: none; }
-  .pick[aria-checked="true"] .rd { box-shadow: inset 0 0 0 7px var(--brand); }
-  .pick[aria-disabled="true"] img { filter: grayscale(.9) opacity(.6); }
+  .regfoot a.btn { text-decoration: none; }
 </style>
 </head>
 <body>
 <main class="screen page" id="s">
-  <div class="appbar"><button class="iconbtn" aria-label="Ետ"><i data-lucide="arrow-left"></i></button><span class="sp"></span>
+  <div class="appbar"><button class="iconbtn" aria-label="Հետ"><i data-lucide="arrow-left"></i></button><span class="sp"></span>
     <button class="iconbtn" aria-label="Զանգել գրասենյակ"><i data-lucide="phone"></i></button></div>
 
   <div class="content">
-    <div class="ptitle" data-not="register choose">Իմ մեքենան</div><div class="ptitle" data-s="register">Նոր մեքենա</div><div class="ptitle" data-s="choose">Իմ մեքենաները</div>
+    <div class="ptitle" data-not="register">Իմ մեքենան</div><div class="ptitle" data-s="register">Մեքենայի գրանցում</div>
 
     <div class="card hero-car">
       <div class="stage">
@@ -110,7 +104,7 @@
           <span class="p-tag warn" data-s="suspended"><i data-lucide="pause"></i>Կասեցված</span>
           <span class="p-tag ok" data-s="approved expiring"><i data-lucide="badge-check"></i>Հաստատված</span>
           <span class="p-tag" data-s="pending"><i data-lucide="clock"></i>Ստուգվում է</span>
-          <span class="p-tag danger" data-s="rejected"><i data-lucide="octagon-x"></i>Մերժված</span>
+          <span class="p-tag warn" data-s="rejected"><i data-lucide="octagon-x"></i>Մերժված</span>
         </span>
       </div>
       <div class="id">
@@ -119,10 +113,10 @@
       </div>
       <div class="chips">
         <span class="p-tag brand" data-not="pending rejected"><i data-lucide="car-front"></i>Eco Comfort</span>
-        <span class="p-tag" data-s="pending rejected"><i data-lucide="car-front"></i>Դաս՝ —</span>
+        <span class="p-tag" data-s="pending rejected"><i data-lucide="car-front"></i>Սակագին՝ —</span>
         <span class="p-tag"><i data-lucide="handshake"></i>Գործընկեր</span>
       </div>
-      <div class="note" data-not="rejected expiring suspended"><i data-lucide="building-2"></i>Դասը սահմանում է գրասենյակը</div>
+      <div class="note" data-not="rejected expiring suspended"><i data-lucide="building-2"></i>Սակագինը սահմանում է գրասենյակը</div>
     </div>
 
     <!-- pending: where it is, how long -->
@@ -134,39 +128,40 @@
 
     <!-- rejected: the reason, and the one fix -->
     <div class="card fix" data-s="rejected">
-      <div class="h"><span class="ic danger"><i data-lucide="image-off"></i></span><div><div class="t1">Լուսանկարն անընթեռնելի է</div><div class="t2">Տեխզննում · 10.10, 11:20</div></div></div>
+      <div class="h"><span class="ic warn"><i data-lucide="image-off"></i></span><div><div class="t1">Լուսանկարն անընթեռնելի է</div><div class="t2">Տեխզննում · 10.10, 11:20</div></div></div>
       <button class="btn btn-brand"><i data-lucide="camera"></i>Նորից լուսանկարել</button>
     </div>
 
     <!-- expiring -->
     <div class="card fix" data-s="expiring">
-      <div class="h"><span class="ic warn"><i data-lucide="shield-alert"></i></span><div><div class="t1">Ապահովագրություն՝ 6 օր</div><div class="t2">15.10-ից հետո՝ առանց պատվերի</div></div></div>
-      <button class="btn btn-brand"><i data-lucide="camera"></i>Թարմացնել</button>
+      <div class="h"><span class="ic warn"><i data-lucide="shield-alert"></i></span><div><div class="t1">Ապահովագրություն՝ 6 օր</div><div class="t2">15.10-ից պատվերներ չեն գա</div></div></div>
+      <button class="btn btn-brand"><i data-lucide="camera"></i>Լուսանկարել նորը</button>
     </div>
 
-    <!-- suspended (P13): a required document expired at the business-day boundary; no new orders until it is renewed -->
+    <!-- suspended (P13): a required document expired at the business-day boundary; no new orders until a new one is uploaded and approved (owner decision 5); his pre-orders went back to dispatch on their own (decision 7) -->
     <div class="card fix" data-s="suspended">
-      <div class="h"><span class="ic warn"><i data-lucide="lock"></i></span><div><div class="t1">Նոր պատվերներ՝ ոչ</div><div class="t2">Ապահովագրությունը լրացել է 15.10-ին</div></div></div>
-      <button class="btn btn-brand"><i data-lucide="camera"></i>Թարմացնել</button>
+      <div class="h"><span class="ic warn"><i data-lucide="lock"></i></span><div><div class="t1">Պատվերներ չեն գա</div><div class="t2">Ապահովագրությունը ժամկետանց է՝ 15.10</div></div></div>
+      <div class="h"><span class="ic n"><i data-lucide="calendar-clock"></i></span><div><div class="t1">1 նախնական պատվեր</div><div class="t2">Ավտոմատ վերադարձավ դիսպետչերին</div></div></div>
+      <button class="btn btn-brand"><i data-lucide="camera"></i>Լուսանկարել նորը</button>
     </div>
 
     <!-- none (P14): car.none -->
     <div class="nocar" data-s="none">
       <span class="ei"><i data-lucide="car-front"></i></span>
       <div class="t1">Մեքենա գրանցված չէ</div>
-      <div class="t2">Զանգահարե՛ք գրասենյակ կամ գրանցեք այստեղ</div>
+      <div class="t2">Գրանցեք այստեղ կամ զանգեք գրասենյակ</div>
     </div>
     <div class="regfoot" data-s="none">
-      <button class="btn btn-brand"><i data-lucide="plus"></i>Գրանցել մեքենա</button>
+      <a class="btn btn-brand" href="?state=register"><i data-lucide="plus"></i>Գրանցել մեքենան</a>
       <button class="btn-text"><i data-lucide="phone"></i>Զանգել գրասենյակ</button>
     </div>
 
-    <!-- register (P15, drawn ahead: no API): the car's facts, then four photos and the documents -->
+    <!-- register (P15, drawn ahead: no API): a partner with no car registers his one car. The car is the self-applicant's (onboarding#applied, console approvals), so no page-local plate. -->
     <section data-s="register" class="reg">
-      <div class="psub">Գրասենյակը կստուգի և կսահմանի դասը</div>
+      <div class="psub">Գրասենյակը կստուգի և կսահմանի սակագինը</div>
       <div class="group" style="margin-top:var(--s3)">
-        <div class="fld"><span class="k">Մակնիշ և մոդել</span><span class="v">Tesla Model Y</span></div>
-        <div class="fld"><span class="k">Համարանիշ</span><span class="v">46 KM 146</span></div>
+        <div class="fld"><span class="k">Մակնիշ և մոդել</span><span class="v">Hyundai Ioniq 5</span></div>
+        <div class="fld"><span class="k">Համարանիշ</span><span class="v">19 HG 519</span></div>
         <div class="fld"><span class="k">Տարի · գույն</span><span class="v">2023 · մոխրագույն</span></div>
       </div>
       <div class="sect">Լուսանկարներ<span class="n">2 / 4</span></div>
@@ -183,28 +178,18 @@
         <button class="doc" style="width:100%;text-align:left"><span class="ic"><i data-lucide="wrench"></i></span><span class="txt"><span class="t1">Տեխզննում</span><span class="t2">Լուսանկարել</span></span><i data-lucide="camera" style="width:20px;height:20px;color:var(--ink-2)"></i></button>
       </div>
     </section>
-    <div class="regfoot" data-s="register"><button class="btn btn-brand" aria-disabled="true" style="opacity:1;background:var(--surface-2);color:var(--ink-2)"><i data-lucide="send"></i>Ուղարկել ստուգման · 4 բաց է</button></div>
+    <div class="regfoot" data-s="register"><button class="btn btn-brand" aria-disabled="true" style="opacity:1;background:var(--surface-2);color:var(--ink-2)"><i data-lucide="send"></i>Ուղարկել · մնաց 4</button></div>
 
-    <!-- choose (P16): a partner with two own cars picks today's at shift open; a pending car cannot be picked -->
-    <section data-s="choose">
-      <div class="psub">Հերթափոխ · ո՞ր մեքենայով</div>
-      <div class="group" role="radiogroup" aria-label="Մեքենա" style="margin-top:var(--s3)">
-        <button class="pick" role="radio" aria-checked="true"><img class="carimg" src="assets/eco/cars/partner.webp" alt=""><span class="tx"><span class="t1">Tesla Model 3</span><span class="t2"><span class="plate" style="height:24px;line-height:24px;font-size:13px">44 KM 771</span> · Eco Comfort</span></span><span class="rd"></span></button>
-        <button class="pick" role="radio" aria-checked="false"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="tx"><span class="t1">VW ID.3</span><span class="t2"><span class="plate" style="height:24px;line-height:24px;font-size:13px">27 KM 202</span> · Eco City</span></span><span class="rd"></span></button>
-        <div class="pick" role="radio" aria-checked="false" aria-disabled="true"><img class="carimg" src="assets/eco/cars/business.webp" alt=""><span class="tx"><span class="t1">Tesla Model Y</span><span class="t2"><span class="plate" style="height:24px;line-height:24px;font-size:13px">46 KM 146</span> · Ստուգվում է</span></span><span class="p-tag"><i data-lucide="clock"></i></span></div>
-      </div>
-    </section>
-    <div class="regfoot" data-s="choose"><button class="go x"><i data-lucide="power"></i>Գծում լինել · 44 KM 771</button></div>
 
     <div class="docs">
     <div class="sect">Փաստաթղթեր</div>
     <div class="group">
       <div class="doc"><span class="ic"><i data-lucide="file-text"></i></span><span class="txt"><span class="t1">Հաշվառման վկայական</span><span class="t2">Տեխանձնագիր</span></span>
         <span class="p-tag ok solo" role="img" aria-label="Վավեր" data-not="pending"><i data-lucide="check"></i></span><span class="p-tag solo" role="img" aria-label="Ստուգվում է" data-s="pending"><i data-lucide="clock"></i></span></div>
-      <div class="doc"><span class="ic"><i data-lucide="shield"></i></span><span class="txt"><span class="t1">Ապահովագրություն</span><span class="t2" data-not="expiring suspended">մինչև 14.04.2027</span><span class="t2" data-s="expiring">մինչև 15.10.2026</span><span class="t2" data-s="suspended">լրացել է 15.10.2026</span></span>
-        <span class="p-tag ok solo" role="img" aria-label="Վավեր" data-s="approved rejected"><i data-lucide="check"></i></span><span class="p-tag warn" data-s="expiring"><i data-lucide="clock"></i>6 օր</span><span class="p-tag warn" data-s="suspended"><i data-lucide="lock"></i>Լրացել է</span><span class="p-tag solo" role="img" aria-label="Ստուգվում է" data-s="pending"><i data-lucide="clock"></i></span></div>
+      <div class="doc"><span class="ic"><i data-lucide="shield"></i></span><span class="txt"><span class="t1">Ապահովագրություն</span><span class="t2" data-not="expiring suspended">մինչև 14.04.2027</span><span class="t2" data-s="expiring">մինչև 15.10.2026</span><span class="t2" data-s="suspended">ժամկետանց՝ 15.10.2026</span></span>
+        <span class="p-tag ok solo" role="img" aria-label="Վավեր" data-s="approved rejected"><i data-lucide="check"></i></span><span class="p-tag warn" data-s="expiring"><i data-lucide="clock"></i>6 օր</span><span class="p-tag warn" data-s="suspended"><i data-lucide="lock"></i>Ժամկետանց</span><span class="p-tag solo" role="img" aria-label="Ստուգվում է" data-s="pending"><i data-lucide="clock"></i></span></div>
       <div class="doc"><span class="ic"><i data-lucide="wrench"></i></span><span class="txt"><span class="t1">Տեխզննում</span><span class="t2">մինչև 22.06.2027</span></span>
-        <span class="p-tag ok solo" role="img" aria-label="Վավեր" data-s="approved expiring suspended"><i data-lucide="check"></i></span><span class="p-tag danger" data-s="rejected"><i data-lucide="x"></i>Նորից</span><span class="p-tag solo" role="img" aria-label="Ստուգվում է" data-s="pending"><i data-lucide="clock"></i></span></div>
+        <span class="p-tag ok solo" role="img" aria-label="Վավեր" data-s="approved expiring suspended"><i data-lucide="check"></i></span><span class="p-tag warn" data-s="rejected"><i data-lucide="x"></i>Մերժված</span><span class="p-tag solo" role="img" aria-label="Ստուգվում է" data-s="pending"><i data-lucide="clock"></i></span></div>
     </div>
     </div>
   </div>
@@ -212,7 +197,7 @@
 <script src="audit.js"></script>
 <script>
   statusBar(document.getElementById('s'))
-  D.init([['approved', 'Approved'], ['pending', 'Pending approval'], ['rejected', 'Rejected · reason · re-shoot'], ['expiring', 'Document expiring'], ['suspended', 'Suspended · document expired'], ['none', 'No car on record'], ['register', 'Register a car (ahead)'], ['choose', 'Two own cars · pick at shift open']])
+  D.init([['approved', 'Approved'], ['pending', 'Pending approval'], ['rejected', 'Rejected · reason · re-shoot'], ['expiring', 'Document expiring'], ['suspended', 'Suspended · document expired'], ['none', 'No car on record'], ['register', 'Register the one car (ahead)']])
   D.partnerNav()
   icons()
   D.noMap()
