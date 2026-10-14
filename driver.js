@@ -14,10 +14,12 @@
   kom: { m: 5780, s: 501, pts: [[40.205102,44.508542],[40.204858,44.509544],[40.204114,44.508365],[40.197831,44.492978],[40.19619,44.493927],[40.192609,44.499628],[40.192343,44.50047],[40.191433,44.51012],[40.191036,44.511375],[40.190357,44.512358],[40.18512,44.516942],[40.183667,44.518817],[40.177963,44.511977],[40.177185,44.512796],[40.177777,44.513721],[40.177384,44.514083],[40.177467,44.514432]] },
   tsi: { m: 3823, s: 439, pts: [[40.187002,44.515502],[40.187053,44.51506],[40.18691,44.514726],[40.17657,44.502463],[40.174988,44.501788],[40.174217,44.500613],[40.175636,44.498741],[40.176564,44.498573],[40.1777,44.497801],[40.177984,44.497424],[40.179215,44.494193],[40.179215,44.493567],[40.178732,44.492066],[40.178957,44.491602],[40.181462,44.492065],[40.183446,44.492791],[40.184954,44.491461],[40.185417,44.490553]] }
   }
+  /* Transfer T-0031: Zvartnots → the centre; the airport geometry reversed (illustrative, change list 2026-10-14). */
+  window.DROUTES.trf = { m: 13400, s: 1320, pts: window.DROUTES.air.pts.slice().reverse() }
 
   const SCREENS = [
     ['driver-login', 'Login'], ['driver-ready', 'Readiness'], ['driver-shift', 'Shift'], ['driver-home', 'Home (hero)'],
-    ['driver-home-states', 'Home, other states'], ['driver-preorders', 'Pre-orders'], ['driver-offer', 'Offer (hero)'],
+    ['driver-home-states', 'Home, other states'], ['driver-preorders', 'Pre-orders'], ['driver-neworder', 'New order (own)'], ['driver-offer', 'Offer (hero)'],
     ['driver-offer-states', 'Offer, other states'], ['driver-ride', 'Ride flow'], ['driver-earnings', 'Earnings'], ['driver-inbox', 'Notifications'], ['driver-account', 'Account'],
   ]
 

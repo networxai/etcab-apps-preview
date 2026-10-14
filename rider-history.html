@@ -17,7 +17,28 @@
 <script src="rider.js"></script>
 <style>
   /* History: destination is the row title, when + tier under it, fare in a tabular column on the right. */
-  .hrow { display: flex; align-items: center; gap: var(--s3); min-height: 72px; width: 100%; text-align: left; }
+  .hrow { display: flex; align-items: center; gap: var(--s2); min-height: 72px; width: 100%; }
+  .hrow .hmain { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--s3); min-height: 72px; text-align: left; }
+  .hrow .l1 { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s2); }
+  .hrow .rcpt { flex: none; width: 44px; height: 44px; border-radius: 50%; background: var(--surface-2); color: var(--ink); display: grid; place-items: center; margin-right: -4px; }
+  .hrow .rcpt svg { width: 20px; height: 20px; }
+  .hrow .rcpt.none { background: none; }
+  /* The receipt document (change list 2026-10-14): a paper card — seller, ride, lines, discount, total, payment, fiscal ref. */
+  .doc { margin: var(--s2) var(--margin) 0; background: var(--surface); border-radius: var(--r-card); box-shadow: var(--e1); padding: var(--s4); display: flex; flex-direction: column; }
+  .doc .dh { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--s3); }
+  .doc .dh img { height: 16px; width: auto; margin-top: 4px; }
+  .doc .dh .no { text-align: right; font: var(--t-secondary); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .doc .dh .no b { display: block; font: var(--t-body-strong); color: var(--ink); }
+  .doc .cut { border-top: 1.5px dashed var(--ink-3); margin: var(--s3) 0; opacity: .7; }
+  .doc .m { display: flex; justify-content: space-between; gap: var(--s3); min-height: 26px; align-items: center; font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .doc .m b { font: var(--t-secondary-strong); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .doc .m.disc span, .doc .m.disc b { color: var(--brand-ink); }
+  .doc .m.disc span { display: inline-flex; align-items: center; gap: 6px; }
+  .doc .m.disc svg { width: 15px; height: 15px; }
+  .doc .tot { display: flex; justify-content: space-between; font: var(--t-headline); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .doc .rt { font: var(--t-secondary); color: var(--ink); line-height: 22px; }
+  .doc .rt span { color: var(--ink-2); }
+  .page .foot.two { display: flex; flex-direction: column; gap: var(--s2); }
   .hrow .trace { flex: none; border-radius: 10px; }
   .hrow .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .hrow .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
@@ -128,10 +149,12 @@
     ['driverToPickup', 'Օպերա', '5 հոկտ., 13:05', 'Eco City', null],
     ['driverToPickup', 'Օպերա', '2 հոկտ., 10:15', 'Eco City', A(800)],
   ]
-  /* co: billed to the rider's company — said in words on the row, the receipt names the company. */
-  const row = ([k, to, when, tier, fare, co]) => `<button class="hrow">${R.trace(k, 48, 48, { pad: 8, r: 3, sw: 2.5, grid: false })}
-      <span class="txt"><span class="t1">${to}</span><span class="t2">${when} · ${co ? `<span class="co">${R.i('building-2')}${ECO.PAY.company.short}</span>` : tier}</span></span>
-      ${fare ? `<span class="fare">${fare}</span>` : `<span class="st">${R.i('circle-slash')}Չեղարկված</span>`}</button>`
+  /* co: billed to the rider's company — said in words on the row, the receipt names the company.
+     Change list 2026-10-14: every charged ride carries its own receipt button at the row's end (a sibling of the row's
+     main tap target, never nested); a cancelled ride has nothing to receipt, so the slot stays empty for column alignment. */
+  const row = ([k, to, when, tier, fare, co]) => `<div class="hrow"><button class="hmain">${R.trace(k, 48, 48, { pad: 8, r: 3, sw: 2.5, grid: false })}
+      <span class="txt"><span class="l1"><span class="t1">${to}</span>${fare ? `<span class="fare">${fare}</span>` : `<span class="st">${R.i('circle-slash')}Չեղարկված</span>`}</span><span class="t2">${when} · ${co ? `<span class="co">${R.i('building-2')}${ECO.PAY.company.short}</span>` : tier}</span></span></button>
+      ${fare ? `<button class="rcpt" aria-label="Ստացական · ${to}, ${when}">${R.i('receipt-text')}</button>` : '<span class="rcpt none" aria-hidden="true"></span>'}</div>`
   const group = (list) => `<div class="group">${list.map((r, i) => (i ? '<div class="divider h"></div>' : '') + row(r)).join('')}</div>`
   const head = () => `<nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl"></span><span class="navend"></span></nav><h1 class="large">Ուղևորություններ</h1>`
   /* ECO.BOOKINGS: Աննա's three pre-orders, soonest first (upcomingBooking order). sun has problemReason → history.pending (warn);
@@ -173,7 +196,7 @@
               <div class="ln paid"><span class="pay ${pay === 'company' ? 'co' : ''}">${pay === 'company' ? R.i('building-2') + 'Վճարում է՝ ' + C.name : R.i('banknote') + ECO.PAY.cash.label}</span></div>
             </div>
             ${pay === 'downgraded' ? `<div class="notice">${R.i('info')}<span><b>Վճարել եք դուք · կանխիկ</b>Ընկերության սահմանաչափը սպառված էր</span></div>` : ''}
-            <div class="btns"><button class="btn btn-brand">${R.i('rotate-ccw')}Կրկին պատվիրել</button>${pay === 'downgraded' ? '' : '<button class="btn btn-quiet">Հաղորդել խնդրի մասին</button>'}</div>
+            <div class="btns"><button class="btn btn-brand">${R.i('rotate-ccw')}Կրկին պատվիրել</button><button class="btn btn-quiet">${R.i('receipt-text')}Ստացական</button></div>
           </section>`
 
   Rider.page({
@@ -198,6 +221,27 @@
         html: () => `<div class="page">${head().replace('<h1 class="large">Ուղևորություններ</h1>', '<h1 class="large">Ուղևորություն</h1>')}
           <div class="errbox" role="status"><span class="eo">${R.i('wifi-off')}</span><span class="et">Կապ չկա</span><span class="es">Ստացականը կբացվի կապի հետ</span></div>
           <div class="foot"><button class="btn btn-quiet">${R.i('rotate-ccw')}Կրկնել</button></div></div>` },
+      { id: 'receipt', label: 'Receipt document', time: '9:58', note: 'Change list 2026-10-14 (drawn ahead): the row\'s receipt button opens the ride\'s receipt as a document — seller and ՀՎՀՀ, ride number and date, route and times, tariff and driver, the tariff lines, a promo line when one was used (ECO.PROMO.applied AUTUMN15 −165 ֏), total, payment, and the fiscal receipt number (ECO.FISCAL). «Ներբեռնել PDF» is the one primary; share is the quiet second. A company ride shows «Վճարում է՝ {company}» in the payment line',
+        html: () => { const F = ECO.FISCAL, PA = ECO.PROMO.applied
+          return `<div class="page on-surface"><nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl">Ստացական</span><button class="navbtn" aria-label="Կիսվել">${R.i('share')}</button></nav>
+          <div class="scroll"><div class="doc" aria-label="Ստացական">
+            <div class="dh"><img src="assets/eco/logo-wide.png" alt="Eco Taxi" width="88" height="16"><span class="no"><b>R-${RD.no}</b>9 հոկտ. 2026</span></div>
+            <div class="m" style="margin-top:var(--s2)"><span>${F.seller}</span><b>ՀՎՀՀ ${F.tin}</b></div>
+            <div class="cut"></div>
+            <div class="rt">${RD.pickup} <span>· ${RD.pickupAt}</span><br>${RD.drop} <span>· ${RD.dropAt}</span></div>
+            <div class="m"><span>${RD.tier} · ${ECO.km(RD.km)} · ${RD.min} րոպե</span><b>${DV.plate}</b></div>
+            <div class="cut"></div>
+            <div class="m"><span>Նստեցում</span><b>${A(600)}</b></div>
+            <div class="m"><span>Ըստ կիլոմետրի · ${ECO.km(RD.km)}</span><b>${A(387)}</b></div>
+            <div class="m"><span>Ըստ րոպեի · ${RD.min} րոպե</span><b>${A(72)}</b></div>
+            <div class="m"><span>Կլորացում</span><b>+${A(41)}</b></div>
+            <div class="m disc"><span>${R.i('ticket-percent')}Պրոմոկոդ · ${PA.code}</span><b>−${A(PA.off)}</b></div>
+            <div class="cut"></div>
+            <div class="tot"><span>Ընդամենը</span><span>${A(PA.pay)}</span></div>
+            <div class="m" style="margin-top:var(--s1)"><span>Վճարում</span><b>${ECO.PAY.cash.label}</b></div>
+            <div class="m"><span>Ֆիսկալ կտրոն №</span><b>${F.no}</b></div>
+          </div></div>
+          <div class="foot two"><button class="btn btn-brand">${R.i('download')}Ներբեռնել PDF</button></div></div>` } },
       { id: 'detail-cancelled', label: 'Cancelled', note: 'No fare was charged, and the reason the rider gave',
         html: () => `<div class="map" id="map" aria-label="Երթուղի"></div>${nav()}
           <section class="sheet" id="sheet">

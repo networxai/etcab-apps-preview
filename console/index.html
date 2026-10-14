@@ -58,10 +58,14 @@
       ['dispatch', 'Դիսպետչերական', 'Dispatch', 'Queue (the centrepiece; lanes ordered by who needs a human: problems, unassigned, searching, active), keyboard intake with real Eco tiers and route prices, 2GIS map with cars and queue ages, driver strip (free first, longest idle first). At 9:41 the walkthrough ride (Մաշտոցի պող. 37 → Կոմիտասի պող. 22) is in the Searching lane, offered to Արամ Պ. The shortcut legend is the queue card\'s own footer, outside the scroll box. 9 queue rows fully visible at 1440×900, 7 at 1366×768.'],
       ['dispatch?tab=scheduled', 'Նախնական պատվերներ', 'Dispatch: pre-order lane', 'Pre-orders by the promised hour (mono), weekday when not today; «Կարող է մեկնել 10:05-ից» / «Վարորդը մեկնեց 09:35»; pre-assigned driver; company booking; driver_blocked and the driver\'s «Չեմ հասցնի» request as problem rows with Release / Reassign one click deep (the request is drawn ahead). The booking form heads the lane.'],
       ['dispatch?intake=booking', 'Նոր նախնական պատվեր', 'Dispatch: booking intake', 'Phone, pickup, Company / Personal, the typed date-time «10.10 08:30» and its read-back «Շբթ, 10 հոկտեմբերի, 08:30». Keyboard only, under 20 s. Pre-assigning is the booking panel\'s.'],
-      ['dispatch?intake=company', 'Ընկերության զանգ', 'Dispatch: corporate caller at intake', 'Customer card with the company badge, Company / Personal, «Ծախսերի կոդ» marked required, over-limit refusal in amber with «Անձնական».'],
+      ['dispatch?intake=company', 'Ընկերության զանգ', 'Dispatch: corporate caller at intake', 'Customer card with the company badge, Company / Personal, and the employee\'s month: «Մնացել է՝ 12 600 ֏ · Տուն → Գրասենյակ՝ թույլատրված» (owner 14 Oct: no cost-centre code, per-employee limits and allowed places; drawn ahead).'],
+      ['dispatch?intake=transfer', 'Տրանսֆեր', 'Dispatch: Transfer tariff at intake (new, 14 Oct)', 'Key 8 «Transfer» turns intake into the transfer form: arrival/departure, flight FZ 715 (Դուբայ, 13:40), pickup 30 min after landing, terminal and exit, passenger, sign, pax/bags, company billing. Saved as a pre-order with the Transfer badge (drawn ahead).', true],
       ['dispatch?intake=price', 'Համաձայնեցված գին', 'Dispatch: intake sub-tabs, agreed price', 'The intake sub-tabs Քարտեզ · Նշումներ · Համաձայնեցված գին; an agreed 2 400 ֏ replaces the tariff price in the summary.'],
       ['rides', 'Պատվերներ', 'Rides + ride detail', 'Today\'s rides, two-line rows, docked detail panel (never a modal) with the actions one click deep, mini map, driver and car, upfront fare breakdown, timeline. The walkthrough ride is #R-2417, 1 100 ֏. The Rides list stays as a page beside Search (owner, 12 Oct); the timeline shows a driver\'s decline with its reason (drawn ahead).'],
       ['rides?ride=booking', 'Նախնական պատվեր', 'Rides: a booking in the docked panel', 'The list filtered to scheduled; B-0912 (Աննա, Saturday 08:30): reassign or release the driver, edit time, addresses and agreed price in place, two-press cancel; held / may set off / activates times. Drawn ahead: the API has PATCH, the console has no screen yet.'],
+      ['transfers', 'Տրանսֆերներ', 'Transfers: today (new, 14 Oct)', 'Airport transfers booked for someone: time, flight with landing/departure, passenger, pickup → destination, driver or automatic search, payer, 6 000 ֏, state. Tabs Այսօր / Առաջիկա / Ավարտված. They reach drivers exactly like pre-orders (drawn ahead).', true],
+      ['transfers?state=new', 'Նոր տրանսֆեր', 'Transfers: create', 'Inline create card (no modal): arrival/departure, flight, day, landing → pickup, passenger and phone, pax and bags, Zvartnots with terminal/exit, destination, sign, payer and company.', true],
+      ['transfers?tab=upcoming&t=T-0031', 'Տրանսֆեր T-0031', 'Transfers: detail', 'Beside the list: flight FZ 715 Դուբայ → Երևան, pickup 14:10, terminal/exit, sign, passenger and booker (Արարատ Սոֆթ), route and price, Արամ Պ. pre-assigned, history; Edit / Reassign / Cancel one click deep.', true],
       ['overview', 'Ընդհանուր', 'Overview', 'KPI strip, rides per hour against the same weekday last week (bars versus a dashed step line), tier mix and the launch payment mix (cash and company account only), live fleet map, and «needs a decision».'],
       ['dispatch?state=problems', 'Խնդիրների տեսակներ', 'Dispatch: problem-lane kinds', 'Driver cancelled with a reason, unacknowledged forced assignment, the «Չեմ հասցնի» request for a booking today, a low rating (24 h). Each with its fix one click deep. 8 rows at 1440, 7 at 1366.'],
       ['dispatch?state=degraded', 'Կապ չկա', 'Dispatch: socket down, polling', 'WebSocket down: «Ուղիղ կապ չկա — հարցում» in the top bar (amber + icon), the queue says how fresh its last poll is; everything stays usable (REST is truth).'],
@@ -80,7 +84,7 @@
       ['rides?panel=edit', 'Մանրամասներ', 'Ride: edit details', 'Destination, agreed price, notes edited in the panel.'],
       ['rides?panel=conflict', 'Փոխվել է', 'Ride: last-write conflict', 'A colleague saved notes first: blue, their value, «Վերցնել նրանցը», nothing typed is lost.'],
       ['rides?panel=noshow', 'Ուղևորը չեկավ', 'Ride: no-show with wait timer', 'Driver at the pickup 6:12 against a free 5:00; the driver\'s own no-show flag; one press.'],
-      ['rides?panel=billing', 'Վճարող', 'Ride: billing, rating, demo flag', 'Company ride: payer, «Ծախսերի կոդ», the company month it counts in (no invoices); rider and driver ratings; demo flag.'],
+      ['rides?panel=billing', 'Վճարող', 'Ride: billing, rating, demo flag', 'Company ride: payer, the company month it counts in (no invoices, no cost-centre code); rider and driver ratings; demo flag.'],
       ['rides?panel=cancelled', 'Չեղարկված', 'Ride: who cancelled and why', 'Party, reason, timing, timeline.'],
       ['rides?ride=booking-now', 'Սկսել հիմա', 'Pre-order started now by the rider', 'Owner ruling: first offer to the pre-assigned driver (Սուրեն Մ.), then automatic search among Eco City drivers if he declines or lets it lapse (drawn ahead).'],
       ['search', 'Որոնում', 'Search (§9.5)', 'One query read by the server as a phone, plate, address, name or driver, with «Կարդացվեց որպես …» saying what it read; the «Երեկ» window; «Կարդալ որպես» override chips; ride results (time with the day when not today, pickup, phone, driver, plate) then customers; ↑↓ ↵, no pagination («Կան ավելին — նեղացրեք որոնումը»). Beside the Rides list (owner, 12 Oct).'],
@@ -130,10 +134,11 @@
     ]],
     ['Ընկերություններ', 'Corporate clients', [
       ['companies', 'Ընկերություններ', 'Companies list', 'Every corporate client; «Նոր ընկերություն» adds inline.'],
-      ['company', 'Պայմանագիր և գներ', 'Company: agreement and pricing', 'Version in force, fixed routes, all versions.'],
-      ['company?tab=routes', 'Նոր տարբերակ', 'Company: new agreement version with the fixed-routes editor', 'Fixed routes are edited inside an agreement version, as in the real console.'],
-      ['company?tab=employees', 'Աշխատակիցներ', 'Company: employees', 'Riders linked to the company.'],
-      ['company?tab=report', 'Հաշվետվություն', 'Company report (no invoices, owner 14 Oct)', 'A month or chosen days: rides with date, employee, route, tariff, cost code and price; totals; Excel / CSV / PDF; «Ուղարկել ընկերությանը»; optional «Վճարված» per period.'],
+      ['company', 'Պայմանագիր և գներ', 'Company: agreement and pricing', 'Version in force with the default monthly limit per employee (50 000 ֏), all versions. Fixed routes and the cost-centre code are removed (owner 14 Oct).'],
+      ['company?tab=routes', 'Նոր տարբերակ', 'Company: new agreement version', 'Prefilled from the version in force: payment, discount, credit limit, and the employee default limit by amount, by rides or none.'],
+      ['company?tab=employees', 'Աշխատակիցներ', 'Company: employees with monthly limits', 'Each employee\'s limit (company default or his own, by amount or by ride count), what is left with a bar, and how many allowed places (drawn ahead).'],
+      ['company?tab=employees&emp=0', 'Սահմանաչափ և հասցեներ', 'Company: one employee\'s limit and allowed places (new, 14 Oct)', 'Under Աննա\'s row: 65 000 ֏ a month (52 400 used, 12 600 left), and her allowed places Տուն / Գրասենյակ / Զվարթնոց within 300 m: company billing only between them; over the limit or outside them the ride is personal (drawn ahead).', true],
+      ['company?tab=report', 'Հաշվետվություն', 'Company report (no invoices, owner 14 Oct)', 'A month or chosen days: rides with date, employee, route, tariff and price; totals; Excel / CSV / PDF; «Ուղարկել ընկերությանը»; optional «Վճարված» per period.'],
       ['company?tab=report&state=send', 'Ուղարկել', 'Company report: send to the client', 'Inline panel: the company\'s email, the files, Send.'],
       ['company?tab=report&state=sent', 'Ուղարկվեց', 'Company report: sent', 'Neutral result row.'],
       ['company?tab=settings', 'Կարգավորումներ', 'Company: settings', 'Billing and booking settings.'],
@@ -148,8 +153,11 @@
       ['reports?company=1', 'Ընկերության հաշվետվություն', 'Reports: company report', 'The same company report with the company filter and period; exports and send.'],
     ]],
     ['Ուղևորի հավելված', 'Rider app', [
-      ['promotions', 'Գովազդներ', 'Promotions (rider-home ads)', 'The cards the rider sees under «Ո՞ւր եք գնում»: image-led rows (live, paused, broken image), what a tap does (book to the address / open the page), order, on/off; the rider carousel previewed beside the list exactly as rider-home draws it.'],
-      ['promotions?new=1', 'Նոր գովազդ', 'Promotions: new card', 'The create card on the 12-column grid; the address must be picked from suggestions; the draft card appears at its order in the preview.'],
+      ['promotions', 'Պրոմոկոդեր', 'Promotions: promo codes (new, 14 Oct)', 'Ակցիաներ has three tabs. Codes: discount (% with a cap, or ֏), used / total with a bar, validity, who (all or new riders) and tariffs; the selected code\'s figures beside it (drawn ahead).', true],
+      ['promotions?tab=codes&new=1', 'Նոր պրոմոկոդ', 'Promotions: new promo code', 'Inline create card: code, % or ֏, cap, total and per-rider uses, dates, tariffs, «Միայն նոր ուղևորներին». The fleet funds the discount; the driver\'s fare is unchanged.', true],
+      ['promotions?tab=referral', 'Հրավերներ', 'Promotions: referral programme', 'What the inviter and the invitee get (700 ֏ each, after the invitee\'s first ride, 30 days), totals, top inviters, and the rider\'s invite screen as a preview.', true],
+      ['promotions?tab=ads', 'Գովազդներ', 'Promotions: rider-home ads', 'The cards the rider sees under «Ո՞ւր եք գնում»: image-led rows (live, paused, broken image), what a tap does (book to the address / open the page), order, on/off; the rider carousel previewed beside the list exactly as rider-home draws it.', true],
+      ['promotions?new=1', 'Նոր գովազդ', 'Promotions: new ad card', 'The create card on the 12-column grid; the address must be picked from suggestions; the draft card appears at its order in the preview.'],
     ]],
     ['Կառավարում', 'Administration', [
       ['operators', 'Օպերատորներ', 'Operators', 'Email, role, state; Disable/Enable visible, reset password / reset authenticator / delete as reveal actions in fixed slots; your own row cannot be disabled or deleted.'],
@@ -169,13 +177,16 @@
   const T = window.THEME, other = T === 'dark' ? 'light' : 'dark'
   document.getElementById('t-' + T).classList.add('on')
   let n = 0
-  document.getElementById('list').innerHTML = G.map(([g, ge, items]) => `<h2 class="grp">${g}<small>${ge}</small></h2>` + items.map(([f, t, te, p]) => {
+  document.getElementById('list').innerHTML = G.map(([g, ge, items]) => `<h2 class="grp">${g}<small>${ge}</small></h2>` + items.map(([f, t, te, p, fresh]) => {
     const [fn, q] = f.split('?'), tag = q ? '-' + q.replace(/[^a-z0-9]/g, '') : '', qs = q ? '&' + q : ''
     n++
     return `<section class="scr"><h2>${n} · ${t}<small>${te}</small></h2><p>${p}</p><div class="pair">
-      <a href="${fn}.html?theme=${T}${qs}"><img src="shots/${fn}${tag}-${T}.png" alt="${t}, ${T}" loading="lazy"></a>
+      ${fresh /* 2026-10-14 change list: only the light 1440 thumbnail was shot; the other theme opens live. */
+        ? `<a href="${fn}.html?theme=light${qs}"><img src="shots/${fn}${tag}-light.png" alt="${t}, light" loading="lazy"></a></div>
+      <div class="links"><a href="${fn}.html?theme=dark${qs}">Գիշեր · բացել էջը</a></div></section>`
+        : `<a href="${fn}.html?theme=${T}${qs}"><img src="shots/${fn}${tag}-${T}.png" alt="${t}, ${T}" loading="lazy"></a>
       <a href="${fn}.html?theme=${other}${qs}"><img src="shots/${fn}${tag}-${other}.png" alt="${t}, ${other}" loading="lazy"></a></div>
-      <div class="links"><a href="shots/${fn}${tag}-light-1366.png">1366×768 ցերեկ</a><a href="shots/${fn}${tag}-dark-1366.png">1366×768 գիշեր</a></div></section>`
+      <div class="links"><a href="shots/${fn}${tag}-light-1366.png">1366×768 ցերեկ</a><a href="shots/${fn}${tag}-dark-1366.png">1366×768 գիշեր</a></div></section>`}`
   }).join('')).join('')
 </script>
 </body>

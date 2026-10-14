@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Driver new order</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="driver.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="mapgl.local.js"></script>
+<script src="kit.js"></script>
+<script src="routes.js"></script>
+<script src="driver.js"></script>
+<!-- Change list 2026-10-14 (driver #3): the driver creates an order himself — a street passenger already at the car
+     («Ինձ համար»), or a customer's phone number («Ուղևորի համար») — then picks ONLY the tariffs his car is allowed
+     (ECO.CAR_TIERS, set on console Vehicles), sees the fare, and starts. One primary action per state (§10.2).
+     Partner variant (?state=partner): Կարեն's car tariffs, and the fee + balance line from ECO.PARTNER.rules.
+     Drawn ahead of the app: no driver-created ride endpoint exists (D1 has only dispatcher/rider-created rides). -->
+<style>
+  .sheet { padding-bottom: 34px; }
+  .back { position: absolute; z-index: 20; top: 60px; left: 16px; }
+  .ttl { font: var(--t-title); color: var(--ink); white-space: nowrap; margin-bottom: var(--s3); }
+  .seg { margin-bottom: var(--s4); }
+  .seg button { height: 48px; }
+  .fld { height: 56px; border-radius: var(--r-control); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); display: flex; align-items: center; gap: var(--s3); padding: 0 var(--s4); }
+  .fld + .fld { margin-top: var(--s2); }
+  .fld .k { font: var(--t-caption); color: var(--ink-2); width: 64px; flex: none; white-space: nowrap; }
+  .fld .v { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; flex: 1; min-width: 0; font-variant-numeric: tabular-nums; }
+  .fld .v.ph { color: var(--ink-3); font-weight: 400; }
+  .fld .v small { font: var(--t-caption); color: var(--ink-2); margin-left: 6px; }
+  .fld.focus { box-shadow: inset 0 0 0 2px var(--ink); }
+  .fld svg { width: 20px; height: 20px; color: var(--ink-2); flex: none; }
+  .fld .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+  .fld .dot.a { background: var(--ink); } .fld .dot.b { background: var(--brand); }
+  .go { margin-top: var(--s4); }
+  .tiers { display: flex; flex-direction: column; gap: var(--s2); }
+  .tier { display: flex; align-items: center; gap: var(--s3); height: 72px; padding: 0 var(--s4) 0 var(--s2); border-radius: var(--r-card); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); width: 100%; text-align: left; }
+  .tier[aria-checked="true"] { box-shadow: inset 0 0 0 2px var(--brand); background: var(--brand-soft); }
+  .tier img { width: 84px; height: 48px; object-fit: contain; flex: none; filter: drop-shadow(0 2px 2px var(--car-ground)); }
+  .tier .txt { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .tier .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .tier .t2 { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; }
+  .tier .pr { font: var(--t-headline); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .only { font: var(--t-caption); color: var(--ink-2); margin-top: var(--s2); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .only svg { width: 14px; height: 14px; }
+  .sum .route { display: flex; flex-direction: column; gap: 4px; }
+  .sum .route div { display: flex; align-items: center; gap: var(--s2); font: var(--t-body); color: var(--ink); white-space: nowrap; }
+  .sum .route .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .sum .fare { display: flex; align-items: flex-end; justify-content: space-between; margin: var(--s4) 0 0; }
+  .sum .hero { font: var(--t-hero); color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -.5px; white-space: nowrap; }
+  .sum .hero small { font: 600 22px/1 var(--font); color: var(--ink-2); margin-left: 4px; }
+  .sum .meta { font: var(--t-secondary); color: var(--ink-2); text-align: right; white-space: nowrap; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .chip.pay { background: var(--surface-2); color: var(--ink); }
+  .fee { display: flex; justify-content: space-between; margin-top: var(--s3); padding: var(--s3) var(--s4); border-radius: var(--r-card); background: var(--surface-2); font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .fee b { color: var(--ink); font-weight: 600; }
+  .pin { width: 16px; height: 16px; border-radius: 50%; border: 3px solid var(--surface); box-shadow: 0 1px 3px rgb(0 0 0 / .35); }
+  .pin.a { background: var(--ink); } .pin.b { background: var(--brand); }
+</style>
+</head>
+<body>
+<main class="screen" id="s">
+  <div class="map" id="map" aria-label="Քարտեզ"></div>
+  <a class="iconbtn back" href="driver-home.html" aria-label="Հետ"><i data-lucide="arrow-left"></i></a>
+
+  <!-- form / customer: who + where -->
+  <section class="sheet" data-s="form customer" data-sheet>
+    <div class="grabber"></div>
+    <div class="ttl">Նոր պատվեր</div>
+    <div class="seg" role="radiogroup" aria-label="Ում համար">
+      <button role="radio" data-who="form" aria-pressed="false">Ինձ համար</button>
+      <button role="radio" data-who="customer" aria-pressed="false">Ուղևորի համար</button>
+    </div>
+    <div class="fld" data-s="customer"><i data-lucide="phone"></i><span class="k">Հեռախոս</span><span class="v">091 23-45-67</span></div>
+    <div class="fld"><span class="dot a"></span><span class="k">Որտեղից</span><span class="v" data-eco="RIDE.pickup">Մաշտոցի պող. 37</span><i data-lucide="locate-fixed"></i></div>
+    <div class="fld" data-s="form"><span class="dot b"></span><span class="k">Ուր</span><span class="v ph">Հասցե</span></div>
+    <div class="fld" data-s="customer"><span class="dot b"></span><span class="k">Ուր</span><span class="v" data-eco="RIDE.drop">Կոմիտասի պող. 22</span></div>
+    <button class="go" data-s="form" aria-disabled="true">Շարունակել</button>
+    <a class="go" data-s="customer" href="?state=tariff">Շարունակել</a>
+  </section>
+
+  <!-- tariff / partner: only the car's tariffs, each with its fare -->
+  <section class="sheet" data-s="tariff partner" data-sheet>
+    <div class="grabber"></div>
+    <div class="ttl">Սակագին</div>
+    <div class="tiers" role="radiogroup" aria-label="Սակագին" id="tiers"></div>
+    <div class="only"><i data-lucide="info"></i>Միայն ձեր մեքենայի սակագները · 4,3 կմ · 6 րոպե</div>
+    <div class="fee" data-s="partner"><span>Միջնորդավճար 15 % · <b>195 ֏</b></span><span>Հաշվեկշիռ <b data-eco="TOPUP.after|amd">4 680 ֏</b></span></div>
+    <a class="go" href="?state=ready">Շարունակել</a>
+  </section>
+
+  <!-- ready: fare and one 76dp start -->
+  <section class="sheet sum" data-s="ready" data-sheet>
+    <div class="grabber"></div>
+    <div class="route">
+      <div><span class="dot" style="background:var(--ink)"></span><span data-eco="RIDE.pickup">Մաշտոցի պող. 37</span></div>
+      <div><span class="dot" style="background:var(--brand)"></span><span data-eco="RIDE.drop">Կոմիտասի պող. 22</span></div>
+    </div>
+    <div class="fare">
+      <div class="hero">1 100<small>֏</small></div>
+      <div class="meta"><span>Eco City · 4,3 կմ</span><span class="chip pay"><i data-lucide="banknote"></i>Կանխիկ</span></div>
+    </div>
+    <a class="go" href="driver-ride.html?state=inprogress"><i data-lucide="play"></i>Սկսել</a>
+  </section>
+</main>
+<script src="audit.js"></script>
+<script>
+  statusBar(document.getElementById('s'), '9:52')
+  const st = D.init([
+    ['form', 'Who + where · for me (street pickup)'], ['customer', 'For a customer · phone'], ['tariff', 'Tariff · only the car\'s, with fares'],
+    ['ready', 'Fare · one Start'], ['partner', 'Partner · own car tariffs, fee + balance'],
+  ])
+  document.querySelectorAll('[data-who]').forEach((b) => { b.setAttribute('aria-pressed', String(b.dataset.who === st)); b.setAttribute('aria-checked', String(b.dataset.who === st)) })
+  /* Fares for Mashtots 37 → Komitas 22 (4,3 km): Eco City = ECO.RIDE.fare; the others illustrative. */
+  const FARE = { city: ECO.RIDE.fare, kids: 1400, comfort: 1300 }
+  const allowed = ECO.CAR_TIERS[st === 'partner' ? 'partner' : 'aram']
+  document.getElementById('tiers').innerHTML = allowed.map((id, i) => {
+    const t = ECO.TIERS.find((x) => x.id === id)
+    return `<button class="tier" role="radio" aria-checked="${i === 0}">${carImg(id === 'comfort' ? 'partner' : id, '')}<span class="txt"><span class="t1">${t.name}</span></span><span class="pr">${ECO.amd(FARE[id])}</span></button>`
+  }).join('')
+  icons()
+  const main = document.querySelector('.sheet[data-sheet]:not([hidden])')
+  const sheetH = main.offsetHeight
+  const pts = ROUTES.pickupToDrop.pts
+  const map = makeMap(document.getElementById('map'), { sheetH, badge: { bottom: (sheetH + 22) + 'px', left: '16px' }, fit: st === 'form' ? [[pts[0][0] - .003, pts[0][1] - .004], [pts[0][0] + .003, pts[0][1] + .004]] : pts, padTL: [40, 110], padBR: [40, sheetH + 10] })
+  if (st !== 'form') drawRoute(map, pts)
+  htmlMarker(map, pts[0], '<div class="pin a"></div>', [16, 16])
+  if (st !== 'form') htmlMarker(map, pts[pts.length - 1], '<div class="pin b"></div>', [16, 16])
+</script>
+</body>
+</html>

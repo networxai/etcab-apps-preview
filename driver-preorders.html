@@ -134,6 +134,16 @@
   .sheet .go.x { height: 76px; }
   .cobadge { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: var(--r-pill); background: var(--surface-2); color: var(--ink); font: var(--t-caption); white-space: nowrap; box-shadow: inset 0 0 0 1px var(--hairline); }
   .cobadge svg { width: 14px; height: 14px; }
+  /* Change list 2026-10-14: airport transfers reach the driver as pre-orders, with a badge and the flight. */
+  .trfbadge { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: var(--r-pill); background: var(--ink); color: var(--surface); font: var(--t-caption); font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .trfbadge svg { width: 14px; height: 14px; }
+  .flight { margin-top: var(--s4); border-radius: var(--r-card); background: var(--surface-2); padding: var(--s3) var(--s4); display: grid; grid-template-columns: 1fr auto; gap: 2px var(--s3); }
+  .flight .f1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; display: flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+  .flight .f1 svg { width: 18px; height: 18px; }
+  .flight .f2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .flight .r { text-align: right; }
+  .flight .sign { grid-column: 1 / -1; margin-top: var(--s2); padding-top: var(--s2); border-top: 1px solid var(--hairline); font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .flight .sign b { color: var(--ink); font-weight: 600; letter-spacing: .3px; }
   .notice.co { margin-top: var(--s4); background: var(--surface-2); color: var(--ink); }
   .notice.co svg { color: var(--ink); }
   .notice.gone { margin-top: var(--s4); background: var(--surface); box-shadow: var(--e1); }
@@ -150,16 +160,16 @@
 
   <!-- ═════════ LIST / OFFLINE / EMPTY / ERROR: parked page ═════════ -->
   <div class="offstrip" role="status" data-s="offline"><i data-lucide="cloud-off"></i>Կապ չկա · պահված ցուցակ</div>
-  <div class="appbar" data-s="list offline empty error gone"><button class="iconbtn" aria-label="Հետ"><i data-lucide="arrow-left"></i></button></div>
-  <section class="content" data-s="list offline empty error gone">
+  <div class="appbar" data-s="list list-end offline empty error gone"><button class="iconbtn" aria-label="Հետ"><i data-lucide="arrow-left"></i></button></div>
+  <section class="content" data-s="list list-end offline empty error gone">
     <div class="ptitle">Նախնական պատվերներ</div>
-    <div class="psub" data-s="list">3 պատվեր · բոլորը՝ Eco City</div>
+    <div class="psub" data-s="list list-end">4 պատվեր · Eco City և Transfer</div>
     <div class="psub" data-s="gone">2 պատվեր · բոլորը՝ Eco City</div>
-    <!-- D32 preorders.gone: the dispatcher released or reassigned a booking; it leaves the list with one neutral line (not red). -->
+    <!-- D32 preorders.gone: the dispatcher released a booking (or moved it to another driver: it reads the same, owner 2026-10-14); it leaves the list with one neutral line (not red). -->
     <div class="notice gone" data-s="gone" role="status"><i data-lucide="calendar-x"></i><div><b>Այս պատվերն այլևս ձերը չէ</b>Վաղը, 07:40 · Բաղրամյան պող. 24</div></div>
     <div class="psub stale" data-s="offline"><i data-lucide="history"></i>Թարմացվել է 09:12-ին</div>
 
-    <div class="list" data-s="list offline gone">
+    <div class="list" data-s="list list-end offline gone">
       <div class="sect"><span>Այսօր</span><span class="n">2</span></div>
       <button class="card pcard now" aria-label="Այսօր 10:35, Կոմիտասի պողոտա 49, Հանրապետության հրապարակ, 1 200 դրամ, կարող եք սկսել">
         <span class="pc-l">
@@ -180,7 +190,7 @@
         <span class="minimap pc-map" data-route="tsi" aria-hidden="true"></span>
       </button>
 
-      <div class="sect" data-not="gone"><span>Վաղը</span><span class="n">1</span></div>
+      <div class="sect" data-not="gone"><span>Վաղը</span><span class="n">2</span></div>
       <button class="card pcard" data-not="gone" aria-label="Վաղը, շաբաթ, 07:40, Բաղրամյան 24, Զվարթնոց, 2 000 դրամ">
         <span class="pc-l">
           <span class="pc-top"><span data-ring="21|ժամ|.12"></span><span><span class="pc-time" style="display:block">07:40</span><span class="pc-hold" style="display:block">ազատ՝ մինչև 07:10</span></span></span>
@@ -190,6 +200,16 @@
         </span>
         <span class="minimap pc-map" data-route="air" aria-hidden="true"></span>
       </button>
+      <!-- Transfer T-0031 (ECO.TRANSFERS[0]): booked by the office for a landing passenger; behaves exactly like a pre-order. -->
+      <a class="card pcard" data-not="gone" href="?state=transfer" style="text-decoration:none;color:inherit" aria-label="Տրանսֆեր, չվերթ FZ 715, վաղը 14:10, Զվարթնոց, Ամիրյան 1, 6 000 դրամ, վճարում է ընկերությունը">
+        <span class="pc-l">
+          <span class="pc-top"><span data-ring="28|ժամ|.05"></span><span><span class="pc-time" style="display:block">14:10</span><span class="pc-hold" style="display:block">Չվերթ FZ 715 · 13:40</span></span></span>
+          <span class="pc-ad"><span class="d a"></span>Զվարթնոց</span>
+          <span class="pc-ad"><span class="d b"></span>Ամիրյան 1</span>
+          <span class="pc-bot"><span class="trfbadge"><i data-lucide="plane-landing"></i>Տրանսֆեր</span><span class="fare">6 000 ֏</span></span>
+        </span>
+        <span class="minimap pc-map" data-route="trf" aria-hidden="true"></span>
+      </a>
     </div>
 
     <div class="center" data-s="empty">
@@ -206,11 +226,11 @@
   </section>
 
   <!-- ═════════ MAP STATES ═════════ -->
-  <div class="map" id="map" aria-label="Քարտեզ" data-not="list offline empty error gone"></div>
-  <button class="iconbtn back" aria-label="Հետ" data-s="details startable starting refused noconn earlier cantmake cantmake-released cantmake-kept onride balance-partner noshift changed blacklisted company"><i data-lucide="arrow-left"></i></button>
+  <div class="map" id="map" aria-label="Քարտեզ" data-not="list list-end offline empty error gone"></div>
+  <button class="iconbtn back" aria-label="Հետ" data-s="details startable starting refused noconn earlier cantmake cantmake-released cantmake-kept onride balance-partner noshift changed blacklisted company transfer"><i data-lucide="arrow-left"></i></button>
 
   <!-- details: one booking, with its start control (StartControl: the commitment's startBlockedBy decides the button) -->
-  <section class="sheet" data-s="details startable starting refused noconn earlier cantmake cantmake-released cantmake-kept onride balance-partner noshift changed blacklisted company" data-sheet>
+  <section class="sheet" data-s="details startable starting refused noconn earlier cantmake cantmake-released cantmake-kept onride balance-partner noshift changed blacklisted company transfer" data-sheet>
     <div class="grabber"></div>
     <div class="dhead">
       <div><div class="eyebrow"><i data-lucide="calendar-clock"></i><span id="d-eyebrow"></span></div><div class="hero" id="d-time"></div></div>
@@ -220,8 +240,14 @@
       <div class="stop"><span class="m a"></span><div><div class="t1" id="d-a"></div><div class="t2" id="d-a2"></div></div></div>
       <div class="stop"><span class="m b"></span><div><div class="t1" id="d-b"></div><div class="t2" id="d-b2"></div></div></div>
     </div>
-    <div class="notice co" data-s="company" role="note"><i data-lucide="building-2"></i><div><b>Վճարում է ընկերությունը</b>Ոչինչ մի վերցրեք ուղևորից</div></div>
-    <div class="tl" id="d-tl"></div>
+    <div class="flight" data-s="transfer">
+      <span class="f1"><i data-lucide="plane-landing"></i>FZ 715 · Դուբայ</span><span class="f1 r">13:40</span>
+      <span class="f2">Ժամանման սրահ · ելք 2</span><span class="f2 r">վայրէջք</span>
+      <span class="f2">2 ուղևոր · 3 ճամպրուկ</span><span class="f2 r"></span>
+      <span class="sign">Ցուցանակ՝ <b>ARARAT SOFT · D. AVETISYAN</b></span>
+    </div>
+    <div class="notice co" data-s="company transfer" role="note"><i data-lucide="building-2"></i><div><b>Վճարում է ընկերությունը</b>Ոչինչ մի վերցրեք ուղևորից</div></div>
+    <div class="tl" id="d-tl" data-not="transfer"></div>
     <div class="tools" data-not="cantmake-released">
       <button class="tool"><span class="b"><i data-lucide="phone"></i></span>Ուղևոր</button>
       <button class="tool"><span class="b"><i data-lucide="headset"></i></span>Դիսպետչեր</button>
@@ -242,6 +268,7 @@
       <div class="notice info" data-s="changed" role="status"><i data-lucide="refresh-cw"></i><div>Պատվերը փոխվել է · թարմացնում ենք</div></div>
       <div class="notice warn" data-s="blacklisted" role="status"><i data-lucide="shield-alert"></i><div>Հնարավոր չէ սկսել · դիսպետչերը կզանգի</div></div>
       <div class="go x outlined" role="button" aria-disabled="true" data-s="company">18:00-ից</div>
+      <div class="go x outlined" role="button" aria-disabled="true" data-s="transfer">Վաղը, 13:40-ից</div>
       <div data-s="refused" class="col"><div class="notice warn" role="status"><i data-lucide="circle-pause"></i><div>Դուք անցանց եք</div></div><button class="go x"><i data-lucide="power"></i>Ընդունել պատվերներ</button></div>
     </div>
     <div data-s="details earlier" class="cant"><button class="btn btn-line"><i data-lucide="clock-alert"></i>Չեմ հասցնի</button><div class="ask-cap">Կխնդրենք դիսպետչերին · որոշումը նրանն է</div></div>
@@ -294,16 +321,16 @@
 <script src="audit.js"></script>
 <script>
   const st = D.init([
-    ['list', 'My pre-orders'], ['details', 'Details · before T−30'], ['startable', 'Details · start (T−30)'], ['starting', 'Starting…'],
+    ['list', 'My pre-orders'], ['list-end', 'My pre-orders · scrolled to the transfer'], ['details', 'Details · before T−30'], ['startable', 'Details · start (T−30)'], ['starting', 'Starting…'],
     ['started', 'Started → en route'], ['refused', 'Start refused (offline)'], ['noconn', 'Start · no connection'], ['earlier', 'Blocked · earlier booking'],
     ['cantmake', '«Չեմ հասցնի» · request sent'], ['cantmake-released', '«Չեմ հասցնի» · dispatcher took it'], ['cantmake-kept', '«Չեմ հասցնի» · asked to keep it'], ['reminder', 'Reminder (T−25) + start'],
     ['activated', 'Activated by fleet (T−15)'], ['empty', 'Empty'], ['offline', 'Offline (cached)'], ['error', 'Error'],
     ['onride', 'Start blocked · on a ride'], ['balance-partner', 'Start blocked · balance (partner)'],
     ['noshift', 'Start blocked · no shift'], ['changed', 'Start · 409 changed (blue)'], ['blacklisted', 'Start refused · rider blacklisted'],
-    ['gone', 'Booking taken away by dispatcher'], ['company', 'Company-paid pre-order'],
+    ['gone', 'Booking taken away by dispatcher'], ['company', 'Company-paid pre-order'], ['transfer', 'Airport transfer · flight, sign (ahead)'],
   ])
-  statusBar(document.getElementById('s'), { list: '10:11', startable: '10:11', refused: '10:12', noconn: '10:12', earlier: '10:14', details: '9:20', reminder: '10:10', activated: '10:20', started: '10:13', starting: '10:12', cantmake: '9:22', 'cantmake-released': '9:31', 'cantmake-kept': '9:31',
-    onride: '10:08', 'balance-partner': '10:11', noshift: '10:06', changed: '10:12', blacklisted: '10:12', gone: '10:11', company: '10:11' }[st])
+  statusBar(document.getElementById('s'), { list: '10:11', 'list-end': '10:11', startable: '10:11', refused: '10:12', noconn: '10:12', earlier: '10:14', details: '9:20', reminder: '10:10', activated: '10:20', started: '10:13', starting: '10:12', cantmake: '9:22', 'cantmake-released': '9:31', 'cantmake-kept': '9:31',
+    onride: '10:08', 'balance-partner': '10:11', noshift: '10:06', changed: '10:12', blacklisted: '10:12', gone: '10:11', company: '10:11', transfer: '10:11' }[st])
 
   /* Two bookings drive the sheet: today's 10:35 (inside its window from 10:05; moved from 10:05 so it no longer holds Արամ during the 9:41 walkthrough) and tomorrow's airport run. */
   const BK = {
@@ -314,8 +341,10 @@
       tl: [['done', 'Նշանակեց դիսպետչերը', 'այսօր 08:52'], ['next', 'Նոր պատվերներ չեն գա', '18:00'], ['', 'Պատվերն ակտիվանում է', '18:15'], ['', 'Նստեցում', '18:30']] },
     air: { route: 'air', eyebrow: 'Վաղը · Զվարթնոց', time: '07:40', fare: ECO.amd(2000), a: 'Բաղրամյան պող. 24', a2: 'Արմեն · Կանխիկ', b: 'Զվարթնոց', b2: ECO.km(13.1) + ' · 19 րոպե',
       tl: [['done', 'Նշանակեց դիսպետչերը', 'այսօր 08:52'], ['next', 'Նոր պատվերներ չեն գա', '07:10'], ['', 'Պատվերն ակտիվանում է', '07:25'], ['', 'Նստեցում', '07:40']] },
+    /* Transfer T-0031 (ECO.TRANSFERS[0]): pickup at Zvartnots after FZ 715 lands; the flight block replaces the timeline. */
+    trf: { route: 'trf', eyebrow: 'Վաղը · Տրանսֆեր', time: ECO.TRANSFERS[0].time, fare: ECO.amd(ECO.TRANSFERS[0].fare), a: 'Զվարթնոց օդանավակայան', a2: 'Դավիթ Ավետիսյան · Ընկերության հաշվին', b: 'Ամիրյան 1, Մարիոթ հյուրանոց', b2: ECO.km(13.4) + ' · 22 րոպե', tl: [] },
   }
-  const bk = ['earlier', 'cantmake', 'cantmake-released', 'cantmake-kept'].includes(st) ? BK.air : st === 'company' ? BK.tsi : BK.kom
+  const bk = ['earlier', 'cantmake', 'cantmake-released', 'cantmake-kept'].includes(st) ? BK.air : st === 'company' ? BK.tsi : st === 'transfer' ? BK.trf : BK.kom
   if (document.getElementById('d-time')) {
     const set = (id, v) => (document.getElementById(id).textContent = v)
     set('d-eyebrow', bk.eyebrow); set('d-time', bk.time); set('d-fare', bk.fare); set('d-a', bk.a); set('d-a2', bk.a2); set('d-b', bk.b); set('d-b2', bk.b2)
@@ -328,6 +357,7 @@
     el.outerHTML = D.ring(big ? 52 : 48, 4, +f, `<span class="v">${v}</span><span class="u">${u}</span>`, c === 'brand' ? 'var(--brand-vivid)' : null)
   })
   icons()
+  if (st === 'list-end') { const c = document.querySelector('section.content'); requestAnimationFrame(() => { c.scrollTop = c.scrollHeight }) }
 
   /* Static route thumbnail (review: three live WebGL maps per list were noise). The real OSRM polyline projected into
      the box over a faint street grid; one live map is kept for the details sheet. Offline draws it dotted and grey. */
@@ -350,7 +380,7 @@
       <circle cx="${ax}" cy="${ay}" r="6" fill="var(--ink)" stroke="var(--surface)" stroke-width="3"/><rect x="${bx - 6}" y="${by - 6}" width="12" height="12" rx="3" fill="var(--ink)" stroke="var(--surface)" stroke-width="3"/></svg>`
   }
 
-  if (st === 'list' || st === 'offline' || st === 'gone') { document.querySelectorAll('.pc-map').forEach((el) => thumb(el, DROUTES[el.dataset.route].pts, st === 'offline')); D.noMap() }
+  if (st === 'list' || st === 'list-end' || st === 'offline' || st === 'gone') { document.querySelectorAll('.pc-map').forEach((el) => thumb(el, DROUTES[el.dataset.route].pts, st === 'offline')); D.noMap() }
   else if (st === 'empty' || st === 'error') D.noMap()
   else {
     const sheet = document.querySelector('.sheet:not([hidden])')

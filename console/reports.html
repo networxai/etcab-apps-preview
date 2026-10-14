@@ -18,7 +18,7 @@
      drawn EMPTY with its reason, never hidden (report.varianceExplains). Admin-only at the API, both routes, and audited
      (report.rides_view/export).
      ?company=1 is the company report (owner decision 11 + Q11, 2026-10-14; no invoices): a company and a period (month
-     or chosen days), the rides with employee, route, tariff, cost code and price, totals, Excel / CSV / PDF and
+     or chosen days), the rides with employee, route, tariff and price (no cost-centre code, owner 2026-10-14), totals, Excel / CSV / PDF and
      «Ուղարկել ընկերությանը». The same table as company.html?tab=statement (company-report.js). */
   .content { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
   .hd { display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap; padding: 10px var(--inset); border-bottom: 1px solid var(--line-soft); }
@@ -72,7 +72,7 @@
   const SEND = CV && new URLSearchParams(location.search).get('state') === 'send' /* «Ուղարկել ընկերությանը» open inline */
   const C = ECO.COMPANY
   /* Yesterday (8 Oct): a plausible Friday-eve day for the fleet. Every ride is fixed_upfront, so «Գանձված» equals the quote
-     and the variance cell stays empty — measured nowhere yet. Company rides carry C.ref in the CSV. */
+     and the variance cell stays empty — measured nowhere yet. */
   const ST = { done: ['ok', 'Ավարտված'], cancelled: ['', 'Չեղարկված'], noshow: ['warn', 'Ուղևորը չեկավ'], nocar: ['bad', 'Մեքենա չգտնվեց'] }
   const ADDR = ['Մաշտոցի պող. 37', 'Կոմիտասի պող. 22', 'Հանրապետության հր.', 'Կասկադ', 'Աբովյան 12', 'Թումանյան 21', 'Վազգեն Սարգսյանի 26/1', 'Բաղրամյան պող. 24', 'Զվարթնոց օդանավակայան', 'Սայաթ-Նովա 5', 'Հալաբյան 41', 'Արշակունյաց 34', 'Տիգրան Մեծի 50', 'Կիևյան 8', 'Ամիրյան 4']
   const CUST = [['Աննա Հ.', '091 23-45-67'], ['Լուսինե Գ.', '098 51-20-44'], ['Արմեն Ս.', '077 41-22-08'], ['Գայանե Մ.', '093 82-17-55'], ['Տիգրան Ա.', '055 60-31-12'], ['Նունե Կ.', '094 18-90-03'], ['Սերգեյ Վ.', '099 70-44-21'], ['Մարինե Ա.', '096 33-12-87']]

@@ -13,10 +13,11 @@
 <script src="console-audit.js"></script>
 </head>
 <body>
-<!-- Mirrors apps/operator components/admin/company-detail.tsx and its tabs: company-agreement (+ agreement-form,
-     company-fixed-routes), company-employees, company-statement, company-settings. Corporate K2–K6.
+<!-- Mirrors apps/operator components/admin/company-detail.tsx and its tabs: company-agreement (+ agreement-form),
+     company-employees, company-statement, company-settings. Corporate K2–K6. Owner 2026-10-14: fixed routes and the
+     cost-centre code are removed; employees get monthly limits and allowed places (drawn ahead).
      Owner decision 11 + Q11 (2026-10-14): no invoices. One «Հաշվետվություն» tab is the company report for a period (month
-     or chosen days): rides with employee, route, tariff, cost code and price, totals, Excel / CSV / PDF, the optional
+     or chosen days): rides with employee, route, tariff and price, totals, Excel / CSV / PDF, the optional
      «Վճարված» mark, and «Ուղարկել ընկերությանը» inline with the company's email. ?tab=report; the old ids statement,
      rides, invoices and months open it too. Every confirmation is an armed button or a panel under its
      row; nothing is a modal (§9.8). -->
@@ -59,21 +60,13 @@
     </div>
     <div class="tabsl" role="tablist" aria-label="Ընկերության բաժիններ">${TABS.map(([k, l]) => `<a href="${T(k)}" role="tab" aria-selected="${k === tab}" class="${k === tab ? 'on' : ''}">${l}</a>`).join('')}</div>`
 
-  /* ── Agreement & pricing (company-agreement.tsx). Append-only versions; a future one can be withdrawn. ── */
-  const ROUTES_FIXED = [
-    ['Վազգեն Սարգսյանի 26/1 · 300 մ', 'Զվարթնոց օդանավակայան · 500 մ', 'Ցանկացած սակագին', 4500, true],
-    ['Վազգեն Սարգսյանի 26/1 · 300 մ', 'Գոտի՝ Կենտրոն', 'Eco City', 1200, false],
-    ['Գոտի՝ Դավթաշեն', 'Վազգեն Սարգսյանի 26/1 · 300 մ', 'Eco City', 1600, false],
-  ]
-  const routesTable = (edit) => `<table class="tbl" aria-label="Ֆիքսված երթուղիներ"><colgroup><col><col><col style="width:${edit ? 172 : 150}px"><col style="width:${edit ? 130 : 110}px"><col style="width:${edit ? 150 : 130}px">${edit ? '<col style="width:64px">' : ''}</colgroup>
-      <thead><tr><th>Որտեղից</th><th>Ուր</th><th>Սակագին</th><th class="m">Գին</th><th>Երկու կողմ</th>${edit ? '<th aria-label="Հեռացնել"></th>' : ''}</tr></thead>
-      <tbody>${ROUTES_FIXED.map(([a, b, t, v, both]) => edit
-        ? `<tr><td><div class="input" style="height:28px"><i data-lucide="${a.startsWith('Գոտի') ? 'map' : 'map-pin'}"></i><span class="val">${a}</span></div></td><td><div class="input" style="height:28px"><i data-lucide="${b.startsWith('Գոտի') ? 'map' : 'map-pin'}"></i><span class="val">${b}</span></div></td><td><div class="input" style="height:28px"><span class="val">${t}</span><i data-lucide="chevron-down"></i></div></td><td><div class="input" style="height:28px"><span class="val mono" style="text-align:right">${ECO.num(v)}</span><span class="faint">֏</span></div></td><td><span class="switch${both ? ' on' : ''}"><i class="t"></i>${both ? 'այո' : 'ոչ'}</span></td><td><button class="btn ghost icon s" aria-label="Հեռացնել երթուղին"><i data-lucide="trash-2"></i></button></td></tr>`
-        : `<tr><td class="wrap">${a}</td><td class="wrap">${b}</td><td class="wrap">${t}</td><td class="m">${amd(v)}</td><td>${both ? '<span class="pill"><i data-lucide="arrow-left-right"></i>այո</span>' : '<span class="dash">ոչ</span>'}</td></tr>`).join('')}
-      ${edit ? `<tr><td colspan="6"><button class="btn ghost s"><i data-lucide="plus"></i>Ավելացնել երթուղի</button></td></tr>` : ''}</tbody></table>`
+  /* ── Agreement & pricing (company-agreement.tsx). Append-only versions; a future one can be withdrawn.
+     Owner 2026-10-14: fixed routes and the company/cost-centre code are REMOVED; the agreement carries the company
+     DEFAULT monthly limit per employee instead (by amount or by ride count; an employee may have his own). ── */
+  const EL = C.empLimit
   const VERS = [
     ['01.11.2026', 400000, '5', 'future', '2027-ի բյուջե'],
-    ['01.09.2026', 300000, '5', 'in', 'Ծախսերի կոդը պարտադիր է'],
+    ['01.09.2026', 300000, '5', 'in', 'Աշխատակցին՝ 50 000 ֏ ամսական'],
     ['01.03.2026', 200000, '0', 'past', 'Առաջին պայմանագիր'],
   ]
   const STATE = { future: ['info', 'Առաջիկա'], in: ['ok', 'Գործում է'], past: ['', 'Նախկին'] }
@@ -83,51 +76,75 @@
         <tbody>${VERS.map(([d, l, disc, st, note]) => `<tr><td class="mono">${d}</td><td class="wrap" style="padding-top:6px;padding-bottom:6px"><span class="mono">${amd(l)}</span><br><span class="faint" style="font:var(--c-small)">${note}</span></td><td class="c">${disc} %</td>
           <td><span class="row-flex" style="gap:6px"><span class="pill ${STATE[st][0]}"><i class="d"></i>${STATE[st][1]}</span>${st === 'future' ? '<button class="btn ghost s">Չեղարկել</button>' : ''}</span></td></tr>`).join('')}</tbody></table></section>`
   const current = `<section class="sec"><h3>Գործող պայմաններ<span class="sub">սկսած <span class="mono">01.09.2026</span></span><span class="end"><a class="btn secondary s" href="${T('routes')}"><i data-lucide="plus"></i>Նոր տարբերակ</a></span></h3>
-      <div class="pad"><dl class="terms" style="grid-template-columns:repeat(5,minmax(0,1fr))">
+      <div class="pad"><dl class="terms" style="grid-template-columns:repeat(4,minmax(0,1fr))">
         <div><dt>Վճարում</dt><dd>Հետվճար</dd></div>
         <div><dt>Սահմանաչափ</dt><dd class="mono">${amd(C.limit)}</dd></div>
         <div><dt>Զեղչ</dt><dd>5 %</dd></div>
-        <div><dt>Կոդի անվանում</dt><dd style="white-space:normal">${C.refLabel} <span class="pill warn" style="vertical-align:1px">պարտադիր</span></dd></div>
-        <div><dt>Նշում</dt><dd style="white-space:normal">Ծախսերի կոդը պարտադիր է</dd></div>
+        <div><dt>Աշխատակցի ամսական սահմանաչափ</dt><dd><span class="mono">${amd(EL.default.amount)}</span> <small>լռելյայն</small></dd></div>
       </dl></div>
-      <h3 style="border-top:1px solid var(--line-soft)">Ֆիքսված երթուղիներ<span class="sub num">${ROUTES_FIXED.length}</span><span class="end faint" style="font:var(--c-small)">Ֆիքսված գինը չի զեղչվում</span></h3>
-      ${routesTable(false)}</section>`
-  /* ?tab=routes: «Նոր տարբերակ» open inline (agreement-form.tsx), prefilled from the version in force; routes editable. */
+      <div class="pad" style="border-top:1px solid var(--line-soft)"><div class="notice neutral"><i data-lucide="info"></i><span>Սահմանաչափից հետո և թույլատրված հասցեներից դուրս՝ ուղևորը վճարում է ինքը</span></div></div></section>`
+  /* ?tab=routes (old id): «Նոր տարբերակ» open inline (agreement-form.tsx), prefilled from the version in force. */
   const form = `<section class="sec alt" aria-label="Նոր տարբերակ"><h3>Նոր տարբերակ<span class="sub">գործողից լրացված</span></h3>
       <div class="pad"><div class="fgrid" style="grid-template-columns:repeat(4,minmax(0,1fr))">
         <div><label class="label">Սկսած</label><div class="input"><i data-lucide="calendar"></i><span class="val mono">01.11.2026 00:00</span></div></div>
         <div><label class="label">Վճարում</label><div class="seg" role="radiogroup" aria-label="Վճարում"><button class="on" role="radio" aria-checked="true">Հետվճար</button><button role="radio" aria-checked="false">Կանխավճար</button></div></div>
         <div><label class="label">Զեղչ</label><div class="input"><span class="val mono">5</span><span class="faint">%</span></div></div>
         <div><label class="label">Սահմանաչափ</label><div class="input focus"><span class="val mono">400 000</span><span class="faint">֏</span></div><p class="hint">Դատարկ՝ առանց սահմանաչափի</p></div>
-        <div><label class="label">Կոդի անվանում</label><div class="input"><span class="val">${C.refLabel}</span></div><p class="hint">Ինչպես է այն կոչում ընկերությունը</p></div>
-        <div style="align-self:center"><span class="check on"><i class="b"></i>Կոդը պարտադիր է</span></div>
+        <div><label class="label">Աշխատակցի ամսական սահմանաչափ</label><div class="seg" role="radiogroup" aria-label="Ըստ ինչի"><button class="on" role="radio" aria-checked="true">Գումար</button><button role="radio" aria-checked="false">Ուղևորություններ</button><button role="radio" aria-checked="false">Առանց</button></div></div>
+        <div><label class="label">Գումարը ամսական</label><div class="input"><span class="val mono">50 000</span><span class="faint">֏</span></div><p class="hint">Աշխատակցի էջում կարելի է փոխել</p></div>
         <div class="full" style="grid-column:span 2"><label class="label">Նշում</label><div class="input"><span class="val">2027-ի բյուջե</span></div></div>
-      </div></div>
-      <h3 style="border-top:1px solid var(--line-soft);background:var(--surface)">Ֆիքսված երթուղիներ<span class="sub">Ֆիքսված գինը չի զեղչվում</span></h3>
-      <div style="background:var(--surface)">${routesTable(true)}</div>
-      <div class="pad"><div class="notice neutral"><i data-lucide="calendar-clock"></i><span>Գործում է միայն սկսած նշված օրից․ անցյալը չի փոխվում</span></div>
+      </div>
+      <div class="notice neutral" style="margin-top:12px"><i data-lucide="calendar-clock"></i><span>Գործում է միայն սկսած նշված օրից․ անցյալը չի փոխվում</span></div>
       <div class="formfoot"><a class="btn ghost" href="${T('agreement')}">Չեղարկել</a><button class="btn primary"><i data-lucide="check"></i>Պահել <span class="kbd">↵</span></button></div></div></section>`
   const agreement = TABQ === 'routes' ? `<div class="tb">${form}</div>` : `<div class="tb">${current}${history}</div>`
 
-  /* ── Employees (company-employees.tsx): number (mono), name, this month's rides and amount ── */
+  /* ── Employees (company-employees.tsx): number (mono), name, this month's rides and amount, plus (owner 2026-10-14)
+     the monthly limit — company default or his own, by amount or by rides — what is left, and his allowed places.
+     ?emp=0 opens Աննա's panel under her row: limit + allowed places (corporate #1, #4). Drawn ahead of the API. ── */
+  /* [name, phone, rides, amount, blacklisted, limit] limit: null = company default (amount), ['amd', n] or ['rides', n] */
   const EMP = [
-    [C.rider, ECO.RIDE.rider.phone, 38, 52400], ['Տիգրան Մանուկյան', '094 55-10-20', 29, 61200], ['Լիանա Գրիգորյան', '077 31-44-90', 21, 25800],
-    ['Արսեն Սահակյան', '099 82-17-03', 17, 18300], ['Նունե Պետրոսյան', '093 40-62-18', 14, 16900], ['Գևորգ Հարությունյան', '098 11-27-65', 0, 0, true],
-    ['Մարիամ Ավագյան', '055 70-09-41', 6, 7200], ['Վարդան Խաչատրյան', '091 66-38-12', 6, 2800], ['Էլեն Սարգսյան', '096 24-51-77', 0, 0],
-    ['Կարեն Զաքարյան', '041 90-83-26', 0, 0], ['Անի Մկրտչյան', '094 13-75-40', 0, 0], ['Արամ Վարդանյան', '077 58-20-11', 0, 0],
-    ['Սոնա Հովսեփյան', '099 07-66-35', 0, 0], ['Դավիթ Ղազարյան', '093 28-14-59', 0, 0],
+    [C.rider, ECO.RIDE.rider.phone, 38, 52400, false, ['amd', EL.rider.amount], 3], ['Տիգրան Մանուկյան', '094 55-10-20', 29, 61200, false, ['rides', 40], 2], ['Լիանա Գրիգորյան', '077 31-44-90', 21, 25800, false, null, 2],
+    ['Արսեն Սահակյան', '099 82-17-03', 17, 18300, false, null, 1], ['Նունե Պետրոսյան', '093 40-62-18', 14, 16900, false, ['rides', 15], 2], ['Գևորգ Հարությունյան', '098 11-27-65', 0, 0, true, null, 1],
+    ['Մարիամ Ավագյան', '055 70-09-41', 6, 7200, false, null, 1], ['Վարդան Խաչատրյան', '091 66-38-12', 6, 2800, false, null, 2], ['Էլեն Սարգսյան', '096 24-51-77', 0, 0, false, null, 1],
+    ['Կարեն Զաքարյան', '041 90-83-26', 0, 0, false, null, 1], ['Անի Մկրտչյան', '094 13-75-40', 0, 0, false, null, 1], ['Արամ Վարդանյան', '077 58-20-11', 0, 0, false, null, 1],
+    ['Սոնա Հովսեփյան', '099 07-66-35', 0, 0, false, null, 1], ['Դավիթ Ղազարյան', '093 28-14-59', 0, 0, false, null, 1],
   ]
+  const EMPQ = q.get('emp')
+  const limCell = (lim, r, s) => {
+    const [by, n] = lim || ['amd', EL.default.amount]
+    const used = by === 'amd' ? s : r, left = Math.max(0, n - used), pct = Math.min(100, Math.round(used / n * 100))
+    const val = by === 'amd' ? amd(n) : `${n} ուղևորություն`
+    const lft = by === 'amd' ? amd(left) : `${left}`
+    return `<td><span class="mono">${val}</span> <span class="faint" style="font:var(--c-small)">${lim ? 'անհատական' : 'լռելյայն'}</span></td>
+      <td><span class="lim${pct >= 90 ? ' near' : ''}" style="display:flex;align-items:center;gap:8px;justify-content:flex-end"><span class="bar3" style="width:40px;flex:none" role="img" aria-label="${pct} % օգտագործված"><i style="width:${pct}%"></i></span><span class="mono${left === 0 ? ' warnn' : ''}">${lft}</span></span></td>`
+  }
+  const P = C.places
+  const placeRow = (ic, label, addr, fixed) => `<div class="row-flex" style="gap:8px;height:36px;border-bottom:1px solid var(--line-soft)"><i data-lucide="${ic}"></i><b style="font:var(--c-strong);width:96px">${label}</b><span class="grow trunc">${addr}</span>${fixed ? '<span class="pill">ընկերության</span>' : '<button class="btn ghost s rev-act" style="opacity:1"><i data-lucide="x"></i>Հեռացնել</button>'}</div>`
+  const empPanel = `<tr class="under"><td colspan="8"><div class="panel" style="margin-top:0">
+      <div class="tb two" style="padding:0">
+        <div><h4><i data-lucide="gauge"></i>Ամսական սահմանաչափ<span class="faint" style="font:var(--c-small);font-weight:400">${C.rider}</span></h4>
+          <div class="seg" role="radiogroup" aria-label="Սահմանաչափ"><button role="radio" aria-checked="false">Լռելյայն · ${amd(EL.default.amount)}</button><button class="on" role="radio" aria-checked="true">Գումար</button><button role="radio" aria-checked="false">Ուղևորություններ</button></div>
+          <div class="fgrid" style="margin-top:12px"><div><label class="label">Գումարը ամսական</label><div class="input focus"><span class="val mono">65 000</span><span class="faint">֏</span></div><p class="hint">Նոր ամսից՝ զրոյից</p></div>
+            <div><span class="label">Այս ամիս</span><div class="facts" style="height:var(--h-m)"><span>Օգտագործված<b class="mono">${amd(EL.rider.used)}</b></span><span>Մնացել է<b class="mono">${amd(EL.rider.left)}</b></span></div></div></div>
+          <p class="hint" style="margin-top:8px">Սահմանաչափից հետո ուղևորությունը անձնական է՝ կանխիկ</p></div>
+        <div><h4><i data-lucide="map-pin"></i>Թույլատրված հասցեներ<span class="faint" style="font:var(--c-small);font-weight:400">շառավիղ ${P.radius} մ</span></h4>
+          ${P.rider.map((x) => placeRow(x.kind === 'home' ? 'house' : x.kind === 'office' ? 'building-2' : 'map-pin', x.label, x.addr, x.kind === 'office')).join('')}
+          <div class="row-flex" style="gap:8px;margin-top:8px"><div class="input" style="width:150px"><span class="val ph">Անվանում</span></div><div class="input l grow"><i data-lucide="search"></i><span class="val ph">Հասցե՝ 2GIS-ից</span></div><button class="btn secondary"><i data-lucide="plus"></i>Ավելացնել</button></div>
+          <p class="hint" style="margin-top:8px">Ընկերության հաշվին՝ միայն այս հասցեների միջև</p></div>
+      </div>
+      <div class="formfoot"><a class="btn ghost" href="${T('employees')}">Փակել</a><button class="btn primary"><i data-lucide="check"></i>Պահել</button></div></div></td></tr>`
   const employees = `<div class="tb">
       <div class="row-flex" style="gap:8px;align-items:flex-end">
         <div style="width:320px"><label class="label">Նոր աշխատակից</label><div class="input l"><i data-lucide="phone"></i><span class="val mono">+374</span><span class="ph">հեռախոսահամար</span></div></div>
         <button class="btn secondary l"><i data-lucide="link"></i>Կապել</button>
-        <span class="faint" style="font:var(--c-small);padding-bottom:10px">Նոր համարը կգրանցվի որպես ուղևոր</span>
+        <span class="faint" style="font:var(--c-small);padding-bottom:10px">Նոր համարը կգրանցվի որպես ուղևոր · սահմանաչափը՝ լռելյայն, հասցեն՝ գրասենյակը</span>
       </div>
-      <section class="sec"><h3>Աշխատակիցներ<span class="sub num">${EMP.length}</span><span class="end faint" style="font:var(--c-small)">Անջատելիս նախկին ուղևորությունները չեն փոխվում</span></h3>
-        <table class="tbl"><colgroup><col style="width:170px"><col><col style="width:184px"><col style="width:190px"><col style="width:150px"></colgroup>
-          <thead><tr><th>Հեռախոս</th><th>Անուն</th><th class="c">Ուղևորություններ (ամիս)</th><th class="m">Գումար (ամիս)</th><th aria-label="Անջատել"></th></tr></thead>
-          <tbody>${EMP.map(([n, ph, r, s, bl], i) => `<tr class="${i === 1 ? 'on' : ''}"><td class="mono">${ph}</td><td><span class="row-flex">${n}${bl ? '<span class="pill warn"><i data-lucide="octagon-alert"></i>Սև ցուցակում</span>' : ''}</span></td><td class="c">${r || '<span class="dash">0</span>'}</td><td class="m">${s ? amd(s) : '<span class="dash">—</span>'}</td>
-            <td style="text-align:right">${i === 1 ? '<button class="btn s armed">Անջատե՞լ</button>' : '<button class="btn ghost s rev-act"><i data-lucide="unlink"></i>Անջատել</button>'}</td></tr>`).join('')}</tbody></table></section></div>`
+      <section class="sec"><h3>Աշխատակիցներ<span class="sub num">${EMP.length}</span><span class="end faint" style="font:var(--c-small)">Լռելյայն՝ ${amd(EL.default.amount)} ամսական · Անջատելիս նախկին ուղևորությունները չեն փոխվում</span></h3>
+        <table class="tbl"><colgroup><col style="width:140px"><col><col style="width:150px"><col style="width:110px"><col style="width:200px"><col style="width:140px"><col style="width:90px"><col style="width:84px"></colgroup>
+          <thead><tr><th>Հեռախոս</th><th>Անուն</th><th class="c">Ուղևորություններ</th><th class="m">Գումար</th><th>Սահմանաչափ</th><th class="m">Մնացել է</th><th class="c">Հասցեներ</th><th aria-label="Գործողություններ"></th></tr></thead>
+          <tbody>${EMP.map(([n, ph, r, s, bl, lim, pl], i) => `<tr class="${EMPQ === String(i) ? 'on' : ''}"><td class="mono">${ph}</td><td><span class="row-flex">${n}${bl ? '<span class="pill warn"><i data-lucide="octagon-alert"></i>Սև ցուցակում</span>' : ''}</span></td><td class="c">${r || '<span class="dash">0</span>'}</td><td class="m">${s ? amd(s) : '<span class="dash">0</span>'}</td>
+            ${limCell(lim, r, s)}<td class="c">${pl}</td>
+            <td style="text-align:right;white-space:nowrap"><button class="btn ghost s icon rev-act" aria-label="Անջատել — ${n}" title="Անջատել"><i data-lucide="unlink"></i></button><a class="btn ${EMPQ === String(i) ? 'secondary' : 'ghost'} s icon" href="${T('employees')}&emp=${i}" aria-expanded="${EMPQ === String(i)}" aria-label="Սահմանաչափ և հասցեներ — ${n}" title="Սահմանաչափ և հասցեներ"><i data-lucide="sliders-horizontal"></i></a></td></tr>${EMPQ === String(i) && i === 0 ? empPanel : ''}`).join('')}</tbody></table></section></div>`
 
   /* ── Report (Q11): one tab. Period = a month (September, closed, by default) or chosen days; the optional «Վճարված»
      mark is per period. ?state=send: «Ուղարկել ընկերությանը» open inline · ?state=sent: the neutral result. ── */
@@ -143,7 +160,7 @@
         <button class="btn ${ST8 === 'send' ? 'secondary' : 'primary'}" aria-expanded="${ST8 === 'send'}"><i data-lucide="send"></i>Ուղարկել ընկերությանը</button>
       </div>
       ${ST8 === 'send' ? CO.sendPanel(M.label) : ST8 === 'sent' ? CO.sentNote()
-        : `<span class="faint" style="font:var(--c-small);margin-top:-4px"><i data-lucide="at-sign" style="width:14px;height:14px;vertical-align:-2px"></i> <span class="mono">${CO.EMAIL}</span> · <span class="dot-w"></span>կոդ չկա՝ լրացնել պատվերում</span>`}
+        : `<span class="faint" style="font:var(--c-small);margin-top:-4px"><i data-lucide="at-sign" style="width:14px;height:14px;vertical-align:-2px"></i> <span class="mono">${CO.EMAIL}</span></span>`}
       <section class="sec">${CO.table(M)}</section></div>`
 
   /* ── Settings (company-settings.tsx): one Save, PATCH of what changed; close is armed, reopen is one press ── */

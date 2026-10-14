@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transfers</title>
+<link rel="stylesheet" href="console.css">
+<link rel="stylesheet" href="corporate.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+<style>
+  /* Transfers (owner 2026-10-14). DRAWN AHEAD: there is no transfer entity in the API. A transfer is a pre-order
+     (§8 scheduled_ride) on the «Transfer» tariff plus flight fields; it reaches drivers exactly like a pre-order
+     (driver-preorders shows the badge and flight). Layout: the companies list archetype (one card, tabs, a dense
+     table), with the detail as a right column beside the list — never a modal (§9.8). */
+  .content.det { grid-template-columns: minmax(0, 1fr) 440px; grid-template-rows: minmax(0, 1fr); }
+  .tr-t td { height: 52px; }
+  .two2 { display: flex; flex-direction: column; min-width: 0; line-height: 18px; }
+  .two2 b { font: var(--c-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .two2 span { font: var(--c-small); color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fl { display: inline-flex; align-items: center; gap: 6px; font: var(--c-strong); font-family: var(--mono); white-space: nowrap; }
+  .fl svg { width: 16px; height: 16px; color: var(--ink-muted); }
+  .tm { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 600; }
+  .tm small { display: block; font: var(--c-small); color: var(--ink-muted); font-family: var(--font); font-weight: 400; }
+  tr.done td { color: var(--ink-faint); }
+  .create { margin: 0 var(--inset) 12px; border-radius: var(--r-card); box-shadow: inset 0 0 0 1px var(--line-soft), var(--e1); background: var(--surface); }
+  .create h3 { font: var(--c-head); padding: 12px var(--inset) 0; display: flex; align-items: center; gap: 8px; }
+  .fg { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px 12px; padding: 12px var(--inset); }
+  .fg > div { min-width: 0; } .s2 { grid-column: span 2; } .s3 { grid-column: span 3; } .s4 { grid-column: span 4; } .s6 { grid-column: span 6; }
+  .fg .seg { display: flex; } .fg .seg button { flex: 1; justify-content: center; }
+  .create .foot { display: flex; align-items: center; gap: 8px; padding: 0 var(--inset) 12px; }
+  .create .foot .faint { margin-left: auto; font: var(--c-small); }
+  /* Detail column */
+  .dt { display: flex; flex-direction: column; min-height: 0; }
+  .dt .hd { padding: 12px var(--inset); border-bottom: 1px solid var(--line-soft); display: flex; flex-direction: column; gap: 6px; }
+  .dt .hd h2 { font: var(--c-head); display: flex; align-items: center; gap: 8px; }
+  .dt .hd .meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font: var(--c-small); color: var(--ink-muted); }
+  .dt .bd { padding: 12px var(--inset); display: flex; flex-direction: column; gap: 14px; }
+  .kv2 { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 6px 12px; font: var(--c-body); }
+  .kv2 dt { color: var(--ink-muted); white-space: nowrap; }
+  .kv2 dd { min-width: 0; }
+  .blk h3 { font: var(--c-label); color: var(--ink-muted); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .blk h3 svg { width: 14px; height: 14px; }
+  .drvc { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--r-ctl); background: var(--surface-alt); }
+  .drvc .nm2 { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+  .drvc .nm2 b { font: var(--c-strong); }
+  .tl { display: flex; flex-direction: column; gap: 6px; font: var(--c-body); }
+  .tl div { display: grid; grid-template-columns: 52px 14px minmax(0, 1fr); gap: 8px; align-items: center; }
+  .tl .mono { color: var(--ink-muted); }
+  .tl i.dt2 { width: 8px; height: 8px; border-radius: 4px; background: var(--line-strong); justify-self: center; }
+  .tl i.dt2.on { background: var(--ok); }
+  .dt .ft { margin-top: auto; padding: 12px var(--inset); border-top: 1px solid var(--line-soft); display: flex; gap: 6px; align-items: center; }
+</style>
+</head>
+<body>
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <h1>Տրանսֆերներ</h1>
+      <div class="live"></div>
+    </header>
+    <div class="content one" id="content">
+      <section class="card page" id="page"></section>
+    </div>
+  </div>
+</div>
+<script>
+  shell('transfers')
+  const q = new URLSearchParams(location.search)
+  const TAB = q.get('tab') || 'today', NEW = q.get('state') === 'new', SEL = q.get('t')
+  const TF = ECO.TRANSFERS, TT = ECO.TRANSFER_TIER
+  const U = (o) => '?' + new URLSearchParams({ theme: THEME, tab: TAB, ...o }).toString()
+
+  /* Rows: ECO's four plus page-local ones so each tab reads at a real density. */
+  const LOCAL = [
+    { id: 'T-0033', dir: 'dep', flight: 'FR 7514', to: 'Միլան', time: '05:30', day: 'Կիր', passenger: 'Լիլիթ Բաբայան', phone: '093 61-08-24', pickup: 'Արաբկիր 31', drop: 'Զվարթնոց օդանավակայան', fare: 6000, pay: 'cash', status: 'unassigned', depart: '08:25' },
+    { id: 'T-0034', dir: 'arr', flight: 'SU 1860', from: 'Մոսկվա', time: '11:05', day: 'Երկ', land: '10:35', passenger: 'Олег Ковалёв', phone: '+7 925 118-40-27', pickup: 'Զվարթնոց օդանավակայան', drop: 'Վազգեն Սարգսյանի 26/1', fare: 6000, pay: 'company', company: true, status: 'unassigned' },
+    { id: 'T-0026', dir: 'dep', flight: 'QR 290', to: 'Դոհա', time: '01:10', day: '8 հոկտ.', passenger: 'Մարինե Ադամյան', phone: '099 40-17-63', pickup: 'Թումանյան 21', drop: 'Զվարթնոց օդանավակայան', fare: 6000, pay: 'cash', status: 'done', driver: { short: 'Դավիթ Կ.', plate: '09 DK 118' }, depart: '04:05' },
+    { id: 'T-0025', dir: 'arr', flight: 'LH 1820', from: 'Մյունխեն', time: '03:05', day: '7 հոկտ.', land: '02:35', passenger: 'Hans Becker', phone: '+49 171 552 0193', pickup: 'Զվարթնոց օդանավակայան', drop: 'Ամիրյան 1, Մարիոթ հյուրանոց', fare: 6000, pay: 'company', company: true, status: 'done', driver: { short: 'Սուրեն Մ.', plate: '22 OU 447' } },
+  ]
+  const ALL = [...TF.map((x) => ({ ...x, day: x.id === 'T-0031' ? 'Շբթ' : x.status === 'done' ? 'Այսօր' : null })), ...LOCAL]
+  const LISTS = {
+    today: ALL.filter((x) => ['T-0030', 'T-0032', 'T-0027'].includes(x.id)).sort((a, b) => (a.status === 'done') - (b.status === 'done') || a.time.localeCompare(b.time)),
+    upcoming: ALL.filter((x) => ['T-0031', 'T-0033', 'T-0034'].includes(x.id)),
+    done: ALL.filter((x) => x.status === 'done'),
+  }
+  const TABS = [['today', 'Այսօր'], ['upcoming', 'Առաջիկա'], ['done', 'Ավարտված']]
+  const ST = { assigned: ['ok', 'Վարորդը նշանակված է'], unassigned: ['', 'Ավտոմատ որոնում'], done: ['', 'Ավարտված'] }
+  const flight = (x) => `<span class="two2"><span class="fl"><i data-lucide="${x.dir === 'arr' ? 'plane-landing' : 'plane-takeoff'}"></i>${x.flight}</span><span>${x.dir === 'arr' ? `${x.from} · վայրէջք <span class="mono">${x.land}</span>` : `${x.to} · թռիչք <span class="mono">${x.depart}</span>`}</span></span>`
+  const row = (x) => `<tr class="${x.id === SEL ? 'on' : ''} ${x.status === 'done' ? 'done' : ''}">
+      <td class="tm">${x.time}<small>${x.day || 'Այսօր'}</small></td>
+      <td>${flight(x)}</td>
+      <td><span class="two2"><b>${x.passenger}</b><span class="mono">${x.phone}</span></span></td>
+      <td><span class="two2"><b>${x.pickup}</b><span>→ ${x.drop}</span></span></td>
+      <td>${x.driver ? `<span class="two2"><b>${x.driver.short}</b><span><span class="plate" style="height:18px;font-size:11px">${x.driver.plate}</span></span></span>` : `<span class="faint">Ավտոմատ</span>`}</td>
+      ${SEL ? '' : `<td>${x.company ? `<span class="pill"><i data-lucide="building-2"></i>${ECO.COMPANY.short}</span>` : '<span class="faint">Կանխիկ</span>'}</td>`}
+      <td class="m">${amd(x.fare)}</td>
+      ${SEL ? '' : `<td><span class="pill ${ST[x.status][0]}"><i class="d"></i>${ST[x.status][1]}</span></td>`}
+      <td style="text-align:right"><a class="btn ghost s icon" href="${U({ t: x.id })}" aria-label="Բացել ${x.id}"><i data-lucide="chevron-right"></i></a></td></tr>`
+
+  const createCard = () => `<div class="create" role="group" aria-labelledby="cr">
+    <h3 id="cr"><i data-lucide="plane-landing"></i>Նոր տրանսֆեր<span class="pill" style="margin-left:4px">${TT.name} · ${amd(TT.fare)}</span></h3>
+    <div class="fg">
+      <div class="s3"><label class="label">Ուղղություն</label><div class="seg" role="radiogroup" aria-label="Ուղղություն"><button class="on" role="radio" aria-checked="true">Ժամանում</button><button role="radio" aria-checked="false">Մեկնում</button></div></div>
+      <div class="s3"><label class="label">Չվերթ</label><span class="input focus"><i data-lucide="plane"></i><span class="val mono">SU 1860<span style="border-left:1.5px solid var(--ink);margin-left:1px"></span></span></span></div>
+      <div class="s3"><label class="label">Օր</label><span class="input"><i data-lucide="calendar"></i><span class="val">Երկ, 12 հոկտ.</span></span></div>
+      <div class="s3"><label class="label">Վայրէջք · նստեցում</label><span class="input"><span class="val mono">10:35 · 11:05</span></span><div class="hint">Նստեցումը՝ վայրէջքից 30 ր հետո</div></div>
+      <div class="s4"><label class="label">Ուղևոր</label><span class="input"><i data-lucide="user"></i><span class="val">Олег Ковалёв</span></span></div>
+      <div class="s4"><label class="label">Ուղևորի հեռախոս</label><span class="input"><i data-lucide="phone"></i><span class="val mono">+7 925 118-40-27</span></span></div>
+      <div class="s2"><label class="label">Ուղևորներ</label><span class="input"><span class="val mono">1</span></span></div>
+      <div class="s2"><label class="label">Ուղեբեռ</label><span class="input"><span class="val mono">2</span></span></div>
+      <div class="s6"><label class="label">Որտեղից</label><span class="input l"><i data-lucide="plane-landing"></i><span class="val">Զվարթնոց օդանավակայան</span><span class="faint">Ժամանման սրահ · ելք 2</span></span></div>
+      <div class="s6"><label class="label">Ուր</label><span class="input l"><i data-lucide="map-pin"></i><span class="val">Վազգեն Սարգսյանի 26/1</span><i data-lucide="circle-check" style="color:var(--ok)"></i></span></div>
+      <div class="s4"><label class="label">Ցուցանակ <span class="faint" style="font-weight:400">· ոչ պարտադիր</span></label><span class="input"><span class="val mono">ARARAT SOFT · O. KOVALEV</span></span></div>
+      <div class="s4"><label class="label">Վճարող</label><div class="seg" role="radiogroup" aria-label="Վճարող"><button role="radio" aria-checked="false">Կանխիկ</button><button class="on" role="radio" aria-checked="true">Ընկերություն</button></div></div>
+      <div class="s4"><label class="label">Ընկերություն</label><span class="input"><i data-lucide="building-2"></i><span class="val">${ECO.COMPANY.name}</span><i data-lucide="chevron-down"></i></span></div>
+    </div>
+    <div class="foot"><button class="btn primary"><i data-lucide="check"></i>Ստեղծել <span class="kbd">↵</span></button><a class="btn secondary" href="${U({})}">Չեղարկել</a><span class="faint">Վարորդին կհասնի որպես նախնական պատվեր</span></div>
+  </div>`
+
+  const L = LISTS[TAB]
+  const list = `<div class="card-h"><h2>Տրանսֆերներ</h2><span class="sub">Զվարթնոց · ${TT.name}</span>
+      <span class="end"><a class="btn primary s" href="${U({ state: 'new' })}" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր տրանսֆեր<span class="kbd">N</span></a></span></div>
+    <div class="tabsl" role="tablist" aria-label="Տրանսֆերներ" style="margin-top:0">${TABS.map(([k, l]) => `<a href="?theme=${THEME}&tab=${k}" role="tab" aria-selected="${k === TAB}" class="${k === TAB ? 'on' : ''}">${l}<span class="c num">${LISTS[k].length}</span></a>`).join('')}</div>
+    ${NEW ? `<div style="padding-top:12px">${createCard()}</div>` : ''}
+    <div class="scroll-y grow"><table class="tbl tr-t"><colgroup><col style="width:76px"><col style="width:${SEL ? 140 : 160}px"><col style="width:${SEL ? 160 : 180}px"><col><col style="width:${SEL ? 104 : 120}px">${SEL ? '' : '<col style="width:136px">'}<col style="width:88px">${SEL ? '' : '<col style="width:184px">'}<col style="width:60px"></colgroup>
+      <thead><tr><th>Ժամ</th><th>Չվերթ</th><th>Ուղևոր</th><th>Որտեղից → Ուր</th><th>Վարորդ</th>${SEL ? '' : '<th>Վճարող</th>'}<th class="m">Գին</th>${SEL ? '' : '<th>Վիճակ</th>'}<th></th></tr></thead>
+      <tbody>${L.map(row).join('')}</tbody></table></div>`
+
+  /* ?t=T-0031: the detail beside the list (Saturday's company transfer, Արամ pre-assigned). */
+  const X = ALL.find((x) => x.id === SEL)
+  const detail = X ? `<section class="card dt" aria-label="Տրանսֆեր ${X.id}">
+      <div class="hd"><h2><i data-lucide="${X.dir === 'arr' ? 'plane-landing' : 'plane-takeoff'}"></i><span class="mono">${X.flight}</span> · ${X.dir === 'arr' ? X.from + ' → Երևան' : 'Երևան → ' + X.to}<span class="end" style="margin-left:auto"><a class="btn ghost icon s" href="${U({})}" aria-label="Փակել"><i data-lucide="x"></i></a></span></h2>
+        <div class="meta"><span class="mono">${X.id}</span><span class="pill ${ST[X.status][0]}"><i class="d"></i>${ST[X.status][1]}</span><span class="pill">${TT.name}</span>${X.company ? `<span class="pill"><i data-lucide="building-2"></i>${ECO.COMPANY.short}</span>` : ''}</div></div>
+      <div class="scroll-y grow"><div class="bd">
+        <div class="blk"><h3><i data-lucide="plane"></i>Չվերթ</h3><dl class="kv2">
+          <dt>Վայրէջք</dt><dd><span class="mono">${X.land || '—'}</span> · ${X.day === 'Շբթ' ? 'Շաբաթ, 10 հոկտ.' : X.day || 'Այսօր'}</dd>
+          <dt>Նստեցում</dt><dd><b class="mono">${X.time}</b> <span class="faint">· վայրէջքից 30 ր հետո</span></dd>
+          <dt>Տերմինալ · ելք</dt><dd>${X.terminal || 'Ժամանման սրահ'}</dd>
+          <dt>Ցուցանակ</dt><dd class="mono">${X.sign || '—'}</dd>
+          <dt>Անվճար սպասում</dt><dd>մինչև <span class="mono">${TT.waitFreeMin}</span> րոպե</dd></dl></div>
+        <div class="blk"><h3><i data-lucide="user"></i>Ուղևոր</h3><dl class="kv2">
+          <dt>Անուն</dt><dd>${X.passenger}</dd><dt>Հեռախոս</dt><dd class="mono">${X.phone}</dd>
+          <dt>Ուղևորներ · ուղեբեռ</dt><dd class="mono">${X.pax || 1} · ${X.bags || 1}</dd>
+          <dt>Պատվիրող</dt><dd>${X.company ? `${ECO.COMPANY.rider} · <a href="company.html?theme=${THEME}" style="color:var(--brand-text)">${ECO.COMPANY.short}</a>` : X.passenger}</dd></dl></div>
+        <div class="blk"><h3><i data-lucide="route"></i>Երթուղի և գին</h3><dl class="kv2">
+          <dt>Որտեղից</dt><dd>${X.pickup}</dd><dt>Ուր</dt><dd>${X.drop}</dd>
+          <dt>Գին</dt><dd><b class="mono">${amd(X.fare)}</b> <span class="faint">· ${X.km ? ECO.km(X.km) : ''}</span></dd>
+          <dt>Վճարող</dt><dd>${X.company ? 'Ընկերություն · ' + ECO.COMPANY.name : 'Կանխիկ'}</dd></dl></div>
+        <div class="blk"><h3><i data-lucide="user-check"></i>Վարորդ</h3>${X.driver ? `<div class="drvc"><span class="av">${X.driver.short.slice(0, 1)}${X.driver.short.split(' ')[1][0]}</span><span class="nm2"><b>${X.driver.short}</b><span class="faint" style="font:var(--c-small)">Կարող է մեկնել <span class="mono">${X.held}</span>-ից</span></span><span class="plate">${X.driver.plate}</span><button class="btn ghost icon s" aria-label="Զանգել վարորդին"><i data-lucide="phone"></i></button></div>` : '<span class="faint">Ավտոմատ որոնում՝ 15 րոպե առաջ</span>'}</div>
+        <div class="blk"><h3><i data-lucide="history"></i>Պատմություն</h3><div class="tl">
+          <div><span class="mono">${(X.booked || '').replace(/^.*, /, '')}</span><i class="dt2 on"></i><span>Ստեղծեց ${X.by || 'Անի Դավթյան'}</span></div>
+          <div><span class="mono">9:22</span><i class="dt2 on"></i><span>Նշանակվեց՝ ${X.driver ? X.driver.short : '—'}</span></div>
+          <div><span class="mono">9:22</span><i class="dt2 on"></i><span>Վարորդը տեսավ նախնական պատվերներում</span></div>
+          <div><span class="mono">${X.held || ''}</span><i class="dt2"></i><span class="faint">Կարող է մեկնել</span></div></div></div>
+      </div></div>
+      <div class="ft"><button class="btn secondary s"><i data-lucide="pencil"></i>Խմբագրել</button><button class="btn secondary s">Վերանշանակել <span class="kbd">A</span></button><span style="flex:1"></span><button class="btn danger s">Չեղարկել</button></div>
+    </section>` : ''
+
+  document.getElementById('page').innerHTML = list
+  if (X) { document.getElementById('content').className = 'content det'; document.getElementById('content').insertAdjacentHTML('beforeend', detail) }
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

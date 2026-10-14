@@ -24,7 +24,12 @@
   .prof .ph { font: var(--t-secondary); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; margin-top: 2px; }
   .prof .edit { width: var(--tap); height: var(--tap); border-radius: var(--r-pill); background: var(--surface); box-shadow: var(--e1); display: grid; place-items: center; color: var(--ink); flex: none; }
   .prof .edit svg { width: 18px; height: 18px; }
-  .gap { height: var(--s4); }
+  .gap { height: var(--s3); }
+  .tiles2 { margin: 0 var(--margin); display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
+  .tile2 { background: var(--surface); border-radius: var(--r-card); padding: var(--s3); display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; min-height: 84px; }
+  .tile2 svg { width: 22px; height: 22px; color: var(--brand-ink); margin-bottom: 4px; }
+  .tile2 .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .tile2 .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .row .val { font-variant-numeric: tabular-nums; }
   .row .t2.warn { color: var(--warn); }
   .count { min-width: 24px; height: 24px; padding: 0 7px; border-radius: var(--r-pill); background: var(--ink); color: var(--surface); font: 600 13px/24px var(--font); text-align: center; font-variant-numeric: tabular-nums; flex: none; }
@@ -99,6 +104,41 @@
   .pa-chips .chip svg { width: 16px; height: 16px; }
   .sheet.modal .field { margin-top: var(--s3); height: 56px; }
   .sheet.modal.pa-sheet { bottom: 251px; padding-bottom: var(--s4); } /* rides on the raised keyboard, as iOS moves it */
+  /* Change list 2026-10-14: company limit + allowed places, promo code, referral. */
+  .lim { margin: var(--s2) var(--margin) 0; background: var(--surface); border-radius: var(--r-card); padding: var(--s4); display: flex; flex-direction: column; gap: var(--s1); }
+  .lim .k { font: var(--t-secondary); color: var(--ink-2); }
+  .lim .hero { font: var(--t-hero); color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -.5px; white-space: nowrap; }
+  .lim .bar { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; margin-top: var(--s2); }
+  .lim .bar i { display: block; height: 100%; background: var(--brand); border-radius: 3px; }
+  .lim .of { display: flex; justify-content: space-between; font: var(--t-caption); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .capt { margin: var(--s2) var(--margin) 0; font: var(--t-secondary); color: var(--ink-2); }
+  .pcode { margin: var(--s2) var(--margin) 0; display: flex; gap: var(--s2); }
+  .pcode .inp { flex: 1; height: 52px; border-radius: var(--r-control); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); display: flex; align-items: center; padding: 0 var(--s4); font: var(--t-body); color: var(--ink-3); }
+  .pcode .btn { width: auto; padding: 0 var(--s5); flex: none; }
+  .pcard { margin: var(--s2) var(--margin) 0; background: var(--surface); border-radius: var(--r-card); padding: var(--s4); display: grid; grid-template-columns: 40px 1fr auto; gap: var(--s3); align-items: center; }
+  .pcard .pi { width: 40px; height: 40px; border-radius: 12px; background: var(--brand-soft, var(--surface-2)); color: var(--brand-ink); display: grid; place-items: center; }
+  .pcard .pi svg { width: 20px; height: 20px; }
+  .pcard .t1 { font: var(--t-body-strong); color: var(--ink); letter-spacing: .3px; }
+  .pcard .t2 { font: var(--t-secondary); color: var(--ink-2); }
+  .pcard .v { font: var(--t-headline); color: var(--brand-ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .refh { margin: var(--s4) var(--margin) 0; display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--s2); }
+  .refh .gi { width: 88px; height: 88px; border-radius: 50%; background: var(--surface); box-shadow: var(--e1); display: grid; place-items: center; color: var(--brand-ink); }
+  .refh .gi svg { width: 40px; height: 40px; }
+  .refh .h { font: var(--t-hero); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .refh .s { font: var(--t-body); color: var(--ink-2); }
+  .two { margin: var(--s4) var(--margin) 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
+  .two > div { background: var(--surface); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: flex; flex-direction: column; gap: 2px; }
+  .two .k { font: var(--t-caption); color: var(--ink-2); }
+  .two .v { font: var(--t-headline); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .rcode { margin: var(--s3) var(--margin) 0; height: 56px; border-radius: var(--r-control); background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--line); border-style: dashed;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 var(--s2) 0 var(--s4); font: 600 17px/24px var(--font); letter-spacing: 1.5px; color: var(--ink); }
+  .rcode button { height: 44px; padding: 0 var(--s3); display: inline-flex; align-items: center; gap: 6px; font: var(--t-secondary-strong); color: var(--brand-ink); letter-spacing: 0; }
+  .rcode button svg { width: 18px; height: 18px; }
+  .stats3 { margin: var(--s3) var(--margin) 0; display: grid; grid-template-columns: repeat(3, 1fr); background: var(--surface); border-radius: var(--r-card); }
+  .stats3 > div { padding: var(--s3); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .stats3 .v { font: var(--t-headline); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .stats3 .k { font: var(--t-caption); color: var(--ink-2); text-align: center; }
+  .page .foot { margin-top: auto; padding: var(--s4) var(--margin) 42px; }
 </style>
 </head>
 <body>
@@ -121,9 +161,12 @@
       r('wallet', 'Վճարում', `<span class="val">${debt ? A(DEBT) : ''}</span>`, debt ? { t2: 'Պարտք', t2c: 'warn' } : { t2: ECO.COMPANY.name }),
     ])}
     <div class="gap"></div>
+    <div class="tiles2"><button class="tile2">${R.i('ticket-percent')}<span class="t1">Պրոմոկոդ</span><span class="t2">${debt ? 'Մուտքագրել' : ECO.PROMO.applied.code}</span></button>
+      <button class="tile2">${R.i('gift')}<span class="t1">Հրավիրեք ընկերոջը</span><span class="t2">${A(ECO.PROMO.referral.invitee)} ձեզ և նրան</span></button></div>
+    <div class="gap"></div>
     ${grp([r('languages', 'Լեզու', '<span class="val">Հայերեն</span>'), r('sun-moon', 'Թեմա', '<span class="val">Ավտոմատ</span>')])}
     <div class="gap"></div>
-    ${grp([r('headset', 'Օգնություն', '', { t2: 'Զանգել գրասենյակ · Հարցեր' }), r('scale', 'Իրավական', '', { t2: 'Պայմաններ · Գաղտնիություն' })])}
+    ${grp([r('headset', 'Օգնություն', '', { t2: 'Գրասենյակ · Հարցեր · Պայմաններ' })])} <!-- 2026-10-14: Legal folded into Help (Help already lists terms and privacy) to make room for Promo + Invite -->
     <div class="gap"></div>
     ${grp([r('log-out', 'Դուրս գալ', '', { chev: false }), r('trash-2', 'Ջնջել հաշիվը', '', { chev: false, cls: 'danger' })])}
   </div>`
@@ -150,7 +193,7 @@
     <div class="sect">Վճարման եղանակ</div>
     ${grp([
       r('banknote', ECO.PAY.cash.label, `<span class="def">${R.i('check')}Հիմնական</span>`, { chev: false, btn: false, cls: 'cash' }),
-      r('building-2', ECO.COMPANY.name, '', { chev: false, btn: false, t2: 'Ընտրվում է պատվիրելիս' }),
+      r('building-2', ECO.COMPANY.name, `<span class="val">${A(ECO.COMPANY.empLimit.rider.left)}</span>`, { t2: 'Մնացել է այս ամիս' }),
       r('wallet', ECO.PAY.card.label, `<span class="soon">${ECO.PAY.soon}</span>`, { chev: false, btn: false, cls: 'off' }),
     ])}</div>`
 
@@ -166,6 +209,29 @@
     states: [
       { id: 'main', group: 'Account', label: 'Account', note: 'Delete is a visible row. Debt is a word plus colour, never colour alone. Help (call the office, questions) and Legal (terms, privacy) sit above sign-out, as both stores expect', html: () => main() },
       { id: 'main-company', group: 'Account', label: 'Company rider', note: 'A rider linked to a company on account: the payment row names the company. The choice itself is made per ride on the order sheet', html: () => main(false) },
+      { id: 'company', group: 'Company', label: 'Company: limit + places', note: 'Change list 2026-10-14 (drawn ahead): from Payment → the company row. The employee\'s monthly limit (ECO.COMPANY.empLimit.rider: 65 000 ֏, 52 400 used, 12 600 left) and the places the company pays between (ECO.COMPANY.places, set on the console). Read-only: the office/company edits them. Over the limit or outside these places a ride is personal',
+        html: () => { const L = ECO.COMPANY.empLimit.rider, PL = ECO.COMPANY.places
+          return `<div class="page">${back(ECO.COMPANY.short)}
+          <div class="lim"><span class="k">Մնացել է այս ամիս</span><span class="hero">${A(L.left)}</span>
+            <span class="bar" role="img" aria-label="Օգտագործված ${Math.round(L.used / L.amount * 100)} %"><i style="width:${Math.round(L.used / L.amount * 100)}%"></i></span>
+            <span class="of"><span>Ծախսված՝ ${A(L.used)}</span><span>Ամսական սահմանաչափ՝ ${A(L.amount)}</span></span></div>
+          <div class="sect">Ընկերությունը վճարում է այս հասցեների միջև</div>
+          ${grp(PL.rider.map((x) => r(x.kind === 'home' ? 'house' : x.kind === 'office' ? 'building-2' : 'plane', x.label, '', { t2: x.addr, chev: false, btn: false })))}
+          <div class="capt">Այլ ուղևորությունները՝ անձնական</div></div>` } },
+      { id: 'promo', group: 'Promo', label: 'Promo code', note: 'Change list 2026-10-14 (drawn ahead): «Պրոմոկոդ» in Account. One field + «Կիրառել»; the active code below with its value, scope and end date. Applied automatically to the next eligible ride; the booking sheet shows it (rider-book#promo)',
+        html: () => { const c = ECO.PROMO.codes[0]
+          return `<div class="page">${back()}<h1 class="large">Պրոմոկոդ</h1>
+          <div class="pcode"><span class="inp">Մուտքագրեք կոդը</span><button class="btn btn-brand">Կիրառել</button></div>
+          <div class="sect">Ակտիվ</div>
+          <div class="pcard"><span class="pi">${R.i('ticket-percent')}</span><span><span class="t1" style="display:block">${c.code}</span><span class="t2">Eco City, Eco Comfort · մինչև 31 հոկտ.</span></span><span class="v">−${c.value} %</span></div>
+          <div class="capt">Կկիրառվի հաջորդ ուղևորության ժամանակ</div></div>` } },
+      { id: 'referral', group: 'Promo', label: 'Invite a friend', note: 'Change list 2026-10-14 (drawn ahead): referral (ECO.PROMO.referral). Both sides get 700 ֏ off; the inviter\'s reward lands when the friend completes a first ride. Own code with copy, the share sheet as the one primary, and the rider\'s own stats',
+        html: () => { const F = ECO.PROMO.referral
+          return `<div class="page">${back()}
+          <div class="refh"><span class="gi">${R.i('gift')}</span><span class="h">${A(F.invitee)} + ${A(F.inviter)}</span><span class="s">Ընկերոջը՝ առաջին ուղևորությանը, ձեզ՝ երբ նա ավարտի այն</span></div>
+          <div class="rcode"><span>${F.code}</span><button>${R.i('copy')}Պատճենել</button></div>
+          <div class="stats3"><div><span class="v">${F.mine.invited}</span><span class="k">Հրավիրված</span></div><div><span class="v">${F.mine.joined}</span><span class="k">Միացել են</span></div><div><span class="v">${A(F.mine.earned)}</span><span class="k">Ստացել եք</span></div></div>
+          <div class="foot"><button class="btn btn-brand">${R.i('share')}Կիսվել հղումով</button></div></div>` } },
       { id: 'help', group: 'Account', label: 'Help', note: 'A person first: the office phone is one tap. Questions and legal pages open in the browser',
         html: () => `<div class="page">${back('Օգնություն')}<div class="gap"></div>
           ${grp([r('phone', 'Զանգել գրասենյակ', '<span class="val">010 55-55-55</span>', { chev: false }), r('circle-help', 'Հաճախ տրվող հարցեր')])}

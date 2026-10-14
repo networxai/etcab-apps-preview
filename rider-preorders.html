@@ -161,7 +161,7 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
   const stops = (b) => `<div class="stops"><div class="stop"><span class="g"><i></i></span><span class="a">${b.pickup}</span><span class="tm">${b.time}</span></div>
       <div class="stop b"><span class="g"><i></i></span><span class="a">${b.drop}</span><span class="tm">${ECO.km(b.km)} · ${b.min} ր</span></div></div>`
   const payLine = (b) => b.pay === 'company'
-    ? `<div class="ln"><span>Վճարում</span><b>${R.i('building-2')}${C.name}</b></div><div class="ln"><span>${C.refLabel}</span><b>${b.ref}</b></div>`
+    ? `<div class="ln"><span>Վճարում</span><b>${R.i('building-2')}${C.name}</b></div>`
     : `<div class="ln"><span>Վճարում</span><b>${R.i('banknote', 'class="cashi"')}${ECO.PAY.cash.label}</b></div>`
   const driverRow = (d) => `<div class="drv"><span class="avatar ini" role="img" aria-label="Վարորդ՝ ${d.name}">${d.ini}</span>
       <span class="txt"><span class="t1">${d.first} <span>${R.i('star')}${d.rating}</span></span><span class="t2">${d.car}</span></span>${R.plate(d.plate)}</div>`
@@ -230,7 +230,7 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
         html: () => detailSheet(BK.air), map: mapFor(BK.air) },
       { id: 'detail-nodriver', group: 'Bookings', label: 'No car yet', note: 'problemReason set (the pre-assigned driver was blocked). Owner Q1: at the time the system searches automatically and any driver of the booking\'s tariff can take it, so the notice is neutral and says exactly that; no person has to assign a car',
         html: () => detailSheet(BK.sun), map: mapFor(BK.sun) },
-      { id: 'detail-company', group: 'Bookings', label: 'Company', note: 'An on-account booking: «Ընկերության հաշվին» names the company and its cost code where the payment would be. No driver yet (Monday)',
+      { id: 'detail-company', group: 'Bookings', label: 'Company', note: 'An on-account booking: «Ընկերության հաշվին» names the company where the payment would be (no cost code, change list 2026-10-14). No driver yet (Monday)',
         html: () => detailSheet(BK.co), map: mapFor(BK.co) },
 
       { id: 'start-confirm', group: 'Actions', label: 'Start now', note: 'Owner decision: a rider may bring a booking forward. One question, same price; the search starts at once and the screen becomes the live ride (rider-searching → rider-ride). Owner ruling 12 Oct: the pre-assigned driver (Սուրեն) gets the first offer; if he declines or lets it ring out, the automatic search offers it to any driver of that tariff (owner Q1) — the sheet draws it as a two-step strip (your driver, then the nearest car) and the price as a fact, so the fallback is no surprise (new strings)',

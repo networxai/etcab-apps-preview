@@ -66,6 +66,14 @@
   .notice span { display: block; font: var(--t-secondary); color: var(--ink-2); margin-top: 2px; }
   .notice .mono { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; }
   .otp.off .d { color: var(--ink-3); background: var(--surface-2); opacity: .7; }
+  /* Change list 2026-10-14: an explicit consent checkbox on its own row, both documents linked. The whole row is the
+     checkbox's hit area (≥ 48 px); the two links are separate targets inside it, underlined, never cramped. */
+  .agree { display: grid; grid-template-columns: 24px 1fr; gap: var(--s3); align-items: start; min-height: 56px; padding: var(--s3) 0; margin: var(--s1) 0 var(--s2);
+    font: var(--t-secondary); color: var(--ink-2); text-align: left; width: 100%; }
+  .agree .box { width: 24px; height: 24px; border-radius: 7px; box-shadow: inset 0 0 0 2px var(--ink-3); display: grid; place-items: center; color: #fff; margin-top: -1px; }
+  .agree[aria-checked="true"] .box { background: var(--brand); box-shadow: none; }
+  .agree .box svg { width: 16px; height: 16px; stroke-width: 2.5; }
+  .agree a { color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--ink-3); display: inline-block; }
   .consent { margin-top: var(--s4); font: var(--t-secondary); color: var(--ink-2); }
   .consent .lk { display: flex; gap: var(--s2); margin-top: var(--s1); }
   .consent .lk button { height: 44px; padding: 0 var(--s3); border-radius: var(--r-pill); background: var(--surface-2); font: var(--t-secondary-strong); color: var(--ink); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
@@ -80,10 +88,13 @@
       <button class="cc" aria-label="Երկրի կոդ +374"><span class="flag" aria-hidden="true"></span>+374${R.i('chevron-down')}</button><span class="sep"></span>
       <span class="num"><span class="lbl">Հեռախոսահամար</span><span class="v ${ph ? 'ph' : ''}">${v}${cls.includes('focus') ? '<span class="caret"></span>' : ''}</span></span>
       ${clear ? `<button class="clear" aria-label="Մաքրել">${R.i('circle-x')}</button>` : ''}</div>`
-  const phonePage = ({ v = PH, ph, fcls = 'focus', clear = true, btn = '<button class="btn btn-brand">Ուղարկել կոդը</button>', note = '', extra = '' }) =>
+  /* agree: true = ticked, false = not yet (Send stays off), null = not shown. */
+  const agreeRow = (on) => `<div class="agree" role="checkbox" aria-checked="${on}" tabindex="0"><span class="box" aria-hidden="true">${on ? R.i('check') : ''}</span>
+      <span>Ընդունում եմ <a href="#">Պայմանները</a> և<br><a href="#">Գաղտնիության քաղաքականությունը</a></span></div>`
+  const phonePage = ({ v = PH, ph, fcls = 'focus', clear = true, btn = '<button class="btn btn-brand">Ուղարկել կոդը</button>', note = '', extra = '', agree = true }) =>
     `<div class="page on-surface">${hero()}<div class="form">
       <h1 class="large">Մուտք</h1><p class="lead">Կոդը կուղարկենք SMS-ով</p>
-      ${field({ v, ph, cls: fcls, clear })}${note}${btn}</div>${R.keypad()}</div>${extra}`
+      ${field({ v, ph, cls: fcls, clear })}${note}${agree === null ? '' : agreeRow(agree)}${btn}</div>${R.keypad()}</div>${extra}`
 
   const boxes = (ds, cls = '', focusAt = -1) => `<div class="otp ${cls}" role="group" aria-label="Վեցանիշ կոդ">${[0, 1, 2, 3, 4, 5].map((i) =>
     `${i === 3 ? '<span class="gap"></span>' : ''}<span class="d ${i === focusAt ? 'focus' : ''}">${ds[i] || (i === focusAt ? '<span class="caret"></span>' : '')}</span>`).join('')}</div>`
@@ -98,8 +109,8 @@
     sub: 'Phone, then a six-digit code, then a name on the first sign-in. +374 by default, a picker for tourists. The keyboard is drawn up',
     states: [
       { id: 'phone-empty', group: 'Phone', label: 'Empty', note: 'Order disabled until the number is complete',
-        html: () => phonePage({ v: 'XX XXX XXX', ph: true, clear: false, btn: '<button class="btn" disabled>Ուղարկել կոդը</button>' }) },
-      { id: 'phone', group: 'Phone', label: 'Filled', note: 'Grouped as it is spoken: 77 123 456',
+        html: () => phonePage({ v: 'XX XXX XXX', ph: true, clear: false, agree: false, btn: '<button class="btn" disabled>Ուղարկել կոդը</button>' }) },
+      { id: 'phone', group: 'Phone', label: 'Filled', note: 'Grouped as it is spoken: 77 123 456; terms ticked (change list 2026-10-14)',
         html: () => phonePage({}) },
       { id: 'sending', group: 'Phone', label: 'Sending', note: 'Spinner in the button; the field stays readable',
         html: () => phonePage({ fcls: '', clear: false, btn: '<button class="btn btn-brand" aria-busy="true"><span class="spin"></span>Ուղարկում ենք</button>' }) },
@@ -131,14 +142,8 @@
           <div class="form" style="margin-top:var(--s2);margin-bottom:0"><h1 class="large">Ինչպե՞ս դիմենք ձեզ</h1>
           <div class="field focus" style="padding-left:var(--s4)"><span class="num"><span class="lbl">Անուն</span><span class="v">Աննա<span class="caret"></span></span></span></div>
           <button class="btn btn-brand">Շարունակել</button></div>${R.keyboard()}</div>` },
-      { id: 'terms', group: 'First sign-in', label: 'Terms and privacy', note: 'R06 (store requirement; drawn ahead: no consent step today). On the first sign-in only, under the one primary: continuing is accepting, and both documents are a 44pt tap away. Accepted version is stored with the customer',
-        html: () => `<div class="page on-surface">
-          <nav class="nav"><span class="navend"></span><span class="navttl"></span><button class="navbtn" aria-label="Բաց թողնել" style="width:auto;padding:0 8px;font:var(--t-body-strong);color:var(--ink-2)">Հետո</button></nav>
-          <div class="form" style="margin-top:var(--s2);margin-bottom:0"><h1 class="large">Ինչպե՞ս դիմենք ձեզ</h1>
-          <div class="field focus" style="padding-left:var(--s4)"><span class="num"><span class="lbl">Անուն</span><span class="v">Աննա<span class="caret"></span></span></span></div>
-          <button class="btn btn-brand">Շարունակել</button>
-          <div class="consent">Շարունակելով՝ ընդունում եք պայմաններն ու գաղտնիության քաղաքականությունը
-            <div class="lk"><button>${R.i('file-text')}Պայմաններ</button><button>${R.i('shield')}Գաղտնիություն</button></div></div></div>${R.keyboard()}</div>` },
+      { id: 'terms', group: 'Phone', label: 'Terms not ticked', note: 'Change list 2026-10-14 (store requirement; drawn ahead: no consent step today): a checkbox row above «Ուղարկել կոդը», both documents linked. Unticked, the button stays off. The accepted version is stored with the customer; a returning rider sees it ticked',
+        html: () => phonePage({ agree: false, btn: '<button class="btn" disabled>Ուղարկել կոդը</button>' }) },
     ],
   })
 </script>

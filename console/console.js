@@ -27,18 +27,18 @@
      on the rider home) is renamed «Բիզնես գործընկերներ» so the word means one thing in this nav.
      Groups marked fold:true render collapsed unless they hold the active page (keeps the nav inside 900px). ── */
   const NAV = [
-    { items: [['overview', 'layout-dashboard', 'Ընդհանուր'], ['dispatch', 'activity', 'Դիսպետչերական', '2', true], ['rides', 'list', 'Պատվերներ'], ['requests', 'inbox', 'Հարցումներ', '3', true]] },
+    { items: [['overview', 'layout-dashboard', 'Ընդհանուր'], ['dispatch', 'activity', 'Դիսպետչերական', '2', true], ['rides', 'list', 'Պատվերներ'], ['transfers', 'plane', 'Տրանսֆերներ', '3'], ['requests', 'inbox', 'Հարցումներ', '3', true]] },
     { group: 'Ավտոպարկ', items: [['drivers', 'users', 'Վարորդներ', '30'], ['vehicles', 'car', 'Մեքենաներ', '28'], ['tariffs', 'tag', 'Սակագներ'], ['zones', 'map', 'Գոտիներ']] },
     { group: 'Գործընկերներ', items: [['partners', 'handshake', 'Գործընկերներ', '12'], ['approvals', 'badge-check', 'Հաստատումներ', '3', true], ['topups', 'wallet', 'Լիցքավորումներ'], ['feeplans', 'percent', 'Միջնորդավճարներ']] },
     /* Owner 2026-10-14: fleet drivers have no balance (#3), so fleet billing plans («Հաշվարկներ», billing.html) are gone;
        no invoicing (#11), so «Հաշիվների ձևավորում» is gone — company reports live on the company page and in Reports. */
     { group: 'Ֆինանսներ', items: [['customers', 'user-check', 'Ուղևորներ'], ['companies', 'building-2', 'Ընկերություններ'], ['monthly', 'calendar-check', 'Ըստ ամսի'], ['fiscal', 'scroll-text', 'Ֆիսկալ կտրոններ'], ['reports', 'chart-column', 'Հաշվետվություններ']] },
-    { group: 'Ուղևորի հավելված', fold: true, items: [['promotions', 'megaphone', 'Գովազդներ'], ['bizpartners', 'store', 'Գովազդատուներ'], ['apptexts', 'smartphone', 'Տեքստեր և կապ']] },
+    { group: 'Ուղևորի հավելված', fold: true, items: [['promotions', 'ticket-percent', 'Ակցիաներ'], ['bizpartners', 'store', 'Գովազդատուներ'], ['apptexts', 'smartphone', 'Տեքստեր և կապ']] },
     { group: 'Կառավարում', fold: true, items: [['operators', 'user-cog', 'Օպերատորներ'], ['integrations', 'plug', 'Ինտեգրումներ'], ['audit', 'history', 'Մատյան'], ['settings', 'settings', 'Կարգավորումներ']] },
   ]
   const PAGES = ['overview', 'dispatch', 'rides', 'drivers', 'tariffs', 'partners', 'approvals', 'topups', 'feeplans', 'companies', 'company', 'monthly', 'settings',
     /* p1p2 pass: the remaining real routes, plus the planned Requests inbox. */
-    'requests', 'vehicles', 'zones', 'customers', 'reports', 'promotions', 'operators', 'integrations', 'audit', 'search']
+    'requests', 'vehicles', 'zones', 'customers', 'reports', 'promotions', 'transfers', 'operators', 'integrations', 'audit', 'search']
   /* Nav ids whose file is named after the real route rather than the nav word. */
   const FILE = { customers: 'customer' }
   const href = (id) => (PAGES.includes(id) ? `${FILE[id] || id}.html?theme=${THEME}` : '#')

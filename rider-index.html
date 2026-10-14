@@ -28,14 +28,15 @@
 </head>
 <body>
 <script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light'</script>
-<header><h1>Ուղևորի հավելված․ բոլոր էկրանները<span class="en">Rider app, every screen: 14 screens, 129 states (127 in the app, 2 on the public trip page), day and night. Open a screen for its state switcher. Company billing: booking (company / personal, cost reference, over-limit), receipt, account.</span></h1>
+<header><h1>Ուղևորի հավելված․ բոլոր էկրանները<span class="en">Rider app, every screen: 14 screens, 137 states (135 in the app, 2 on the public trip page), day and night. Open a screen for its state switcher. Company billing: booking (company / personal, monthly limit left, over-limit and not-an-allowed-place fallbacks), receipt, account. 2026-10-14 change list: terms checkbox, compact tariffs, promo codes, referral, receipt document.</span></h1>
   <div class="bar" role="group" aria-label="Թեմա / Theme"><a data-t="light" href="?theme=light">Ցերեկ · Day</a><a data-t="dark" href="?theme=dark">Գիշեր · Night</a><a href="index.html">Գլխավոր · Hub</a></div></header>
 <div class="grid" id="g"></div>
 <script>
   const S = [
     ['rider-opening', 'Opening', 'Letter-by-letter logo reveal, then the leaf', 'done'],
     ['rider-login', 'Login', 'Phone, code, errors, resend, offline, name', 'phone'],
-    ['rider-login', 'Login: consent, expiry, lock-out', 'Terms on first sign-in, session ended, too many codes (drawn ahead)', 'terms'],
+    ['rider-login', 'Login: terms checkbox', 'Privacy + Terms checkbox, both linked; Send stays off until ticked (drawn ahead)', 'terms'],
+    ['rider-login', 'Login: expiry, lock-out', 'Session ended, too many codes (drawn ahead)', 'expired'],
     ['rider-home', 'Home', 'Approved hero', null],
     ['rider-home', 'Home, ride in progress', 'Live-ride card back to the ride (drawn ahead)', null, { q: 'active=1', shot: 'rider-home-active' }],
     ['rider-home', 'Home, pre-order activated', '«Վարորդը նշանակված է · Սուրեն Մ. · 08:30-ին» (drawn ahead)', null, { q: 'active=preorder', shot: 'rider-home-active-preorder' }],
@@ -48,7 +49,11 @@
     ['rider-book', 'Booking details', 'Note, Later, payment', 'details'],
     ['rider-book', 'When: day + quarter-hour', '7 day chips, slots from now + 30 min, «Հիմա»', 'when'],
     ['rider-book', 'Booking for later', 'Time set, note off, company pre-booking', 'scheduled'],
-    ['rider-book', 'Company booking', 'Company / personal, «Ծախսերի կոդ», over-limit fallback', 'company'],
+    ['rider-book', 'Company booking', 'Company / personal, monthly limit left (drawn ahead)', 'company'],
+    ['rider-book', 'Company: over monthly limit', '600 ֏ left: personal, one line why (drawn ahead)', 'company-limit'],
+    ['rider-book', 'Company: not an allowed place', 'Trip outside home / office / Zvartnots: personal, places listed (drawn ahead)', 'company-places'],
+    ['rider-book', 'Promo applied', 'AUTUMN15: 1 100 → 935 ֏ on the card and the button (drawn ahead)', 'promo'],
+    ['rider-book', 'Enter promo code', 'One field, the check result, «Կիրառել» (drawn ahead)', 'promo-enter'],
     ['rider-book', 'Company unavailable', 'company.unavailable fallback', 'company-unavailable'],
     ['rider-book', 'Order refused', 'Blacklisted, refused, offline at order', 'blacklisted'],
     ['rider-book', 'Price and route states', 'Pricing, no price, no route line, metered «≈»', 'quote-loading'],
@@ -64,8 +69,10 @@
     ['trip-share', 'Shared trip (public page)', 'What a recipient opens; ended state', null, { href: 'trip-share.html', shot: 'trip-share' }],
     ['rider-done', 'Trip complete', 'Fare breakdown, rating, compliments', 'rate'],
     ['rider-done', 'Receipt, company', '«Վճարում է՝ …» in place of the payment method', 'company'],
+    ['rider-done', 'Trip complete, promo', '«Պրոմոկոդ · AUTUMN15 −165 ֏» in the breakdown (drawn ahead)', 'promo'],
     ['rider-done', 'Fiscal receipt', 'The tax receipt as issued, share as PDF (drawn ahead)', 'fiscal'],
     ['rider-history', 'Ride history', 'Pre-orders first, then rides; receipts', 'list'],
+    ['rider-history', 'Receipt document', 'Every ride row has a receipt button; the receipt with promo line, fiscal №, «Ներբեռնել PDF» (drawn ahead)', 'receipt'],
     ['rider-history', 'Receipt offline', 'app.offline + «Կրկնել» where the receipt would be', 'receipt-error'],
     ['rider-preorders', 'Pre-orders', 'List, change via the dispatcher, reminder', 'list'],
     ['rider-preorders', 'Pre-order detail', 'Pre-assigned driver, «Սկսել հիմա» (drawn ahead)', 'detail'],
@@ -73,6 +80,9 @@
     ['rider-preorders', 'Pre-order pushes', 'Reminder 30 min before; driver assigned · pickup 08:30', 'activated'],
     ['rider-account', 'Account', 'Profile, places, wallet, language, theme, help, legal, delete', 'main'],
     ['rider-account', 'Account, company rider', 'Linked company in the wallet', 'main-company'],
+    ['rider-account', 'Company: limit and places', 'Monthly limit left, the places the company pays between (drawn ahead)', 'company'],
+    ['rider-account', 'Promo code', 'Enter a code; the active one (drawn ahead)', 'promo'],
+    ['rider-account', 'Invite a friend', 'Referral: 700 ֏ + 700 ֏, own code, share, stats (drawn ahead)', 'referral'],
     ['rider-account', 'Save a place', 'Home / Work / Other from a ride or a search; remove failed', 'place-add'],
     ['rider-account', 'Delete blocked', 'Debt, a running ride, other (account.blocked*)', 'delete-blocked-ride'],
     ['rider-offline', 'Offline and errors', 'Banner pattern, degraded, full-screen error', 'offline'],

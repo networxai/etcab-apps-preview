@@ -73,6 +73,21 @@
   .empty .ei svg { width: 32px; height: 32px; }
   .empty .t1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
   .empty .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  /* Range sheet (change list 2026-10-14): 7 columns of 48px day targets; the chosen run is one soft band, its ends filled. */
+  .cal { padding-bottom: 34px; }
+  .calhead { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--s2); }
+  .calhead b { font: var(--t-headline); color: var(--ink); }
+  .cal .wk, .cal .grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .cal .wk span { text-align: center; font: var(--t-caption); color: var(--ink-2); padding-bottom: var(--s2); }
+  .cal .grid span { height: 48px; display: grid; place-items: center; font: var(--t-body); color: var(--ink); font-variant-numeric: tabular-nums; position: relative; }
+  .cal .grid span.mute { color: var(--ink-3); }
+  .cal .grid span.in { background: var(--brand-soft); }
+  .cal .grid span.a, .cal .grid span.b { background: var(--brand-soft); }
+  .cal .grid span.a { border-radius: 24px 0 0 24px; } .cal .grid span.b { border-radius: 0 24px 24px 0; }
+  .cal .grid span.a i, .cal .grid span.b i { position: absolute; inset: 2px; border-radius: 50%; background: var(--brand); }
+  .cal .grid span.a em, .cal .grid span.b em { position: relative; font-style: normal; color: var(--on-brand); font-weight: 600; }
+  .cal .grid span.today { font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+  .calsum { display: flex; justify-content: space-between; align-items: center; margin: var(--s3) 0 var(--s3); font: var(--t-secondary-strong); color: var(--ink); }
 </style>
 </head>
 <body>
@@ -80,7 +95,7 @@
   <div class="appbar">
     <button class="iconbtn" aria-label="Հետ"><i data-lucide="arrow-left"></i></button>
     <span class="sp"></span>
-    <button class="iconbtn" aria-label="Թաքցնել գումարները" data-s="today week"><i data-lucide="eye"></i></button>
+    <button class="iconbtn" aria-label="Թաքցնել գումարները" data-s="today week month range picker"><i data-lucide="eye"></i></button>
   </div>
 
   <div class="content">
@@ -88,9 +103,12 @@
     <div class="ptitle" data-s="rides">Պատվերներ</div>
 
     <!-- Owner #3 (2026-10-14): a fleet driver has no balance. Two periods only; the old «Հաշվեկշիռ» tab is gone. -->
-    <div class="seg" role="group" aria-label="Ժամանակահատված" data-s="today week unavailable">
+    <!-- Change list 2026-10-14: a date filter — Today / Week / Month / a chosen range («Ընտրել» opens the range sheet). -->
+    <div class="seg" role="group" aria-label="Ժամանակահատված" data-s="today week month range picker unavailable">
       <button aria-pressed="false" data-ps="today unavailable">Այսօր</button>
       <button aria-pressed="false" data-ps="week">Շաբաթ</button>
+      <button aria-pressed="false" data-ps="month">Ամիս</button>
+      <button aria-pressed="false" data-ps="range" aria-label="Ընտրել օրերը"><i data-lucide="calendar" style="width:16px;height:16px;margin-right:4px;vertical-align:-3px"></i>Ընտրել</button>
     </div>
 
     <!-- ── today ── -->
@@ -138,6 +156,27 @@
       <a class="group more" href="?state=rides" style="display:block;text-decoration:none"><div class="row"><span class="ic"><i data-lucide="list"></i></span><span class="txt"><span class="t1">Բոլոր պատվերները</span></span><i class="chev" data-lucide="chevron-right"></i></div></a>
     </section>
 
+    <!-- ── month (change list 2026-10-14): the month so far, by week ── -->
+    <section data-s="month range">
+      <div class="lbl" data-s="month">Հոկտեմբեր · 1–9 հոկտ.</div>
+      <div class="lbl" data-s="range">1–7 հոկտ. · 7 օր</div>
+      <div class="hero" data-s="month">112 300<small>֏</small></div>
+      <div class="hero" data-s="range">84 600<small>֏</small></div>
+      <div class="kpis" data-s="month"><span class="kpi"><i data-lucide="car-front"></i><b>79</b>պատվեր</span><span class="kpi"><i data-lucide="clock"></i><b>74 ժ</b>առցանց</span></div>
+      <div class="kpis" data-s="range"><span class="kpi"><i data-lucide="car-front"></i><b>58</b>պատվեր</span><span class="kpi"><i data-lucide="clock"></i><b>55 ժ</b>առցանց</span></div>
+      <div class="split" role="img" aria-label="Կանխիկ և ընկերության հաշվին">
+        <div class="bar"><i class="c-cash" style="width:81%"></i><i class="c-company" style="width:19%"></i></div>
+        <div class="legend" data-s="month"><span><i class="c-cash"></i>Կանխիկ <b>91 000 ֏</b></span><span><i class="c-company"></i>Ընկերություն <b>21 300 ֏</b></span></div>
+        <div class="legend" data-s="range"><span><i class="c-cash"></i>Կանխիկ <b>68 500 ֏</b></span><span><i class="c-company"></i>Ընկերություն <b>16 100 ֏</b></span></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><b>1 420 ֏</b><span>Միջին պատվեր</span></div>
+        <div class="stat"><b>1 520 ֏</b><span>Ժամում</span></div>
+        <div class="stat"><b data-s="month">392 կմ</b><b data-s="range">296 կմ</b><span>Ճանապարհ</span></div>
+      </div>
+      <a class="group more" href="?state=rides" style="display:block;text-decoration:none"><div class="row"><span class="ic"><i data-lucide="list"></i></span><span class="txt"><span class="t1">Բոլոր պատվերները</span></span><i class="chev" data-lucide="chevron-right"></i></div></a>
+    </section>
+
     <!-- ── rides (was «ledger»): every ride by day, how it was paid; no fees, no settlements (owner #3) ── -->
     <section data-s="rides">
       <div class="day"><span>Այսօր, 9 հոկտ.</span><span>7 պատվեր · <b>9 800 ֏</b></span></div>
@@ -165,14 +204,29 @@
       <button class="btn btn-quiet on-ground" style="width:auto;padding:0 24px;margin-top:var(--s4)"><i data-lucide="rotate-cw"></i>Կրկնել</button>
     </section>
   </div>
+  <!-- ── range picker (?state=picker): «Ընտրել» opens a month grid; tap the first day, then the last (≤ 92 days). ── -->
+  <div class="scrim" data-s="picker" aria-hidden="true"></div>
+  <section class="sheet top cal" data-s="picker" role="dialog" aria-label="Ընտրել օրերը">
+    <div class="grabber"></div>
+    <div class="calhead"><button class="iconbtn flat" aria-label="Նախորդ ամիս"><i data-lucide="chevron-left"></i></button><b>Հոկտեմբեր 2026</b><button class="iconbtn flat" aria-label="Հաջորդ ամիս"><i data-lucide="chevron-right"></i></button></div>
+    <div class="wk"><span>Երկ</span><span>Երք</span><span>Չրք</span><span>Հնգ</span><span>Ուրբ</span><span>Շբթ</span><span>Կիր</span></div>
+    <div class="grid" id="calgrid"></div>
+    <div class="calsum"><span>1–7 հոկտ. · 7 օր</span><button class="btn-text" style="width:auto">Մաքրել</button></div>
+    <button class="btn btn-brand lg">Ցույց տալ</button>
+  </section>
 </main>
 <script src="audit.js"></script>
 <script>
   statusBar(document.getElementById('s'), '15:10') /* the same Friday, later: the shift's rides are behind us */
   const st = D.init([
-    ['today', 'Today · cash/company split'], ['week', 'Week · daily bars'], ['rides', 'All rides by day'], ['unavailable', 'Unavailable · retry'],
+    ['today', 'Today · cash/company split'], ['week', 'Week · daily bars'], ['month', 'Month so far (filter, ahead)'], ['picker', 'Choose days · range sheet (ahead)'], ['range', 'Chosen range 1–7 Oct (ahead)'],
+    ['rides', 'All rides by day'], ['unavailable', 'Unavailable · retry'],
   ])
-  document.querySelectorAll('[data-ps]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.ps.split(' ').includes(st))))
+  /* October 2026 starts on a Thursday; the range 1–7, today the 9th. picker shows the range page under the sheet. */
+  if (st === 'picker') document.querySelectorAll('[data-s~="range"]').forEach((el) => { el.hidden = false })
+  document.getElementById('calgrid').innerHTML = [28, 29, 30].map((d) => `<span class="mute">${d}</span>`).join('') +
+    Array.from({ length: 31 }, (_, i) => i + 1).map((d) => d === 1 ? '<span class="a"><i></i><em>1</em></span>' : d === 7 ? '<span class="b"><i></i><em>7</em></span>' : `<span class="${d < 7 ? 'in' : d === 9 ? 'today' : d > 9 ? 'mute' : ''}">${d}</span>`).join('') + '<span class="mute">1</span>'
+  document.querySelectorAll('[data-ps]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.ps.split(' ').includes(st === 'picker' ? 'range' : st))))
   icons()
   D.noMap()
 </script>

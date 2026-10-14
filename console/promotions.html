@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Promotions</title>
 <link rel="stylesheet" href="console.css">
+<link rel="stylesheet" href="corporate.css">
 <script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
 <script src="../kit.js"></script>
 <script src="console.js"></script>
@@ -16,6 +17,7 @@
      sizes and scrim as rider-home.html, so the operator previews the carousel, not a form. */
   .content { grid-template-columns: minmax(0, 1fr) 312px; }
   .lst { min-width: 0; }
+  .tbx { padding: 12px var(--inset) var(--inset); display: grid; gap: 12px; align-content: start; }
   .explain { font: var(--c-body); color: var(--ink-muted); padding: 10px var(--inset); border-bottom: 1px solid var(--line-soft); max-width: 900px; }
   .tb { display: flex; align-items: center; gap: 6px; padding: 8px var(--inset); border-bottom: 1px solid var(--line-soft); }
   .tb .input { width: 240px; }
@@ -71,10 +73,11 @@
 <div class="screen" id="screen">
   <div class="main">
     <header class="bar">
-      <span class="crumb">Ուղևորի հավելված <i data-lucide="chevron-right"></i></span><h1>Գովազդներ</h1>
+      <span class="crumb">Ուղևորի հավելված <i data-lucide="chevron-right"></i></span><h1>Ակցիաներ</h1>
+      <nav class="tabsl" id="ptabs" aria-label="Ակցիաներ" style="margin:0;border:0;padding:0 0 0 12px;align-self:stretch;align-items:center"></nav>
       <div class="live"></div>
     </header>
-    <div class="content">
+    <div class="content" id="content">
       <section class="card lst" aria-labelledby="t1">
         <div class="card-h"><h2 id="t1">Գովազդներ</h2><span class="sub num" id="cnt"></span><span class="sub">· ուղևորի գլխավոր էջում</span>
           <span class="end"><button class="btn primary s" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր գովազդ<span class="kbd">N</span></button></span></div>
@@ -158,6 +161,85 @@
   document.getElementById('track').style.transform = `translateX(${-326 * first}px)`
   document.getElementById('dots').innerHTML = strip.map((_, i) => `<i class="${i === first ? 'on' : ''}"></i>`).join('')
   document.getElementById('order').innerHTML = strip.map((s) => `<div><span class="mono r">${s.order}</span>${s.who}${s.isNew ? ' <span class="pill brand" style="height:20px">Նոր · չպահված</span>' : ''}</div>`).join('')
+
+  /* ── Owner 2026-10-14: Promotions is now three tabs — promo codes (default), the referral programme, and the
+     partner ads above (kept as they were). Codes and referral are DRAWN AHEAD: no promo entity in the API.
+     ?tab=codes [&new=1 create card · &code=AUTUMN15 stats] · ?tab=referral · ?tab=ads (old ?new=1 = ads create). ── */
+  const PTAB = q.get('tab') || (NEW ? 'ads' : 'codes')
+  const PR = ECO.PROMO
+  document.getElementById('ptabs').innerHTML = [['codes', 'Պրոմոկոդեր', PR.codes.length], ['referral', 'Հրավերներ', ''], ['ads', 'Գովազդներ', cards.length]]
+    .map(([k, l, c]) => `<a href="?theme=${THEME}&tab=${k}" class="${k === PTAB ? 'on' : ''}" aria-current="${k === PTAB ? 'page' : 'false'}">${l}${c !== '' ? `<span class="c num">${c}</span>` : ''}</a>`).join('')
+  const tierName = (id) => ECO.TIERS.find((t) => t.id === id).name
+  const disc = (c) => c.kind === 'pct' ? `${c.value} %${c.cap ? ` <span class="faint">· մինչև ${amd(c.cap)}</span>` : ''}` : amd(c.value)
+  const SELC = q.get('code') || 'AUTUMN15'
+  if (PTAB === 'codes') {
+    const C1 = PR.codes.find((c) => c.code === SELC)
+    const createCodes = `<div class="create" role="group" aria-labelledby="crc"><h3 id="crc"><i data-lucide="plus"></i>Նոր պրոմոկոդ</h3>
+      <div class="fg">
+        <div class="f s3"><label class="label">Կոդ</label><span class="input focus"><span class="val mono">NOV10<span style="border-left:1.5px solid var(--ink);margin-left:1px"></span></span></span><div class="hint">Լատինատառ և թվեր</div></div>
+        <div class="f s3"><label class="label">Զեղչ</label><div class="seg" role="radiogroup" aria-label="Զեղչի տեսակ" style="display:flex"><button class="on" role="radio" aria-checked="true" style="flex:1;justify-content:center">%</button><button role="radio" aria-checked="false" style="flex:1;justify-content:center">֏</button></div></div>
+        <div class="f s3"><label class="label">Չափը</label><span class="input"><span class="val mono">10</span><span class="faint">%</span></span></div>
+        <div class="f s3"><label class="label">Առավելագույնը</label><span class="input"><span class="val mono">400</span><span class="faint">֏</span></span><div class="hint">Մեկ ուղևորությանը</div></div>
+        <div class="f s3"><label class="label">Ընդհանուր օգտագործում</label><span class="input"><span class="val mono">500</span></span><div class="hint">Դատարկ՝ առանց սահմանի</div></div>
+        <div class="f s3"><label class="label">Մեկ ուղևորին</label><span class="input"><span class="val mono">2</span></span></div>
+        <div class="f s3"><label class="label">Սկսած</label><span class="input"><i data-lucide="calendar"></i><span class="val mono">01.11.2026</span></span></div>
+        <div class="f s3"><label class="label">Մինչև</label><span class="input"><i data-lucide="calendar"></i><span class="val mono">30.11.2026</span></span></div>
+        <div class="f s9"><label class="label">Սակագներ</label><div class="row-flex" style="gap:6px;flex-wrap:wrap">${ECO.TIERS.map((t, i) => `<button class="chip${i < 2 ? ' on' : ''}">${t.name}</button>`).join('')}</div></div>
+        <div class="f s3" style="align-self:end"><span class="check"><i class="b"></i>Միայն նոր ուղևորներին</span></div>
+      </div>
+      <div class="foot"><button class="btn primary"><i data-lucide="check"></i>Ավելացնել <span class="kbd">↵</span></button><a class="btn secondary" href="?theme=${THEME}&tab=codes">Չեղարկել</a><span class="faint">Զեղչը ֆինանսավորում է ավտոպարկը · վարորդի գինը չի փոխվում</span></div></div>`
+    document.getElementById('content').innerHTML = `
+      <section class="card lst" aria-labelledby="tc"><div class="card-h"><h2 id="tc">Պրոմոկոդեր</h2><span class="sub num">${PR.codes.length}</span>
+          <span class="end"><a class="btn primary s" href="?theme=${THEME}&tab=codes&new=1" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր պրոմոկոդ<span class="kbd">N</span></a></span></div>
+        ${NEW ? `<div style="padding-top:12px">${createCodes}</div>` : ''}
+        <div class="scroll-y grow"><table class="tbl pt"><colgroup><col style="width:124px"><col style="width:160px"><col><col style="width:140px"><col style="width:140px"><col style="width:112px"></colgroup>
+          <thead><tr><th>Կոդ</th><th>Զեղչ</th><th>Օգտագործված</th><th>Ժամկետ</th><th>Ում</th><th>Վիճակ</th></tr></thead>
+          <tbody>${PR.codes.map((c) => { const pct = c.total ? Math.round(c.used / c.total * 100) : null
+            return `<tr class="${c.code === SELC ? 'on' : ''} ${c.on ? '' : 'paused'}"><td><a class="nm mono" href="?theme=${THEME}&tab=codes&code=${c.code}" style="color:inherit;text-decoration:none;font-weight:600">${c.code}</a></td><td>${disc(c)}</td>
+              <td><span class="lim${pct >= 90 ? ' near' : ''}" style="display:flex;align-items:center;gap:8px"><span class="mono" style="width:96px">${ECO.num(c.used)}${c.total ? ' / ' + ECO.num(c.total) : ''}</span>${pct !== null ? `<span class="bar3 grow" role="img" aria-label="${pct} %"><i style="width:${pct}%"></i></span>` : '<span class="faint">առանց սահմանի</span>'}</span></td>
+              <td>${c.to ? `մինչև <span class="mono">${c.to}</span>` : '<span class="faint">անժամկետ</span>'}</td>
+              <td><span class="two2" style="display:flex;flex-direction:column"><span>${c.newOnly ? 'Նոր ուղևորներ' : 'Բոլորը'}</span><span class="faint" style="font:var(--c-small)">${c.tiers ? c.tiers.map(tierName).map((n) => n.replace('Eco ', '')).join(', ') : 'Բոլոր սակագները'}</span></span></td>
+              <td><span class="pill ${c.on ? 'ok' : ''}"><i class="d"></i>${c.on ? 'Միացված' : c.used >= (c.total || Infinity) ? 'Սպառված' : 'Անջատված'}</span></td></tr>` }).join('')}</tbody></table></div></section>
+      <aside class="card" aria-labelledby="ts"><div class="card-h"><h2 id="ts" class="mono">${C1.code}</h2><span class="sub">${disc(C1).replace(/<[^>]+>/g, '')}</span></div>
+        <div class="scroll-y grow"><div class="tbx">
+          <div class="figs" style="grid-template-columns:1fr 1fr"><div class="kpi"><span class="k">Կիրառված</span><span class="v mono">${ECO.num(C1.used)}</span><span class="s">${C1.total ? ECO.num(C1.total - C1.used) + ' մնացել է' : ''}</span></div>
+            <div class="kpi"><span class="k">Ուղևորներ</span><span class="v mono">318</span><span class="s">71 նոր</span></div></div>
+          <div class="figs" style="grid-template-columns:1fr 1fr"><div class="kpi"><span class="k">Զեղչ՝ ընդամենը</span><span class="v mono">${amd(64200)}</span><span class="s">միջինը՝ ${amd(156)}</span></div>
+            <div class="kpi"><span class="k">Ուղևորություններ</span><span class="v mono">${amd(512800)}</span><span class="s">զեղչից հետո</span></div></div>
+          <dl class="terms" style="grid-template-columns:1fr 1fr">
+            <div><dt>Ժամկետ</dt><dd class="mono">${C1.from} – ${C1.to || '…'}</dd></div><div><dt>Մեկ ուղևորին</dt><dd class="mono">${C1.perRider}</dd></div>
+            <div><dt>Սակագներ</dt><dd style="white-space:normal">${C1.tiers ? C1.tiers.map(tierName).join(', ') : 'Բոլորը'}</dd></div><div><dt>Ում</dt><dd>${C1.newOnly ? 'Նոր ուղևորներ' : 'Բոլորը'}</dd></div></dl>
+          <div class="row-flex" style="gap:6px"><button class="btn secondary s"><i data-lucide="pencil"></i>Խմբագրել</button><button class="btn secondary s">Անջատել</button><span class="grow"></span><button class="btn ghost s"><i data-lucide="file-spreadsheet"></i>Excel</button></div>
+        </div></div></aside>`
+  } else if (PTAB === 'referral') {
+    const RF = PR.referral
+    const TOP = [['Աննա Հակոբյան', '091 23-45-67', 5, 3, 1400], ['Գայանե Մ.', '093 82-17-55', 9, 6, 4200], ['Տիգրան Ա.', '055 60-31-12', 7, 4, 2800], ['Նունե Կ.', '094 18-90-03', 4, 4, 2800], ['Արմեն Ս.', '077 41-22-08', 6, 2, 1400]]
+      .sort((a, b) => b[3] - a[3])
+    document.getElementById('content').innerHTML = `
+      <section class="card lst" aria-labelledby="tr"><div class="card-h"><h2 id="tr">Հրավերներ</h2><span class="sub">ընկերոջը հրավիրելու ծրագիր</span><span class="end"><span class="switch on"><i class="t"></i>Միացված</span></span></div>
+        <div class="scroll-y grow"><div class="tbx">
+          <div class="figs"><div class="kpi"><span class="k">Հրավիրված</span><span class="v mono">${RF.total.invited}</span></div><div class="kpi"><span class="k">Գրանցվել են</span><span class="v mono">${RF.total.joined}</span></div>
+            <div class="kpi"><span class="k">Ուղևորվել են</span><span class="v mono">${RF.total.rewarded}</span></div><div class="kpi"><span class="k">Զեղչ՝ ընդամենը</span><span class="v mono">${amd(RF.total.spent)}</span></div></div>
+          <section class="sec"><h3>Պայմաններ<span class="sub">գործում է նոր հրավերների համար</span></h3><div class="pad"><div class="fgrid" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+            <div><label class="label">Հրավիրողը ստանում է</label><div class="input"><span class="val mono">700</span><span class="faint">֏ զեղչ</span></div><p class="hint">Հաջորդ ուղևորությանը</p></div>
+            <div><label class="label">Հրավիրվածը ստանում է</label><div class="input"><span class="val mono">700</span><span class="faint">֏ զեղչ</span></div><p class="hint">Առաջին ուղևորությանը</p></div>
+            <div><label class="label">Երբ</label><div class="input" style="min-width:0"><span class="val trunc">Առաջին ուղևորությունից</span><i data-lucide="chevron-down"></i></div><p class="hint">Հրավիրվածի առաջինից հետո</p></div>
+            <div><label class="label">Զեղչը գործում է</label><div class="input"><span class="val mono">${RF.expiresDays}</span><span class="faint">օր</span></div></div>
+            <div class="full"><span class="check on"><i class="b"></i>Միայն նոր համար · նույն սարքից երկրորդ հաշիվը չի հաշվվում</span></div>
+          </div><div class="formfoot"><span class="faint" style="font:var(--c-small)">Ուղևորը տեսնում է՝ Հաշիվ → Հրավիրեք ընկերոջը</span><span class="sp"></span><button class="btn primary">Պահել</button></div></div></section>
+          <section class="sec"><h3>Ամենաշատ հրավիրողները<span class="sub">այս ամիս</span></h3>
+            <table class="tbl"><colgroup><col><col style="width:170px"><col style="width:120px"><col style="width:140px"><col style="width:140px"></colgroup>
+              <thead><tr><th>Ուղևոր</th><th>Հեռախոս</th><th class="c">Հրավիրել է</th><th class="c">Ուղևորվել են</th><th class="m">Ստացել է</th></tr></thead>
+              <tbody>${TOP.map(([n, ph, a, b, e]) => `<tr><td>${n}</td><td class="mono">${ph}</td><td class="c">${a}</td><td class="c">${b}</td><td class="m">${amd(e)}</td></tr>`).join('')}</tbody></table></section>
+        </div></div></section>
+      <aside class="card" aria-labelledby="tp"><div class="card-h"><h2 id="tp">Ինչպես է տեսնում ուղևորը</h2></div>
+        <div class="pv"><div class="phone" style="height:200px" aria-label="Ուղևորի հրավերի էջի նախադիտում"><div class="in" style="padding:20px 16px">
+          <div style="font:600 24px/30px var(--font);color:var(--ink)">Հրավիրեք ընկերոջը</div>
+          <div style="font:400 15px/22px var(--font);color:var(--ink-muted);margin-top:6px">Դուք և ընկերը՝ ${amd(RF.inviter)} զեղչ</div>
+          <div style="margin-top:20px;height:56px;border-radius:14px;background:var(--surface-alt);display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:600 20px/24px var(--mono);letter-spacing:1px;color:var(--ink)">${RF.code}<i data-lucide="copy"></i></div>
+          <div style="margin-top:12px;height:52px;border-radius:14px;background:var(--brand-fill);color:var(--brand-fill-ink);display:flex;align-items:center;justify-content:center;gap:8px;font:600 17px/22px var(--font)"><i data-lucide="share"></i>Կիսվել հղումով</div>
+        </div></div><span class="cap">Նույնը՝ rider-account · Հրավիրեք ընկերոջը</span></div></aside>`
+  } else document.getElementById('t1').textContent = 'Գովազդներ'
   icons()
   document.documentElement.dataset.mapReady = 'none'
 </script>

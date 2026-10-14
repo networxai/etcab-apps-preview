@@ -49,8 +49,20 @@
     },
 
     /* Corporate client used on every surface (rider booking, receipt, console Companies). */
-    COMPANY: { name: 'Արարատ Սոֆթ ՍՊԸ', short: 'Արարատ Սոֆթ', tin: '02612345', refLabel: 'Ծախսերի կոդ', ref: 'MKT-204',
+    /* Owner 2026-10-14 (change list): no company/cost-centre code and no fixed routes, anywhere. */
+    COMPANY: { name: 'Արարատ Սոֆթ ՍՊԸ', short: 'Արարատ Սոֆթ', tin: '02612345',
       rider: 'Աննա Հակոբյան', limit: 300000, used: 184600, email: 'finance@araratsoft.am',
+      /* Per-employee monthly limit (owner 2026-10-14, corporate #1): by amount OR by ride count, per calendar month.
+         The company default applies unless an employee has his own. Over the limit → the ride is personal (cash).
+         Աննա (the rider app's company rider): 65 000 ֏ a month, 52 400 used (= console Employees row) → 12 600 left. */
+      empLimit: { default: { by: 'amount', amount: 50000 }, rider: { by: 'amount', amount: 65000, used: 52400, left: 12600 },
+        /* The over-limit variant the rider app draws: 600 ֏ left against an 1 100 ֏ fare. */
+        low: { left: 600 } },
+      /* Allowed places per employee (corporate #4): «Ընկերության հաշվին» is offered only when pickup AND destination are
+         each within radius of one of these. office = the company's own address, on every employee by default. */
+      places: { radius: 300, office: { label: 'Գրասենյակ', addr: 'Վազգեն Սարգսյանի 26/1' },
+        rider: [{ kind: 'home', label: 'Տուն', addr: 'Կոմիտասի պող. 22' }, { kind: 'office', label: 'Գրասենյակ', addr: 'Վազգեն Սարգսյանի 26/1' },
+          { kind: 'other', label: 'Զվարթնոց', addr: 'Զվարթնոց օդանավակայան' }] },
       /* Owner 2026-10-14 (#11): no invoices in the product. The fleet tracks each month and sends the client a report;
          accounting invoices outside ETCAB. paid = the optional «Վճարված» mark. */
       months: [
@@ -119,6 +131,46 @@
       { id: 'taron', who: 'Տարոն ռեստորան', offer: 'Աղանդեր՝ նվեր', img: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=700&h=340&q=80&auto=format&fit=crop', on: true, addr: 'Թումանյան 21', until: '15 նոյ.', taps: 268 },
       { id: 'araks', who: 'Արաքս սպա', offer: 'Մերսում՝ −20%', img: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=700&h=340&q=80&auto=format&fit=crop', on: true, addr: 'Սայաթ-Նովա 5', until: '30 նոյ.', taps: 97 },
     ],
+    /* ── Change list 2026-10-14 ── */
+    /* Airport transfers (console Transfers; tariff «Transfer»). Booked by the office for someone else; they reach the
+       driver exactly like pre-orders (driver-preorders shows a «Տրանսֆեր» badge + flight). dir: 'arr' = pick up at
+       Zvartnots after a landing, 'dep' = take someone to it. All drawn ahead: no transfer entity in the API. */
+    TRANSFER_TIER: { id: 'transfer', name: 'Transfer', fare: 6000, waitFreeMin: 60 },
+    TRANSFERS: [
+      { id: 'T-0031', dir: 'arr', flight: 'FZ 715', from: 'Դուբայ', land: '13:40', when: 'Վաղը, 14:10', day: 'Շաբաթ, 10 հոկտ.', time: '14:10', held: '13:40',
+        passenger: 'Դավիթ Ավետիսյան', phone: '+971 50 214 7781', pax: 2, bags: 3, terminal: 'Ժամանման սրահ · ելք 2', sign: 'ARARAT SOFT · D. AVETISYAN',
+        pickup: 'Զվարթնոց օդանավակայան', drop: 'Ամիրյան 1, Մարիոթ հյուրանոց', km: 13.4, fare: 6000, pay: 'company', company: true,
+        status: 'assigned', driver: { name: 'Արամ Պետրոսյան', short: 'Արամ Պ.', plate: '01 ET 001' }, by: 'Անի Դավթյան', booked: 'Այսօր, 9:20' },
+      { id: 'T-0030', dir: 'dep', flight: 'SU 1861', to: 'Մոսկվա', depart: '17:55', when: 'Այսօր, 15:10', day: 'Ուրբաթ, 9 հոկտ.', time: '15:10', held: '14:40',
+        passenger: 'Елена Смирнова', phone: '+7 916 402-18-55', pax: 1, bags: 1, terminal: 'Մեկնման սրահ',
+        pickup: 'Աբովյան 3, Ռադիսոն հյուրանոց', drop: 'Զվարթնոց օդանավակայան', km: 14.1, fare: 6000, pay: 'cash', company: false,
+        status: 'assigned', driver: { name: 'Սուրեն Մկրտչյան', short: 'Սուրեն Մ.', plate: '22 OU 447' }, by: 'Մարիամ Հովսեփյան', booked: 'Երեկ, 18:02' },
+      { id: 'T-0032', dir: 'arr', flight: 'A3 920', from: 'Աթենք', land: '23:15', when: 'Այսօր, 23:40', day: 'Ուրբաթ, 9 հոկտ.', time: '23:40', held: '23:10',
+        passenger: 'Нина Арутюнян', phone: '098 77-31-02', pax: 1, bags: 2, terminal: 'Ժամանման սրահ · ելք 1',
+        pickup: 'Զվարթնոց օդանավակայան', drop: 'Դավթաշեն, 3-րդ թաղ. 14', km: 15.8, fare: 6000, pay: 'cash', company: false,
+        status: 'unassigned', driver: null, by: 'Սոնա Աբգարյան', booked: 'Այսօր, 8:51' },
+      { id: 'T-0027', dir: 'arr', flight: 'W6 4521', from: 'Վիեննա', land: '04:20', when: 'Այսօր, 04:40', day: 'Ուրբաթ, 9 հոկտ.', time: '04:40',
+        passenger: 'Արմեն Գասպարյան', phone: '091 50-22-19', pax: 3, bags: 4, terminal: 'Ժամանման սրահ · ելք 2',
+        pickup: 'Զվարթնոց օդանավակայան', drop: 'Բաղրամյան պող. 24', km: 12.9, fare: 6000, pay: 'cash', company: false,
+        status: 'done', driver: { name: 'Գագիկ Հովհաննիսյան', short: 'Գագիկ Հ.', plate: '35 LL 210' }, by: 'Սոնա Աբգարյան', booked: 'Երեկ, 16:40' },
+    ],
+    /* Tariffs each car may take (console Vehicles → «Սակագներ»). A driver's own order (driver «Նոր պատվեր», change
+       list 2026-10-14) offers only these. Արամ's VW ID.3: Eco City + Eco Kids; Կարեն's (partner) car: Eco Comfort + Eco City. */
+    CAR_TIERS: { aram: ['city', 'kids'], partner: ['comfort', 'city'] },
+    /* Promotions (console Promotions; rider promo entry, booking and receipt). The applied example: AUTUMN15 on the
+       walkthrough's 1 100 ֏ → −165 ֏ → 935 ֏. The fleet funds the discount; the driver's fare is unchanged (drawn ahead). */
+    PROMO: {
+      codes: [
+        { code: 'AUTUMN15', kind: 'pct', value: 15, cap: 500, total: 1000, used: 412, perRider: 3, from: '01.10.2026', to: '31.10.2026', tiers: ['city', 'comfort'], newOnly: false, on: true },
+        { code: 'WELCOME', kind: 'amd', value: 700, total: null, used: 268, perRider: 1, from: '01.03.2026', to: null, tiers: null, newOnly: true, on: true },
+        { code: 'ZVARTNOTS', kind: 'amd', value: 1000, total: 300, used: 300, perRider: 1, from: '01.09.2026', to: '30.09.2026', tiers: ['city'], newOnly: false, on: false },
+      ],
+      applied: { code: 'AUTUMN15', fare: 1100, off: 165, pay: 935 },
+      /* Referral: the invitee gets 700 ֏ off the first ride; the inviter gets 700 ֏ off his next ride once the invitee
+         completes that first ride. Աննա's own code and her stats. */
+      referral: { inviter: 700, invitee: 700, after: 'first_ride', expiresDays: 30, code: 'ANNA4821', link: 'eco.am/r/ANNA4821',
+        mine: { invited: 5, joined: 3, earned: 1400 }, total: { invited: 186, joined: 121, rewarded: 94, spent: 151900 } },
+    },
     /* App versions for «update required» (rider R68, driver D40): the minimum the fleet accepts, set by the office. */
     APP: { rider: { have: '1.3.2', min: '1.4.0' }, driver: { have: '2.2.7', min: '2.3.0' } },
     /* The walkthrough ride's fiscal receipt (R58, drawn ahead: no fiscal API yet; console's «Ֆիսկալ հերթ»). */
@@ -142,9 +194,9 @@
       sun: { id: 'B-0917', who: 'rider', when: 'կիրակի, 19:00', day: 'Կիրակի, 11 հոկտ.', iso: '2026-10-11T19:00', time: '19:00', held: '18:30', activates: '18:45',
         pickup: 'Կասկադ', drop: 'Մաշտոցի պող. 37', tier: 'Eco Comfort', km: 2.4, min: 6, fare: 1000, pay: 'cash',
         rider: 'Աննա', phone: '091 23-45-67', booked: 'Երեկ, 21:14', problem: 'driver_blocked', driver: null },
-      /* A company booking (ADR-C2 on a pre-order): billed to ECO.COMPANY with its cost code. */
+      /* A company booking (ADR-C2 on a pre-order): billed to ECO.COMPANY. Home → office, both allowed places (corporate #4). */
       co: { id: 'B-0921', who: 'rider', when: 'երկուշաբթի, 09:00', day: 'Երկուշաբթի, 12 հոկտ.', iso: '2026-10-12T09:00', time: '09:00', held: '08:30', activates: '08:45',
-        pickup: 'Կոմիտասի պող. 22', drop: 'Վազգեն Սարգսյանի 26/1', tier: 'Eco City', km: 4.1, min: 11, fare: 1100, pay: 'company', ref: 'MKT-204',
+        pickup: 'Կոմիտասի պող. 22', drop: 'Վազգեն Սարգսյանի 26/1', tier: 'Eco City', km: 4.1, min: 11, fare: 1100, pay: 'company',
         rider: 'Աննա Հակոբյան', phone: '091 23-45-67', booked: 'Այսօր, 9:39', driver: null },
       /* Արամ's (ECO.RIDE.driver) two commitments, as driver-preorders draws them.
          kom was 10:05 (held from 09:35), which held Արամ while the walkthrough offered him R-2417 at 9:41. Moved to 10:35:

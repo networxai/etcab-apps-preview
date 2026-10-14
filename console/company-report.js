@@ -1,5 +1,5 @@
 /* Company reports (owner decision 11 + clarification Q11, 2026-10-14): NO invoices. Per company and period — rides with
-   date/time, employee, route, tariff, cost code and price; totals; Excel / CSV / PDF; «Ուղարկել ընկերությանը» to the
+   date/time, employee, route, tariff and price (owner 2026-10-14: no cost-centre code); totals; Excel / CSV / PDF; «Ուղարկել ընկերությանը» to the
    company's contact email; credit limit; an optional «Վճարված» mark per month (who and when). One data set for
    companies.html, company.html (?tab=statement, ?tab=months), monthly.html and reports.html?company=1. */
 (function () {
@@ -66,10 +66,10 @@
   CO.sentNote = () => `<div class="notice neutral" role="status"><i data-lucide="check"></i><span>Ուղարկվեց՝ <span class="mono">${CO.EMAIL}</span> · Excel, PDF · 9:52</span></div>`
 
   /* The rides of a month for ECO.COMPANY: deterministic, newest first. Personal rides and rides of an unlinked employee
-     are not company rides and never appear here. One employee forgot the required cost code once (amber dot). */
-  const EMP = [[C.rider, C.ref], ['Տիգրան Մանուկյան', 'SALES-17'], ['Լիանա Գրիգորյան', 'MKT-204'], ['Արսեն Սահակյան', 'IT-009'], ['Նունե Պետրոսյան', 'HR-002']]
+     are not company rides and never appear here. Owner 2026-10-14: no cost-centre code column. */
+  const EMP = [[C.rider], ['Տիգրան Մանուկյան'], ['Լիանա Գրիգորյան'], ['Արսեն Սահակյան'], ['Նունե Պետրոսյան']]
   const ROUTES = [
-    ['Վազգեն Սարգսյանի 26/1', 'Զվարթնոց օդանավակայան', 'Eco Comfort', 4500],
+    ['Վազգեն Սարգսյանի 26/1', 'Զվարթնոց օդանավակայան', 'Eco Comfort', 4300],
     ['Դավթաշեն 3-րդ թղմ.', 'Վազգեն Սարգսյանի 26/1', 'Eco City', 1600],
     ['Վազգեն Սարգսյանի 26/1', 'Կասկադ', 'Eco City', 1200],
     ['Կոմիտասի պող. 5', 'Վազգեն Սարգսյանի 26/1', 'Eco City', 1000],
@@ -82,19 +82,18 @@
     const out = []
     for (let i = 0; i < n; i++) {
       const d = days - Math.floor(i * days / n), h = 8 + (i * 5) % 12, m = (i * 17) % 60
-      const [who, code] = EMP[(i * 3) % EMP.length], [a, b, tier, price] = ROUTES[(i * 5 + 1) % ROUTES.length]
-      out.push({ at: `${String(d).padStart(2, '0')}.${mm} ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`, who, a, b, tier, code: i === 3 ? '' : code, price })
+      const [who] = EMP[(i * 3) % EMP.length], [a, b, tier, price] = ROUTES[(i * 5 + 1) % ROUTES.length]
+      out.push({ at: `${String(d).padStart(2, '0')}.${mm} ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`, who, a, b, tier, price })
     }
     return out
   }
   /* The report table: bounded (the files carry every ride), a total row that is the month's own figure. */
   CO.table = (month, drawn = 18) => {
     const L = CO.rides(month.key, drawn)
-    return `<table class="tbl rep" aria-label="Ուղևորություններ · ${month.label}"><colgroup><col style="width:124px"><col style="width:180px"><col><col style="width:128px"><col style="width:132px"><col style="width:112px"></colgroup>
-      <thead><tr><th>Ամսաթիվ</th><th>Աշխատակից</th><th>Երթուղի</th><th>Սակագին</th><th>${C.refLabel}</th><th class="m">Գին</th></tr></thead>
-      <tbody>${L.map((r) => `<tr><td class="mono">${r.at}</td><td class="trunc">${r.who}</td><td class="trunc">${r.a} → ${r.b}</td><td>${r.tier}</td>
-        <td>${r.code ? `<span class="tag">${r.code}</span>` : '<span class="warnn" style="font:var(--c-body)"><span class="dot-w"></span>չկա</span>'}</td><td class="m">${amd(r.price)}</td></tr>`).join('')}
-        <tr class="cut"><td colspan="6">Ցուցադրված է ${drawn}-ը ${month.rides}-ից · ֆայլերում բոլորն են</td></tr></tbody>
-      <tfoot><tr><td colspan="2">Ընդամենը</td><td class="c">${month.rides} ուղևորություն</td><td></td><td></td><td class="m">${amd(month.amount)}</td></tr></tfoot></table>`
+    return `<table class="tbl rep" aria-label="Ուղևորություններ · ${month.label}"><colgroup><col style="width:124px"><col style="width:180px"><col><col style="width:140px"><col style="width:120px"></colgroup>
+      <thead><tr><th>Ամսաթիվ</th><th>Աշխատակից</th><th>Երթուղի</th><th>Սակագին</th><th class="m">Գին</th></tr></thead>
+      <tbody>${L.map((r) => `<tr><td class="mono">${r.at}</td><td class="trunc">${r.who}</td><td class="trunc">${r.a} → ${r.b}</td><td>${r.tier}</td><td class="m">${amd(r.price)}</td></tr>`).join('')}
+        <tr class="cut"><td colspan="5">Ցուցադրված է ${drawn}-ը ${month.rides}-ից · ֆայլերում բոլորն են</td></tr></tbody>
+      <tfoot><tr><td colspan="2">Ընդամենը</td><td class="c">${month.rides} ուղևորություն</td><td></td><td class="m">${amd(month.amount)}</td></tr></tfoot></table>`
   }
 })()

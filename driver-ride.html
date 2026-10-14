@@ -295,11 +295,11 @@
     <button class="go">Պատրաստ եմ</button>
   </section>
 
-  <!-- ── ride gone mid-approach (D21): cancelled by the passenger, or reassigned by the dispatcher ── -->
-  <section class="sheet" data-s="changed reassigned" data-sheet role="status">
+  <!-- ── ride gone mid-approach (D21): the order was cancelled. Owner 2026-10-14: no «the dispatcher gave it to another driver» notice; a reassignment reads as a plain cancel. ── -->
+  <section class="sheet" data-s="changed" data-sheet role="status">
     <div class="grabber"></div>
     <div class="gone">
-      <div class="notice info"><i data-lucide="refresh-cw"></i><div><b data-s="changed">Ուղևորը չեղարկեց պատվերը</b><b data-s="reassigned">Դիսպետչերը պատվերը տվեց այլ վարորդի</b>Պատվերը փոխվել է · թարմացնում ենք</div></div>
+      <div class="notice info"><i data-lucide="refresh-cw"></i><div><b>Պատվերը չեղարկվեց</b>Պատվերը փոխվել է · թարմացնում ենք</div></div>
       <div class="was"><i data-lucide="map-pin-off"></i><div><div class="t1" data-eco="RIDE.pickup">Մաշտոցի պող. 37</div><div class="t2">Աննա · Eco City · 1 100 ֏</div></div></div>
       <div class="line"><span class="d"></span>Առցանց եք · սպասում ենք պատվերի</div>
       <a class="go quiet" href="driver-home.html"><span class="drain" aria-hidden="true"></span><i data-lucide="house"></i>Գլխավոր</a>
@@ -377,14 +377,14 @@
 <script>
   const st0 = new URLSearchParams(location.search).get('state') || 'assigned'
   /* The clock follows ECO.RIDE: assigned 9:41, at the pickup 9:45, riding 9:47, dropped 9:51. */
-  statusBar(document.getElementById('s'), { enroute: '9:43', arrived: '9:45', noshow: '9:50', noshowsent: '9:51', offline: '9:45', call: '9:45', cancel: '9:45', inprogress: '9:47', done: '9:51', chat: '9:43', 'company-inprogress': '9:47', 'company-done': '9:51', changed: '9:43', reassigned: '9:43', destchanged: '9:48', sos: '9:48' }[st0] || '9:41')
+  statusBar(document.getElementById('s'), { enroute: '9:43', arrived: '9:45', noshow: '9:50', noshowsent: '9:51', offline: '9:45', call: '9:45', cancel: '9:45', inprogress: '9:47', done: '9:51', chat: '9:43', 'company-inprogress': '9:47', 'company-done': '9:51', changed: '9:43', destchanged: '9:48', sos: '9:48' }[st0] || '9:41')
   const st = D.init([
     ['assigned', 'Assigned · On my way'], ['enroute', 'En route · Arrived (guidance)'], ['arrived', 'Arrived · wait, slide Start'],
     ['noshow', 'No-show available (5:00+)'], ['noshowsent', 'No-show raised'], ['inprogress', 'In progress · slide Complete'],
     ['done', 'Complete · collect cash'], ['forced', 'Forced acknowledgement'], ['offline', 'Offline · actions will sync'],
     ['call', 'Call sheet'], ['cancel', 'Cancel or give back'], ['chat', 'Chat · quick replies (ahead)'],
     ['company-inprogress', 'Company ride · in progress'], ['company-done', 'Company ride · complete, collect nothing'],
-    ['changed', 'Cancelled by passenger (mid-approach)'], ['reassigned', 'Reassigned by dispatcher'],
+    ['changed', 'Order cancelled (mid-approach)'],
     ['destchanged', 'Destination changed by dispatcher (re-priced)'], ['sos', 'SOS · alert dispatcher / 112 (ahead)'],
   ])
   document.getElementById('fring').outerHTML = D.ring(28, 4, .4, '', 'var(--warn)')
@@ -393,7 +393,7 @@
   const A = ROUTES.driverToPickup.pts, B = ROUTES.pickupToDrop.pts
   const bear = (p, q) => Math.atan2((q[1] - p[1]) * Math.cos(p[0] * Math.PI / 180), q[0] - p[0]) * 180 / Math.PI
   const car = (pts, i) => `<div class="me">${carTop(bear(pts[i], pts[Math.min(i + 2, pts.length - 1)]), 'var(--brand)', 'rgb(255 255 255 / .75)')}</div>`
-  const base = ['call', 'cancel'].includes(st) ? 'arrived' : st === 'chat' ? 'enroute' : { 'company-inprogress': 'inprogress', 'company-done': 'done', reassigned: 'changed', sos: 'inprogress' }[st] || st
+  const base = ['call', 'cancel'].includes(st) ? 'arrived' : st === 'chat' ? 'enroute' : { 'company-inprogress': 'inprogress', 'company-done': 'done', sos: 'inprogress' }[st] || st
   const main = document.querySelector('.sheet[data-sheet]:not([hidden]):not(.top)') || (st === 'sos' ? document.querySelector('.sheet[data-s~="inprogress"]') : document.querySelector('.sheet[data-s~="arrived"]'))
   if (st === 'sos') main.hidden = false
   if (['call', 'cancel', 'chat', 'sos'].includes(st)) { main.hidden = false; for (const el of [main, document.getElementById('fab'), document.getElementById('map'), ...document.querySelectorAll('.guide:not([hidden])')]) { el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true') } }
