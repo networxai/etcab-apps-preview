@@ -68,6 +68,59 @@
   @media (max-height: 860px) { .where, .pvl { display: none; } }
   .where div { display: flex; align-items: center; gap: 10px; font: var(--c-body); color: var(--ink-muted); }
   .where .car { width: 56px; height: 30px; }
+  /* ── Change list 2026-10-15: the tariff is the main configuration layer. ?t=<tier>&sec=price|preorder|commission|other
+     opens one tariff's editor; zones (zones.html) only add exceptions on top: Սակագին → Գոտու կանոն → Գոտուց գոտի.
+     Partner fee + balance rules moved here from the retired Fee plans page (owner: partners only; fleet has no balance). ── */
+  .content[hidden] { display: none; }
+  .content.ed { grid-template-columns: 220px minmax(0, 1fr) 316px; }
+  @media (max-width: 1400px) { .content.ed { grid-template-columns: minmax(0, 1fr) 292px; } .content.ed .tl { display: none; } }
+  @media (min-width: 1401px) { .tpick { display: none !important; } }
+  .tl .ti { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 var(--inset) 0 10px; border-bottom: 1px solid var(--line-soft); text-decoration: none; color: var(--ink); }
+  .tl .ti .car { width: 40px; height: 22px; flex: none; }
+  .tl .ti b { font: var(--c-strong); white-space: nowrap; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .tl .ti .faint { font: var(--c-small); }
+  .tl .ti.on { background: var(--surface-alt); box-shadow: inset 3px 0 0 var(--brand-vivid); }
+  .edc { display: flex; flex-direction: column; min-height: 0; }
+  .edc .card-h .car { width: 56px; height: 30px; }
+  .edc .tabsl { margin-top: 0; }
+  .tpick { display: inline-flex; }
+  .sh { display: flex; align-items: center; gap: 10px; padding: 18px var(--inset) 6px; }
+  .sh h3 { font: var(--c-head); white-space: nowrap; }
+  .sh .sub { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .sh .end { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+  .frow { display: grid; grid-template-columns: minmax(0, 1fr) auto 112px; gap: 12px; align-items: center; min-height: 50px; padding: 6px var(--inset); border-bottom: 1px solid var(--line-soft); }
+  .frow .l { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .frow .l b { font: var(--c-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .frow .l span { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .frow .c { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
+  .frow .s { display: flex; justify-content: flex-end; }
+  .frow.off .l b, .frow.off .c { opacity: .5; }
+  .num-in { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; height: 30px; padding: 0 8px; border-radius: var(--r-ctl); box-shadow: inset 0 0 0 1px var(--line-control); background: var(--surface); font: 500 13px/18px var(--mono); white-space: nowrap; min-width: 84px; }
+  .num-in span { color: var(--ink-faint); font-family: var(--font); }
+  .num-in.p { min-width: 64px; } .num-in.dis { background: var(--surface-alt); color: var(--ink-faint); box-shadow: inset 0 0 0 1px var(--line-soft); }
+  .num-in.ed1 { box-shadow: inset 0 0 0 2px var(--ink); }
+  .c .x { font: var(--c-small); color: var(--ink-faint); }
+  .seg.sm button { height: 24px; padding: 0 8px; }
+  .br td { font: 500 13px/18px var(--mono); }
+  .br td.t { font: var(--c-body); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 0; }
+  .grid2 .frow:nth-child(odd) { border-right: 1px solid var(--line-soft); }
+  .split { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 0 var(--inset); font: var(--c-body); }
+  .split span:nth-child(even) { text-align: right; font: 500 13px/20px var(--mono); white-space: nowrap; }
+  .split .tot { font-weight: 600; color: var(--ink); border-top: 1px solid var(--line-soft); padding-top: 6px; margin-top: 2px; }
+  .split .faint { color: var(--ink-faint); }
+  .prio { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; padding: 10px var(--inset) 4px; font: var(--c-label); color: var(--ink-muted); }
+  .prio b { font: var(--c-small); font-weight: 500; color: var(--ink); white-space: nowrap; } .prio svg { width: 14px; height: 14px; color: var(--ink-faint); }
+  .zr { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; padding: 8px var(--inset); border-bottom: 1px solid var(--line-soft); }
+  .zr:last-child { border-bottom: 0; }
+  .zr .sw { width: 10px; height: 10px; border-radius: 3px; background: var(--zc); }
+  .zr b { font: var(--c-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .zr .v { font: 500 13px/18px var(--mono); white-space: nowrap; }
+  .zr .d { grid-column: 2 / 4; font: var(--c-small); color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ovt td { height: 40px; } .ovt td.r { font: 500 13px/18px var(--mono); }
+  .edf2 { display: flex; align-items: center; gap: 8px; padding: 10px var(--inset); border-top: 1px solid var(--line-soft); flex: none; font: var(--c-small); color: var(--ink-faint); }
+  .tier .go { justify-self: end; }
 </style>
 </head>
 <body>
@@ -77,14 +130,14 @@
       <span class="crumb">Ավտոպարկ <i data-lucide="chevron-right"></i></span><h1>Սակագներ</h1>
       <div class="live"></div>
     </header>
-    <div class="content">
+    <div class="content" id="ov">
       <div class="col">
         <section class="card" aria-label="Սակագներ">
           <div class="card-h"><h2>Սակագներ</h2><span class="sub">Հերթականությունը՝ ինչպես հավելվածում · Alt+↑ / Alt+↓</span>
             <span class="end"><button class="btn secondary s"><i data-lucide="plus"></i>Ավելացնել սակագին <span class="kbd">N</span></button></span></div>
           <div id="tiers" data-truncate></div>
           <div class="hint"><i data-lucide="calendar-clock"></i>Նախնական պատվերը ժամին ավտոմատ գնում է այս սակագնի վարորդներին · նախ՝ նշանակված վարորդին, եթե կա</div>
-          <div class="hint"><i data-lucide="image-up"></i>PNG, WebP, JPEG · մինչև 1 ՄԲ · թափանցիկ ֆոն · մեքենան ¾ առջևից<span style="flex:1"></span><i data-lucide="percent"></i>Գործընկերների միջնորդավճարը՝ <a href="feeplans.html" style="color:var(--brand-text)">Միջնորդավճարներ →</a></div>
+          <div class="hint"><i data-lucide="image-up"></i>PNG, WebP, JPEG · մինչև 1 ՄԲ · թափանցիկ ֆոն · մեքենան ¾ առջևից<span style="flex:1"></span><i data-lucide="sliders-horizontal"></i>Գին, միջնորդավճար, կանոններ՝ <a href="tariffs.html?t=comfort&sec=price" id="cfg" style="color:var(--brand-text)">սակագնի կարգավորումներում →</a></div>
         </section>
         <section class="card" aria-label="Գներ">
           <div class="card-h"><h2>Գներ</h2><span class="sub">Գինը հայտնի է նախապես · կլորացում 100 ֏ · <span class="num">09.10</span>-ից</span>
@@ -112,6 +165,7 @@
         <div style="margin:auto var(--inset) var(--inset)"><div class="notice neutral"><i data-lucide="info"></i><span>Նոր նկարը ուղևորը կտեսնի հավելվածը նորից բացելիս</span></div></div>
       </aside>
     </div>
+    <div class="content ed" id="ed" hidden></div>
   </div>
 </div>
 <script>
@@ -143,6 +197,143 @@
   document.getElementById('pv2').innerHTML = TIERS.filter(pre).map((t, i) => card(t, i, i === 0)).join('')
   document.getElementById('pvn').innerHTML = `<i data-lucide="calendar-x"></i>${TIERS.filter((t) => !pre(t)).map((t) => t.name).join(', ')}՝ միայն հիմա`
   ;['w1', 'w2', 'w3'].forEach((id) => { document.getElementById(id).innerHTML = carImg('van') })
+  /* ── Tariff editor (change list 2026-10-15). ?t= takes the kit id (comfort) or the console id (partner). ── */
+  const QS = new URLSearchParams(location.search)
+  const SEC = QS.get('sec'), TID = QS.get('t')
+  document.querySelectorAll('#tiers .tier').forEach((row, i) => {
+    const t = TIERS[i], kid = t.id === 'partner' ? 'comfort' : t.id
+    row.querySelector('.nm b').outerHTML = `<a href="tariffs.html?theme=${THEME}&t=${kid}&sec=price" style="color:inherit;text-decoration:none;font:var(--c-head);white-space:nowrap;display:inline-flex;align-items:center;gap:4px">${t.name}<i data-lucide="chevron-right" style="width:16px;height:16px;color:var(--ink-faint)"></i></a>`
+  })
+  document.getElementById('cfg').href = `tariffs.html?theme=${THEME}&t=comfort&sec=price`
+  if (SEC || TID) {
+    document.getElementById('ov').style.display = 'none'
+    const ed = document.getElementById('ed'); ed.hidden = false
+    const kidOf = (t) => (t.id === 'partner' ? 'comfort' : t.id)
+    const T = TIERS.find((t) => kidOf(t) === (TID || 'comfort') || t.id === TID) || TIERS[1]
+    const K = kidOf(T), sec = SEC || 'price', R = tierRules(T.id)
+    const sw = (on, label) => `<span class="switch${on ? ' on' : ''}" role="switch" aria-checked="${on}" aria-label="${label}"><i class="t"></i>${on ? 'Միաց.' : 'Անջ.'}</span>`
+    const n = (v, u, cls) => `<span class="num-in${cls ? ' ' + cls : ''}">${v}${u ? `<span>${u}</span>` : ''}</span>`
+    const row = (b, hint, ctl, on, label) => `<div class="frow${on === false ? ' off' : ''}"><span class="l"><b>${b}</b>${hint ? `<span>${hint}</span>` : ''}</span><span class="c">${ctl}</span><span class="s">${on === undefined ? '' : sw(on, label || b)}</span></div>`
+    const seg = (opts, on, label) => `<div class="seg sm" role="radiogroup" aria-label="${label}">${opts.map((o, i) => `<button role="radio" aria-checked="${i === on}" class="${i === on ? 'on' : ''}">${o}</button>`).join('')}</div>`
+    const chk = (label, on) => `<span class="check${on ? ' on' : ''}" role="checkbox" aria-checked="${on}"><i class="b"></i>${label}</span>`
+    const sh = (h, sub, end) => `<div class="sh"><h3>${h}</h3>${sub ? `<span class="sub">${sub}</span>` : ''}${end ? `<span class="end">${end}</span>` : ''}</div>`
+    /* Service fee and commission per tariff: Comfort shows percent + min/max; Business is hybrid; Vip is fixed. */
+    const COMM = { city: [0, 15, 0, 100, 1200], comfort: [0, R.fee || 15, 0, 150, 1500], kids: [0, 15, 0, 150, 1500], business: [2, 10, 100, 200, 2000], van: [0, 15, 0, 200, 2000], vip: [1, 0, 600, 600, 600] }[K]
+    const SVC = { city: [2, 3, 50, 100, 300], comfort: [2, 3, 50, 100, 500], kids: [2, 3, 50, 100, 500], business: [0, 4, 0, 100, 600], van: [2, 3, 50, 100, 500], vip: null }[K]
+    const f = fare(T, 2.1, 4)
+    const svcOf = (x) => SVC ? Math.min(SVC[4], Math.max(SVC[3], Math.round(x * SVC[1] / 100) + SVC[2])) : 0
+    const comOf = (x) => Math.min(COMM[4], Math.max(COMM[3], Math.round(x * COMM[1] / 100) + COMM[2]))
+    const comTxt = (c) => (c[0] === 1 ? amd(c[2]) : c[0] === 2 ? `${c[1]} % + ${amd(c[2])}` : `${c[1]} %`)
+    const tabs = [['price', 'Գին', 'banknote'], ['preorder', 'Նախնական պատվեր', 'calendar-clock'], ['commission', 'Միջնորդավճար', 'percent'], ['other', 'Այլ', 'sliders-horizontal']]
+    let body = ''
+    if (sec === 'price') {
+      body = sh('Գնի բաղադրիչներ', 'ամեն մեկն առանձին է միանում · կլորացում 100 ֏')
+        + row('Նստելու գին', 'պատվերի սկզբում', n(nf(T.base), '֏'), true)
+        + row('Նվազագույն գին', 'եթե հաշվարկը ավելի քիչ է', n(nf(T.floor), '֏'), true)
+        + row('Կիլոմետր', 'ըստ միջակայքերի՝ ներքևում', n(T.km, '֏/կմ'), true)
+        + row('Րոպե ճանապարհին', 'երթևեկության ժամանակ', n(T.min, '֏/ր'), true)
+        + row('Անվճար սպասում', 'վարորդի տեղ հասնելուց', n(3, 'ր'), true)
+        + row('Վճարովի սպասում', 'անվճարից հետո', n(50, '֏/ր'), true)
+        + row('Ֆիքսված վճար', 'ամեն պատվերին, օր. ամրագրում', n('—', '֏', 'dis'), false)
+        + sh('Հեռավորության միջակայքեր', 'երկար ճանապարհին՝ էժան', `${sw(true, 'Միջակայքեր')}<button class="btn ghost s"><i data-lucide="plus"></i>Միջակայք</button>`)
+        + `<table class="tbl br"><colgroup><col><col style="width:120px"><col style="width:120px"><col style="width:140px"><col style="width:56px"></colgroup>
+            <thead><tr><th>Միջակայք</th><th class="r">Սկսած</th><th class="r">Մինչև</th><th class="r">Կմ գին</th><th></th></tr></thead><tbody>
+            ${[['Քաղաքային', 0, 10, T.km], ['Միջին', 10, 30, Math.round(T.km * .86)], ['Հեռու', 30, null, Math.round(T.km * .73)]].map(([nm, a, b, k]) => `<tr><td class="t">${nm}</td><td class="r">${a} կմ</td><td class="r">${b === null ? '∞' : b + ' կմ'}</td><td class="r">${n(k, '֏/կմ')}</td><td class="r"><button class="btn ghost icon s" aria-label="Հեռացնել միջակայքը ${nm}"><i data-lucide="x"></i></button></td></tr>`).join('')}</tbody></table>`
+        + sh('Լրացուցիչ վճարներ', 'ուղևորը կամ դիսպետչերը ավելացնում է', '<button class="btn ghost s"><i data-lucide="plus"></i>Վճար</button>')
+        + row('Մեծ ուղեբեռ', 'ուղևորն ընտրում է', n(300, '֏'), true)
+        + row('Կենդանի', 'ուղևորն ընտրում է', n(500, '֏'), true)
+        + row('Լրացուցիչ կանգառ', 'յուրաքանչյուրի համար', n(200, '֏'), true)
+        + row('Մանկական նստոց', K === 'kids' ? 'ներառված է սակագնում' : 'եթե մեքենան ունի', n(K === 'kids' ? 0 : 500, '֏'), K !== 'kids')
+    } else if (sec === 'preorder') {
+      const on = tierPre(T.id)
+      body = sh('Նախնական պատվեր', on ? 'ժամին ավտոմատ որոնում այս սակագնի վարորդների մեջ' : 'այս սակագինը միայն «Հիմա»', sw(on, 'Նախնական պատվեր'))
+        + `<div${on ? '' : ' style="opacity:.5"'}>`
+        + row('Նվազագույնը առաջ', 'ամենաշուտը՝ հիմիկվանից', n(30, 'ր'))
+        + row('Առավելագույնը առաջ', 'ամենաուշը', n(7, 'օր'))
+        + row('Հավելավճար', 'նախնական պատվերի համար', `${seg(['Ֆիքսված', '%'], 0, 'Հավելավճարի տեսակ')}${n(200, '֏')}`, true)
+        + row('Որոնումը սկսվում է', 'նստելու ժամից առաջ', n(15, 'ր'))
+        + row('Նշանակում', 'ով է ստանում պատվերը', seg(['Նշանակվածը, հետո ավտոմատ', 'Ավտոմատ', 'Դիսպետչեր'], 0, 'Նշանակում'))
+        + sh('Վճարում', 'որ եղանակներով կարելի է պատվիրել նախապես')
+        + `<div style="padding:4px var(--inset) 12px" class="chips">${chk('Կանխիկ', true)}${chk('Քարտ', true)}${chk('Ընկերության հաշիվ', true)}</div>`
+        + sh('Չեղարկում', 'ուղևորը հավելվածում չի չեղարկում՝ զանգում է դիսպետչերին')
+        + row('Անվճար չեղարկում', 'մինչև նստելու ժամը', n(60, 'ր'))
+        + row('Չեղարկման վճար', 'դրանից հետո', n(500, '֏'), true)
+        + row('Վարորդի հրաժարում', 'նշանակված վարորդը կարող է հրաժարվել մինչև', n(120, 'ր'))
+        + `</div><div style="padding:12px var(--inset)"><div class="notice neutral"><i data-lucide="bell"></i><span>Հիշեցման ծանուցման ժամանակը՝ <a href="settings.html?theme=${THEME}" style="color:var(--brand-text)">Կարգավորումներում</a> · գոտիները կարող են արգելել կամ սահմանափակել՝ <a href="zones.html?theme=${THEME}" style="color:var(--brand-text)">Գոտիներ</a></span></div></div>`
+    } else if (sec === 'commission') {
+      body = sh('Գործընկերոջ միջնորդավճար', 'միայն գործընկերներ · ավտոպարկի վարորդները հաշվեկշիռ չունեն')
+        + row('Տեսակ', 'տոկոս, ֆիքսված գումար կամ երկուսը միասին', seg(['Տոկոս', 'Ֆիքսված', 'Խառը'], COMM[0], 'Միջնորդավճարի տեսակ'))
+        + row('Տոկոս', 'ավարտված պատվերի գնից', n(COMM[0] === 1 ? '—' : COMM[1], '%', COMM[0] === 1 ? 'dis p' : 'p'))
+        + row('Ֆիքսված', 'ամեն պատվերից', n(COMM[0] === 0 ? '—' : nf(COMM[2]), '֏', COMM[0] === 0 ? 'dis' : ''))
+        + row('Նվազագույն / առավելագույն', 'մեկ պատվերից', `${n(nf(COMM[3]), '֏')}<span class="x">–</span>${n(nf(COMM[4]), '֏')}`)
+        + sh('Հաշվեկշռի կանոններ', 'գործընկերոջ կանխավճարային հաշիվ')
+        + row('Զգուշացում', 'հաշվեկշիռը ցածր է', n('&lt; ' + nf(R.warnBelow), '֏'))
+        + row('Կանգ', 'նոր պատվեր չի գալիս, ընթացիկն ավարտվում է', n('&lt; ' + nf(R.blockBelow), '֏'))
+        + `<div style="padding:6px var(--inset) 4px" class="chips"><span class="chip"><i data-lucide="power"></i>Առցանց անցնելիս</span><span class="chip"><i data-lucide="car"></i>Հերթափոխ բացելիս</span><span class="chip"><i data-lucide="send"></i>Առաջարկ ուղարկելիս</span><span class="chip"><i data-lucide="calendar-clock"></i>Նախնական պատվեր սկսելիս</span></div>`
+        + sh('Ուղևորի սպասարկման վճար', 'ավելանում է գնին · առանձին տող գնի և կտրոնի մեջ', sw(!!SVC, 'Սպասարկման վճար'))
+        + (SVC ? row('Տեսակ', 'տոկոս, ֆիքսված կամ երկուսը', seg(['Տոկոս', 'Ֆիքսված', 'Երկուսը'], SVC[0], 'Սպասարկման վճարի տեսակ'))
+          + row('Տոկոս + ֆիքսված', 'գնից', `${n(SVC[1], '%', 'p')}<span class="x">+</span>${n(nf(SVC[2]), '֏', SVC[2] ? '' : 'dis')}`)
+          + row('Նվազագույն / առավելագույն', 'մեկ պատվերից', `${n(nf(SVC[3]), '֏')}<span class="x">–</span>${n(nf(SVC[4]), '֏')}`)
+          + `<div style="padding:8px var(--inset) 12px" class="chips">${chk('Կանխիկ', true)}${chk('Քարտ', true)}${chk('Ընկերության հաշիվ', false)}<span class="faint" style="font:var(--c-small);align-self:center">ընկերության պատվերին՝ ոչ</span></div>`
+          : `<div style="padding:4px var(--inset) 12px"><div class="notice neutral"><i data-lucide="info"></i><span>${T.name}-ում սպասարկման վճար չկա</span></div></div>`)
+        + sh('Բոլոր սակագները', 'մի հայացքով') + `<table class="tbl ovt"><colgroup><col><col style="width:160px"><col style="width:160px"></colgroup><thead><tr><th>Սակագին</th><th class="r">Գործընկերոջ միջնորդավճար</th><th class="r">Սպասարկման վճար</th></tr></thead><tbody>
+          ${TIERS.map((t) => { const k = kidOf(t), c = { city: [0, 15, 0], comfort: [0, R.fee || 15, 0], kids: [0, 15, 0], business: [2, 10, 100], van: [0, 15, 0], vip: [1, 0, 600] }[k], s2 = { city: '3 % + 50', comfort: '3 % + 50', kids: '3 % + 50', business: '4 %', van: '3 % + 50', vip: '—' }[k]
+            return `<tr${t === T ? ' class="on"' : ''}><td><a href="tariffs.html?theme=${THEME}&t=${kidOf(t)}&sec=commission" style="color:inherit;text-decoration:none">${t.name}</a></td><td class="r">${comTxt(c)}</td><td class="r">${s2}</td></tr>` }).join('')}</tbody></table>`
+    } else {
+      body = sh('Վճարման եղանակներ')
+        + `<div style="padding:4px var(--inset) 12px" class="chips">${chk('Կանխիկ', true)}${chk('Քարտ', true)}${chk('Ընկերության հաշիվ', true)}${chk('Պրոմոկոդ', true)}</div>`
+        + sh('Չեղարկում')
+        + row('Ուղևորի չեղարկման վճար', 'վարորդը նշանակվելուց հետո', `${n(2, 'ր')}<span class="x">հետո</span>${n(300, '֏')}`, true)
+        + row('Ուղևորը չեկավ', 'անվճար սպասումից հետո', n(500, '֏'), true)
+        + sh('Դիսպետչերացում', 'ինչպես է փնտրվում վարորդը')
+        + row('Որոնման շառավիղ', 'սկզբում / ընդլայնել մինչև', `${n(3, 'կմ')}<span class="x">→</span>${n(6, 'կմ')}`)
+        + row('Առաջարկի ժամկետ', 'վարորդը պատասխանում է', n(15, 'վ'))
+        + row('Ալիքներ', 'հետո՝ «Վարորդ չկա» դիսպետչերին', n(3, ''))
+        + row('Մոտեցման սահման', 'ավելի հեռու վարորդին չառաջարկել', n(12, 'ր'))
+        + sh('Հավելավճարներ ըստ ժամի')
+        + row('Գիշերային', 'ամեն օր', `${n('23:00', '')}<span class="x">–</span>${n('06:00', '')}${n('+15', '%', 'p')}`, true)
+        + row('Տոնական օրեր', '31.12, 01.01, 06.01, 08.03, 28.05', `${n('+20', '%', 'p')}<button class="btn ghost s">Օրեր</button>`, true)
+        + sh('Սահմանափակումներ')
+        + row('Ուղևորներ', 'առավելագույնը', n(T.seats, ''))
+        + row('Պատվերի աղբյուր', 'որտեղից կարելի է պատվիրել', `${chk('Հավելված', true)}${chk('Դիսպետչեր', true)}${chk('Վարորդ', K !== 'vip')}`)
+    }
+    /* Aside: what a 2,1 km · 4 min ride costs on this tariff, who gets what; zone exceptions; versions. */
+    const svc = svcOf(f), com = comOf(f)
+    const ZC = DARK_ZC()
+    function DARK_ZC() { return THEME === 'dark' ? { air: '#F2C464', ctr: '#3DD68C', city: '#6B9BFF' } : { air: '#B45309', ctr: '#15803D', city: '#2563EB' } }
+    const zr = [['air', 'Զվարթնոց օդանավակայան', '+500 ֏', 'նստեցում և իջեցում · բոլոր սակագները'],
+      ['air', 'Զվարթնոց · նվազագույնը', '3 000 ֏', 'նստեցում · փոխարինում է սակագնինը'],
+      ['ctr', 'Կենտրոն · րոպե', '18 ֏/ր', 'ժ. 17:00–20:00 · նստեցում'],
+      ['ctr', 'Կենտրոն → Զվարթնոց', K === 'comfort' ? '4 500 ֏' : 'ֆիքսված', 'գոտուց գոտի · ֆիքսված գին']]
+    ed.innerHTML = `
+      <section class="card tl" aria-label="Սակագներ"><div class="card-h"><h2>Սակագներ</h2><span class="end"><a class="btn ghost s" href="tariffs.html?theme=${THEME}">Բոլորը</a></span></div>
+        ${TIERS.map((t) => `<a class="ti${t === T ? ' on' : ''}" href="tariffs.html?theme=${THEME}&t=${kidOf(t)}&sec=${sec}"><span class="car">${carImg(t.id)}</span><b>${t.name}</b><span class="faint mono">${nf(t.base)}</span></a>`).join('')}</section>
+      <section class="card edc" aria-label="${T.name} կարգավորումներ">
+        <div class="card-h"><span class="car">${carImg(T.id)}</span><h2>${T.name}</h2><span class="sub">գործում է <span class="num">09.10.2026</span>-ից</span>
+          <button class="btn secondary s tpick" aria-label="Ընտրել սակագին">${T.name}<i data-lucide="chevrons-up-down"></i></button>
+          <span class="end">${sec === 'commission' ? '<span class="pill warn"><i data-lucide="pencil"></i>Չպահված</span>' : ''}<button class="btn ghost s">Չեղարկել</button><button class="btn primary s">Պահել՝ 16.10-ից</button></span></div>
+        <nav class="tabsl" aria-label="Բաժիններ">${tabs.map(([id, l, ic]) => `<a class="${id === sec ? 'on' : ''}" href="tariffs.html?theme=${THEME}&t=${K}&sec=${id}"><i data-lucide="${ic}"></i>${l}</a>`).join('')}</nav>
+        <div class="scroll-y grow">${body}<div style="height:16px"></div></div>
+        <div class="edf2"><i data-lucide="info"></i>Նոր գինը գործում է նշված օրվանից · ընթացիկ և նախնական պատվերները պահում են իրենց գինը</div>
+      </section>
+      <aside class="col">
+        <section class="card"><div class="card-h"><h2>Գնի օրինակ</h2><span class="sub">2,1 կմ · 4 ր</span></div>
+          <div class="split" style="padding-top:10px;padding-bottom:12px">
+            <span>Նստելու գին</span><span>${amd(T.base)}</span>
+            <span>2,1 կմ × ${T.km} ֏</span><span>${amd(Math.round(T.km * 2.1))}</span>
+            <span>4 ր × ${T.min} ֏</span><span>${amd(T.min * 4)}</span>
+            <span class="faint">${T.base + Math.round(T.km * 2.1) + T.min * 4 < T.floor ? 'նվազագույնը' : 'կլորացում 100 ֏'}</span><span class="faint">${amd(f)}</span>
+            <span>Սպասարկման վճար</span><span>${svc ? '+' + amd(svc) : '—'}</span>
+            <span class="tot">Ուղևորը վճարում է</span><span class="tot">${amd(f + svc)}</span>
+            <span class="faint">Միջնորդավճար · ${comTxt(COMM)}</span><span class="faint">−${amd(com)}</span>
+            <span class="faint">Գործընկերին մնում է</span><span class="faint">${amd(f - com)}</span>
+          </div></section>
+        <section class="card"><div class="card-h"><h2>Գոտիների բացառություններ</h2><span class="end"><a class="btn ghost icon s" href="zones.html?theme=${THEME}" aria-label="Գոտիներ" title="Գոտիներ"><i data-lucide="arrow-right"></i></a></span></div>
+          <div class="prio" aria-label="Կիրառման հերթականություն"><b>Սակագին</b><i data-lucide="chevron-right"></i><b>Գոտու կանոն</b><i data-lucide="chevron-right"></i><b>Գոտուց գոտի</b></div>
+          ${zr.map(([z, b, v, d]) => `<div class="zr" style="--zc:${ZC[z]}"><span class="sw"></span><b>${b}</b><span class="v">${v}</span><span class="d">${d}</span></div>`).join('')}
+        </section>
+      </aside>`
+  }
   icons()
   document.documentElement.dataset.mapReady = 'none'
 </script>

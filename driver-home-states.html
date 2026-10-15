@@ -126,6 +126,10 @@
   .notice.doc { text-decoration: none; color: var(--ink); }
   .notice.doc .chev { margin-left: auto; color: var(--ink-3); align-self: center; }
   .notice .s { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  /* Change list 2026-10-14: the driver's own order — same entry as driver-home, on the states where the driver is on shift and free. */
+  .neword { position: absolute; z-index: 20; left: 16px; height: var(--h-sec); padding: 0 20px 0 16px; border-radius: var(--r-pill); background: var(--surface);
+    box-shadow: var(--e2); display: inline-flex; align-items: center; gap: var(--s2); font: var(--t-body-strong); color: var(--ink); text-decoration: none; white-space: nowrap; }
+  .neword svg { width: 22px; height: 22px; }
 </style>
 </head>
 <body>
@@ -146,6 +150,7 @@
   <div class="locwarn" role="alert" data-s="location"><div class="h"><i data-lucide="map-pin"></i>Էկրանը փակելիս պատվերները դադարում են</div><button class="btn"><i data-lucide="settings"></i>Բացել կարգավորումները</button></div>
   <div class="connlost" role="alert" data-s="lost"><i data-lucide="wifi-off"></i>Կապը վերականգնվում է<span class="tm">0:48</span></div>
 
+  <a class="neword" id="neword" data-s="away offline lost location nomap newoffer docexpiry" href="driver-neworder.html"><i data-lucide="plus"></i>Նոր պատվեր</a>
   <button class="fab lg" id="recentre" data-not="nomap" style="right:16px" aria-label="Կենտրոնացնել ինձ վրա"><i data-lucide="locate-fixed"></i></button>
 
   <section class="sheet" id="sheet">
@@ -241,6 +246,7 @@
   if (pill) document.fonts.ready.then(() => { logo.hidden = pill.getBoundingClientRect().right + 12 > logo.getBoundingClientRect().left })
   const sheetH = document.getElementById('sheet').offsetHeight
   document.getElementById('recentre').style.bottom = (sheetH + 12) + 'px'
+  const nw = document.getElementById('neword'); nw.style.bottom = (sheetH + 8) + 'px'; nw.href = 'driver-neworder.html?theme=' + THEME
   const me = [40.1823, 44.5072]
   const A = ROUTES.driverToPickup.pts
   const box = (p, d) => [[p[0] - d, p[1] - d * 1.35], [p[0] + d, p[1] + d * 1.35]]

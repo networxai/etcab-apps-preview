@@ -2,103 +2,15 @@
 <html lang="hy">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Partner fee plans</title>
-<link rel="stylesheet" href="console.css">
-<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
-<script src="../kit.js"></script>
-<script src="console.js"></script>
-<script src="console-audit.js"></script>
-<style>
-  /* Owner #3 (2026-10-14): a partner's rules are per tariff — fee %, warn below, stop below — and this page is the one place
-     they are set (ECO.PARTNER.rules; Tariffs links here, the partner panel reads them). Named plans are gone: one row per
-     tariff is the rule. Fleet drivers have no balance, so there is nothing for them here. */
-  .content { grid-template-columns: minmax(0, 1fr) 340px; }
-  @media (max-width: 1400px) { .content { grid-template-columns: minmax(0, 1fr) 300px; } .fp .car { display: none; } col.w5, col.w6 { width: 76px !important; } }
-  .col { display: flex; flex-direction: column; gap: var(--gap); min-height: 0; overflow-y: auto; scrollbar-width: thin; }
-  .col > .card { flex: none; overflow: visible; }
-  .ph2 { display: flex; align-items: center; gap: 10px; padding: 12px var(--inset); border-bottom: 1px solid var(--line-soft); flex-wrap: wrap; }
-  .ph2 h2 { font: var(--c-head); white-space: nowrap; }
-  .fp td { height: 52px; }
-  .fp .tc { display: flex; align-items: center; gap: 10px; min-width: 0; }
-  .fp .tc .nm { display: flex; flex-direction: column; min-width: 0; }
-  .fp .tc b { font: var(--c-strong); white-space: nowrap; }
-  .fp .tc span.s { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; }
-  .num-in { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; height: 30px; padding: 0 8px; border-radius: var(--r-ctl); box-shadow: inset 0 0 0 1px var(--line-control); background: var(--surface); font: 500 13px/18px var(--mono); }
-  .num-in span { color: var(--ink-faint); font-family: var(--font); }
-  .num-in.p { width: 64px; } .num-in.m { width: 96px; }
-  .fp .r { text-align: right; }
-  .fp th.grp { text-align: center; border-bottom: 0; }
-  .when { display: flex; gap: 6px; flex-wrap: wrap; padding: 12px var(--inset); }
-  .foot { display: flex; gap: 8px; align-items: center; padding: 10px var(--inset); font: var(--c-small); color: var(--ink-faint); border-top: 1px solid var(--line-soft); }
-  .foot svg { width: 16px; height: 16px; flex: none; }
-  .tax { padding: 12px var(--inset); border-bottom: 1px solid var(--line-soft); display: flex; flex-direction: column; gap: 8px; }
-  .tax .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .tax .top b { font: var(--c-strong); }
-  .tax .d { font: var(--c-small); color: var(--ink-muted); }
-  .tax .f { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .tax .f .input { background: var(--surface-alt); box-shadow: inset 0 0 0 1px var(--line-soft); }
-  .hist { padding: 4px var(--inset) 12px; display: grid; gap: 6px; font: var(--c-body); }
-  .hist div { display: flex; justify-content: space-between; gap: 8px; white-space: nowrap; }
-</style>
-</head>
-<body>
-<div class="screen" id="screen">
-  <div class="main">
-    <header class="bar">
-      <span class="crumb">Գործընկերներ <i data-lucide="chevron-right"></i></span><h1>Միջնորդավճարներ</h1>
-      <span class="crumb">ըստ սակագնի · <a href="tariffs.html" style="color:var(--brand-text)">Սակագներ →</a></span>
-      <div class="live"></div>
-    </header>
-    <div class="content">
-      <div class="col">
-        <section class="card" aria-label="Միջնորդավճար և հաշվեկշիռ ըստ սակագնի">
-          <div class="ph2"><h2>Միջնորդավճար և հաշվեկշիռ</h2><span class="faint" style="font:var(--c-small)">գործում է <span class="num">01.10.2026</span>-ից</span>
-            <span style="flex:1"></span><span class="pill warn" style="height:22px"><i data-lucide="pencil"></i>Չպահված փոփոխություն</span><button class="btn primary s">Պահել՝ 15.10-ից</button></div>
-          <table class="tbl fp"><colgroup><col><col style="width:104px"><col style="width:112px"><col style="width:112px"><col class="w5" style="width:88px"><col class="w6" style="width:84px"><col style="width:96px"></colgroup>
-            <thead><tr><th>Սակագին</th><th class="r">Միջնորդավճար</th><th class="r" title="Զգուշացնել, երբ հաշվեկշիռը ցածր է">Զգուշացում</th><th class="r" title="Կանգնեցնել պատվերները, երբ հաշվեկշիռը ցածր է">Կանգ</th><th class="r">Գին՝ 2,1 կմ</th><th class="r">Մեզ</th><th class="r">Գործընկերին</th></tr></thead>
-            <tbody id="rows"></tbody></table>
-          <div class="foot"><i data-lucide="info"></i><span>Միջնորդավճարը՝ ավարտված պատվերի գնից, հանվում է հաշվեկշռից · կանխիկը մնում է գործընկերոջ մոտ</span></div>
-        </section>
-        <section class="card" aria-label="Երբ է ստուգվում հաշվեկշիռը">
-          <div class="card-h"><h2>Հաշվեկշիռը ստուգվում է</h2><span class="sub">«Կանգ»-ից ցածր՝ նոր պատվեր չի գալիս, ընթացիկն ավարտվում է</span></div>
-          <div class="when"><span class="chip"><i data-lucide="power"></i>Առցանց անցնելիս</span><span class="chip"><i data-lucide="car"></i>Հերթափոխ բացելիս</span><span class="chip"><i data-lucide="send"></i>Առաջարկ ուղարկելիս</span><span class="chip"><i data-lucide="calendar-clock"></i>Նախնական պատվեր սկսելիս</span></div>
-        </section>
-      </div>
-
-      <aside class="col">
-        <section class="card" aria-label="Հարկեր">
-          <div class="card-h"><h2>Հարկեր</h2><span class="end pill">Անջատված</span></div>
-          <div class="tax"><div class="top"><b>Հարկ միջնորդավճարի վրա</b><span class="switch" role="switch" aria-checked="false"><i class="t"></i>Անջ.</span></div>
-            <span class="d">ԱԱՀ կամ շրջանառության հարկ՝ առանձին տողով</span>
-            <div class="f"><div><label class="label">Եղանակ</label><div class="input"><span class="val ph">ներառված / ավելացված</span></div></div><div><label class="label">Դրույք</label><div class="input"><span class="val ph">—</span><span class="faint">%</span></div></div></div></div>
-          <div class="tax" style="border:0"><div class="top"><b>Տուրքի պահում</b><span class="switch" role="switch" aria-checked="false"><i class="t"></i>Անջ.</span></div>
-            <span class="d">Ուղևորափոխադրման տուրքը պահել գործընկերոջ փոխարեն</span>
-            <div class="f"><div><label class="label">Կանխիկ</label><div class="input"><span class="val ph">—</span><span class="faint">%</span></div></div><div><label class="label">Անկանխիկ</label><div class="input"><span class="val ph">—</span><span class="faint">%</span></div></div></div></div>
-          <div style="padding:0 var(--inset) var(--inset)"><div class="notice amber"><i data-lucide="scale"></i><span>Անջատված է մինչև հաշվապահի որոշումը</span></div></div>
-        </section>
-        <section class="card" aria-label="Տարբերակներ">
-          <div class="card-h"><h2>Տարբերակներ</h2></div>
-          <div class="hist"><div><span>15.10-ից <span class="faint">· սևագիր</span></span><span class="pill warn" style="height:20px">Չպահված</span></div><div><span class="num">01.10.2026</span><span class="faint">Սարգիս Ա.</span></div><div><span class="num">12.09.2026</span><span class="faint">Սարգիս Ա.</span></div></div>
-        </section>
-      </aside>
-    </div>
-  </div>
-</div>
+<title>Fee plans</title>
+<!-- Change list 2026-10-15: the tariff is the main configuration layer. A partner's fee (percent, fixed or both, with
+     min/max) and the balance rules (warn below, stop below) are set in each tariff's «Միջնորդավճար» section, so this page
+     is retired. Old links land there, keeping ?theme=. -->
+<meta http-equiv="refresh" content="0; url=tariffs.html?t=comfort&amp;sec=commission">
 <script>
-  shell('feeplans')
-  /* console.js TIERS calls Eco Comfort 'partner'; kit.js ECO calls it 'comfort'. */
-  const R = (id) => ECO.PARTNER.rules[id === 'partner' ? 'comfort' : id]
-  const cnt = (id) => PARTNERS.filter((p) => p.tier === id).length
-  document.getElementById('rows').innerHTML = TIERS.map((t) => {
-    const r = R(t.id), edited = t.id === 'business', pct = edited ? 17 : r.fee, f = fare(t, 2.1, 4), fee = Math.round(f * pct / 100)
-    return `<tr><td><span class="tc"><span class="car s">${carImg(t.id)}</span><span class="nm"><b>${t.name}</b><span class="s">${cnt(t.id)} գործընկեր</span></span></span></td>
-      <td class="r"><span class="num-in p"${edited ? ' style="box-shadow:inset 0 0 0 2px var(--ink)"' : ''}>${pct}<span>%</span></span></td>
-      <td class="r"><span class="num-in m"><span>&lt;</span>${nf(r.warnBelow)}<span>֏</span></span></td><td class="r"><span class="num-in m"><span>&lt;</span>${nf(r.blockBelow)}<span>֏</span></span></td>
-      <td class="r mono">${amd(f)}</td><td class="r mono">${amd(fee)}</td><td class="r mono">${amd(f - fee)}</td></tr>`
-  }).join('')
-  icons()
-  document.documentElement.dataset.mapReady = 'none'
+  const t = new URLSearchParams(location.search).get('theme')
+  location.replace('tariffs.html?t=comfort&sec=commission' + (t ? '&theme=' + t : ''))
 </script>
-</body>
+</head>
+<body><a href="tariffs.html?t=comfort&amp;sec=commission">Սակագին · Միջնորդավճար</a></body>
 </html>

@@ -1,7 +1,7 @@
 /* Settings → Money (p1p2 pass, C45; owner decisions 3 and 11, 2026-10-14). Uses settings.html's N / SW / G row builders.
    Mirrors apps/operator components/admin/money-settings.tsx, cut to what still exists:
    - Fleet drivers have NO balance (decision 3): the per-driver-type settlement columns are gone. Partner rules (fee,
-     warn, block) are per tariff and live in Fee plans (feeplans.html); this tab links there instead of repeating them.
+     warn, block) are per tariff and live in each tariff's «Միջնորդավճար» section (tariffs.html?sec=commission, change list 2026-10-15); this tab links there instead of repeating them.
    - No invoices (decision 11): the Invoicing tab (seller, numbering, credit notes, terms) is gone; ?tab=invoicing opens
      this tab. The corporate credit estimate for a metered company ride stays: the credit limit still exists.
    - Kept: the partner top-up SMS receipt, the top-up instructions the partner app shows, the tax lines (off until the
@@ -24,7 +24,7 @@ window.drawMoneyTab = function () {
   document.head.appendChild(style)
   col.innerHTML = `
     <div class="link"><i data-lucide="handshake"></i><span class="grow"><b style="color:var(--ink);font-weight:500">Գործընկերներ</b> · միջնորդավճար և նվազագույն հաշվեկշիռ՝ ըստ սակագնի</span>
-      <a class="btn secondary s" href="feeplans.html?theme=${THEME}" style="text-decoration:none">Միջնորդավճարներ<i data-lucide="arrow-right"></i></a></div>
+      <a class="btn secondary s" href="tariffs.html?theme=${THEME}&t=comfort&sec=commission" style="text-decoration:none">Սակագներ<i data-lucide="arrow-right"></i></a></div>
     ${G('Լիցքավորման SMS', [SW('Ուղարկել SMS գործընկերին', true),
       TXT('Լիցքավորում', 'Ստացվել է {amount}։ Հաշվեկշիռ՝ {balance}։ Կոդ՝ {reference}։'),
       TXT('Չեղարկում', 'Չեղարկվել է {amount}։ Հաշվեկշիռ՝ {balance}։'),

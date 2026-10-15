@@ -6,11 +6,11 @@
 <!-- Fleet-driver billing plans are gone (owner decision 3, 2026-10-14): fleet drivers have no balance, so the fleet keeps
      nothing from them through a plan. Only partners pay a fee, set per tariff in Fee plans. Old links (?state=…) land
      there, keeping ?theme=. -->
-<meta http-equiv="refresh" content="0; url=feeplans.html">
+<meta http-equiv="refresh" content="0; url=tariffs.html?t=comfort&sec=commission">
 <script>
   const t = new URLSearchParams(location.search).get('theme')
-  location.replace('feeplans.html' + (t ? '?theme=' + t : ''))
+  location.replace("tariffs.html?t=comfort&sec=commission" + (t ? "&theme=" + t : ""))
 </script>
 </head>
-<body><a href="feeplans.html">Միջնորդավճարներ</a></body>
+<body><a href="tariffs.html?t=comfort&sec=commission">Միջնորդավճարներ</a></body>
 </html>

@@ -73,8 +73,8 @@
   if (wide) document.getElementById('screen').classList.add('wide')
   shell('partners')
   const P = PARTNERS, p = P[sel], T = tierById(p.tier)
-  /* Owner #3: a partner's balance rules (fee, warn below, stop below) are per tariff, set in one place — Միջնորդավճարներ
-     (feeplans.html) — and read from ECO.PARTNER.rules. console.js calls Eco Comfort 'partner'; kit.js calls it 'comfort'. */
+  /* Owner #3: a partner's balance rules (fee, warn below, stop below) are per tariff, set in one place — the tariff's
+     «Միջնորդավճար» section (tariffs.html?sec=commission, change list 2026-10-15) — and read from ECO.PARTNER.rules. console.js calls Eco Comfort 'partner'; kit.js calls it 'comfort'. */
   const R = (t) => ECO.PARTNER.rules[t === 'partner' ? 'comfort' : t]
   const tone = (b, t) => (b < R(t).blockBelow ? ['warn', 'Կանգնած', 'lock'] : b < R(t).warnBelow ? ['warn', 'Ցածր', 'triangle-alert'] : null)
   const bal = (b, t) => { const x = tone(b, t); return x ? `<span class="pill ${x[0]} bal" title="${x[1]}"><i data-lucide="${x[2]}"></i><span class="mono">${amd(b)}</span></span>` : `<span class="mono">${amd(b)}</span>` }
@@ -83,7 +83,7 @@
 
   /* ── List ── */
   const filters = `<div class="filters">
-      <div class="input" style="width:${wide ? '100%' : '240px'}"><i data-lucide="search"></i><span class="val ph">Անուն, հեռախոս, վճարման կոդ</span><span class="kbd">/</span></div>
+      <div class="input" style="width:${wide ? '100%' : '264px'}"><i data-lucide="search"></i><span class="val ph">Անուն, հեռախոս, վճարման կոդ</span><span class="kbd">/</span></div>
       ${wide ? '' : '<span style="flex:1"></span><button class="btn secondary s"><i data-lucide="plus"></i>Նոր գործընկեր</button>'}</div>
     ${wide ? '' : `<div class="filters" style="padding-top:6px;padding-bottom:6px">
       <span class="chip on">Բոլորը <span class="c num">12</span></span><span class="chip"><i data-lucide="lock"></i>Կանգնած <span class="c num">2</span></span>
@@ -120,7 +120,7 @@
     <div class="blk">
       <h3><i data-lucide="wallet"></i>Հաշվեկշիռ<span class="end code"><span class="faint" style="font-weight:400">Վճարման կոդ</span><span class="tag">${p.code}</span><button class="btn ghost icon s" aria-label="Պատճենել կոդը"><i data-lucide="copy"></i></button></span></h3>
       <div class="bigbal${stopped ? ' neg' : ''}" style="margin-top:4px">${balTxt}</div>
-      <div class="faint" style="font:var(--c-small)">${T.name} · զգուշացում՝ ${amd(r.warnBelow)}-ից ցածր · կանգ՝ ${amd(r.blockBelow)}-ից ցածր · <a href="feeplans.html?theme=${THEME}" style="color:var(--brand-text)">կանոններ</a></div>
+      <div class="faint" style="font:var(--c-small)">${T.name} · զգուշացում՝ ${amd(r.warnBelow)}-ից ցածր · կանգ՝ ${amd(r.blockBelow)}-ից ցածր · <a href="tariffs.html?theme=${THEME}&t=${p.tier === 'partner' ? 'comfort' : p.tier}&sec=commission" style="color:var(--brand-text)">կանոններ</a></div>
       <div style="display:flex;gap:6px;margin-top:12px"><a class="btn primary" href="?theme=${THEME}&p=${sel}&tab=wallet" style="text-decoration:none">Գրանցել լիցքավորում</a><a class="btn secondary" href="?theme=${THEME}&p=${sel}&tab=wallet" style="text-decoration:none">Պատմություն</a></div>
     </div>
     <div class="blk">
@@ -129,7 +129,7 @@
         <dl class="facts"><dt>Համարանիշ</dt><dd><span class="plate">${p.plate}</span></dd><dt>Մոդել</dt><dd>${p.model.split(' · ')[0]}</dd><dt>Սակագին</dt><dd>${T.name}</dd><dt>Հաստատել է</dt><dd>Սարգիս Ա.</dd></dl></div>
     </div>
     <div class="blk">
-      <h3><i data-lucide="percent"></i>Միջնորդավճար<span class="end"><a class="btn ghost s" href="feeplans.html?theme=${THEME}">${T.name}<i data-lucide="arrow-right"></i></a></span></h3>
+      <h3><i data-lucide="percent"></i>Միջնորդավճար<span class="end"><a class="btn ghost s" href="tariffs.html?theme=${THEME}&t=${p.tier === 'partner' ? 'comfort' : p.tier}&sec=commission">${T.name}<i data-lucide="arrow-right"></i></a></span></h3>
       <dl class="kv2"><dt>Դրույք</dt><dd><b>${r.fee}%</b> պատվերի գնից</dd><dt>Հարկեր</dt><dd class="faint">անջատված</dd><dt>Այսօր</dt><dd>3 պատվեր · <b>1 110 ֏</b></dd></dl>
     </div>
     <div class="blk" style="margin-bottom:12px">
