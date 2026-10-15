@@ -244,13 +244,8 @@
           htmlMarker(m, k.ll, carTop(k.deg), [18, 34])
         } },
 
-      { id: 'pay-change', group: 'In the ride', label: 'Change payment', note: 'Change list 2026-10-15: «Փոխել» on the ride card opens the payment sheet mid-ride. Cash or a saved card; allowed until the driver completes the ride (then the row locks). The driver sees the change at once (driver-ride#paychanged). Company rides do not show the row. Card payments are drawn ahead',
-        time: '9:48', ...modal('Վճարման եղանակ', `<div class="paylist" role="radiogroup" aria-label="Վճարման եղանակ">
-          <button class="choice" role="radio" aria-checked="false"><span class="ico cashc">${R.i('banknote')}</span><span class="t">Կանխիկ<span class="t2">վարորդին՝ ավարտին</span></span><span class="radio"></span></button>
-          <div class="divider" style="margin-left:48px"></div>
-          <button class="choice" role="radio" aria-checked="true"><span class="ico">${R.i('wallet')}</span><span class="t">Քարտ ·· 4242<span class="t2">կգանձվի ավարտին</span></span><span class="radio"></span></button>
-          <div class="divider" style="margin-left:48px"></div>
-          <button class="choice"><span class="ico">${R.i('plus')}</span><span class="t">Ավելացնել քարտ</span></button></div>
+      { id: 'pay-change', group: 'In the ride', label: 'Change payment', note: 'Change list 2026-10-15: «Փոխել» on the ride card opens the payment sheet mid-ride. Any method (cash, card, Apple / Google Pay, POS or NFC at the driver); allowed until the driver completes the ride (then the row locks). The driver sees the change at once (driver-ride#paychanged). Company rides do not show the row. Card payments are drawn ahead',
+        time: '9:48', ...modal('Վճարման եղանակ', `${R.payList('card', { ride: true })}
           <div class="inline-note" style="margin:var(--s3) 0">${R.i('info')}<span>Կարող եք փոխել մինչև ուղևորության ավարտը · վարորդը կտեսնի անմիջապես</span></div>
           <button class="btn btn-brand">Պահել</button>`, 'riding'),
         map: (s) => { const k = at(T, .45), rest = T.slice(k.i); const m = R.map(s, { fit: rest, padTL: [56, 96], padBR: [56, s.querySelector('#sheet').offsetHeight + 56] }); drawRoute(m, rest, { weight: 5 }); htmlMarker(m, DROP, '<div class="pin-b"></div>', [18, 18]); htmlMarker(m, k.ll, carTop(k.deg), [18, 34]) } },

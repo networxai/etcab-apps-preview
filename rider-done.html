@@ -147,14 +147,14 @@
         html: () => page(`${tripHead()}${collapsed}${who}${stars(LOW)}<div class="q" style="text-align:center">Ի՞նչը չստացվեց</div>
           ${chips(['Ուշացավ', 'Անզգույշ վարում', 'Մեքենան մաքուր չէր', 'Երկար երթուղի', 'Անհարմար զրույց'], [1])}`,
           '<button class="btn btn-brand">Ուղարկել</button><button class="btn-text">Բաց թողնել</button>') },
-      { id: 'fiscal', label: 'Fiscal receipt', time: '9:52', note: 'R58, drawn ahead (no fiscal API yet; the console\'s «Ֆիսկալ հերթ» holds the ones that failed to issue). Reached from «Ստացական» on Thanks and from the History receipt. The receipt as issued (ECO.FISCAL): seller, ՀՎՀՀ, ՀԴՄ, number, time, the one service line, total, method and the tax office\'s QR. Share sends the PDF (system share sheet); nothing else on screen (new strings)',
-        html: () => `<div class="page">${nav.replace('Ուղևորությունն ավարտված է', 'Ֆիսկալ կտրոն').replace('aria-label="Փակել">' + R.i('x'), 'aria-label="Փակել">' + R.i('x'))}<div class="body">
-          <div class="fis" aria-label="Ֆիսկալ կտրոն">
+      { id: 'fiscal', label: 'Tax Service receipt', time: '9:52', note: 'Owner 2026-10-15: we send the receipt ourselves, through ETAPI (register-income with the Tax Service: platform ՀՎՀՀ + driver ՀՎՀՀ, receipt_id and receipt_url). Cashless rides are filed at once; cash after ETAPI\'s 24 h hold, so until then the receipt reads «պատրաստվում է». Shown: platform and driver ՀՎՀՀ, receipt number, time, the one service line, total, method, and the QR to receipt_url. Share sends the PDF (system share sheet); nothing else on screen (new strings)',
+        html: () => `<div class="page">${nav.replace('Ուղևորությունն ավարտված է', 'ՊԵԿ կտրոն').replace('aria-label="Փակել">' + R.i('x'), 'aria-label="Փակել">' + R.i('x'))}<div class="body">
+          <div class="fis" aria-label="ՊԵԿ կտրոն">
             <div class="seller">${ECO.FISCAL.seller}</div>
             <div class="meta">
-              <div class="m"><span>ՀՎՀՀ</span><b>${ECO.FISCAL.tin}</b></div>
-              <div class="m"><span>ՀԴՄ</span><b>${ECO.FISCAL.device}</b></div>
-              <div class="m"><span>Կտրոն №</span><b>${ECO.FISCAL.no}</b></div>
+              <div class="m"><span>Հարթակ · ՀՎՀՀ</span><b>${ECO.FISCAL.tin}</b></div>
+              <div class="m"><span>Վարորդ · ՀՎՀՀ</span><b>${ECO.FISCAL.driverTin}</b></div>
+              <div class="m"><span>ՊԵԿ կտրոն №</span><b>${ECO.FISCAL.no}</b></div>
               <div class="m"><span>Ամսաթիվ</span><b>${ECO.FISCAL.at}</b></div>
             </div>
             <div class="cut"></div>

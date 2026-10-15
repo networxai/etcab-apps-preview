@@ -194,7 +194,9 @@
     ${grp([
       r('banknote', ECO.PAY.cash.label, `<span class="def">${R.i('check')}Հիմնական</span>`, { chev: false, btn: false, cls: 'cash' }),
       r('building-2', ECO.COMPANY.name, `<span class="val">${A(ECO.COMPANY.empLimit.rider.left)}</span>`, { t2: 'Մնացել է այս ամիս' }),
-      r('wallet', ECO.PAY.card.label, `<span class="soon">${ECO.PAY.soon}</span>`, { chev: false, btn: false, cls: 'off' }),
+      r('credit-card', `${ECO.PAY.card.label} ·· ${ECO.PAY.card.last4}`, '', { t2: 'Visa · 09/28' }),
+      r('smartphone', `${ECO.PAY.applepay.label} / ${ECO.PAY.googlepay.label}`, '', { t2: 'հեռախոսի դրամապանակից' }),
+      r('plus', 'Ավելացնել քարտ', '', {}),
     ])}</div>`
 
   /* delete-blocked variants: account.deleteBlocked as the title, the API's reason as the body (account.blocked*). */
@@ -205,7 +207,7 @@
 
   Rider.page({
     title: 'Rider · Account',
-    sub: 'Profile, saved places, payment (a debt said plainly, card honestly «Շուտով»), language, theme, sign out and deletion — all one tap from the list',
+    sub: 'Profile, saved places, payment (a debt said plainly, cash, card, Apple / Google Pay), language, theme, sign out and deletion — all one tap from the list',
     states: [
       { id: 'main', group: 'Account', label: 'Account', note: 'Delete is a visible row. Debt is a word plus colour, never colour alone. Help (call the office, questions) and Legal (terms, privacy) sit above sign-out, as both stores expect', html: () => main() },
       { id: 'main-company', group: 'Account', label: 'Company rider', note: 'A rider linked to a company on account: the payment row names the company. The choice itself is made per ride on the order sheet', html: () => main(false) },
@@ -252,7 +254,7 @@
             <div class="field focus"><span class="num"><span class="lbl">Անվանում</span><span class="v">Մարզասրահ<span class="caret"></span></span></span></div>
             <div class="btns"><button class="btn btn-brand">Պահել</button></div></section>${R.keyboard()}` },
       { id: 'place-remove-failed', group: 'Places', label: 'Remove failed', note: 'R64, real string (account.placeDeleteFailed): the row comes back and the toast offers a retry. Neutral, not red: nothing was lost', html: () => places('failed') },
-      { id: 'wallet', group: 'Balance', label: 'Debt', note: 'account.debtNote said plainly; the linked company is listed (AccountSheets.tsx WalletSheet), card is shown as «Շուտով», not hidden', html: () => wallet(true) },
+      { id: 'wallet', group: 'Balance', label: 'Debt', note: 'account.debtNote said plainly; the linked company is listed (AccountSheets.tsx WalletSheet), card, Apple / Google Pay and «Ավելացնել քարտ» below cash', html: () => wallet(true) },
       { id: 'wallet-clear', group: 'Balance', label: 'Clear', html: () => wallet(false) },
       { id: 'language', group: 'Settings', label: 'Language', note: 'Each language named, and coded, in its own script (ՀՅ / РУ / EN, as the driver app); applies on tap',
         html: () => over(`${mhead('Լեզու')}${choice('Հայերեն', true, '', 'ՀՅ')}${choice('Русский', false, '', 'РУ')}${choice('English', false, '', 'EN')}`) },

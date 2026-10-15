@@ -43,7 +43,13 @@
     PAY: {
       cash: { label: 'Կանխիկ', icon: 'banknote', live: true },
       company: { label: 'Ընկերության հաշվին', short: 'Ընկերություն', icon: 'building-2', live: true },
-      card: { label: 'Քարտ', icon: 'credit-card', live: false },
+      /* Owner 2026-10-15: cash, card, NFC, Google Pay, Apple Pay. In-app card / wallets are charged by the app (ETAPI
+         CASHLESS); POS and NFC are paid at the driver's terminal or phone (ETAPI CASHLESS_POS); cash is ETAPI CASH. */
+      card: { label: 'Քարտ', icon: 'credit-card', live: true, last4: '4242' },
+      applepay: { label: 'Apple Pay', icon: 'smartphone', live: true },
+      googlepay: { label: 'Google Pay', icon: 'smartphone', live: true },
+      pos: { label: 'POS տերմինալ', icon: 'credit-card', live: true },
+      nfc: { label: 'NFC', icon: 'smartphone-nfc', live: true },
       idram: { label: 'Idram', live: false }, telcell: { label: 'Telcell', live: false },
       soon: 'Շուտով',
     },
@@ -174,7 +180,9 @@
     /* App versions for «update required» (rider R68, driver D40): the minimum the fleet accepts, set by the office. */
     APP: { rider: { have: '1.3.2', min: '1.4.0' }, driver: { have: '2.2.7', min: '2.3.0' } },
     /* The walkthrough ride's fiscal receipt (R58, drawn ahead: no fiscal API yet; console's «Ֆիսկալ հերթ»). */
-    FISCAL: { ride: '2417', no: '00041872', device: 'ՀԴՄ 51002417', tin: '02598741', seller: 'Էկո Տաքսի ՍՊԸ', at: '9 հոկտ. 2026, 9:51' },
+    /* The receipt is the Tax Service's (ETAPI register-income): the ride is filed as the driver's income through the
+       platform; it returns receipt_id + receipt_url. Cash is filed after ETAPI's 24 h hold, cashless at once. */
+    FISCAL: { ride: '2417', no: 'RI-7F3K29Q', tin: '02598741', seller: 'Էկո Տաքսի ՍՊԸ', driverTin: '23457812', driver: 'Արամ Պետրոսյան', income: 'Կանխիկ', at: '9 հոկտ. 2026, 9:51', url: 'taxservice.am/r/RI-7F3K29Q' },
     /* The partner's top-up arriving (P10): Կարեն, blocked at −320 ֏ in the app, pays 5 000 ֏ at the office. */
     TOPUP: { id: 'TU-0419', amount: 5000, before: -320, after: 4680, via: 'office', at: '10:12', by: 'Անի Դավթյան' },
 

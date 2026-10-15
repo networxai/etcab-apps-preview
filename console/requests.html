@@ -94,7 +94,7 @@
   const V = DOCS.blocked
   document.getElementById('crumb').textContent = `${ECO.DAY.today} · ${ECO.DAY.now}`
   document.getElementById('tabs').innerHTML = `<a href="requests.html?theme=${THEME}" class="${TAB === 'all' ? 'on' : ''}"${TAB === 'all' ? ' aria-current="page"' : ''}><i data-lucide="inbox"></i>Որոշում է պետք <span class="c">3</span></a>
-    <a href="requests.html?theme=${THEME}&tab=fiscal" class="${TAB === 'fiscal' ? 'on' : ''}"${TAB === 'fiscal' ? ' aria-current="page"' : ''}><i data-lucide="scroll-text"></i>Ֆիսկալ և չհաշվարկված <span class="c">3</span></a>`
+    <a href="requests.html?theme=${THEME}&tab=fiscal" class="${TAB === 'fiscal' ? 'on' : ''}"${TAB === 'fiscal' ? ' aria-current="page"' : ''}><i data-lucide="scroll-text"></i>ՊԵԿ կտրոններ և չհաշվարկված <span class="c">3</span></a>`
   const row = (id, icon, tone, title, sub, when, pill, info) => `<a href="requests.html?theme=${THEME}&item=${id}" class="rq ${tone}${id === ITEM ? ' on' : ''}${info ? ' info' : ''}">
     <i data-lucide="${icon}"></i><span class="t">${title}</span><span class="s">${sub}</span>
     <span class="when">${when}</span><span class="st">${pill || ''}</span></a>`
@@ -155,19 +155,19 @@
     }
   } else {
     /* C50, drawn ahead (no fiscal API yet): receipts the e-HDM did not take, and rides whose money did not settle. */
-    document.getElementById('list').innerHTML = gh('Ֆիսկալ կտրոններ · չթողարկված', 2)
+    document.getElementById('list').innerHTML = gh('ՊԵԿ կտրոններ · չթողարկված', 2)
       + `<table class="tbl ft"><colgroup><col style="width:96px"><col><col style="width:96px"><col style="width:132px"></colgroup><thead><tr><th>Պատվեր</th><th>Պատճառ</th><th class="r">Գումար</th><th></th></tr></thead><tbody>
-        <tr class="on"><td class="mono">R-2402</td><td><span class="two"><b>ՀԴՄ-ն չպատասխանեց</b><span>3 փորձ · վերջինը՝ 09:36</span></span></td><td class="r mono">${ECO.amd(1300)}</td><td class="r"><button class="btn secondary s"><i data-lucide="rotate-cw"></i>Կրկնել</button></td></tr>
+        <tr class="on"><td class="mono">R-2402</td><td><span class="two"><b>ՊԵԿ-ը չպատասխանեց</b><span>ETAPI · 3 փորձ · վերջինը՝ 09:36</span></span></td><td class="r mono">${ECO.amd(1300)}</td><td class="r"><button class="btn secondary s"><i data-lucide="rotate-cw"></i>Կրկնել</button></td></tr>
         <tr><td class="mono">R-2396</td><td><span class="two"><b>Վաճառողի ՀՎՀՀ-ն լրացված չէ</b><span>Կարգավորումներ → Գումար</span></span></td><td class="r mono">${ECO.amd(900)}</td><td class="r"><a class="btn ghost s" href="settings.html?theme=${THEME}&tab=money">Լրացնել</a></td></tr></tbody></table>`
       + gh('Չհաշվարկված պատվերներ', 1)
       + `<table class="tbl ft"><colgroup><col style="width:96px"><col><col style="width:96px"><col style="width:132px"></colgroup><tbody>
         <tr><td class="mono">R-2388</td><td><span class="two"><b>Ընկերության պատվեր · գինն անհայտ</b><span>${ECO.COMPANY.short} · գնահատված՝ ${ECO.amd(3000)}</span></span></td><td class="r mono"><span class="faint">—</span></td><td class="r"><button class="btn secondary s">Նշել գինը</button></td></tr></tbody></table>`
       + gh('Վերջին թողարկվածները', '')
-      + `<div class="ptr"><i data-lucide="circle-check"></i>R-${F.ride} · կտրոն <span class="mono">${F.no}</span> · ${F.device}<span class="n">${F.at}</span></div>`
-    detail.innerHTML = `<div class="hd"><span class="k"><i data-lucide="scroll-text"></i>Ֆիսկալ կտրոն · չթողարկված</span><h2>R-2402 · ${ECO.amd(1300)}</h2><div class="meta">Ավարտվել է 09:31 · Կանխիկ · Գագիկ Ավետիսյան</div></div>
-      <div class="blk"><h3>Փորձեր</h3><ul class="tl2"><li><span class="mono">09:31</span><span>Ուղարկվեց ՀԴՄ-ին · պատասխան չկա</span></li><li><span class="mono">09:33</span><span>Կրկին · պատասխան չկա</span></li><li><span class="mono">09:36</span><span>Կրկին · պատասխան չկա</span></li></ul></div>
-      <div class="blk"><h3>Ինչ է տեսնում ուղևորը</h3><p style="font:var(--c-body);margin-top:6px">Անդորրագիր՝ առանց ֆիսկալ համարի · «Կտրոնը պատրաստվում է»</p></div>
-      <div class="acts2"><div class="notice red"><i data-lucide="circle-alert"></i><span>ՀԴՄ-ն երեք անգամ չպատասխանեց</span></div><button class="btn primary"><i data-lucide="rotate-cw"></i>Կրկնել</button><button class="btn secondary">Նշել՝ թողարկված ձեռքով</button></div>`
+      + `<div class="ptr"><i data-lucide="circle-check"></i>R-${F.ride} · ՊԵԿ կտրոն <span class="mono">${F.no}</span> · վարորդ ${F.driverTin}<span class="n">${F.at}</span></div>`
+    detail.innerHTML = `<div class="hd"><span class="k"><i data-lucide="scroll-text"></i>ՊԵԿ կտրոն · չթողարկված</span><h2>R-2402 · ${ECO.amd(1300)}</h2><div class="meta">Ավարտվել է 09:31 · Կանխիկ · Գագիկ Ավետիսյան</div></div>
+      <div class="blk"><h3>Փորձեր</h3><ul class="tl2"><li><span class="mono">09:31</span><span>ETAPI-ն ուղարկեց ՊԵԿ · պատասխան չկա</span></li><li><span class="mono">09:33</span><span>Կրկին · պատասխան չկա</span></li><li><span class="mono">09:36</span><span>Կրկին · պատասխան չկա</span></li></ul></div>
+      <div class="blk"><h3>Ինչ է տեսնում ուղևորը</h3><p style="font:var(--c-body);margin-top:6px">Ստացական՝ առանց ՊԵԿ կտրոնի համարի · «Կտրոնը պատրաստվում է»</p></div>
+      <div class="acts2"><div class="notice red"><i data-lucide="circle-alert"></i><span>ՊԵԿ-ը երեք անգամ չպատասխանեց (ETAPI)</span></div><button class="btn primary"><i data-lucide="rotate-cw"></i>Կրկնել</button><button class="btn secondary">Նշել՝ թողարկված ձեռքով</button></div>`
   }
   icons()
   document.documentElement.dataset.mapReady = 'none'

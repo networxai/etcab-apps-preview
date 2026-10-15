@@ -64,6 +64,18 @@
     },
     bbox(pt, dLat, dLng) { return [[pt[0] - dLat, pt[1] - dLng], [pt[0] + dLat, pt[1] + dLng]] },
   }
+  /* Payment methods (owner 2026-10-15). Apple Pay shows on iPhone, Google Pay on Android — the mock lists both. */
+  R.payList = (sel, o = {}) => {
+    const P = ECO.PAY, row = (id, ic, t, t2, cls) => `<button class="choice" role="radio" aria-checked="${sel === id}"><span class="ico ${cls || ''}">${R.i(ic)}</span><span class="t">${t}<span class="t2">${t2}</span></span><span class="radio"></span></button>`
+    const div = '<div class="divider" style="margin-left:48px"></div>'
+    return `<div class="paylist" role="radiogroup" aria-label="Վճարման եղանակ">${[
+      row('cash', 'banknote', P.cash.label, o.ride ? 'վարորդին՝ ավարտին' : 'վարորդին', 'cashc'),
+      row('card', 'credit-card', `${P.card.label} ·· ${P.card.last4}`, 'կգանձվի ավարտին'),
+      row('applepay', 'smartphone', P.applepay.label, 'iPhone-ում'),
+      row('googlepay', 'smartphone', P.googlepay.label, 'Android-ում'),
+      row('driver', 'smartphone-nfc', 'Վարորդի մոտ՝ POS կամ NFC', 'քարտը կամ հեռախոսը մոտեցնել'),
+    ].join(div)}${div}<button class="choice"><span class="ico">${R.i('plus')}</span><span class="t">Ավելացնել քարտ</span></button></div>`
+  }
   window.R = R
 
   function ready() {

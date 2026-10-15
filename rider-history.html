@@ -221,7 +221,7 @@
         html: () => `<div class="page">${head().replace('<h1 class="large">Ուղևորություններ</h1>', '<h1 class="large">Ուղևորություն</h1>')}
           <div class="errbox" role="status"><span class="eo">${R.i('wifi-off')}</span><span class="et">Կապ չկա</span><span class="es">Ստացականը կբացվի կապի հետ</span></div>
           <div class="foot"><button class="btn btn-quiet">${R.i('rotate-ccw')}Կրկնել</button></div></div>` },
-      { id: 'receipt', label: 'Receipt document', time: '9:58', note: 'Change list 2026-10-14 (drawn ahead): the row\'s receipt button opens the ride\'s receipt as a document — seller and ՀՎՀՀ, ride number and date, route and times, tariff and driver, the tariff lines, a promo line when one was used (ECO.PROMO.applied AUTUMN15 −165 ֏), total, payment, and the fiscal receipt number (ECO.FISCAL). «Ներբեռնել PDF» is the one primary; share is the quiet second. A company ride shows «Վճարում է՝ {company}» in the payment line',
+      { id: 'receipt', label: 'Receipt document', time: '9:58', note: 'Change list 2026-10-14 (drawn ahead): the row\'s receipt button opens the ride\'s receipt as a document — seller and ՀՎՀՀ, ride number and date, route and times, tariff and driver, the tariff lines, a promo line when one was used (ECO.PROMO.applied AUTUMN15 −165 ֏), total, payment, and the Tax Service receipt (ECO.FISCAL, via ETAPI: receipt number, driver ՀՎՀՀ, the check link). «Ներբեռնել PDF» is the one primary; share is the quiet second. A company ride shows «Վճարում է՝ {company}» in the payment line',
         html: () => { const F = ECO.FISCAL, PA = ECO.PROMO.applied
           return `<div class="page on-surface"><nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl">Ստացական</span><button class="navbtn" aria-label="Կիսվել">${R.i('share')}</button></nav>
           <div class="scroll"><div class="doc" aria-label="Ստացական">
@@ -239,7 +239,9 @@
             <div class="cut"></div>
             <div class="tot"><span>Ընդամենը</span><span>${A(PA.pay)}</span></div>
             <div class="m" style="margin-top:var(--s1)"><span>Վճարում</span><b>${ECO.PAY.cash.label}</b></div>
-            <div class="m"><span>Ֆիսկալ կտրոն №</span><b>${F.no}</b></div>
+            <div class="m"><span>ՊԵԿ կտրոն №</span><b>${F.no}</b></div>
+            <div class="m"><span>Վարորդ · ՀՎՀՀ</span><b>${F.driverTin}</b></div>
+            <div class="m"><span>Ստուգել</span><b style="color:var(--brand-text, var(--ink))">${F.url}</b></div>
           </div></div>
           <div class="foot two"><button class="btn btn-brand">${R.i('download')}Ներբեռնել PDF</button></div></div>` } },
       { id: 'detail-cancelled', label: 'Cancelled', note: 'No fare was charged, and the reason the rider gave',
