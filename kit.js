@@ -438,3 +438,28 @@
     return `<img src="assets/eco/cars/${kind}.webp" alt="${alt || ''}" decoding="async">`
   }
 })()
+
+/* «Բոլոր էկրանները»: a page opened on its own (not inside the viewer, not a screenshot run) gets one quiet pill back
+   to the viewer (index.html), pointed at this very screen and state. The viewer's hash key is the page path relative
+   to this script's folder, so it holds in the repo and on the preview site alike. */
+;(() => {
+  const me = document.currentScript && document.currentScript.src
+  if (!me || window.top !== window || navigator.webdriver) return
+  const base = new URL('.', me), here = new URL(location.href)
+  const a = base.pathname.split('/').filter(Boolean), b = here.pathname.replace(/\.html$/, '').split('/').filter(Boolean)
+  let i = 0
+  while (i < a.length && i < b.length - 1 && a[i] === b[i]) i++
+  const key = '../'.repeat(a.length - i) + b.slice(i).join('/')
+  if (key === 'index') return
+  const q = new URLSearchParams(here.search), t = q.get('sun') === '1' ? 'sun' : q.get('theme') || 'light'
+  ;['theme', 'sun', 'embed'].forEach((k) => q.delete(k))
+  const go = () => {
+    const el = document.createElement('a')
+    el.href = new URL('index.html', base).href + '#' + new URLSearchParams({ p: key, s: q.toString(), t })
+    el.textContent = '← Բոլոր էկրանները'
+    el.setAttribute('style', 'position:fixed;z-index:2147483647;left:12px;bottom:12px;height:32px;padding:0 12px;border-radius:99px;'
+      + 'background:#141416;color:#fff;font:500 13px/32px system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 16px rgb(0 0 0/.25);opacity:.88')
+    document.body.appendChild(el)
+  }
+  if (document.body) go(); else document.addEventListener('DOMContentLoaded', go)
+})()

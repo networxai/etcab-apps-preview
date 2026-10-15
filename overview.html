@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eco Taxi apps and console</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&display=swap">
+<script>
+  /* The review chrome follows ?theme= like every screen (H3), never the OS setting. */
+  document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light'
+</script>
+<style>
+  :root { --bg: #E9E9E6; --ink: #111113; --ink-2: #5E5E63; --bezel: #0B0B0C; --card: #FFFFFF; --brand: #2F7D0A; }
+  :root[data-theme="dark"] { --bg: #0A0A0B; --ink: #F2F2F3; --ink-2: #A1A1A6; --bezel: #2A2A2E; --card: #161618; --brand: #7CC90C; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--bg); color: var(--ink); font: 400 15px/22px 'Google Sans', 'Noto Sans Armenian', system-ui, sans-serif; padding: 40px 16px 64px; }
+  header { max-width: 1800px; margin: 0 auto 32px; }
+  h1 { font: 600 28px/36px 'Google Sans', sans-serif; }
+  .en { display: block; font: 400 13px/18px 'Google Sans', sans-serif; color: var(--ink-2); margin-top: 2px; }
+  header p { color: var(--ink-2); margin-top: 8px; max-width: 820px; }
+  .bar { display: flex; gap: 8px; margin: 16px 0 0; flex-wrap: wrap; }
+  .bar a { font: inherit; padding: 6px 14px; border-radius: 999px; background: var(--card); color: var(--ink); text-decoration: none; min-height: 36px; display: inline-flex; align-items: center; }
+  .bar a[aria-current="true"] { background: var(--ink); color: var(--bg); }
+  .hub { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin: 24px 0 12px; }
+  .hub a { display: flex; flex-direction: column; gap: 2px; padding: 14px 18px; border-radius: 14px; background: var(--card); color: var(--ink);
+    text-decoration: none; box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 8px 24px rgb(0 0 0 / .08); }
+  .hub a b { font: 600 17px/24px 'Google Sans', sans-serif; } .hub a span { font-size: 13px; line-height: 18px; color: var(--ink-2); }
+  .hub a:focus-visible, .bar a:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .sec { font: 600 22px/28px 'Google Sans', sans-serif; margin-top: 32px; }
+  .grid { max-width: 1800px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 48px 64px; }
+  section h2 { font: 600 17px/24px 'Google Sans', sans-serif; margin-bottom: 4px; }
+  section .sub { color: var(--ink-2); font-size: 13px; margin-bottom: 16px; }
+  figure { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  figcaption { font-size: 12px; color: var(--ink-2); }
+  .phone { width: 406px; height: 860px; padding: 8px; border-radius: 56px; background: var(--bezel); box-shadow: 0 1px 2px rgb(0 0 0 / .1), 0 24px 60px rgb(0 0 0 / .18); }
+  .phone iframe { width: 390px; height: 844px; border: 0; border-radius: 48px; display: block; background: #000; }
+  footer { max-width: 1800px; margin: 48px auto 0; color: var(--ink-2); font-size: 12px; line-height: 18px; }
+  @media (max-width: 460px) { .phone { zoom: .82; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Էկո Տաքսի․ հավելվածներ և վահանակ<span class="en">Eco Taxi: rider app, driver app (fleet and partner) and the operator console. Mockups of the current build, 14 October 2026: Armenian copy rewritten to one glossary, late screens restyled, owner decisions of 14 October applied.</span></h1>
+  <div class="bar" role="group" aria-label="Թեմա / Theme"><a data-t="light" href="?theme=light">Ցերեկ · Day</a><a data-t="dark" href="?theme=dark">Գիշեր · Night</a></div>
+  <nav class="hub" aria-label="Բաժիններ">
+    <a data-keep href="rider-index.html"><b>Ուղևորի հավելված</b><span>Rider app: every screen and state, day and night. Includes company billing at booking and on the receipt.</span></a>
+    <a data-keep href="driver-index.html"><b>Վարորդի հավելված</b><span>Driver app: every screen and state, day, night and Sun. Call-like offer, pre-order start from T−30.</span></a>
+    <a data-keep href="driver-types.html"><b>Ավտոպարկի վարորդ և գործընկեր</b><span>Fleet vs partner driver, side by side: same app; only a partner (one own car) has a balance.</span></a>
+    <a data-keep href="console/index.html"><b>Վահանակ</b><span>Operator console: every real route (sign-in to integrations) plus the Requests inbox, light and dark, 1440 and 1366.</span></a>
+    <a data-keep href="console/companies.html"><b>Ընկերություններ</b><span>Corporate clients: companies list and detail (agreement and versions, employees with monthly limits and allowed places, rides, the company report with export and «Վճարված» mark, settings). No invoicing in the product.</span></a>
+    <a data-keep href="console/reports.html?company=1"><b>Ընկերության հաշվետվություն</b><span>Per company and period: rides, employees, routes, totals; Excel / CSV / PDF and «Ուղարկել ընկերությանը».</span></a>
+    <a data-keep href="rider-book.html#company"><b>Ընկերության հաշվին պատվեր</b><span>Rider: company / personal choice, the employee's remaining monthly limit, over-limit and outside-allowed-places fallback to personal.</span></a>
+    <a data-keep href="rider-preorders.html#list"><b>Նախնական պատվերներ</b><span>Pre-orders end to end: when sheet, list, detail with «Սկսել հիմա», changes via the dispatcher, reminder, activation into a live ride (rider), start from T−30 and «Չեմ հասցնի» request (driver), scheduled lane and booking intake (console).</span></a>
+    <a data-keep href="rider-ride.html#cancelled-by"><b>Ընդհատված ուղևորություն</b><span>Ride interrupted: cancelled, driver gave it back, reassigned (rider side), company ride on both apps.</span></a>
+    <a data-keep href="trip-share.html"><b>Կիսված ուղևորություն</b><span>Messages with quick replies (rider and driver) and the public share-my-trip page.</span></a>
+    <a data-keep href="console/dispatch.html?tab=scheduled"><b>Նախնական պատվերներ (վահանակ)</b><span>Console pre-order lane, booking intake, corporate caller, agreed price, booking panel, reminder setting.</span></a>
+    <a data-keep href="console/requests.html"><b>Հարցումներ (վահանակ)</b><span>Console Requests inbox: deletions, wrong car, expired documents, blacklisted caller refused in the app; fiscal and unsettled-ride exceptions (drawn ahead).</span></a>
+    <a data-keep href="console/search.html"><b>Որոնում և ուղևոր</b><span>Console search (phone, plate, address, name, dates), the customer record, blacklist, deleted account.</span></a>
+    <a data-keep href="console/vehicles.html"><b>Մեքենաներ և գոտիներ</b><span>Console fleet admin: vehicles with tariff, owner and approval; zones on the 2GIS map.</span></a>
+    <a data-keep href="console/promotions.html?tab=ads"><b>Գովազդներ</b><span>Console Promotions → ads tab: the rider-home ads with the live carousel preview; reports, settings (dispatch, money), operators, audit, integrations, sign-in.</span></a>
+    <a data-keep href="console/rides.html?panel=force"><b>Պատվերի գործողություններ</b><span>Console ride panel: force state, reassign, decision log, edit and 409, no-show timer, billing; dispatch degraded, conflict, problems, quiet, session expired.</span></a>
+    <a data-keep href="driver-preorders.html?state=onride"><b>Վարորդի եզրային վիճակներ</b><span>Driver: pre-order start blocks, home without shift or held, lock-screen offers, «Սկսել հիմա» first offer, SOS, help, update; partner onboarding, car, wallet receipts.</span></a>
+    <a data-keep href="rider-book.html#blacklisted"><b>Ուղևորի եզրային վիճակներ</b><span>Rider: consent, session ended, refused orders, price and route states, partner sheet, notifications, update, SOS, fiscal receipt, saved places.</span></a>
+    <a data-keep href="console/transfers.html"><b>Տրանսֆերներ</b><span>New 14 Oct · Console airport transfers (list, create, detail), the Transfer tariff at dispatch intake, and the driver's pre-order with the «Տրանսֆեր» badge and flight.</span></a>
+    <a data-keep href="console/promotions.html"><b>Ակցիաներ</b><span>New 14 Oct · Console promo codes, referral programme and partner ads; rider promo entry, discount on fare and receipt, invite screen.</span></a>
+    <a data-keep href="console/company.html?tab=employees&emp=0"><b>Աշխատակցի սահմանաչափ</b><span>New 14 Oct · Per-employee monthly limit (amount or rides) and allowed places, in the console and as the rider sees it.</span></a>
+    <a data-keep href="driver-neworder.html"><b>Վարորդի նոր պատվեր</b><span>New 14 Oct · Driver creates an order himself (street pickup or for a customer's phone), only his car's tariffs, fare, start. Fleet and partner.</span></a>
+    <a data-keep href="rider-history.html?state=receipt"><b>Ստացական</b><span>New 14 Oct · Rider history: a receipt button on every ride and the receipt document (with a promo discount line).</span></a>
+    <a href="#heroes"><b>Չորս գլխավոր էկրան</b><span>The four heroes: rider home · tiers · driver home · offer.</span></a>
+  </nav>
+  <h2 id="heroes" class="sec">Չորս գլխավոր էկրան<span class="en">Each phone is the live page. One token system across rider and driver, Google Sans for Armenian, Russian and Latin with tabular figures. Live 2GIS map with Armenian labels and a reduced ride style.</span></h2>
+</header>
+<div class="grid" id="grid"></div>
+<footer>Քարտեզ՝ © 2GIS (MapGL JS, Armenian labels). Routes: OSRM over OpenStreetMap (ODbL). Partner photos: Unsplash (Unsplash Licence). Icons: Lucide (ISC). Car images: Eco Taxi's own renders of the fleet.</footer>
+<script>
+  const theme = document.documentElement.dataset.theme
+  document.querySelectorAll('.bar a').forEach((a) => a.setAttribute('aria-current', String(a.dataset.t === theme)))
+  /* Carry the theme into every linked page. */
+  document.querySelectorAll('.hub a[data-keep]').forEach((a) => { const u = new URL(a.getAttribute('href'), location.href); u.searchParams.set('theme', theme); a.href = u.href })
+  const heroes = [
+    ['rider-home', 'Ուղևոր․ գլխավոր', 'Rider home: map first, partner offers always on screen'],
+    ['rider-tiers', 'Ուղևոր․ սակագին և գին', 'Rider tier choice and fare: tiers scroll horizontally (owner rule)'],
+    ['driver-home', 'Վարորդ․ առցանց', 'Driver home, online: status, today, pre-orders, one 76 pt action'],
+    ['driver-offer', 'Վարորդ․ նոր պատվեր', 'Driver offer: full-screen and call-like, countdown ring, slide to accept'],
+    ['rider-home', 'Ուղևոր․ նախնական պատվերով', 'Rider home with an upcoming pre-order', 'preorder=1'],
+  ]
+  document.getElementById('grid').innerHTML = heroes.map(([f, t, s, q]) => {
+    const sun = f.startsWith('driver') && theme === 'light'
+    const list = [[theme === 'light' ? 'Ցերեկ · Day' : 'Գիշեր · Night', ''], ...(sun ? [['Արև · Sun', '&sun=1']] : [])]
+    return `<section><h2>${t}</h2><div class="sub">${s}</div><div style="display:flex;gap:24px;flex-wrap:wrap">
+    ${list.map(([cap, x]) => `<figure><div class="phone"><iframe title="${t}, ${cap}" data-src="${f}.html?theme=${theme}${x}${q ? '&' + q : ''}"></iframe></div><figcaption>${cap}</figcaption></figure>`).join('')}
+  </div></section>`
+  }).join('')
+  /* Each screen is a live 2GIS map, i.e. a WebGL context, and browsers cap live contexts. A phone only runs while it
+     is near the viewport; one scrolled away is unloaded and its context freed. */
+  const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+    const f = e.target
+    if (e.isIntersecting) { if (!f.src || f.src === 'about:blank') f.src = f.dataset.src }
+    else if (f.src && f.src !== 'about:blank') f.src = 'about:blank'
+  }), { rootMargin: '0px' })
+  document.querySelectorAll('iframe[data-src]').forEach((f) => io.observe(f))
+</script>
+</body>
+</html>

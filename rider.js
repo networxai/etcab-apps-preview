@@ -102,6 +102,8 @@
   function gallery(cfg) {
     document.title = cfg.title
     window.RIDER_STATES = cfg.states.map((s) => s.id)
+    /* tools/build-nav reads this to list the screen in the viewer (index.html). */
+    window.RIDER_CFG = { title: cfg.title, sub: cfg.sub, states: cfg.states.map((s) => ({ id: s.id, label: s.label, group: s.group, note: s.note })) }
     const st = document.createElement('style')
     st.textContent = `
       html,body{background:#E9E9E6} body{color:#111113;font:400 15px/22px var(--font);padding:32px 16px 64px;font-feature-settings:'tnum' 1}

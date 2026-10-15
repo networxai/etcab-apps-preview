@@ -46,7 +46,9 @@
       sw.innerHTML = '<h2>States</h2>' + states.map(([id, label]) => '<a href="' + link({ state: id }) + '"' + (id === st ? ' aria-current="true"' : '') + '>' + label + '</a>').join('') +
         '<div class="themes"><a href="' + link({ theme: 'light', sun: null }) + '">Day</a><a href="' + link({ theme: 'dark', sun: null }) + '">Night</a><a href="' + link({ theme: 'light', sun: '1' }) + '">Sun</a></div>' +
         '<h2>Screens</h2>' + SCREENS.map(([f, l]) => '<a href="' + f + '.html?theme=' + window.THEME + '"' + (f === here ? ' aria-current="true"' : '') + '>' + l + '</a>').join('')
-      document.body.appendChild(sw)
+      /* Inside the viewer (index.html, ?embed=1) the viewer is the switcher; tools/build-nav reads DRIVER_STATES. */
+      window.DRIVER_STATES = states
+      if (q.get('embed') !== '1') document.body.appendChild(sw)
       this.eco()
       if (onState) onState(st)
       return st
