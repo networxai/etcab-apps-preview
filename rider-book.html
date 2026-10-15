@@ -294,7 +294,7 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
 
   Rider.page({
     title: 'Rider · Booking details',
-    sub: 'Extends the approved tier sheet: when (now, or a quarter-hour up to 7 days ahead), a note for the driver (now only), payment (cash, card, Apple / Google Pay, POS or NFC at the driver), and the company / personal choice for corporate riders (monthly limit left, allowed places), and a promo code',
+    sub: 'Extends the approved tier sheet: when (now, or a quarter-hour up to 7 days ahead), a note for the driver (now only), payment (cash, card, Apple / Google Pay, NFC at the driver), and the company / personal choice for corporate riders (monthly limit left, allowed places), and a promo code',
     states: [
       { id: 'details', group: 'Sheet', label: 'Details', note: 'One compact line under the tiers: when · note · payment. Order stays the one accent',
         html: () => details(null, TRIPS.now), map: (s) => drawRide(s) },
@@ -313,7 +313,7 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
         html: () => whenSheet(1, B.air.time, 7), after: daysInView, map: (s) => drawRide(s, false, TRIPS.air) },
       { id: 'when-late', group: 'Sheets', label: 'When · late evening', time: '23:41', note: 'R29 (drawn ahead: the real sheet opens on an empty «Այսօր»). At 23:41 the first slot is past midnight, so today has none: its chip is struck through and the sheet opens on Tomorrow from 00:15. The row ends at the seventh day, and the line says both limits once',
         html: () => whenSheet(1, null, 0, { now: 23 * 60 + 41, note: 'Այսօր ազատ ժամ չկա · առավելագույնը 7 օր առաջ' }), after: (s) => s.querySelectorAll('.days .chip').forEach((c) => { const r = c.getBoundingClientRect(); if (r.right > 390) c.dataset.peek = '' }), map: (s) => drawRide(s, false, TRIPS.air) },
-      { id: 'pay', group: 'Sheets', label: 'Payment', note: 'Owner 2026-10-15: cash, a saved card, Apple Pay (iPhone) / Google Pay (Android), or paying at the driver by POS terminal or NFC; «Ավելացնել քարտ» at the foot. Drawn ahead of card processing. A company rider chooses Company / Personal on the sheet itself',
+      { id: 'pay', group: 'Sheets', label: 'Payment', note: 'Owner 2026-10-15: cash, a saved card, Apple Pay (iPhone) / Google Pay (Android), or NFC (tap a card or phone on the driver\'s phone); «Ավելացնել քարտ» at the foot. Drawn ahead of card processing. A company rider chooses Company / Personal on the sheet itself',
         html: () => modal('Վճարում', R.payList('cash')), map: (s) => drawRide(s, false) },
 
       { id: 'company', group: 'Company', label: 'Company ride · limit left', note: 'Change list 2026-10-14: no cost-centre code. Home → office (both allowed places, ECO.COMPANY.places): Company is offered; the billed-to line shows the employee\'s monthly limit left (ECO.COMPANY.empLimit.rider: 65 000 ֏, 12 600 left). Drawn ahead',

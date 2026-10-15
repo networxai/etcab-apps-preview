@@ -244,7 +244,7 @@
           htmlMarker(m, k.ll, carTop(k.deg), [18, 34])
         } },
 
-      { id: 'pay-change', group: 'In the ride', label: 'Change payment', note: 'Change list 2026-10-15: «Փոխել» on the ride card opens the payment sheet mid-ride. Any method (cash, card, Apple / Google Pay, POS or NFC at the driver); allowed until the driver completes the ride (then the row locks). The driver sees the change at once (driver-ride#paychanged). Company rides do not show the row. Card payments are drawn ahead',
+      { id: 'pay-change', group: 'In the ride', label: 'Change payment', note: 'Change list 2026-10-15: «Փոխել» on the ride card opens the payment sheet mid-ride. Any method (cash, card, Apple / Google Pay, NFC at the driver); allowed until the driver completes the ride (then the row locks). The driver sees the change at once (driver-ride#paychanged). Company rides do not show the row. Card payments are drawn ahead',
         time: '9:48', ...modal('Վճարման եղանակ', `${R.payList('card', { ride: true })}
           <div class="inline-note" style="margin:var(--s3) 0">${R.i('info')}<span>Կարող եք փոխել մինչև ուղևորության ավարտը · վարորդը կտեսնի անմիջապես</span></div>
           <button class="btn btn-brand">Պահել</button>`, 'riding'),

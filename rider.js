@@ -73,7 +73,7 @@
       row('card', 'credit-card', `${P.card.label} ·· ${P.card.last4}`, 'կգանձվի ավարտին'),
       row('applepay', 'smartphone', P.applepay.label, 'iPhone-ում'),
       row('googlepay', 'smartphone', P.googlepay.label, 'Android-ում'),
-      row('driver', 'smartphone-nfc', 'Վարորդի մոտ՝ POS կամ NFC', 'քարտը կամ հեռախոսը մոտեցնել'),
+      row('nfc', 'smartphone-nfc', 'NFC', 'մոտեցնել վարորդի հեռախոսին'),
     ].join(div)}${div}<button class="choice"><span class="ico">${R.i('plus')}</span><span class="t">Ավելացնել քարտ</span></button></div>`
   }
   window.R = R
