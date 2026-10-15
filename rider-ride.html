@@ -53,6 +53,15 @@
   .trip .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
   .sq { width: 12px; height: 12px; border-radius: 3px; background: var(--ink); flex: none; }
   .mini { display: flex; align-items: center; gap: var(--s3); min-height: 56px; }
+  /* Change list 2026-10-15: the rider changes Cash ↔ Card during the ride, until the driver completes it. */
+  .payrow { display: flex; align-items: center; gap: var(--s3); width: 100%; min-height: 48px; padding: 0 var(--s1); border-top: 1px solid var(--line); text-align: left; }
+  .payrow svg { width: 20px; height: 20px; color: var(--ink-2); flex: none; } .payrow .cashc { color: var(--ok); }
+  .payrow .t { flex: 1; font: var(--t-body); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .payrow .ch { font: var(--t-body-strong); color: var(--brand-text, var(--ink)); white-space: nowrap; }
+  .paylist .choice { min-height: 60px; }
+  .paylist .choice .ico { width: 36px; height: 36px; border-radius: 10px; background: var(--surface-2); display: grid; place-items: center; flex: none; }
+  .paylist .choice .ico svg { width: 20px; height: 20px; } .paylist .choice .ico.cashc { color: var(--ok); }
+  .paylist .choice .t2 { display: block; font: var(--t-caption); color: var(--ink-2); }
   .mini .nm { flex: 1; font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
 
   /* modals */
@@ -167,6 +176,7 @@
       ${o.tags ? `<div class="tags">${o.tags}</div>` : ''}${o.cap ? `<div class="cap">${o.cap}</div>` : ''}
       ${identity(o.d)}${driver(o.d)}${acts(A_WAIT)}${o.after || ''}</section>`
   const preTag = (t) => `<span class="tagp pre">${R.i('calendar-clock')}Նախնական պատվեր · ${t}-ին</span>`
+  const payrow = (card) => `<button class="payrow" aria-label="Փոխել վճարման եղանակը">${card ? R.i('wallet') : `<span class="cashc" style="display:contents">${R.i('banknote')}</span>`}<span class="t">${card ? 'Քարտ ·· 4242' : 'Կանխիկ'} · ${ECO.amd(1100)}</span><span class="ch">Փոխել</span></button>`
   const notice = (body, icon = 'info') => `<div class="notice" role="status">${R.i(icon)}<span>${body}</span></div>`
 
   /* Approach map: the driver's dotted line to the pickup, our car on it, the pickup pin. frac = how far along the car is. */
@@ -223,6 +233,7 @@
             <div class="head2"><div><div class="eta">${RD.riding.left} րոպե</div><div class="status">Ճանապարհին · ժամանում <b>${RD.dropAt}</b></div></div></div>
             <div class="trip"><span class="sq"></span><span class="to"><span class="t1">${RD.drop}</span><span class="t2">${ECO.km(2.8)} մնաց</span></span></div>
             <div class="mini">${R.car('city', 64, 32, '')}${R.plate(DV.plate)}<span class="nm">${DV.first}</span></div>
+            ${payrow(false)}
             ${acts([['share-2', 'Կիսվել', 'on'], ['phone', 'Զանգել'], ['message-circle', 'Գրել'], ['life-buoy', 'Օգնություն']])}</section>`,
         map: (s) => {
           const k = at(T, .35), rest = T.slice(k.i)
@@ -230,6 +241,35 @@
           drawRoute(m, rest, { weight: 5 })
           htmlMarker(m, DROP, '<div class="pin-b"></div>', [18, 18])
           htmlMarker(m, DROP, `<div class="maptag" data-overlay style="position:absolute;left:0;top:-22px;transform:translate(-50%,-100%)"><b>${RD.dropAt}</b>Կոմիտաս</div>`, [0, 0], [0, 0])
+          htmlMarker(m, k.ll, carTop(k.deg), [18, 34])
+        } },
+
+      { id: 'pay-change', group: 'In the ride', label: 'Change payment', note: 'Change list 2026-10-15: «Փոխել» on the ride card opens the payment sheet mid-ride. Cash or a saved card; allowed until the driver completes the ride (then the row locks). The driver sees the change at once (driver-ride#paychanged). Company rides do not show the row. Card payments are drawn ahead',
+        time: '9:48', ...modal('Վճարման եղանակ', `<div class="paylist" role="radiogroup" aria-label="Վճարման եղանակ">
+          <button class="choice" role="radio" aria-checked="false"><span class="ico cashc">${R.i('banknote')}</span><span class="t">Կանխիկ<span class="t2">վարորդին՝ ավարտին</span></span><span class="radio"></span></button>
+          <div class="divider" style="margin-left:48px"></div>
+          <button class="choice" role="radio" aria-checked="true"><span class="ico">${R.i('wallet')}</span><span class="t">Քարտ ·· 4242<span class="t2">կգանձվի ավարտին</span></span><span class="radio"></span></button>
+          <div class="divider" style="margin-left:48px"></div>
+          <button class="choice"><span class="ico">${R.i('plus')}</span><span class="t">Ավելացնել քարտ</span></button></div>
+          <div class="inline-note" style="margin:var(--s3) 0">${R.i('info')}<span>Կարող եք փոխել մինչև ուղևորության ավարտը · վարորդը կտեսնի անմիջապես</span></div>
+          <button class="btn btn-brand">Պահել</button>`, 'riding'),
+        map: (s) => { const k = at(T, .45), rest = T.slice(k.i); const m = R.map(s, { fit: rest, padTL: [56, 96], padBR: [56, s.querySelector('#sheet').offsetHeight + 56] }); drawRoute(m, rest, { weight: 5 }); htmlMarker(m, DROP, '<div class="pin-b"></div>', [18, 18]); htmlMarker(m, k.ll, carTop(k.deg), [18, 34]) } },
+      { id: 'riding-card', group: 'In the ride', label: 'Riding · paid by card', note: 'After the change: the row reads the card, one neutral line confirms the driver was told. The fare is unchanged',
+        time: '9:48', html: () => `<div class="map" id="map" aria-label="Քարտեզ"></div>
+          <button class="fab" style="top:62px;left:16px" aria-label="Հետ">${R.i('chevron-down')}</button>
+          <button class="fab" style="top:62px;right:16px" aria-label="Անվտանգություն">${R.i('shield')}</button>
+          <section class="sheet r" id="sheet"><div class="grabber"></div>
+            ${notice('<b>Վճարումը՝ քարտով</b>Վարորդը տեղեկացված է', 'circle-check')}
+            <div class="head2" style="margin-top:var(--s3)"><div><div class="eta">3 րոպե</div><div class="status">Ճանապարհին · ժամանում <b>${RD.dropAt}</b></div></div></div>
+            <div class="trip"><span class="sq"></span><span class="to"><span class="t1">${RD.drop}</span><span class="t2">${ECO.km(2.1)} մնաց</span></span></div>
+            <div class="mini">${R.car('city', 64, 32, '')}${R.plate(DV.plate)}<span class="nm">${DV.first}</span></div>
+            ${payrow(true)}
+            ${acts([['share-2', 'Կիսվել', 'on'], ['phone', 'Զանգել'], ['message-circle', 'Գրել'], ['life-buoy', 'Օգնություն']])}</section>`,
+        map: (s) => {
+          const k = at(T, .5), rest = T.slice(k.i)
+          const m = R.map(s, { fit: rest, padTL: [56, 156], padBR: [56, s.querySelector('#sheet').offsetHeight + 56] })
+          drawRoute(m, rest, { weight: 5 })
+          htmlMarker(m, DROP, '<div class="pin-b"></div>', [18, 18])
           htmlMarker(m, k.ll, carTop(k.deg), [18, 34])
         } },
 

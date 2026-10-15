@@ -65,6 +65,12 @@
   .cash svg { width: 24px; height: 24px; color: var(--ok); flex: none; }
   .cash .t1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
   .cash .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  /* Change list 2026-10-15: on Complete the driver can switch Cash → POS terminal before «Պատրաստ եմ» (the fare is
+     final; only the method changes; the dispatcher and the receipt follow). The rider can switch Cash ↔ Card mid-ride. */
+  .cash.pos { background: var(--info-soft); } .cash.pos svg { color: var(--info); }
+  .cash.card { background: var(--surface-2); } .cash.card svg { color: var(--ink-2); }
+  .paylbl { font: var(--t-caption); color: var(--ink-2); margin: 0 0 var(--s2) var(--s1); }
+  .done-pay { margin-bottom: var(--s4); }
   .facts { display: flex; justify-content: space-between; padding: 0 var(--s2) var(--s4); }
   .facts div { display: flex; flex-direction: column; align-items: center; gap: 2px; }
   .facts b { font: var(--t-headline); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -156,14 +162,14 @@
 
   <div class="offstrip" role="status" data-s="offline"><i data-lucide="cloud-off"></i>Կապ չկա · կուղարկենք կապի դեպքում<span class="tm">2:14</span></div>
 
-  <div class="guide" data-s="enroute inprogress company-inprogress chat destchanged sos" role="region" aria-label="Ուղղորդում">
+  <div class="guide" data-s="enroute inprogress company-inprogress chat destchanged sos paychanged" role="region" aria-label="Ուղղորդում">
     <span class="turn"><i data-lucide="corner-up-right"></i></span>
-    <div><div class="dist"><span data-s="enroute chat">300</span><span data-s="inprogress company-inprogress sos">650</span><span data-s="destchanged">400</span><small>մ</small></div>
-      <div class="st" data-s="enroute chat">Թումանյան փ.</div><div class="st" data-s="inprogress company-inprogress sos destchanged">Կոմիտասի պող.</div></div>
+    <div><div class="dist"><span data-s="enroute chat">300</span><span data-s="inprogress company-inprogress sos paychanged">650</span><span data-s="destchanged">400</span><small>մ</small></div>
+      <div class="st" data-s="enroute chat">Թումանյան փ.</div><div class="st" data-s="inprogress company-inprogress sos destchanged paychanged">Կոմիտասի պող.</div></div>
     <div class="then"><i data-lucide="corner-up-left"></i>ապա</div>
   </div>
 
-  <button class="fab lg" id="fab" style="right:16px" aria-label="Ընդհանուր տեսք" data-s="enroute inprogress assigned offline arrived noshow noshowsent company-inprogress chat destchanged sos"><i data-lucide="locate-fixed"></i></button>
+  <button class="fab lg" id="fab" style="right:16px" aria-label="Ընդհանուր տեսք" data-s="enroute inprogress assigned offline arrived noshow noshowsent company-inprogress chat destchanged sos paychanged"><i data-lucide="locate-fixed"></i></button>
 
   <!-- ── assigned: on the way to start (tap "On my way") ── -->
   <section class="sheet" data-s="assigned" data-sheet>
@@ -234,6 +240,24 @@
     </div>
   </section>
 
+  <!-- ── in progress, the rider switched Cash → Card in the app (change list 2026-10-15) ── -->
+  <section class="sheet" data-s="paychanged" data-sheet>
+    <div class="grabber"></div>
+    <div class="notice info" role="status"><i data-lucide="wallet"></i><div><b>Ուղևորը կվճարի քարտով</b>Կանխիկ մի վերցրեք · 9:48</div></div>
+    <div class="head" style="margin-top:var(--s3)">
+      <div><div class="eyebrow"><span class="d"></span>3 րոպե · 2,1 կմ · 9:51</div><div class="addr">Կոմիտասի պող. 22</div></div>
+      <div class="big" style="font:var(--t-title)">1 100 ֏</div>
+    </div>
+    <div class="tools" style="justify-content:flex-start;gap:var(--s4)">
+      <button class="tool"><span class="b"><i data-lucide="phone"></i></span>Զանգել</button>
+      <button class="tool"><span class="b"><i data-lucide="headset"></i></span>Դիսպետչեր</button>
+    </div>
+    <div class="slide" role="slider" aria-label="Ավարտել" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+      <span class="knob"><i data-lucide="flag"></i></span>Ավարտել
+      <span class="hint" aria-hidden="true"><i data-lucide="chevron-right"></i><i data-lucide="chevron-right"></i></span>
+    </div>
+  </section>
+
   <!-- ── destchanged (D22): the dispatcher moved the drop mid-ride; the price follows the new route (drawn ahead) ── -->
   <section class="sheet" data-s="destchanged" data-sheet>
     <div class="grabber"></div>
@@ -262,6 +286,34 @@
       <div class="big">1 100<small>֏</small></div>
     </div>
     <div class="cash"><i data-lucide="banknote"></i><div><div class="t1">Վերցրեք կանխիկ</div><div class="t2">Աննա · Eco City · 1 100 ֏</div></div></div>
+    <div class="done-pay"><div class="paylbl">Ինչպես է վճարում ուղևորը</div><div class="seg" role="radiogroup" aria-label="Վճարման եղանակ"><button role="radio" aria-pressed="true" aria-checked="true">Կանխիկ</button><button role="radio" aria-pressed="false" aria-checked="false">POS տերմինալ</button></div></div>
+    <div class="facts"><div><b>4,3 կմ</b><span>Ճանապարհ</span></div><div><b>6 րոպե</b><span>Տևողություն</span></div><div><b>1:20</b><span>Սպասում</span></div></div>
+    <button class="go">Պատրաստ եմ</button>
+  </section>
+
+  <!-- ── complete, switched to POS (change list 2026-10-15): the hero says so; «Պատրաստ եմ» records the method ── -->
+  <section class="sheet" data-s="done-pos" data-sheet>
+    <div class="grabber"></div>
+    <div class="done-top">
+      <span class="ok"><i data-lucide="check"></i></span>
+      <div class="l">Կոմիտասի պող. 22 · 9:51</div>
+      <div class="big">1 100<small>֏</small></div>
+    </div>
+    <div class="cash pos"><i data-lucide="credit-card"></i><div><div class="t1">Վճարում՝ POS տերմինալով</div><div class="t2">1 100 ֏ · կանխիկ մի վերցրեք</div></div></div>
+    <div class="done-pay"><div class="paylbl">Ինչպես է վճարում ուղևորը</div><div class="seg" role="radiogroup" aria-label="Վճարման եղանակ"><button role="radio" aria-pressed="false" aria-checked="false">Կանխիկ</button><button role="radio" aria-pressed="true" aria-checked="true">POS տերմինալ</button></div></div>
+    <div class="facts"><div><b>4,3 կմ</b><span>Ճանապարհ</span></div><div><b>6 րոպե</b><span>Տևողություն</span></div><div><b>1:20</b><span>Սպասում</span></div></div>
+    <button class="go">Պատրաստ եմ</button>
+  </section>
+
+  <!-- ── complete, the rider switched to card mid-ride: nothing to collect, no switch ── -->
+  <section class="sheet" data-s="done-card" data-sheet>
+    <div class="grabber"></div>
+    <div class="done-top">
+      <span class="ok"><i data-lucide="check"></i></span>
+      <div class="l">Կոմիտասի պող. 22 · 9:51</div>
+      <div class="big">1 100<small>֏</small></div>
+    </div>
+    <div class="cash card"><i data-lucide="wallet"></i><div><div class="t1">Վճարված է քարտով</div><div class="t2">ոչինչ մի վերցրեք · Աննա · Eco City</div></div></div>
     <div class="facts"><div><b>4,3 կմ</b><span>Ճանապարհ</span></div><div><b>6 րոպե</b><span>Տևողություն</span></div><div><b>1:20</b><span>Սպասում</span></div></div>
     <button class="go">Պատրաստ եմ</button>
   </section>
@@ -377,11 +429,11 @@
 <script>
   const st0 = new URLSearchParams(location.search).get('state') || 'assigned'
   /* The clock follows ECO.RIDE: assigned 9:41, at the pickup 9:45, riding 9:47, dropped 9:51. */
-  statusBar(document.getElementById('s'), { enroute: '9:43', arrived: '9:45', noshow: '9:50', noshowsent: '9:51', offline: '9:45', call: '9:45', cancel: '9:45', inprogress: '9:47', done: '9:51', chat: '9:43', 'company-inprogress': '9:47', 'company-done': '9:51', changed: '9:43', destchanged: '9:48', sos: '9:48' }[st0] || '9:41')
+  statusBar(document.getElementById('s'), { enroute: '9:43', arrived: '9:45', noshow: '9:50', noshowsent: '9:51', offline: '9:45', call: '9:45', cancel: '9:45', inprogress: '9:47', done: '9:51', 'done-pos': '9:51', 'done-card': '9:51', paychanged: '9:48', chat: '9:43', 'company-inprogress': '9:47', 'company-done': '9:51', changed: '9:43', destchanged: '9:48', sos: '9:48' }[st0] || '9:41')
   const st = D.init([
     ['assigned', 'Assigned · On my way'], ['enroute', 'En route · Arrived (guidance)'], ['arrived', 'Arrived · wait, slide Start'],
     ['noshow', 'No-show available (5:00+)'], ['noshowsent', 'No-show raised'], ['inprogress', 'In progress · slide Complete'],
-    ['done', 'Complete · collect cash'], ['forced', 'Forced acknowledgement'], ['offline', 'Offline · actions will sync'],
+    ['done', 'Complete · collect cash'], ['done-pos', 'Complete · switched to POS terminal'], ['paychanged', 'Rider switched to card (in ride)'], ['done-card', 'Complete · paid by card'], ['forced', 'Forced acknowledgement'], ['offline', 'Offline · actions will sync'],
     ['call', 'Call sheet'], ['cancel', 'Cancel or give back'], ['chat', 'Chat · quick replies (ahead)'],
     ['company-inprogress', 'Company ride · in progress'], ['company-done', 'Company ride · complete, collect nothing'],
     ['changed', 'Order cancelled (mid-approach)'],
@@ -393,7 +445,7 @@
   const A = ROUTES.driverToPickup.pts, B = ROUTES.pickupToDrop.pts
   const bear = (p, q) => Math.atan2((q[1] - p[1]) * Math.cos(p[0] * Math.PI / 180), q[0] - p[0]) * 180 / Math.PI
   const car = (pts, i) => `<div class="me">${carTop(bear(pts[i], pts[Math.min(i + 2, pts.length - 1)]), 'var(--brand)', 'rgb(255 255 255 / .75)')}</div>`
-  const base = ['call', 'cancel'].includes(st) ? 'arrived' : st === 'chat' ? 'enroute' : { 'company-inprogress': 'inprogress', 'company-done': 'done', sos: 'inprogress' }[st] || st
+  const base = ['call', 'cancel'].includes(st) ? 'arrived' : st === 'chat' ? 'enroute' : { 'company-inprogress': 'inprogress', 'company-done': 'done', 'done-pos': 'done', 'done-card': 'done', paychanged: 'inprogress', sos: 'inprogress' }[st] || st
   const main = document.querySelector('.sheet[data-sheet]:not([hidden]):not(.top)') || (st === 'sos' ? document.querySelector('.sheet[data-s~="inprogress"]') : document.querySelector('.sheet[data-s~="arrived"]'))
   if (st === 'sos') main.hidden = false
   if (['call', 'cancel', 'chat', 'sos'].includes(st)) { main.hidden = false; for (const el of [main, document.getElementById('fab'), document.getElementById('map'), ...document.querySelectorAll('.guide:not([hidden])')]) { el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true') } }
