@@ -80,6 +80,14 @@
   .fis .qr { display: flex; gap: var(--s3); align-items: center; margin-top: var(--s2); }
   .fis .qr svg { flex: none; background: #fff; border-radius: 6px; padding: 6px; }
   .fis .qr span { font: var(--t-secondary); color: var(--ink-2); }
+  /* Cash, before ETAPI files it (24 h hold): the number is a promise with a time, never an error. */
+  .fis .m .pend { display: inline-flex; align-items: center; gap: 6px; font: var(--t-secondary-strong); color: var(--ink-2); }
+  .fis .m .pend svg { width: 16px; height: 16px; }
+  .fis .wait { display: flex; gap: var(--s3); align-items: flex-start; margin-top: var(--s3); padding: var(--s3); border-radius: 12px; background: var(--surface-2); }
+  .page.on-surface .fis .wait { background: var(--surface); }
+  .fis .wait svg { width: 20px; height: 20px; flex: none; color: var(--ink-2); margin-top: 1px; }
+  .fis .wait b { display: block; font: var(--t-body-strong); color: var(--ink); }
+  .fis .wait span { font: var(--t-secondary); color: var(--ink-2); }
   .bd .l.promo span:first-child { display: inline-flex; align-items: center; gap: 6px; }
   .bd .l.promo svg { width: 16px; height: 16px; }
   .bd .l.promo span { color: var(--brand-ink, var(--brand)); }
@@ -165,6 +173,24 @@
             <div class="qr">${qr()}<span>Ստուգեք կտրոնը ՊԵԿ կայքում</span></div>
           </div></div>
           <div class="foot"><button class="btn btn-brand">${R.i('share')}Կիսվել</button><button class="btn btn-quiet">${R.i('download')}Պահել PDF</button></div></div>` },
+      { id: 'fiscal-pending', label: 'Receipt · cash, pending', time: '9:52', note: 'Cash rides reach the Tax Service only after ETAPI\'s 24 h hold (cashless ones at once), so right after a cash ride the receipt has no number yet. The same receipt, with «պատրաստվում է» in place of the number and a neutral line giving the time it will be ready; no QR until then. A push says when it is issued, and History shows the number from then on. Never red: nothing failed',
+        html: () => `<div class="page">${nav.replace('Ուղևորությունն ավարտված է', 'ՊԵԿ կտրոն')}<div class="body">
+          <div class="fis" aria-label="ՊԵԿ կտրոն · պատրաստվում է">
+            <div class="seller">${ECO.FISCAL.seller}</div>
+            <div class="meta">
+              <div class="m"><span>Հարթակ · ՀՎՀՀ</span><b>${ECO.FISCAL.tin}</b></div>
+              <div class="m"><span>Վարորդ · ՀՎՀՀ</span><b>${ECO.FISCAL.driverTin}</b></div>
+              <div class="m"><span>ՊԵԿ կտրոն №</span><span class="pend">${R.i('clock')}պատրաստվում է</span></div>
+              <div class="m"><span>Ամսաթիվ</span><b>${ECO.FISCAL.at}</b></div>
+            </div>
+            <div class="cut"></div>
+            <div class="item"><span>Տաքսու ծառայություն<small>${RD.tier} · R-${RD.no} · ${ECO.km(RD.km)}</small></span><span>${R.amd(RD.fare)}</span></div>
+            <div class="cut"></div>
+            <div class="tot"><span>Ընդամենը</span><span>${R.amd(RD.fare)}</span></div>
+            <div class="m" style="margin-top:var(--s1)"><span>${ECO.PAY.cash.label}</span><b>${R.amd(RD.fare)}</b></div>
+            <div class="wait" role="status">${R.i('clock')}<div><b>Կտրոնը պատրաստ կլինի մինչև վաղը, 9:51</b><span>Կանխիկ վճարումները ՊԵԿ են ուղարկվում 24 ժամվա ընթացքում · կծանուցենք</span></div></div>
+          </div></div>
+          <div class="foot"><button class="btn btn-brand">Լավ</button><button class="btn btn-quiet">${R.i('download')}Պահել ստացականը</button></div></div>` },
       { id: 'thanks', label: 'Thanks', note: 'Calm close; the next ride is one tap',
         html: () => page(`<div class="thanks"><span class="ok">${R.i('check')}</span><h1 class="large">Շնորհակալություն</h1>
           <span class="sum">${R.amd(RD.fare)} · ${ECO.PAY.cash.label} · ${DV.first}</span></div>`,

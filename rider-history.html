@@ -28,6 +28,7 @@
   .doc .dh { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--s3); }
   .doc .dh img { height: 16px; width: auto; margin-top: 4px; }
   .doc .dh .no { text-align: right; font: var(--t-secondary); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .doc .m .pend { display: inline-flex; align-items: center; gap: 6px; font: var(--t-secondary-strong); color: var(--ink-2); } .doc .m .pend svg { width: 16px; height: 16px; }
   .doc .dh .no b { display: block; font: var(--t-body-strong); color: var(--ink); }
   .doc .cut { border-top: 1.5px dashed var(--ink-3); margin: var(--s3) 0; opacity: .7; }
   .doc .m { display: flex; justify-content: space-between; gap: var(--s3); min-height: 26px; align-items: center; font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
@@ -242,6 +243,28 @@
             <div class="m"><span>ՊԵԿ կտրոն №</span><b>${F.no}</b></div>
             <div class="m"><span>Վարորդ · ՀՎՀՀ</span><b>${F.driverTin}</b></div>
             <div class="m"><span>Ստուգել</span><b style="color:var(--brand-text, var(--ink))">${F.url}</b></div>
+          </div></div>
+          <div class="foot two"><button class="btn btn-brand">${R.i('download')}Ներբեռնել PDF</button></div></div>` } },
+      { id: 'receipt-pending', label: 'Receipt document · cash, pending', time: '9:58', note: 'The same document within 24 h of a cash ride: ETAPI has not filed it with the Tax Service yet, so the receipt number row gives the time it will be ready and the check link is absent. Everything else, PDF included, is already final. Change list 2026-10-14 (drawn ahead): the row\'s receipt button opens the ride\'s receipt as a document — seller and ՀՎՀՀ, ride number and date, route and times, tariff and driver, the tariff lines, a promo line when one was used (ECO.PROMO.applied AUTUMN15 −165 ֏), total, payment, and the Tax Service receipt (ECO.FISCAL, via ETAPI: receipt number, driver ՀՎՀՀ, the check link). «Ներբեռնել PDF» is the one primary; share is the quiet second. A company ride shows «Վճարում է՝ {company}» in the payment line',
+        html: () => { const F = ECO.FISCAL, PA = ECO.PROMO.applied
+          return `<div class="page on-surface"><nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl">Ստացական</span><button class="navbtn" aria-label="Կիսվել">${R.i('share')}</button></nav>
+          <div class="scroll"><div class="doc" aria-label="Ստացական">
+            <div class="dh"><img src="assets/eco/logo-wide.png" alt="Eco Taxi" width="88" height="16"><span class="no"><b>R-${RD.no}</b>9 հոկտ. 2026</span></div>
+            <div class="m" style="margin-top:var(--s2)"><span>${F.seller}</span><b>ՀՎՀՀ ${F.tin}</b></div>
+            <div class="cut"></div>
+            <div class="rt">${RD.pickup} <span>· ${RD.pickupAt}</span><br>${RD.drop} <span>· ${RD.dropAt}</span></div>
+            <div class="m"><span>${RD.tier} · ${ECO.km(RD.km)} · ${RD.min} րոպե</span><b>${DV.plate}</b></div>
+            <div class="cut"></div>
+            <div class="m"><span>Նստեցում</span><b>${A(600)}</b></div>
+            <div class="m"><span>Ըստ կիլոմետրի · ${ECO.km(RD.km)}</span><b>${A(387)}</b></div>
+            <div class="m"><span>Ըստ րոպեի · ${RD.min} րոպե</span><b>${A(72)}</b></div>
+            <div class="m"><span>Կլորացում</span><b>+${A(41)}</b></div>
+            <div class="m disc"><span>${R.i('ticket-percent')}Պրոմոկոդ · ${PA.code}</span><b>−${A(PA.off)}</b></div>
+            <div class="cut"></div>
+            <div class="tot"><span>Ընդամենը</span><span>${A(PA.pay)}</span></div>
+            <div class="m" style="margin-top:var(--s1)"><span>Վճարում</span><b>${ECO.PAY.cash.label}</b></div>
+            <div class="m"><span>ՊԵԿ կտրոն №</span><span class="pend">${R.i('clock')}մինչև 10 հոկտ., 9:51</span></div>
+            <div class="m"><span>Վարորդ · ՀՎՀՀ</span><b>${F.driverTin}</b></div>
           </div></div>
           <div class="foot two"><button class="btn btn-brand">${R.i('download')}Ներբեռնել PDF</button></div></div>` } },
       { id: 'detail-cancelled', label: 'Cancelled', note: 'No fare was charged, and the reason the rider gave',
