@@ -132,6 +132,12 @@
       <h3><i data-lucide="percent"></i>Միջնորդավճար<span class="end"><a class="btn ghost s" href="tariffs.html?theme=${THEME}&t=${p.tier === 'partner' ? 'comfort' : p.tier}&sec=commission">${T.name}<i data-lucide="arrow-right"></i></a></span></h3>
       <dl class="kv2"><dt>Դրույք</dt><dd><b>${r.fee}%</b> պատվերի գնից</dd><dt>Հարկեր</dt><dd class="faint">անջատված</dd><dt>Այսօր</dt><dd>3 պատվեր · <b>1 110 ֏</b></dd></dl>
     </div>
+    <!-- Owner 2026-10-15: ETAPI files a partner's non-cash rides like a fleet driver's — ՊԵԿ receipt + Idram payout — so
+         the partner carries the same two ids (drivers?etapi=missing draws the empty state). -->
+    <div class="blk">
+      <h3><i data-lucide="receipt-text"></i>ETAPI · կտրոն և Idram<span class="end pill ok" style="height:20px"><i data-lucide="circle-check"></i>Կարգին</span></h3>
+      <dl class="kv2"><dt>ՀՎՀՀ</dt><dd class="mono">2${p.code.slice(2)}4471</dd><dt>Idram ID</dt><dd class="mono">0433 ${p.code.slice(2)}</dd><dt>Idram՝ այս շաբաթ</dt><dd><b>${amd(18600)}</b> · 14 անկանխիկ պատվեր</dd></dl>
+    </div>
     <div class="blk" style="margin-bottom:12px">
       <h3><i data-lucide="file-text"></i>Փաստաթղթեր<span class="end pill warn" style="height:20px"><i data-lucide="clock"></i>1 լրանում է</span></h3>
       <div class="docs" data-truncate>

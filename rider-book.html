@@ -155,6 +155,13 @@
   .tier .est { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; }
   .whennote { display: flex; align-items: center; gap: var(--s2); font: var(--t-secondary); color: var(--ink-2); margin: calc(-1 * var(--s1)) 0 var(--s3); }
   .whennote svg { width: 16px; height: 16px; flex: none; }
+  /* Price breakdown (owner 2026-10-15): the driver's fare lines, then the service fee as its own line; the button is the total. */
+  .pb { display: flex; flex-direction: column; margin: calc(-1 * var(--s1)) 0 var(--s3); }
+  .pl { display: flex; justify-content: space-between; align-items: center; gap: var(--s3); min-height: 22px; font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  .pl b { font: var(--t-secondary-strong); color: var(--ink); font-variant-numeric: tabular-nums; }
+  /* A tier the zone does not serve (Eco Kids from the airport): dimmed, «—», one word why. Not removed: the rider knows it exists. */
+  .tier.off .art, .tier.off .name, .tier.off .meta { opacity: .4; }
+  .paylist .choice[aria-disabled="true"] .radio { opacity: .4; }
   .days .chip[aria-disabled="true"] { color: var(--ink-3); background: var(--surface-2); box-shadow: none; text-decoration: line-through; text-decoration-color: var(--ink-3); }
 </style>
 </head>
@@ -164,6 +171,9 @@
 ROUTES.preAir = { m: 14742, s: 1230, pts: [[40.206708,44.503782],[40.206399,44.504441],[40.205481,44.505095],[40.204759,44.503279],[40.204318,44.502176],[40.204082,44.501602],[40.202996,44.498929],[40.202872,44.498628],[40.202428,44.497484],[40.201647,44.495615],[40.201432,44.494992],[40.201145,44.49452],[40.200917,44.494345],[40.200513,44.494151],[40.199807,44.493798],[40.198956,44.493301],[40.198106,44.492905],[40.197743,44.492696],[40.197089,44.491608],[40.196422,44.490502],[40.195291,44.488607],[40.19445,44.48718],[40.193467,44.485512],[40.193153,44.48498],[40.192913,44.484573],[40.192357,44.483655],[40.190298,44.480188],[40.189677,44.47917],[40.188309,44.476902],[40.187751,44.475663],[40.187296,44.475026],[40.186779,44.474804],[40.186151,44.474964],[40.185234,44.476],[40.183985,44.476892],[40.181787,44.478394],[40.180049,44.479534],[40.174492,44.482576],[40.172049,44.483645],[40.169922,44.484602],[40.169234,44.484955],[40.168793,44.484975],[40.167889,44.484857],[40.167676,44.484745],[40.166884,44.483542],[40.166493,44.48276],[40.166191,44.48215],[40.164273,44.477967],[40.163116,44.475368],[40.161956,44.472764],[40.161185,44.471037],[40.159962,44.468365],[40.158888,44.465553],[40.158505,44.464464],[40.158195,44.46355],[40.157646,44.461701],[40.157548,44.461288],[40.15677,44.457973],[40.156594,44.457071],[40.156551,44.456605],[40.156549,44.456259],[40.156817,44.454198],[40.157048,44.453034],[40.157885,44.449959],[40.158331,44.448322],[40.158525,44.447608],[40.158971,44.446009],[40.159747,44.443033],[40.159876,44.442472],[40.160031,44.441338],[40.160043,44.440744],[40.160001,44.44038],[40.15974,44.439443],[40.158743,44.436972],[40.158205,44.435511],[40.158035,44.434456],[40.15807,44.433374],[40.158193,44.4322],[40.158596,44.430668],[40.159022,44.429622],[40.159832,44.427732],[40.160453,44.426288],[40.163227,44.419834],[40.163718,44.41869],[40.164315,44.417232],[40.164546,44.416341],[40.164642,44.415647],[40.164654,44.415013],[40.164401,44.411989],[40.164088,44.408393],[40.163985,44.407222],[40.16368,44.403728],[40.163643,44.4033],[40.1633,44.403328],[40.161179,44.403642],[40.16102,44.403609],[40.160896,44.403553],[40.160748,44.403446],[40.160614,44.403314],[40.159388,44.401998],[40.159059,44.401731],[40.158759,44.40155],[40.158473,44.401425],[40.158112,44.401335],[40.157636,44.40131],[40.156644,44.401305],[40.156526,44.401273],[40.156415,44.401195],[40.156273,44.400963],[40.156157,44.400806],[40.156009,44.400716],[40.155377,44.400635],[40.155141,44.400598],[40.154795,44.400455],[40.154341,44.40014],[40.15322,44.398955]] }
 ROUTES.preSun = { m: 2173, s: 259, pts: [[40.190505,44.51519],[40.19052,44.51519],[40.190528,44.515037],[40.190532,44.514968],[40.19056,44.51458],[40.190625,44.514575],[40.190626,44.514553],[40.190645,44.514294],[40.190632,44.514241],[40.190641,44.514051],[40.190623,44.514017],[40.190443,44.514006],[40.190269,44.513596],[40.190452,44.513427],[40.190178,44.512875],[40.190128,44.512774],[40.190312,44.512604],[40.190435,44.512482],[40.190607,44.512287],[40.190798,44.512026],[40.191004,44.511708],[40.191104,44.511515],[40.191172,44.511377],[40.191235,44.511213],[40.191364,44.510866],[40.191468,44.510513],[40.191543,44.510146],[40.191632,44.509493],[40.191822,44.508091],[40.191855,44.507803],[40.191875,44.507627],[40.191762,44.507617],[40.191741,44.507786],[40.191593,44.508906],[40.191513,44.509504],[40.191433,44.51012],[40.191418,44.510197],[40.19137,44.510441],[40.19127,44.510786],[40.191146,44.51113],[40.191128,44.511171],[40.191036,44.511375],[40.190902,44.511615],[40.190745,44.511873],[40.190503,44.512195],[40.190357,44.512358],[40.190219,44.512498],[40.189723,44.512942],[40.189253,44.513351],[40.189112,44.513473],[40.188739,44.513797],[40.188679,44.513852],[40.188545,44.513973],[40.188527,44.513989],[40.188403,44.514097],[40.188347,44.514145],[40.188272,44.51421],[40.187735,44.514679],[40.187622,44.514777],[40.18755,44.514839],[40.187522,44.514863],[40.187234,44.515082],[40.18691,44.514726],[40.18624,44.513946],[40.186315,44.513874],[40.186516,44.513675],[40.186519,44.513602],[40.186559,44.512757],[40.186566,44.512537],[40.186575,44.512293],[40.186412,44.512084],[40.186338,44.511991],[40.186257,44.512104],[40.18613,44.512283],[40.185646,44.512946],[40.18561,44.512999],[40.185526,44.513109],[40.185457,44.513206],[40.18559,44.513365],[40.185833,44.513653]] }
 ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.50409],[40.206137,44.504628],[40.205481,44.505095],[40.204847,44.503499],[40.204424,44.50244],[40.204318,44.502176],[40.204089,44.501618],[40.203633,44.50049],[40.202996,44.498929],[40.202904,44.498705],[40.202799,44.498451],[40.202428,44.497484],[40.201804,44.496037],[40.201615,44.495528],[40.201432,44.494992],[40.201204,44.494581],[40.201083,44.494454],[40.200917,44.494345],[40.20058,44.49417],[40.200394,44.494096],[40.199807,44.493798],[40.199109,44.493426],[40.198507,44.493159],[40.198243,44.493047],[40.198108,44.493032],[40.197983,44.493039],[40.197811,44.493067],[40.197429,44.493168],[40.196762,44.493443],[40.196392,44.493729],[40.196025,44.494137],[40.195723,44.494578],[40.195113,44.495541],[40.194569,44.496406],[40.19379,44.497647],[40.192932,44.49902],[40.192609,44.499628],[40.192343,44.50047],[40.192276,44.501165],[40.192233,44.50222],[40.192144,44.504193],[40.192006,44.504423],[40.191967,44.504415],[40.191086,44.504207],[40.190794,44.504144],[40.189307,44.503774],[40.188931,44.50385],[40.187379,44.504654],[40.187146,44.504739],[40.187138,44.504945],[40.187018,44.505126],[40.186685,44.50512],[40.186237,44.50509],[40.18556,44.505019],[40.185337,44.504978],[40.185038,44.504786],[40.184883,44.504682],[40.184737,44.504834],[40.184393,44.505331],[40.184225,44.505574],[40.184796,44.506254],[40.185145,44.506695],[40.185594,44.507227],[40.186138,44.507872],[40.185612,44.508578],[40.18534,44.508971],[40.184939,44.509548],[40.184689,44.509899],[40.184603,44.51002],[40.183907,44.510996],[40.183763,44.511186],[40.183578,44.511452],[40.183239,44.511923],[40.182864,44.512455],[40.182676,44.512229],[40.182202,44.511662],[40.181857,44.51125],[40.181538,44.510874],[40.181351,44.51067],[40.181109,44.510405],[40.180969,44.510318],[40.180288,44.511311],[40.17988,44.511905],[40.179793,44.512028],[40.17948,44.512477]] }
+/* Mashtots 37 → Zvartnots (OSRM, fetched 2026-10-15) for the Կենտրոն → Զվարթնոց fixed fare; the airport → home trip is preAir reversed. */
+ROUTES.cenAir = { m: 13231, s: 1089, pts: [[40.185833,44.513653],[40.186808,44.514823],[40.186862,44.514883],[40.187107,44.515194],[40.186885,44.515383],[40.186540,44.515697],[40.185214,44.516859],[40.184986,44.517113],[40.184580,44.517626],[40.183782,44.518666],[40.183559,44.518692],[40.183166,44.518237],[40.182459,44.517414],[40.182062,44.516952],[40.180821,44.515495],[40.180752,44.515414],[40.179933,44.514437],[40.179455,44.513869],[40.178870,44.513167],[40.178490,44.512717],[40.178286,44.512502],[40.178137,44.512202],[40.178106,44.512111],[40.178057,44.512037],[40.178005,44.512000],[40.177931,44.511970],[40.177799,44.512005],[40.177654,44.511958],[40.177523,44.511836],[40.177109,44.510833],[40.176738,44.509941],[40.176363,44.509096],[40.176195,44.508726],[40.176089,44.508466],[40.175647,44.507396],[40.175413,44.506827],[40.174958,44.505722],[40.174861,44.505487],[40.174734,44.505172],[40.174533,44.504654],[40.174132,44.503685],[40.174051,44.503427],[40.174006,44.503203],[40.174004,44.501617],[40.174005,44.501422],[40.174018,44.501155],[40.174054,44.500953],[40.174123,44.500752],[40.174237,44.500568],[40.175586,44.498806],[40.175714,44.498597],[40.175748,44.498507],[40.175772,44.498348],[40.175731,44.498082],[40.175668,44.497968],[40.175571,44.497805],[40.174183,44.495499],[40.173647,44.494636],[40.172980,44.493561],[40.171908,44.491804],[40.171654,44.491391],[40.171073,44.490449],[40.169211,44.487433],[40.168786,44.486745],[40.168262,44.485883],[40.166884,44.483542],[40.166584,44.482951],[40.166448,44.482670],[40.166191,44.482150],[40.164840,44.479228],[40.163543,44.476309],[40.163116,44.475368],[40.162463,44.473906],[40.161598,44.471961],[40.161185,44.471037],[40.160549,44.469652],[40.159578,44.467408],[40.158888,44.465553],[40.158671,44.464942],[40.158414,44.464206],[40.158195,44.463550],[40.157682,44.461836],[40.157598,44.461503],[40.157548,44.461288],[40.157106,44.459405],[40.156650,44.457421],[40.156594,44.457071],[40.156554,44.456661],[40.156550,44.456491],[40.156549,44.456259],[40.156591,44.455661],[40.156878,44.453798],[40.157048,44.453034],[40.157616,44.450961],[40.157990,44.449548],[40.158331,44.448322],[40.158435,44.447952],[40.158716,44.446915],[40.158971,44.446009],[40.159654,44.443444],[40.159858,44.442547],[40.159876,44.442472],[40.159991,44.441764],[40.160042,44.441006],[40.160043,44.440744],[40.160023,44.440563],[40.159944,44.440143],[40.159740,44.439443],[40.159220,44.438114],[40.158487,44.436360],[40.158205,44.435511],[40.158069,44.434839],[40.158027,44.434108],[40.158070,44.433374],[40.158143,44.432622],[40.158290,44.431649],[40.158596,44.430668],[40.158825,44.430089],[40.159127,44.429373],[40.159832,44.427732],[40.160380,44.426456],[40.161007,44.424999],[40.163227,44.419834],[40.163470,44.419266],[40.163754,44.418607],[40.164315,44.417232],[40.164496,44.416577],[40.164586,44.416141],[40.164642,44.415647],[40.164661,44.415269],[40.164610,44.414383],[40.164401,44.411989],[40.164211,44.409810],[40.164079,44.408298],[40.163985,44.407222],[40.163762,44.404664],[40.163673,44.403640],[40.163643,44.403300],[40.163388,44.403315],[40.162272,44.403484],[40.161179,44.403642],[40.161060,44.403623],[40.161003,44.403603],[40.160896,44.403553],[40.160795,44.403486],[40.160702,44.403406],[40.160614,44.403314],[40.159495,44.402104],[40.159283,44.401905],[40.159059,44.401731],[40.158831,44.401589],[40.158713,44.401525],[40.158473,44.401425],[40.158232,44.401357],[40.157995,44.401323],[40.157636,44.401310],[40.156729,44.401310],[40.156603,44.401299],[40.156526,44.401273],[40.156450,44.401225],[40.156388,44.401165],[40.156273,44.400963],[40.156183,44.400825],[40.156132,44.400790],[40.156009,44.400716],[40.155707,44.400678],[40.155312,44.400623],[40.155141,44.400598],[40.154980,44.400551],[40.154610,44.400419],[40.154341,44.400140],[40.153222,44.398957]] }
+ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pts.slice().reverse() }
 </script>
 <script>
   /* Tenant "eco" tariffs, fixed_upfront: fare = max(floor, base + per_km·km + per_min·min) rounded to 100 ֏ (NOTES.md; the console's
@@ -177,28 +187,70 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
   const B = ECO.BOOKINGS, C = ECO.COMPANY
   /* Trips drawn on this page. now = Republic Sq → Cascade (2,1 km, 4 min → Eco City 800 ֏).
      air = ECO.BOOKINGS.air being booked (Komitas 22 → Zvartnots, 12,6 km, 17 min → 1 900 ֏); co = ECO.BOOKINGS.co (4,1 km, 11 min → 1 100 ֏). */
+  /* Owner 2026-10-15, zones (console zones.html): Զվարթնոց adds 500 ֏ «Օդանավակայանի վճար» on pickup and drop-off, has a 3 000 ֏
+     minimum on pickup, takes no cash and no Eco Kids on pickup, and pre-orders from it are ≥ 2 h ahead. Zone-to-zone, City / Comfort:
+     Կենտրոն → Զվարթնոց fixed 4 500 ֏, Երևան → Զվարթնոց fixed 5 000 ֏; a fixed fare replaces the metered one and includes the zone
+     charges. zone: { fixed: { tierId: fare }, pair, air: 'pickup' | 'drop', min }. */
+  const AIR = 500
   const TRIPS = {
     now: { route: 'republicToCascade', km: 2.1, min: 4, a: 'Հանրապետության հր.', b: 'Կասկադ' },
-    air: { route: 'preAir', km: B.air.km, min: B.air.min, a: B.air.pickup, b: B.air.dropShort, bRight: true },
+    /* The walkthrough ride (ECO.RIDE): Mashtots 37 → Komitas 22, 4,3 km, 6 min → 1 100 ֏, the rider pays 1 200 ֏. */
+    ride: { route: 'pickupToDrop', km: ECO.RIDE.km, min: ECO.RIDE.min, a: ECO.RIDE.pickup, b: ECO.RIDE.drop },
+    /* Komitas 22 is Երևան, not Կենտրոն: «Երևան → Զվարթնոց» fixes City / Comfort at 5 000 ֏ (ECO.BOOKINGS.air.fare / .fixed). */
+    air: { route: 'preAir', km: B.air.km, min: B.air.min, a: B.air.pickup, b: B.air.dropShort, bRight: true, zone: { fixed: { city: B.air.fare, partner: B.air.fare }, pair: B.air.fixed, air: 'drop' } },
     co: { route: 'preCo', km: B.co.km, min: B.co.min, a: B.co.pickup, b: B.co.drop },
+    /* Mashtots 37 (Կենտրոն) → Զվարթնոց now: OSRM 13,2 km, 18 min (ROUTES.cenAir). */
+    cenAir: { route: 'cenAir', km: 13.2, min: 18, a: ECO.RIDE.pickup, b: 'Զվարթնոց', bRight: true, zone: { fixed: { city: 4500, partner: 4500 }, pair: 'Կենտրոն → Զվարթնոց', air: 'drop' } },
+    /* From the airport home: Զվարթնոց → Komitas 22 (ECO.BOOKINGS.air reversed), metered, the 3 000 ֏ minimum and the pickup charge. */
+    airHome: { route: 'airHome', km: B.air.km, min: B.air.min, a: 'Զվարթնոց', b: B.air.pickup, aRight: true, bLeft: true, zone: { air: 'pickup', min: 3000 } },
   }
-  if (price('city', B.air.km, B.air.min) !== B.air.fare || price('city', B.co.km, B.co.min) !== B.co.fare) console.error('[rider-book] tariff and ECO.BOOKINGS fares disagree')
+  if (price('city', B.co.km, B.co.min) !== B.co.fare) console.error('[rider-book] tariff and ECO.BOOKINGS fares disagree')
+
+  /* Rider service fee (owner 2026-10-15, final): the fleet's own income, +2 % on top of the final fare when the rider pays by bank
+     card (the saved card, Apple Pay, Google Pay). Cash, NFC at the driver and company rides carry none. Whole dram: 1 100 → 22, 4 500 → 90.
+     It is its own line, and never on the Tax Service receipt. */
+  const CARDY = ['card', 'applepay', 'googlepay']
+  const fee = (fare, pay = 'cash') => CARDY.includes(pay) ? Math.round(fare * 2 / 100) : 0
+  /* The driver's fare after the zone layer: { fare, fixed, metered, base, air, min }. */
+  const fareOf = (k, trip) => {
+    const z = trip.zone || {}
+    if (z.fixed && z.fixed[k]) return { fare: z.fixed[k], fixed: z.fixed[k] }
+    const metered = price(k, trip.km, trip.min), base = z.min ? Math.max(z.min, metered) : metered
+    return { fare: base + (z.air ? AIR : 0), metered, base, air: z.air ? AIR : 0, min: z.min && z.min > metered ? z.min : 0 }
+  }
+  /* What the rider pays: the tier cards and the order button always carry this total. */
+  const total = (k, trip, pay) => { const f = fareOf(k, trip).fare; return f + fee(f, pay) }
+  /* Kids from the airport: not served there (zone rule). */
+  const offTier = (k, trip) => k === 'kids' && trip.zone && trip.zone.air === 'pickup'
 
   /* mode: undefined = priced (fixed_upfront); 'pending' = quote in flight (TierCard Skeleton); 'dash' = no quote (§14.1, «—»);
-     'metered' = a non-fixed tier (presentQuote labelAsEstimate: «≈» + «Մոտավոր»). */
-  const tierPrice = (k, trip, mode) => mode === 'pending' ? '<span class="price" aria-label="Գինը հաշվարկվում է"><span class="sk" aria-hidden="true"></span></span>'
+     'metered' = a non-fixed tier (presentQuote labelAsEstimate: «≈» + «Մոտավոր»). A zone-fixed fare says «Ֆիքսված» under it. */
+  const tierPrice = (k, trip, mode, pay) => mode === 'pending' ? '<span class="price" aria-label="Գինը հաշվարկվում է"><span class="sk" aria-hidden="true"></span></span>'
     : mode === 'dash' ? '<span class="price dash" aria-label="Գին չկա">—</span>'
-    : mode === 'metered' ? `<span class="price">≈ ${R.amd(price(k, trip.km, trip.min))}</span><span class="est">Մոտավոր</span>`
-    : `<span class="price">${R.amd(price(k, trip.km, trip.min))}</span>`
-  const tiers = (trip, mode, later, promo) => `<div class="tiers" role="radiogroup" aria-label="Սակագին">${TIERS.filter(([, n]) => !later || preOk(n)).map(([k, n, eta, seats], i) =>
-    `<button class="tier ${i ? '' : 'on'}" role="radio" aria-checked="${!i}" ${i >= 3 ? 'data-peek' : ''}>
-      ${i ? '' : `<span class="tick" aria-hidden="true">${R.i('leaf')}</span>`}
+    : offTier(k, trip) ? '<span class="price dash" aria-hidden="true">—</span><span class="est">Այստեղից՝ ոչ</span>'
+    : mode === 'metered' ? `<span class="price">≈ ${R.amd(total(k, trip, pay))}</span><span class="est">Մոտավոր</span>`
+    : `<span class="price">${R.amd(total(k, trip, pay))}</span>${fareOf(k, trip).fixed ? '<span class="est">Ֆիքսված</span>' : ''}`
+  /* sel: the chosen tier (default the first). promo: { fare, off, pay } on the chosen tier (cash). pay: the method, for the card fee. */
+  const tiers = (trip, mode, later, promo, sel, pay) => `<div class="tiers" role="radiogroup" aria-label="Սակագին">${TIERS.filter(([, n]) => !later || preOk(n)).map(([k, n, eta, seats], i) => {
+    const on = sel ? k === sel : !i, off = offTier(k, trip)
+    return `<button class="tier ${on ? 'on' : ''}${off ? ' off' : ''}" role="radio" aria-checked="${on}"${off ? ` aria-disabled="true" aria-label="${n}, օդանավակայանից չի սպասարկվում"` : ''} ${i >= 3 ? 'data-peek' : ''}>
+      ${on ? `<span class="tick" aria-hidden="true">${R.i('leaf')}</span>` : ''}
       <span class="art">${k === 'kids' ? carImg('city') + `<span class="seat" role="img" aria-label="Մանկական նստոցով">${R.i('baby')}</span>` : carImg(k)}</span><span class="name">${n}</span>
       <span class="meta"><span aria-label="Մեքենան՝ ${eta} րոպեում">${R.i('car-front')}${eta} ր</span><span>${R.i('user-round')}${seats}</span></span>
-      ${promo && !i ? `<span class="was">${R.amd(promo.fare)}</span><span class="price">${R.amd(promo.pay)}</span>` : tierPrice(k, trip, mode)}</button>`).join('')}</div>`
+      ${promo && on ? `<span class="was">${R.amd(promo.fare)}</span><span class="price">${R.amd(promo.pay)}</span>` : tierPrice(k, trip, mode, pay)}</button>` }).join('')}</div>`
   /* R31: for a later ride the order button carries the time instead of the tier (the tier is the ringed card above it):
-     «Պատվիրել · Վաղը, 08:30 · 1 900 ֏» (book.scheduleOrder + the useWhenLabel string + the fixed price). */
-  const cta = (trip, label = 'Պատվիրել', when = null) => `${label} · ${when || 'Eco City'} · ${R.amd(price('city', trip.km, trip.min))}`
+     «Պատվիրել · Վաղը, 08:30 · 5 000 ֏» (book.scheduleOrder + the useWhenLabel string + the fixed price; + the fee when paid by card). */
+  const TN = Object.fromEntries(TIERS.map(([k, n]) => [k, n]))
+  const cta = (trip, label = 'Պատվիրել', when = null, k = 'city', pay) => `${label} · ${when || TN[k]} · ${R.amd(total(k, trip, pay))}`
+  /* The price, broken down under the options (owner 2026-10-15: the service fee is its own line, before the rider orders).
+     The driver's fare lines first, then the fee; the total is the button. */
+  const fareLines = (trip, k = 'city', pay) => {
+    const f = fareOf(k, trip), z = trip.zone || {}
+    const ln = (l, v) => `<div class="pl"><span>${l}</span><b>${R.amd(v)}</b></div>`
+    return `<div class="pb" aria-label="Գինը">${f.fixed ? ln(`Ֆիքսված գին · ${z.pair}`, f.fixed)
+      : (f.min ? ln('Նվազագույն գին՝ օդանավակայանից', f.min) : ln('Ուղևորություն', f.metered)) + (f.air ? ln('Օդանավակայանի վճար', f.air) : '')}
+      ${fee(f.fare, pay) ? ln('Սպասարկման վճար · քարտով 2 %', fee(f.fare, pay)) : ''}</div>`
+  }
 
   /* when: null = now; else the useWhenLabel string («Վաղը, 08:30»). A set time turns the chip brand-soft and switches the note off. */
   const opts = (when, pay = 'cash') => `<div class="opts">
@@ -207,6 +259,8 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
         : `<button class="opt" aria-label="Նշում վարորդին">${R.i('message-square-text')}Նշում</button>`}
       ${pay === 'company'
         ? `<button class="opt${when ? ' ico' : ''}" aria-label="Վճարում՝ ${ECO.PAY.company.label}">${R.i('building-2')}${when ? '' : ECO.PAY.company.short}</button>` /* with a time set the line is long; the segment below names the company */
+        : pay === 'card' ? `<button class="opt" aria-label="Վճարում՝ ${ECO.PAY.card.label} ·· ${ECO.PAY.card.last4}">${R.i('credit-card')}·· ${ECO.PAY.card.last4}</button>`
+        : pay === 'applepay' ? `<button class="opt" aria-label="Վճարում՝ Apple Pay">${R.i('smartphone')}Apple Pay</button>`
         : `<button class="opt" aria-label="Վճարում՝ ${ECO.PAY.cash.label}"><span class="cash">${R.i('banknote')}</span>${ECO.PAY.cash.label}</button>`}</div>
       ${when ? '<div class="noteoff">Նշում՝ միայն հիմա պատվիրելիս</div>' : ''}`
   /* who: 'company' = billed to the company, monthly limit left shown · 'personal' = the rider chose personal ·
@@ -227,10 +281,17 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
       ${fab ? `<button class="fab" style="top:62px;left:16px" aria-label="Հետ">${R.i('arrow-left')}</button>` : ''}${sheet}`
   const company = (who, when = null, trip = TRIPS.co) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers(trip, undefined, !!when)}${opts(when, who === 'company' ? 'company' : 'cash')}${billTo(who)}
       <button class="btn btn-brand">${cta(trip, 'Պատվիրել', when)}</button></section>`)
-  const promoSheet = (trip) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers(trip, undefined, false, ECO.PROMO.applied)}${opts(null)}${promoRow(true)}
-      <button class="btn btn-brand">Պատվիրել · Eco City · <s>${R.amd(ECO.PROMO.applied.fare)}</s>${R.amd(ECO.PROMO.applied.pay)}</button></section>`)
-  const details = (when, trip) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers(trip, undefined, !!when)}${opts(when)}${when ? '' : promoRow(false)}
-      <button class="btn btn-brand">${cta(trip, 'Պատվիրել', when)}</button></section>`)
+  const PA = ECO.PROMO.applied
+  const promoSheet = (trip) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers(trip, undefined, false, PA)}${opts(null)}${promoRow(true)}
+      <button class="btn btn-brand">Պատվիրել · Eco City · <s>${R.amd(PA.fare)}</s>${R.amd(PA.pay)}</button></section>`)
+  /* o: { lines: show the price breakdown, sel: tier, pay, why: a neutral zone line under the options } */
+  const details = (when, trip, o = {}) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers(trip, undefined, !!when, null, o.sel, o.pay)}${opts(when, o.pay)}
+      ${o.why || ''}${o.lines ? fareLines(trip, o.sel, o.pay) : ''}${when || o.why ? '' : promoRow(false)}
+      <button class="btn btn-brand">${cta(trip, 'Պատվիրել', when, o.sel, o.pay)}</button></section>`)
+  /* The payment sheet with a quiet «+2 %» on the bank-card methods (owner 2026-10-15; page-local, rider.js stays as it is). */
+  const payL = (sel) => R.payList(sel).replace('կգանձվի ավարտին', 'կգանձվի ավարտին · +2 %').replace('iPhone-ում', 'iPhone-ում · +2 %').replace('Android-ում', 'Android-ում · +2 %')
+  /* A zone rule said once, in a neutral line with its own icon: never red, never a modal (owner 2026-10-15). */
+  const zoneWhy = (icon, text) => `<div class="whennote" role="note">${R.i(icon)}${text}</div>`
   /* The order sheet with a neutral Notice above Order (book.tsx: orderError → <Notice tone="neutral">, from orderRefusalKey). */
   const orderSheet = ({ trip = TRIPS.now, mode, notice = '', btn }) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers(trip, mode)}${opts(null)}
       ${notice}${btn || `<button class="btn btn-brand">${cta(trip)}</button>`}</section>`)
@@ -254,9 +315,9 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
     htmlMarker(m, a, '<div class="pin-a"></div>', [18, 18])
     htmlMarker(m, b, '<div class="pin-b"></div>', [18, 18])
     if (tags) {
-      htmlMarker(m, a, `<div class="maptag plain" style="position:absolute;right:20px;top:-18px">${trip.a}</div>`, [0, 0], [0, 0])
+      htmlMarker(m, a, `<div class="maptag plain" style="position:absolute;${trip.aRight ? 'left:16px' : 'right:20px'};top:-18px">${trip.a}</div>`, [0, 0], [0, 0])
       /* The airport sits at the map's west edge, so its tag opens to the right of the pin instead of centring over it. */
-      htmlMarker(m, b, `<div class="maptag" style="position:absolute;${trip.bRight ? 'left:16px;top:-18px' : 'left:0;top:-22px;transform:translate(-50%,-100%)'}">${o.noLine ? '' : `<b>${ECO.km(trip.km)} · ${trip.min} ր</b>`}${trip.b}</div>`, [0, 0], [0, 0])
+      htmlMarker(m, b, `<div class="maptag" style="position:absolute;${trip.bRight ? 'left:16px;top:-18px' : trip.bLeft ? 'right:16px;top:-18px' : 'left:0;top:-22px;transform:translate(-50%,-100%)'}">${o.noLine ? '' : `<b>${ECO.km(trip.km)} · ${trip.min} ր</b>`}${trip.b}</div>`, [0, 0], [0, 0])
     }
   }
 
@@ -269,16 +330,18 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
   const [nh, nm] = ECO.DAY.now.split(':').map(Number)
   const clock = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
   /* nowMin: minutes since midnight (default ECO.DAY.now). Tomorrow's slots also start at now + 30 when that crosses midnight. */
-  const slotsFor = (day, nowMin = nh * 60 + nm) => { const out = []; for (let m = 0; m < 1440; m += 15) if (day * 1440 + m >= nowMin + 30) out.push(m); return out }
+  const slotsFor = (day, nowMin = nh * 60 + nm, lead = 30) => { const out = []; for (let m = 0; m < 1440; m += 15) if (day * 1440 + m >= nowMin + lead) out.push(m); return out }
+  /* late: { now, note, icon, lead } — lead = minutes ahead of now for the first slot (30, LEAD_MINUTES; a zone may ask more:
+     Զվարթնոց, 120). With a lead, today keeps its chip; without one (late evening) today has no slot and is struck through. */
   /* The slot list scrolls inside the sheet. rowsScrolled = 0: today from the first slot (5 full rows, then more under the fade);
      rowsScrolled = n: already scrolled to row n (a sliver of the row above shows). Rows not fully in view are data-peek. */
   const whenSheet = (day, picked, rowsScrolled = 0, late = null) => {
-    const list = slotsFor(day, late ? late.now : undefined), rows = []
+    const list = slotsFor(day, late ? late.now : undefined, late && late.lead), rows = []
     for (let i = 0; i < list.length; i += 4) rows.push(list.slice(i, i + 4))
     const first = rowsScrolled ? rowsScrolled - 1 : 0, full = rowsScrolled ? [rowsScrolled, rowsScrolled + 4] : [0, 5]
     const shown = rows.slice(first, full[1] + 1)
     const chips = `<div class="days" role="radiogroup" aria-label="Օր"><button class="chip" aria-label="Հիմա">${R.i('clock')}Հիմա</button>${days.map((l, i) =>
-      `<button class="chip" role="radio" aria-checked="${i === day}"${late && i === 0 ? ' aria-disabled="true"' : ''}>${l}</button>`).join('')}</div>${late ? `<div class="whennote" role="note">${R.i('moon')}${late.note}</div>` : ''}`
+      `<button class="chip" role="radio" aria-checked="${i === day}"${late && !late.lead && i === 0 ? ' aria-disabled="true"' : ''}>${l}</button>`).join('')}</div>${late ? `<div class="whennote" role="note">${R.i(late.icon || 'moon')}${late.note}</div>` : ''}`
     const grid = `<div class="slots${rowsScrolled ? ' top' : ''}" role="radiogroup" aria-label="Ժամ"><div class="in" style="margin-top:${rowsScrolled ? -30 : 0}px">${shown.map((row, j) => {
       const r = first + j, peek = r < full[0] || r >= full[1]
       return row.map((m) => `<button role="radio" aria-checked="${clock(m) === picked}" aria-label="${clock(m)}"${peek ? ' data-peek' : ''}>${clock(m)}</button>`).join('')
@@ -296,9 +359,11 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
     title: 'Rider · Booking details',
     sub: 'Extends the approved tier sheet: when (now, or a quarter-hour up to 7 days ahead), a note for the driver (now only), payment (cash, card, Apple / Google Pay, NFC at the driver), and the company / personal choice for corporate riders (monthly limit left, allowed places), and a promo code',
     states: [
-      { id: 'details', group: 'Sheet', label: 'Details', note: 'One compact line under the tiers: when · note · payment. Order stays the one accent',
-        html: () => details(null, TRIPS.now), map: (s) => drawRide(s) },
-      { id: 'scheduled', group: 'Sheet', label: 'Scheduled', note: 'A time is set (book.tsx): the when chip turns brand-soft and reads «Վաղը, 08:30»; the note switches off and says why (book.noteNowOnly), because scheduled_ride has no notes column. Owner #1: only tariffs with ECO.TIERS[].preorders are offered (Eco Kids and Eco Van drop out of the row). ECO.BOOKINGS.air: 12,6 km, 17 min → 1 900 ֏',
+      { id: 'details', group: 'Sheet', label: 'Details', note: 'One compact line under the tiers: when · note · payment. Order stays the one accent. The walkthrough ride (ECO.RIDE), paid in cash: 1 100 ֏ on the card and the button, no fee line (owner 2026-10-15, final: the service fee is only on bank-card payments)',
+        html: () => details(null, TRIPS.ride), map: (s) => drawRide(s, true, TRIPS.ride) },
+      { id: 'details-card', group: 'Sheet', label: 'Details · card', note: 'Owner 2026-10-15 (final): the same ride with the saved card ·· 4242 chosen (Apple Pay / Google Pay alike). Every price becomes what the rider pays, fare + 2 %: Eco City 1 122 ֏ on the card and the button, and two lines under the options say why — the fare 1 100 ֏ and «Սպասարկման վճար · քարտով 2 %» 22 ֏. Switching back to cash drops the line and the 22 ֏',
+        html: () => details(null, TRIPS.ride, { lines: true, pay: 'card' }), map: (s) => drawRide(s, true, TRIPS.ride) },
+      { id: 'scheduled', group: 'Sheet', label: 'Scheduled', note: 'A time is set (book.tsx): the when chip turns brand-soft and reads «Վաղը, 08:30»; the note switches off and says why (book.noteNowOnly), because scheduled_ride has no notes column. Owner #1: only tariffs with ECO.TIERS[].preorders are offered (Eco Kids and Eco Van drop out of the row). ECO.BOOKINGS.air, Komitas 22 → Զվարթնոց: owner 2026-10-15 zone-to-zone «Երևան → Զվարթնոց» fixes City / Comfort at 5 000 ֏ (ECO.BOOKINGS.air.fare / .fixed), «Ֆիքսված» under it; paid in cash, so no service fee. Business / Vip stay metered + the 500 ֏ airport drop-off charge',
         html: () => details(B.air.when, TRIPS.air), map: (s) => drawRide(s, true, TRIPS.air) },
       { id: 'scheduled-company', group: 'Sheet', label: 'Scheduled · company', note: 'R33: a company rider pre-books on account (corp.schedule): Company / Personal and the monthly limit left work as for a ride now (no cost code, change list 2026-10-14); the tier row is the pre-order subset (owner #1). ECO.BOOKINGS.co, Monday 09:00, 1 100 ֏',
         html: () => company('company', B.co.when, TRIPS.co), map: (s) => drawRide(s, false, TRIPS.co) },
@@ -313,18 +378,30 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
         html: () => whenSheet(1, B.air.time, 7), after: daysInView, map: (s) => drawRide(s, false, TRIPS.air) },
       { id: 'when-late', group: 'Sheets', label: 'When · late evening', time: '23:41', note: 'R29 (drawn ahead: the real sheet opens on an empty «Այսօր»). At 23:41 the first slot is past midnight, so today has none: its chip is struck through and the sheet opens on Tomorrow from 00:15. The row ends at the seventh day, and the line says both limits once',
         html: () => whenSheet(1, null, 0, { now: 23 * 60 + 41, note: 'Այսօր ազատ ժամ չկա · առավելագույնը 7 օր առաջ' }), after: (s) => s.querySelectorAll('.days .chip').forEach((c) => { const r = c.getBoundingClientRect(); if (r.right > 390) c.dataset.peek = '' }), map: (s) => drawRide(s, false, TRIPS.air) },
-      { id: 'pay', group: 'Sheets', label: 'Payment', note: 'Owner 2026-10-15: cash, a saved card, Apple Pay (iPhone) / Google Pay (Android), or NFC (tap a card or phone on the driver\'s phone); «Ավելացնել քարտ» at the foot. Drawn ahead of card processing. A company rider chooses Company / Personal on the sheet itself',
-        html: () => modal('Վճարում', R.payList('cash')), map: (s) => drawRide(s, false) },
+      { id: 'pay', group: 'Sheets', label: 'Payment', note: 'Owner 2026-10-15: cash, a saved card, Apple Pay (iPhone) / Google Pay (Android), or NFC (tap a card or phone on the driver\'s phone); «Ավելացնել քարտ» at the foot. Owner 2026-10-15 (final): the card, Apple Pay and Google Pay rows carry a quiet «+2 %», the service fee on bank-card payments; cash and NFC have none. Drawn ahead of card processing. A company rider chooses Company / Personal on the sheet itself',
+        html: () => modal('Վճարում', payL('cash')), map: (s) => drawRide(s, false) },
+
+      { id: 'airport', group: 'Airport', label: 'To the airport · fixed', note: 'Owner 2026-10-15, zone-to-zone: Mashtots 37 (Կենտրոն) → Զվարթնոց is a fixed 4 500 ֏ for City / Comfort; the fixed fare replaces the metered one and already includes the zone charges (the 500 ֏ drop-off charge, the Կենտրոն per-minute rule). Paid by the saved card here, so the 2 % service fee goes on top: 4 500 + 90 = 4 590 ֏, its own line (owner 2026-10-15, final). «Ֆիքսված» under the fixed cards; the other tiers are metered + the airport charge, each + 2 %',
+        html: () => details(null, TRIPS.cenAir, { lines: true, pay: 'card' }), map: (s) => drawRide(s, true, TRIPS.cenAir) },
+      { id: 'airport-metered', group: 'Airport', label: 'To the airport · metered', note: 'The same trip in Eco Business, which has no fixed zone fare: the metered fare (3 300 ֏), «Օդանավակայանի վճար» 500 ֏ as its own line (zones.html: a separate line on the receipt); paid in cash, so no service fee → 3 800 ֏',
+        html: () => details(null, TRIPS.cenAir, { lines: true, sel: 'business' }), after: (s) => { const t = s.querySelector('.tiers'); t.scrollLeft = 2 * 116; t.querySelectorAll('.tier').forEach((c) => { const r = c.getBoundingClientRect(); if (r.left < 0 || r.right > 390) c.dataset.peek = ''; else delete c.dataset.peek }) }, map: (s) => drawRide(s, false, TRIPS.cenAir) },
+      { id: 'airport-pickup', group: 'Airport', label: 'From the airport', note: 'Owner 2026-10-15, zone rules on pickup at Զվարթնոց: no cash, so payment is already the saved card and one neutral line says why (no modal, no red); Eco Kids is not served there, so its card stays in the row dimmed with «—» and «Այստեղից՝ ոչ» rather than vanishing; the metered 1 900 ֏ is raised to the 3 000 ֏ airport minimum, + the 500 ֏ pickup charge = 3 500 ֏, + the 2 % card fee 70 ֏ → 3 570 ֏ (cash being off here, every rider at the airport pays the fee unless they use NFC at the driver). Assumed: the minimum applies before the charge',
+        html: () => details(null, TRIPS.airHome, { lines: true, pay: 'card', why: zoneWhy('plane', 'Օդանավակայանից՝ միայն անկանխիկ') }), map: (s) => drawRide(s, true, TRIPS.airHome) },
+      { id: 'airport-pay', group: 'Airport', label: 'From the airport · payment', note: 'The payment sheet at the airport: cash is greyed in place (not hidden, so the rider sees the rule rather than a missing option), its second line says why, and the same reason sits once above the list. Card, Apple / Google Pay and NFC stay open',
+        html: () => modal('Վճարում', zoneWhy('plane', 'Օդանավակայանից՝ միայն անկանխիկ') + payL('card').replace('aria-checked="false"><span class="ico cashc">', 'aria-checked="false" aria-disabled="true"><span class="ico">').replace('<span class="t2">վարորդին</span>', '<span class="t2">Օդանավակայանից՝ ոչ</span>')),
+        map: (s) => drawRide(s, false, TRIPS.airHome) },
+      { id: 'airport-when', group: 'Airport', label: 'From the airport · when', note: 'Owner 2026-10-15: a pre-order from Զվարթնոց must be at least 2 h ahead (zone rule, instead of the usual 30 min). At 9:41 today\'s first slot is 11:45, not 10:15; today keeps its chip. One neutral line under the days says the rule once',
+        html: () => whenSheet(0, null, 0, { now: nh * 60 + nm, lead: 120, icon: 'plane', note: 'Օդանավակայանից՝ առնվազն 2 ժամ առաջ' }), after: daysInView, map: (s) => drawRide(s, false, TRIPS.airHome) },
 
       { id: 'company', group: 'Company', label: 'Company ride · limit left', note: 'Change list 2026-10-14: no cost-centre code. Home → office (both allowed places, ECO.COMPANY.places): Company is offered; the billed-to line shows the employee\'s monthly limit left (ECO.COMPANY.empLimit.rider: 65 000 ֏, 12 600 left). Drawn ahead',
         html: () => company('company'), map: (s) => drawRide(s, false, TRIPS.co) },
-      { id: 'company-limit', group: 'Company', label: 'Over monthly limit', note: 'Corporate #1: 600 ֏ left against a 1 100 ֏ fare. Company is greyed, Personal is chosen, one line says why. No modal, no red: the order still goes. Drawn ahead',
+      { id: 'company-limit', group: 'Company', label: 'Over monthly limit', note: 'Corporate #1: 600 ֏ left against a 1 100 ֏ fare (company rides carry no service fee). Company is greyed, Personal is chosen, one line says why. No modal, no red: the order still goes. Drawn ahead',
         html: () => company('limit'), map: (s) => drawRide(s, false, TRIPS.co) },
       { id: 'company-places', group: 'Company', label: 'Not an allowed place', note: 'Corporate #4: Republic Sq → Cascade is not between the employee\'s allowed places (home, office, Zvartnots; set on the console). Company is greyed, Personal is chosen, the allowed places are listed. Drawn ahead',
         html: () => company('places', null, TRIPS.now), map: (s) => drawRide(s, false) },
       { id: 'personal', group: 'Company', label: 'Personal', note: 'The same rider paying personally: the row stays, the billed-to line goes, payment is cash',
         html: () => company('personal'), map: (s) => drawRide(s, false, TRIPS.co) },
-      { id: 'promo', group: 'Promo', label: 'Promo applied', note: 'Change list 2026-10-14: ECO.PROMO.applied AUTUMN15 (−15 %, Eco City): the City card shows 1 100 struck → 935 ֏, the row names the code and the discount, the button carries both. Drawn ahead',
+      { id: 'promo', group: 'Promo', label: 'Promo applied', note: 'Change list 2026-10-14: ECO.PROMO.applied AUTUMN15 (−15 %, Eco City): the City card shows 1 100 struck → 935 ֏, the row names the code and the discount, the button carries both. Cash, so no service fee. Drawn ahead',
         html: () => promoSheet(TRIPS.co), map: (s) => drawRide(s, false, TRIPS.co) },
       { id: 'promo-enter', group: 'Promo', label: 'Enter promo code', note: 'Tapping «Պրոմոկոդ» (here or in Account): one field, the check result under it, one button. Keyboard up',
         html: () => modal('Պրոմոկոդ', `<div class="mcode">${ECO.PROMO.applied.code}<span class="caret"></span></div>
@@ -358,7 +435,7 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
           <div class="top"><span class="badge">${R.i('calendar-clock')}</span><h2 class="h-title">Պատվերն ընդունված է</h2></div>
           <div class="hero">${B.air.when}</div><div class="hsub">Փոխելու համար զանգեք դիսպետչերին</div>
           <div class="trip"><div class="stop"><span class="g"><i></i></span>${B.air.pickup}</div><div class="stop"><span class="g"><i class="b"></i></span>${B.air.drop}</div>
-            <div class="meta"><span>${B.air.tier}</span>·<b>${R.amd(B.air.fare)}</b>·<span>${ECO.PAY.cash.label}</span></div></div>
+            <div class="meta"><span>${B.air.tier}</span>·<b>${R.amd(total('city', TRIPS.air, B.air.pay))}</b>·<span>${ECO.PAY.cash.label}</span></div></div>
           <button class="btn btn-brand">Պատրաստ է</button></section>`), map: (s) => drawRide(s, true, TRIPS.air) },
     ],
   })

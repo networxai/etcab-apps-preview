@@ -35,6 +35,41 @@
   .legend span { display: inline-flex; align-items: center; gap: 6px; font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .legend b { color: var(--ink); font-weight: 600; }
   .legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  /* Owner 2026-10-15: three ways a ride is paid, so three rows, not one line — Armenian does not fit three on 358 px.
+     Non-cash (in-app card, Apple/Google Pay, POS, NFC) is paid out to the driver via Idram; cash is already in hand. */
+  .c-noncash { background: var(--ink-3); }
+  .legend.rows { flex-direction: column; gap: 0; margin-top: var(--s3); }
+  .legend.rows span { justify-content: flex-start; min-height: 28px; }
+  .legend.rows span b { margin-left: auto; }
+  .legend.rows em { font-style: normal; color: var(--ink-3); }
+
+  /* Idram payouts (owner 2026-10-15): every completed non-cash, non-company ride goes to ETAPI → a Tax Service receipt and a
+     payout of the fare to the driver's Idram. Cash rides: the receipt only, after 24 h; company rides never go to ETAPI. */
+  .po { display: flex; align-items: center; gap: var(--s3); min-height: 60px; }
+  .po + .po { border-top: 1px solid var(--hairline); }
+  .po .ic { width: 40px; height: 40px; border-radius: 10px; background: var(--surface-2); color: var(--ink); display: grid; place-items: center; flex: none; }
+  .po .ic svg { width: 20px; height: 20px; }
+  .po .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .po .t1 { font: var(--t-body); color: var(--ink); white-space: nowrap; }
+  .po .t2 { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; display: flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums; }
+  .po .t2 svg { width: 14px; height: 14px; }
+  .po .t2.ok svg { color: var(--ok); } .po .t2.warn svg { color: var(--warn); }
+  .po .amt { font: var(--t-body-strong); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; flex: none; text-align: right; min-width: 72px; }
+  .idram { display: flex; align-items: center; gap: var(--s3); padding: var(--s3) var(--s4); margin-top: var(--s4); }
+  .idram .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .idram .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .idram .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .idram .ic { width: 40px; height: 40px; border-radius: 10px; background: var(--surface-2); color: var(--ink); display: grid; place-items: center; flex: none; }
+  .idram .ic svg { width: 20px; height: 20px; }
+  .blockedcard { padding: var(--s4); display: flex; flex-direction: column; gap: var(--s3); margin-top: var(--s4); }
+  .blockedcard .h { display: flex; align-items: center; gap: var(--s3); }
+  .blockedcard .h .ic { width: 40px; height: 40px; border-radius: 50%; background: var(--warn-soft); color: var(--warn); display: grid; place-items: center; flex: none; }
+  .blockedcard .h .ic svg { width: 20px; height: 20px; }
+  .blockedcard .t1 { font: var(--t-headline); color: var(--ink); }
+  .blockedcard .t2 { font: var(--t-secondary); color: var(--ink-2); }
+  .miss { display: flex; align-items: center; gap: var(--s2); font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; }
+  .miss svg { width: 18px; height: 18px; color: var(--warn); flex: none; }
+  .miss.ok svg { color: var(--ok); }
 
   /* Ride list */
   .ride { display: flex; align-items: center; gap: var(--s3); min-height: 56px; }
@@ -99,7 +134,8 @@
   </div>
 
   <div class="content">
-    <div class="ptitle" data-not="rides">Եկամուտ</div>
+    <div class="ptitle" data-not="rides payouts payouts-blocked">Եկամուտ</div>
+    <div class="ptitle" data-s="payouts payouts-blocked">Փոխանցումներ</div>
     <div class="ptitle" data-s="rides">Պատվերներ</div>
 
     <!-- Owner #3 (2026-10-14): a fleet driver has no balance. Two periods only; the old «Հաշվեկշիռ» tab is gone. -->
@@ -116,18 +152,25 @@
       <div class="lbl">Ուրբաթ, 9 հոկտեմբերի</div>
       <div class="hero">9 800<small>֏</small></div>
       <div class="kpis"><span class="kpi"><i data-lucide="car-front"></i><b>7</b>պատվեր</span><span class="kpi"><i data-lucide="clock"></i><b>5 ժ 58 ր</b>առցանց</span></div>
-      <div class="split" role="img" aria-label="Կանխիկ 7 600 ֏, ընկերության հաշվին 2 200 ֏">
-        <div class="bar"><i class="c-cash" style="width:77.6%"></i><i class="c-company" style="width:22.4%"></i></div>
-        <div class="legend"><span><i class="c-cash"></i>Կանխիկ <b>7 600 ֏</b></span><span><i class="c-company"></i>Ընկերություն <b>2 200 ֏</b></span></div>
+      <div class="split" role="img" aria-label="Կանխիկ 4 200 ֏, անկանխիկ 3 400 ֏, ընկերության հաշվին 2 200 ֏">
+        <div class="bar"><i class="c-cash" style="width:42.9%"></i><i class="c-noncash" style="width:34.7%"></i><i class="c-company" style="width:22.4%"></i></div>
+        <div class="legend rows">
+          <span><i class="c-cash"></i>Կանխիկ <em>· ձեր մոտ</em><b>4 200 ֏</b></span>
+          <span><i class="c-noncash"></i>Անկանխիկ <em>· Idram-ով</em><b>3 400 ֏</b></span>
+          <span><i class="c-company"></i>Ընկերություն<b>2 200 ֏</b></span>
+        </div>
       </div>
       <div class="sect">Վերջին պատվերներ</div>
       <div class="group">
         <div class="ride"><span class="tm">14:52</span><span class="txt"><span class="t1">Կոմիտասի պող. 49</span><span class="t2"><i data-lucide="building-2"></i>Ընկերություն · 4,3 կմ</span></span><span class="amt">1 100 ֏</span></div>
-        <div class="ride"><span class="tm">14:10</span><span class="txt"><span class="t1">Զվարթնոց</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 13,1 կմ</span></span><span class="amt">2 000 ֏</span></div>
+        <div class="ride"><span class="tm">14:10</span><span class="txt"><span class="t1">Զվարթնոց</span><span class="t2"><i data-lucide="credit-card"></i>Քարտ · 13,1 կմ</span></span><span class="amt">2 000 ֏</span></div>
         <div class="ride"><span class="tm">13:25</span><span class="txt"><span class="t1">Ամիրյան փ. 4</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 5,8 կմ</span></span><span class="amt">1 200 ֏</span></div>
         <div class="ride"><span class="tm">12:40</span><span class="txt"><span class="t1">Ծիծեռնակաբերդ</span><span class="t2"><i data-lucide="building-2"></i>Ընկերություն · 4,1 կմ</span></span><span class="amt">1 100 ֏</span></div>
       </div>
-      <a class="group more" href="?state=rides" style="display:block;text-decoration:none"><div class="row"><span class="ic"><i data-lucide="list"></i></span><span class="txt"><span class="t1">Բոլոր պատվերները</span></span><i class="chev" data-lucide="chevron-right"></i></div></a>
+      <div class="group more">
+        <a class="row" href="?state=rides" style="text-decoration:none"><span class="ic"><i data-lucide="list"></i></span><span class="txt"><span class="t1">Բոլոր պատվերները</span></span><i class="chev" data-lucide="chevron-right"></i></a>
+        <a class="row" href="?state=payouts" style="text-decoration:none"><span class="ic"><i data-lucide="send"></i></span><span class="txt"><span class="t1">Idram-ով փոխանցումներ</span></span><i class="chev" data-lucide="chevron-right"></i></a>
+      </div>
     </section>
 
     <!-- ── week ── -->
@@ -164,10 +207,10 @@
       <div class="hero" data-s="range">84 600<small>֏</small></div>
       <div class="kpis" data-s="month"><span class="kpi"><i data-lucide="car-front"></i><b>79</b>պատվեր</span><span class="kpi"><i data-lucide="clock"></i><b>74 ժ</b>առցանց</span></div>
       <div class="kpis" data-s="range"><span class="kpi"><i data-lucide="car-front"></i><b>58</b>պատվեր</span><span class="kpi"><i data-lucide="clock"></i><b>55 ժ</b>առցանց</span></div>
-      <div class="split" role="img" aria-label="Կանխիկ և ընկերության հաշվին">
-        <div class="bar"><i class="c-cash" style="width:81%"></i><i class="c-company" style="width:19%"></i></div>
-        <div class="legend" data-s="month"><span><i class="c-cash"></i>Կանխիկ <b>91 000 ֏</b></span><span><i class="c-company"></i>Ընկերություն <b>21 300 ֏</b></span></div>
-        <div class="legend" data-s="range"><span><i class="c-cash"></i>Կանխիկ <b>68 500 ֏</b></span><span><i class="c-company"></i>Ընկերություն <b>16 100 ֏</b></span></div>
+      <div class="split" role="img" aria-label="Կանխիկ, անկանխիկ և ընկերության հաշվին">
+        <div class="bar"><i class="c-cash" style="width:63%"></i><i class="c-noncash" style="width:18%"></i><i class="c-company" style="width:19%"></i></div>
+        <div class="legend rows" data-s="month"><span><i class="c-cash"></i>Կանխիկ <em>· ձեր մոտ</em><b>71 000 ֏</b></span><span><i class="c-noncash"></i>Անկանխիկ <em>· Idram-ով</em><b>20 000 ֏</b></span><span><i class="c-company"></i>Ընկերություն<b>21 300 ֏</b></span></div>
+        <div class="legend rows" data-s="range"><span><i class="c-cash"></i>Կանխիկ <em>· ձեր մոտ</em><b>53 200 ֏</b></span><span><i class="c-noncash"></i>Անկանխիկ <em>· Idram-ով</em><b>15 300 ֏</b></span><span><i class="c-company"></i>Ընկերություն<b>16 100 ֏</b></span></div>
       </div>
       <div class="stats">
         <div class="stat"><b>1 420 ֏</b><span>Միջին պատվեր</span></div>
@@ -182,17 +225,57 @@
       <div class="day"><span>Այսօր, 9 հոկտ.</span><span>7 պատվեր · <b>9 800 ֏</b></span></div>
       <div class="group">
         <div class="ride"><span class="tm">14:52</span><span class="txt"><span class="t1">Կոմիտասի պող. 49</span><span class="t2"><i data-lucide="building-2"></i>Ընկերություն · 4,3 կմ</span></span><span class="amt">1 100 ֏</span></div>
-        <div class="ride"><span class="tm">14:10</span><span class="txt"><span class="t1">Զվարթնոց</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 13,1 կմ</span></span><span class="amt">2 000 ֏</span></div>
+        <div class="ride"><span class="tm">14:10</span><span class="txt"><span class="t1">Զվարթնոց</span><span class="t2"><i data-lucide="credit-card"></i>Քարտ · 13,1 կմ</span></span><span class="amt">2 000 ֏</span></div>
         <div class="ride"><span class="tm">13:25</span><span class="txt"><span class="t1">Ամիրյան փ. 4</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 5,8 կմ</span></span><span class="amt">1 200 ֏</span></div>
         <div class="ride"><span class="tm">12:40</span><span class="txt"><span class="t1">Ծիծեռնակաբերդ</span><span class="t2"><i data-lucide="building-2"></i>Ընկերություն · 4,1 կմ</span></span><span class="amt">1 100 ֏</span></div>
         <div class="ride"><span class="tm">11:35</span><span class="txt"><span class="t1">Դավթաշեն, 2-րդ թաղ.</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 8,9 կմ</span></span><span class="amt">1 900 ֏</span></div>
-        <div class="ride"><span class="tm">10:20</span><span class="txt"><span class="t1">Հանրապետության հր.</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 5,8 կմ</span></span><span class="amt">1 400 ֏</span></div>
+        <div class="ride"><span class="tm">10:20</span><span class="txt"><span class="t1">Հանրապետության հր.</span><span class="t2"><i data-lucide="smartphone-nfc"></i>NFC · 5,8 կմ</span></span><span class="amt">1 400 ֏</span></div>
         <div class="ride"><span class="tm">09:18</span><span class="txt"><span class="t1">Կասկադ</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 4,0 կմ</span></span><span class="amt">1 100 ֏</span></div>
       </div>
       <div class="day"><span>Երեկ, 8 հոկտ.</span><span>9 պատվեր · <b>12 900 ֏</b></span></div>
       <div class="group">
-        <div class="ride"><span class="tm">19:12</span><span class="txt"><span class="t1">Ծիծեռնակաբերդ</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 3,8 կմ</span></span><span class="amt">1 000 ֏</span></div>
+        <div class="ride"><span class="tm">19:12</span><span class="txt"><span class="t1">Ծիծեռնակաբերդ</span><span class="t2"><i data-lucide="smartphone"></i>Apple Pay · 3,8 կմ</span></span><span class="amt">1 000 ֏</span></div>
         <div class="ride"><span class="tm">17:40</span><span class="txt"><span class="t1">Բաղրամյան պող. 24</span><span class="t2"><i data-lucide="building-2"></i>Ընկերություն · 13,1 կմ</span></span><span class="amt">2 000 ֏</span></div>
+      </div>
+    </section>
+
+    <!-- ── payouts (owner 2026-10-15): non-cash income, paid to the driver's Idram per ride once ETAPI files the Tax Service
+         receipt. Pending is neutral (it is on its way), sent is green. Cash: receipt after 24 h, no payout (the cash is his). ── -->
+    <section data-s="payouts">
+      <div class="lbl">Այսօր, 9 հոկտ. · անկանխիկ</div>
+      <div class="hero">3 400<small>֏</small></div>
+      <div class="kpis"><span class="kpi"><i data-lucide="check"></i><b>1 400 ֏</b>ուղարկված</span><span class="kpi"><i data-lucide="clock"></i><b>2 000 ֏</b>սպասվում է</span></div>
+      <div class="card idram"><span class="ic"><i data-lucide="send"></i></span><span class="txt"><span class="t1">Idram ID · 0012 3456 78</span><span class="t2">ՀՎՀՀ · <span data-eco="FISCAL.driverTin">23457812</span></span></span></div>
+      <div class="sect">Idram-ով փոխանցված</div>
+      <div class="group">
+        <div class="po"><span class="ic" role="img" aria-label="Քարտ"><i data-lucide="credit-card"></i></span><span class="txt"><span class="t1">Զվարթնոց</span><span class="t2"><i data-lucide="clock"></i>Սպասվում է · չեկը տրված</span></span><span class="amt">2 000 ֏</span></div>
+        <div class="po"><span class="ic" role="img" aria-label="NFC"><i data-lucide="smartphone-nfc"></i></span><span class="txt"><span class="t1">Հանրապետության հր.</span><span class="t2 ok"><i data-lucide="circle-check"></i>Ուղարկված · 10:22</span></span><span class="amt">1 400 ֏</span></div>
+      </div>
+      <div class="day"><span>Երեկ, 8 հոկտ.</span><span>Ուղարկված · <b>1 000 ֏</b></span></div>
+      <div class="group">
+        <div class="po"><span class="ic" role="img" aria-label="Apple Pay"><i data-lucide="smartphone"></i></span><span class="txt"><span class="t1">Ծիծեռնակաբերդ</span><span class="t2 ok"><i data-lucide="circle-check"></i>Ուղարկված · 19:14</span></span><span class="amt">1 000 ֏</span></div>
+      </div>
+      <div class="notice on-ground" style="margin-top:var(--s4)"><i data-lucide="banknote"></i><div>Կանխիկ պատվերներ՝ փոխանցում չկա, գումարը ձեր մոտ է · չեկը՝ 24 ժամից</div></div>
+    </section>
+
+    <!-- ── payouts-blocked (owner 2026-10-15): ETAPI needs the driver's tax number (ՀՎՀՀ) for every receipt and his Idram ID for
+         the payout. Without them non-cash rides can be neither filed nor paid. Amber (needs you), not red; one action. Drawn for a
+         partner, who enters his own; a fleet driver sees the same card with «Զանգել գրասենյակ», since the office sets his. ── -->
+    <section data-s="payouts-blocked">
+      <div class="lbl">Այսօր, 9 հոկտ. · անկանխիկ</div>
+      <div class="hero">3 400<small>֏</small></div>
+      <div class="kpis"><span class="kpi"><i data-lucide="pause"></i><b>3 400 ֏</b>սպասում է ձեր տվյալներին</span></div>
+      <div class="card blockedcard" role="status">
+        <div class="h"><span class="ic"><i data-lucide="file-warning"></i></span><div><div class="t1">Փոխանցումները կանգնած են</div></div></div>
+        <div class="t2">Առանց այս տվյալների անկանխիկ պատվերների չեկը չի տրվում, և գումարը չի փոխանցվում</div>
+        <div class="miss"><i data-lucide="circle-alert"></i>ՀՎՀՀ · լրացված չէ</div>
+        <div class="miss"><i data-lucide="circle-alert"></i>Idram ID · լրացված չէ</div>
+        <a class="btn btn-brand" href="driver-account.html?state=payout-partner" style="text-decoration:none"><i data-lucide="plus"></i>Ավելացնել ՀՎՀՀ և Idram ID</a>
+      </div>
+      <div class="sect">Սպասում են</div>
+      <div class="group">
+        <div class="po"><span class="ic" role="img" aria-label="Քարտ"><i data-lucide="credit-card"></i></span><span class="txt"><span class="t1">Զվարթնոց</span><span class="t2 warn"><i data-lucide="pause"></i>Կանգնեցված</span></span><span class="amt">2 000 ֏</span></div>
+        <div class="po"><span class="ic" role="img" aria-label="NFC"><i data-lucide="smartphone-nfc"></i></span><span class="txt"><span class="t1">Հանրապետության հր.</span><span class="t2 warn"><i data-lucide="pause"></i>Կանգնեցված</span></span><span class="amt">1 400 ֏</span></div>
       </div>
     </section>
 
@@ -219,8 +302,8 @@
 <script>
   statusBar(document.getElementById('s'), '15:10') /* the same Friday, later: the shift's rides are behind us */
   const st = D.init([
-    ['today', 'Today · cash/company split'], ['week', 'Week · daily bars'], ['month', 'Month so far (filter, ahead)'], ['picker', 'Choose days · range sheet (ahead)'], ['range', 'Chosen range 1–7 Oct (ahead)'],
-    ['rides', 'All rides by day'], ['unavailable', 'Unavailable · retry'],
+    ['today', 'Today · cash / non-cash / company split'], ['week', 'Week · daily bars'], ['month', 'Month so far (filter, ahead)'], ['picker', 'Choose days · range sheet (ahead)'], ['range', 'Chosen range 1–7 Oct (ahead)'],
+    ['rides', 'All rides by day'], ['payouts', 'Idram payouts · non-cash, per ride'], ['payouts-blocked', 'Payouts blocked · tax number / Idram ID missing'], ['unavailable', 'Unavailable · retry'],
   ])
   /* October 2026 starts on a Thursday; the range 1–7, today the 9th. picker shows the range page under the sheet. */
   if (st === 'picker') document.querySelectorAll('[data-s~="range"]').forEach((el) => { el.hidden = false })

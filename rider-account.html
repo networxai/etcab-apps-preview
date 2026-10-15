@@ -144,7 +144,8 @@
 <body>
 <script>
   const A = R.amd
-  const DEBT = 1300 /* Oct 7, Eco Comfort, Komitas → Mashtots: 700 + 473 + 98 = 1 271 → 1 300, left unpaid */
+  const DEBT = 1300 /* Oct 7, Eco Comfort, Komitas → Mashtots: 700 + 473 + 98 = 1 271 → 1 300, left unpaid (a cash ride: no service fee) */
+  const DEBT_CARD = DEBT + Math.round(DEBT * 2 / 100) /* settled by card: + the 2 % service fee (owner 2026-10-15) = 1 326 */
   const r = (ic, t1, end = '', o = {}) => `<${o.btn === false ? 'div' : 'button'} class="row btnrow ${o.cls || ''}"><span class="ic">${R.i(ic)}</span>
       <span class="txt"><span class="t1">${t1}</span>${o.t2 ? `<span class="t2 ${o.t2c || ''}">${o.t2}</span>` : ''}</span>${end}${o.chev === false ? '' : `<i class="chev" data-lucide="chevron-right"></i>`}</${o.btn === false ? 'div' : 'button'}>`
   const grp = (rows) => `<div class="group">${rows.join('<div class="divider"></div>')}</div>`
@@ -188,7 +189,8 @@
   const wallet = (debt) => `<div class="page">${back()}<h1 class="large">Վճարում</h1>
     <div class="bal">${debt
       ? `<div class="k">${R.i('circle-alert')}Պարտք</div><div class="hero">${A(DEBT)}</div><div class="from">7 հոկտ. ուղևորությունից</div>
-         <div class="note">${R.i('banknote')}<span><span class="n1" style="display:block">Վճարեք հաջորդ վարորդին՝ կանխիկ</span></span></div>`
+         <div class="note">${R.i('wallet')}<span><span class="n1" style="display:block">Վճարեք հիմա՝ քարտով (+2 %)</span><span class="n2">կամ կանխիկ՝ հաջորդ վարորդին</span></span></div>
+         <button class="btn btn-brand" style="margin-top:var(--s3)">${R.i('credit-card')}Վճարել ·· ${ECO.PAY.card.last4} · ${A(DEBT_CARD)}</button>`
       : `<div class="k ok">${R.i('circle-check')}Պարտք չկա</div><div class="hero">${A(0)}</div><div class="from">Բոլոր ուղևորությունները վճարված են</div>`}</div>
     <div class="sect">Վճարման եղանակ</div>
     ${grp([
@@ -254,7 +256,7 @@
             <div class="field focus"><span class="num"><span class="lbl">Անվանում</span><span class="v">Մարզասրահ<span class="caret"></span></span></span></div>
             <div class="btns"><button class="btn btn-brand">Պահել</button></div></section>${R.keyboard()}` },
       { id: 'place-remove-failed', group: 'Places', label: 'Remove failed', note: 'R64, real string (account.placeDeleteFailed): the row comes back and the toast offers a retry. Neutral, not red: nothing was lost', html: () => places('failed') },
-      { id: 'wallet', group: 'Balance', label: 'Debt', note: 'account.debtNote said plainly; the linked company is listed (AccountSheets.tsx WalletSheet), card, Apple / Google Pay and «Ավելացնել քարտ» below cash', html: () => wallet(true) },
+      { id: 'wallet', group: 'Balance', label: 'Debt', note: 'Owner 2026-10-15: a debt can now be settled by card, at once («Վճարել ·· 4242 · 1 326 ֏»: the 1 300 ֏ debt + the 2 % card service fee, said in the line above; the payment sheet if there is no saved card), or in cash to the next driver as before, with no fee. account.debtNote said plainly; the linked company is listed (AccountSheets.tsx WalletSheet), card, Apple / Google Pay and «Ավելացնել քարտ» below cash', html: () => wallet(true) },
       { id: 'wallet-clear', group: 'Balance', label: 'Clear', html: () => wallet(false) },
       { id: 'language', group: 'Settings', label: 'Language', note: 'Each language named, and coded, in its own script (ՀՅ / РУ / EN, as the driver app); applies on tap',
         html: () => over(`${mhead('Լեզու')}${choice('Հայերեն', true, '', 'ՀՅ')}${choice('Русский', false, '', 'РУ')}${choice('English', false, '', 'EN')}`) },

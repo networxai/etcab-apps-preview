@@ -191,12 +191,13 @@
       </button>
 
       <div class="sect" data-not="gone"><span>Վաղը</span><span class="n">2</span></div>
-      <button class="card pcard" data-not="gone" aria-label="Վաղը, շաբաթ, 07:40, Բաղրամյան 24, Զվարթնոց, 2 000 դրամ">
+      <!-- B-0904 (ECO.BOOKINGS.bag): Կենտրոն → Զվարթնոց is a zone-to-zone fixed fare (owner 2026-10-15), so the card says «Ֆիքսված». -->
+      <button class="card pcard" data-not="gone" aria-label="Վաղը, շաբաթ, 07:40, Բաղրամյան 24, Զվարթնոց, ֆիքսված գին 4 500 դրամ">
         <span class="pc-l">
           <span class="pc-top"><span data-ring="21|ժամ|.12"></span><span><span class="pc-time" style="display:block">07:40</span><span class="pc-hold" style="display:block">ազատ՝ մինչև 07:10</span></span></span>
           <span class="pc-ad"><span class="d a"></span>Բաղրամյան պող. 24</span>
           <span class="pc-ad"><span class="d b"></span>Զվարթնոց</span>
-          <span class="pc-bot"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="fare">2 000 ֏</span></span>
+          <span class="pc-bot"><span class="cobadge"><i data-lucide="lock"></i>Ֆիքսված</span><span class="fare" data-eco="BOOKINGS.bag.fare|amd">4 500 ֏</span></span>
         </span>
         <span class="minimap pc-map" data-route="air" aria-hidden="true"></span>
       </button>
@@ -339,7 +340,8 @@
     /* D33: the 18:30 booking is company-paid (page-local; the driver sees the tag, never the company name). */
     tsi: { route: 'tsi', eyebrow: 'Այսօր · Ծիծեռնակաբերդ', time: '18:30', fare: ECO.amd(1000), a: 'Կասկադ', a2: 'Գայանե · Ընկերության հաշվին', b: 'Ծիծեռնակաբերդ', b2: ECO.km(3.8) + ' · 7 րոպե',
       tl: [['done', 'Նշանակեց դիսպետչերը', 'այսօր 08:52'], ['next', 'Նոր պատվերներ չեն գա', '18:00'], ['', 'Պատվերն ակտիվանում է', '18:15'], ['', 'Նստեցում', '18:30']] },
-    air: { route: 'air', eyebrow: 'Վաղը · Զվարթնոց', time: '07:40', fare: ECO.amd(2000), a: 'Բաղրամյան պող. 24', a2: 'Արմեն · Կանխիկ', b: 'Զվարթնոց', b2: ECO.km(13.1) + ' · 19 րոպե',
+    /* ECO.BOOKINGS.bag: a cash, zone-to-zone fixed fare (Կենտրոն → Զվարթնոց, owner 2026-10-15). */
+    air: { route: 'air', eyebrow: 'Վաղը · Զվարթնոց · Ֆիքսված գին', time: '07:40', fare: ECO.amd(ECO.BOOKINGS.bag.fare), a: 'Բաղրամյան պող. 24', a2: 'Արմեն · Կանխիկ', b: 'Զվարթնոց', b2: ECO.km(13.1) + ' · 19 րոպե',
       tl: [['done', 'Նշանակեց դիսպետչերը', 'այսօր 08:52'], ['next', 'Նոր պատվերներ չեն գա', '07:10'], ['', 'Պատվերն ակտիվանում է', '07:25'], ['', 'Նստեցում', '07:40']] },
     /* Transfer T-0031 (ECO.TRANSFERS[0]): pickup at Zvartnots after FZ 715 lands; the flight block replaces the timeline. */
     trf: { route: 'trf', eyebrow: 'Վաղը · Տրանսֆեր', time: ECO.TRANSFERS[0].time, fare: ECO.amd(ECO.TRANSFERS[0].fare), a: 'Զվարթնոց օդանավակայան', a2: 'Դավիթ Ավետիսյան · Ընկերության հաշվին', b: 'Ամիրյան 1, Մարիոթ հյուրանոց', b2: ECO.km(13.4) + ' · 22 րոպե', tl: [] },

@@ -182,14 +182,14 @@
     /* The walkthrough ride's fiscal receipt (R58, drawn ahead: no fiscal API yet; console's «Ֆիսկալ հերթ»). */
     /* The receipt is the Tax Service's (ETAPI register-income): the ride is filed as the driver's income through the
        platform; it returns receipt_id + receipt_url. Cash is filed after ETAPI's 24 h hold, cashless at once. */
-    FISCAL: { ride: '2417', no: 'RI-7F3K29Q', tin: '02598741', seller: 'Էկո Տաքսի ՍՊԸ', driverTin: '23457812', driver: 'Արամ Պետրոսյան', income: 'Կանխիկ', at: '9 հոկտ. 2026, 9:51', url: 'taxservice.am/r/RI-7F3K29Q' },
+    FISCAL: { ride: '2417', no: 'RI-7F3K29Q', tin: '02598741', seller: 'Էկո Տաքսի ՍՊԸ', driverTin: '23457812', driver: 'Արամ Պետրոսյան', income: 'Կանխիկ', at: '10 հոկտ. 2026, 9:51' /* cash: filed after ETAPI's 24 h hold */, url: 'taxservice.am/r/RI-7F3K29Q' },
     /* The partner's top-up arriving (P10): Կարեն, blocked at −320 ֏ in the app, pays 5 000 ֏ at the office. */
     TOPUP: { id: 'TU-0419', amount: 5000, before: -320, after: 4680, via: 'office', at: '10:12', by: 'Անի Դավթյան' },
 
     BOOKINGS: {
       /* Աննա's (ECO.RIDE.rider) walkthrough booking: tomorrow's airport run, pre-assigned to Սուրեն. */
       air: { id: 'B-0912', who: 'rider', when: 'Վաղը, 08:30', day: 'Շաբաթ, 10 հոկտ.', iso: '2026-10-10T08:30', time: '08:30', held: '08:00', activates: '08:15',
-        pickup: 'Կոմիտասի պող. 22', drop: 'Զվարթնոց օդանավակայան', dropShort: 'Զվարթնոց', tier: 'Eco City', km: 12.6, min: 17, fare: 1900, pay: 'cash',
+        pickup: 'Կոմիտասի պող. 22', drop: 'Զվարթնոց օդանավակայան', dropShort: 'Զվարթնոց', tier: 'Eco City', km: 12.6, min: 17, fare: 5000, fixed: 'Երևան → Զվարթնոց' /* zone-to-zone fixed fare (2026-10-15) */, pay: 'cash',
         rider: 'Աննա', phone: '091 23-45-67', booked: 'Այսօր, 9:38',
         driver: { name: 'Սուրեն Մկրտչյան', short: 'Սուրեն Մ.', first: 'Սուրեն', ini: 'ՍՄ', phone: '094 12-40-77', plate: '22 OU 447', car: 'Toyota Prius · մոխրագույն', rating: '4,8' },
         /* The activation story (R41/R43): the sweep assigns at 08:12, the driver starts early at 08:02 (held from 08:00). */
@@ -213,7 +213,7 @@
         pickup: 'Կոմիտասի պող. 49', drop: 'Հանրապետության հր.', tier: 'Eco City', fare: 1200, pay: 'cash', rider: 'Լուսինե', phone: '098 51-20-44',
         driver: { name: 'Արամ Պետրոսյան', short: 'Արամ Պ.', plate: '01 ET 001' } },
       bag: { id: 'B-0904', who: 'driver', when: 'Վաղը, 07:40', iso: '2026-10-10T07:40', time: '07:40', held: '07:10', activates: '07:25',
-        pickup: 'Բաղրամյան պող. 24', drop: 'Զվարթնոց', tier: 'Eco City', km: 13.1, fare: 2000, pay: 'cash', rider: 'Արմեն', phone: '077 41-22-08',
+        pickup: 'Բաղրամյան պող. 24', drop: 'Զվարթնոց', tier: 'Eco City', km: 13.1, fare: 4500, fixed: 'Կենտրոն → Զվարթնոց' /* zone-to-zone fixed fare (2026-10-15) */, pay: 'cash', rider: 'Արմեն', phone: '077 41-22-08',
         driver: { name: 'Արամ Պետրոսյան', short: 'Արամ Պ.', plate: '01 ET 001' } },
     },
   }
@@ -439,6 +439,19 @@
   }
 })()
 
+/* Language (i18n.js): ?lang=ru|en, or the tab's last choice (sessionStorage, set by the viewer and by ?lang=). Armenian
+   is the source, so hy loads nothing. */
+;(() => {
+  const me = document.currentScript && document.currentScript.src
+  let lang = new URLSearchParams(location.search).get('lang')
+  try { if (lang) sessionStorage.setItem('mock-lang', lang); else lang = sessionStorage.getItem('mock-lang') } catch (e) { console.warn('[i18n] no sessionStorage', e) }
+  window.MOCK_LANG = ['ru', 'en'].includes(lang) ? lang : 'hy'
+  if (!me || window.MOCK_LANG === 'hy') return
+  const load = (src) => new Promise((ok, no) => { const el = document.createElement('script'); el.src = new URL(src, me).href; el.onload = ok; el.onerror = no; document.head.appendChild(el) })
+  load('i18n.js').then(() => load('i18n/' + window.MOCK_LANG + '.js'))
+    .then(() => window.I18N.use(window.I18N_DICT || {}, window.MOCK_LANG), (e) => console.warn('[i18n] could not load the dictionary', window.MOCK_LANG, e))
+})()
+
 /* «Բոլոր էկրանները»: a page opened on its own (not inside the viewer, not a screenshot run) gets one quiet pill back
    to the viewer (index.html), pointed at this very screen and state. The viewer's hash key is the page path relative
    to this script's folder, so it holds in the repo and on the preview site alike. */
@@ -451,11 +464,11 @@
   while (i < a.length && i < b.length - 1 && a[i] === b[i]) i++
   const key = '../'.repeat(a.length - i) + b.slice(i).join('/')
   if (key === 'index') return
-  const q = new URLSearchParams(here.search), t = q.get('sun') === '1' ? 'sun' : q.get('theme') || 'light'
-  ;['theme', 'sun', 'embed'].forEach((k) => q.delete(k))
+  const q = new URLSearchParams(here.search), t = q.get('sun') === '1' ? 'sun' : q.get('theme') || 'light', l = window.MOCK_LANG || 'hy'
+  ;['theme', 'sun', 'embed', 'lang'].forEach((k) => q.delete(k))
   const go = () => {
     const el = document.createElement('a')
-    el.href = new URL('index.html', base).href + '#' + new URLSearchParams({ p: key, s: q.toString(), t })
+    el.href = new URL('index.html', base).href + '#' + new URLSearchParams({ p: key, s: q.toString(), t, l })
     el.textContent = '← Բոլոր էկրանները'
     el.setAttribute('style', 'position:fixed;z-index:2147483647;left:12px;bottom:12px;height:32px;padding:0 12px;border-radius:99px;'
       + 'background:#141416;color:#fff;font:500 13px/32px system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 16px rgb(0 0 0/.25);opacity:.88')

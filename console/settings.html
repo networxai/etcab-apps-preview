@@ -86,7 +86,7 @@
      scrolling column; the operator has scrolled to them). */
   document.fonts.ready.then(() => {
     const box = document.querySelector('.page .scroll-y'), row = [...document.querySelectorAll('.set.new')].pop()
-    if (!row) return
+    if (!row || TAB === 'money') return /* Money opens at the top: its new rows (payment methods) are the first group */
     box.scrollTop += row.getBoundingClientRect().top - box.getBoundingClientRect().top - box.clientHeight / 2 + row.offsetHeight / 2
   })
   document.fonts.ready.then(() => { document.documentElement.dataset.mapReady = 'none' })

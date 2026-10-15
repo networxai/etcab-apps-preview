@@ -166,6 +166,20 @@
   .pr .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .pr .f { font: var(--t-body-strong); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; flex: none; }
   .locked { color: var(--ink-3); box-shadow: inset 0 0 0 1.5px var(--hairline); background: transparent; }
+  /* Payout details (owner 2026-10-15): ETAPI files a Tax Service receipt under the driver's ՀՎՀՀ for every ride and pays non-cash
+     fares to his Idram ID. Fleet: the office enters both (read-only here). Partner: enters his own. Field = driver-login's. */
+  .flbl { font: var(--t-caption); color: var(--ink-2); margin: var(--s4) 0 var(--s2) var(--s1); white-space: nowrap; }
+  .field { height: 56px; border-radius: var(--r-control); background: var(--surface); box-shadow: var(--e1); display: flex; align-items: center; gap: var(--s3); padding: 0 var(--s4); }
+  .field.focus { box-shadow: var(--e1), inset 0 0 0 2px var(--ink); }
+  .field .num { flex: 1; font: 500 20px/24px var(--font); color: var(--ink); letter-spacing: .5px; font-variant-numeric: tabular-nums; white-space: nowrap; display: flex; align-items: center; }
+  .field .ph2 { color: var(--ink-3); }
+  .field svg { width: 20px; height: 20px; flex: none; }
+  .field .okc { color: var(--ok); }
+  .caret { width: 2px; height: 24px; background: var(--brand-ink); margin-left: 2px; border-radius: 1px; }
+  .fhint { font: var(--t-caption); color: var(--ink-2); margin: var(--s2) 0 0 var(--s1); white-space: nowrap; }
+  :root[data-sun] .field { box-shadow: inset 0 0 0 1.5px #000; } :root[data-sun] .field.focus { box-shadow: inset 0 0 0 2.5px #000; }
+  /* NFC (tap to pay on the driver's phone): a checklist, each line a fact with its state; the one failing line carries the action. */
+  [data-s="nfc-unsupported"] .h2 { white-space: normal; max-width: 320px; }
 </style>
 </head>
 <body>
@@ -186,6 +200,8 @@
       <div class="group">
         <a class="row" href="driver-inbox.html" style="text-decoration:none"><span class="ic"><i data-lucide="bell"></i></span><span class="txt"><span class="t1">Ծանուցումներ</span></span><span class="cnt" aria-label="3 նոր">3</span><i class="chev" data-lucide="chevron-right"></i></a>
         <a class="row" href="?state=docs" style="text-decoration:none"><span class="ic"><i data-lucide="file-text"></i></span><span class="txt"><span class="t1">Փաստաթղթեր</span></span><span class="tag warn"><i data-lucide="clock"></i>11 օր</span><i class="chev" data-lucide="chevron-right"></i></a>
+        <!-- Owner 2026-10-15: what non-cash rides need (ՀՎՀՀ, Idram ID, the phone's NFC) behind one row; amber while one is missing. -->
+        <a class="row" href="?state=payout" style="text-decoration:none"><span class="ic"><i data-lucide="landmark"></i></span><span class="txt"><span class="t1">Վճարումներ</span></span><span class="tag warn solo" role="img" aria-label="Idram ID-ն լրացված չէ"><i data-lucide="circle-alert"></i></span><i class="chev" data-lucide="chevron-right"></i></a>
         <div class="row"><span class="ic"><i data-lucide="languages"></i></span><span class="txt"><span class="t1">Լեզու</span></span><span class="end">Հայերեն</span><i class="chev" data-lucide="chevron-right"></i></div>
         <div class="row"><span class="ic"><i data-lucide="sun-moon"></i></span><span class="txt"><span class="t1">Թեմա</span></span><span class="end">Ավտոմատ</span><i class="chev" data-lucide="chevron-right"></i></div>
         <div class="row"><span class="ic"><i data-lucide="graduation-cap"></i></span><span class="txt"><span class="t1">Փորձնական պատվեր</span></span><i class="chev" data-lucide="chevron-right"></i></div>
@@ -383,6 +399,72 @@
       </div>
     </section>
 
+    <!-- ── payout (fleet, owner 2026-10-15): the office enters a fleet driver's ՀՎՀՀ and Idram ID; he reads them and, if one is
+         missing, calls the office. Read-only: no field, no edit affordance. Amber because non-cash payouts wait on it. ── -->
+    <section data-s="payout" class="grow" style="display:flex;flex-direction:column">
+      <div class="ptitle">Վճարման տվյալներ</div>
+      <div class="psub" style="margin-bottom:var(--s5)">Լրացնում է գրասենյակը</div>
+      <div class="group">
+        <div class="doc"><span class="ic"><i data-lucide="file-badge"></i></span><span class="txt"><span class="t1">ՀՎՀՀ</span><span class="t2" data-eco="FISCAL.driverTin">23457812</span></span><span class="tag ok solo" role="img" aria-label="Լրացված"><i data-lucide="check"></i></span></div>
+        <div class="doc"><span class="ic"><i data-lucide="send"></i></span><span class="txt"><span class="t1">Idram ID</span><span class="t2">լրացված չէ</span></span><span class="tag warn"><i data-lucide="circle-alert"></i>Չկա</span></div>
+      </div>
+      <div class="notice warn" style="margin-top:var(--s4)"><i data-lucide="pause"></i><div><b>Անկանխիկ գումարը չի փոխանցվում</b>Քարտով, NFC-ով և POS-ով պատվերները սպասում են Idram ID-ին</div></div>
+      <div class="notice on-ground" style="margin-top:var(--s3)"><i data-lucide="lock"></i><div>Փոխելու համար զանգեք գրասենյակ</div></div>
+      <div class="group" style="margin-top:var(--s4)">
+        <a class="row" href="?state=nfc" style="text-decoration:none"><span class="ic"><i data-lucide="smartphone-nfc"></i></span><span class="txt"><span class="t1">NFC վճարում</span></span><span class="end">Անջատված</span><i class="chev" data-lucide="chevron-right"></i></a>
+      </div>
+      <span class="grow"></span>
+      <div class="foot"><button class="btn btn-brand lg"><i data-lucide="phone"></i>Զանգել գրասենյակ</button></div>
+    </section>
+
+    <!-- ── payout-partner (owner 2026-10-15): a partner enters his own. ՀՎՀՀ is 8 digits and checked as typed; the Idram ID is
+         being typed. One action, Save. ── -->
+    <section data-s="payout-partner" class="grow" style="display:flex;flex-direction:column">
+      <div class="ptitle">Վճարման տվյալներ</div>
+      <div class="psub">Չեկերի և Idram փոխանցումների համար</div>
+      <div class="flbl">ՀՎՀՀ</div>
+      <div class="field"><span class="num">35812047</span><i class="okc" data-lucide="circle-check"></i></div>
+      <div class="flbl">Idram ID</div>
+      <div class="field focus"><span class="num">0012 345<span class="caret"></span><span class="ph2">6 78</span></span></div>
+      <div class="fhint">Idram հավելված › Պրոֆիլ › ID · 10 նիշ</div>
+      <div class="notice on-ground" style="margin-top:var(--s5)"><i data-lucide="info"></i><div>Անկանխիկ պատվերների գումարը կփոխանցվի այս Idram-ին · կանխիկը՝ ձեր մոտ</div></div>
+      <span class="grow"></span>
+      <div class="foot"><button class="btn btn-brand lg"><i data-lucide="check"></i>Պահպանել</button></div>
+    </section>
+
+    <!-- ── nfc (owner 2026-10-15): can this phone take a tap? Checked on the device, line by line; the one failing line (NFC off)
+         is amber and the single action opens the system setting. Then a test tap, no money moves. ── -->
+    <section data-s="nfc" class="grow" style="display:flex;flex-direction:column">
+      <div class="ptitle">NFC վճարում</div>
+      <div class="psub" style="margin-bottom:var(--s5)">Ուղևորը քարտը կամ հեռախոսը մոտեցնում է ձերին</div>
+      <div class="group">
+        <div class="doc"><span class="ic"><i data-lucide="smartphone-nfc"></i></span><span class="txt"><span class="t1">Հեռախոսն աջակցում է</span><span class="t2">Xiaomi · Android 14</span></span><span class="tag ok solo" role="img" aria-label="Այո"><i data-lucide="check"></i></span></div>
+        <div class="doc"><span class="ic"><i data-lucide="toggle-left"></i></span><span class="txt"><span class="t1">NFC</span><span class="t2">անջատված է</span></span><span class="tag warn solo" role="img" aria-label="Անջատված"><i data-lucide="circle-alert"></i></span></div>
+        <div class="doc"><span class="ic"><i data-lucide="lock-keyhole"></i></span><span class="txt"><span class="t1">Էկրանի կողպում</span><span class="t2">PIN կամ մատնահետք</span></span><span class="tag ok solo" role="img" aria-label="Միացված"><i data-lucide="check"></i></span></div>
+        <div class="doc"><span class="ic"><i data-lucide="credit-card"></i></span><span class="txt"><span class="t1">Փորձնական հպում</span><span class="t2">0 ֏ · գումար չի գանձվում</span></span><span class="end" style="font:var(--t-secondary);color:var(--ink-3)">Հետո</span></div>
+      </div>
+      <span class="grow"></span>
+      <div class="foot">
+        <button class="btn btn-brand lg"><i data-lucide="settings"></i>Միացնել NFC-ն</button>
+      </div>
+    </section>
+
+    <!-- ── nfc-unsupported (owner 2026-10-15): no NFC chip. Not a fault: the switch on Complete simply hides NFC; POS and cash stay. ── -->
+    <section data-s="nfc-unsupported" class="grow" style="display:flex;flex-direction:column">
+      <div class="center" style="margin-top:64px">
+        <span class="bigic neutral"><i data-lucide="smartphone-nfc"></i></span>
+        <div class="h2">Ձեր հեռախոսը NFC չի աջակցում</div>
+        <div class="sub">Օգտագործեք POS կամ կանխիկ</div>
+      </div>
+      <div class="group fate">
+        <div class="row"><span class="ic ok"><i data-lucide="credit-card"></i></span><span class="txt"><span class="t1">POS տերմինալ</span><span class="t2">քարտով վճարում</span></span></div>
+        <div class="row"><span class="ic ok"><i data-lucide="banknote"></i></span><span class="txt"><span class="t1">Կանխիկ</span></span></div>
+        <div class="row"><span class="ic"><i data-lucide="smartphone"></i></span><span class="txt"><span class="t1">Քարտ, Apple Pay, Google Pay</span><span class="t2">ուղևորը վճարում է հավելվածով</span></span></div>
+      </div>
+      <span class="grow"></span>
+      <div class="foot"><button class="btn btn-quiet on-ground lg">Հասկացա</button></div>
+    </section>
+
     <!-- ── delete requested ── -->
     <section data-s="deleterequested" class="grow" style="display:flex;flex-direction:column">
       <div class="center">
@@ -425,6 +507,7 @@
     ['deleterequested', 'Deletion requested'], ['signout', 'Sign out · blocked by shift'],
     ['deleteblocked', 'Delete blocked · open ride'], ['help', 'Help · dispatcher, FAQ, legal'], ['legal', 'Privacy policy'],
     ['update', 'Update required'], ['diag', 'Shift diagnostics'], ['rating', 'Rating + past rides'],
+    ['payout', 'Payout details · fleet, set by the office'], ['payout-partner', 'Payout details · partner enters ՀՎՀՀ, Idram ID'], ['nfc', 'NFC tap-to-pay · check + enable'], ['nfc-unsupported', 'NFC not supported · POS or cash'],
   ])
   const uv = document.getElementById('u-ver'); if (uv) uv.textContent = ECO.APP.driver.have + ' · նվազագույնը՝ ' + ECO.APP.driver.min
   if (st === 'signout') for (const id of ['bar', 'content']) { const el = document.getElementById(id); el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true') }

@@ -1,5 +1,5 @@
 /* drivers.html detail tabs and actions (coverage C29, C30). Loaded after the page script; re-renders the docked panel.
-   ?tab=rides | shifts | docs | rating     (C29) — Rides, Shifts and Rating are drawn ahead. `money` is kept as an alias of
+   ?tab=rides | shifts | docs | rating | payouts (C29; payouts = Idram via ETAPI, owner 2026-10-15) — Rides, Shifts and Rating are drawn ahead. `money` is kept as an alias of
    `shifts`: owner #3 (2026-10-14) — a fleet driver has no balance, so the real driver-money.tsx / driver-ledger.tsx /
    record-payment.tsx / driver-payout.tsx (fleet settlement) are to be removed, not drawn.
    ?action=create | code | offline | shift | deletion   (C30) — use with &d=N to pick the driver the action is about
@@ -32,7 +32,7 @@
     .xblk h3 svg { width: 16px; height: 16px; }
     .xblk p { font: var(--c-body); color: var(--ink-muted); margin-top: 4px; }
     .lt col.r { width: 56px; } .lt col.c { width: 72px; }
-    @media (max-width: 1400px) { .lt col.a { width: 76px; } .lt col.c { width: 64px; } .lt col.r { width: 54px; } }
+    @media (max-width: 1400px) { .newrow { grid-template-columns: 140px minmax(0, 1fr) 96px 104px auto !important; } .lt col.a { width: 76px; } .lt col.c { width: 64px; } .lt col.r { width: 54px; } }
     .sum { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; white-space: nowrap; }
     .sum b { font: var(--c-kpi); font-variant-numeric: tabular-nums; } .sum span { font: var(--c-small); color: var(--ink-faint); }
     .code { font: 600 32px/40px var(--mono); letter-spacing: .08em; margin: 8px 0 4px; }
@@ -44,7 +44,7 @@
     .bars { display: grid; grid-template-columns: 24px minmax(0, 1fr) 32px; gap: 4px 8px; align-items: center; font: var(--c-small); color: var(--ink-muted); margin-top: 8px; }
     .bars i { display: block; height: 6px; border-radius: 3px; background: var(--ink); }
     .bars span:last-child { text-align: right; }
-    .newrow { display: grid; grid-template-columns: 170px minmax(0, 1fr) auto; gap: 8px; align-items: end; padding: 10px var(--inset); border-bottom: 1px solid var(--line-soft); background: var(--surface-alt); }
+    .newrow { display: grid; grid-template-columns: 150px minmax(0, 1fr) 112px 120px auto; gap: 8px; align-items: end; padding: 10px var(--inset); border-bottom: 1px solid var(--line-soft); background: var(--surface-alt); }
     .newrow .lbl { font: var(--c-label); color: var(--ink-muted); margin-bottom: 4px; display: block; }
   </style>`)
   const dp = document.getElementById('dp')
@@ -107,6 +107,25 @@
     nb.style.marginBottom = '12px'
   }
 
+  /* ── ?tab=payouts «Վճարումներ» (owner 2026-10-15, drawn ahead: no ETAPI yet). Every completed non-cash, non-company
+     ride is filed through ETAPI, which pays the fare to the driver's Idram — fleet drivers too. One row per ride, the
+     newest first; cash rides have no payout and company rides are never sent, so neither appears. A refunded ride shows
+     the hold-back as its own negative row (rides?pay=refund). Status is icon + word: paid, sending, held. ── */
+  if (TAB === 'payouts') {
+    setTab(5); clearBelow(); tabs.scrollLeft = tabs.scrollWidth
+    const PO = [['13:12', '#R-20395', 'credit-card', 'Քարտ', 1500, ['', 'loader', 'Ուղարկվում է']], ['12:40', '#R-20388', 'smartphone', 'Apple Pay', 2200, ['ok', 'check', 'Վճարված']],
+      ['11:05', '#R-20354', 'smartphone-nfc', 'NFC', 900, ['ok', 'check', 'Վճարված']], ['10:22', '#R-20341', 'smartphone', 'Google Pay', 1300, ['ok', 'check', 'Վճարված']],
+      ['Հնգ', '#R-20217', 'credit-card', 'POS', 2600, ['ok', 'check', 'Վճարված']], ['Հնգ', '#R-20196', 'undo-2', 'Վերադարձ', -1100, ['', 'minus', 'Պահվեց']], ['Հնգ', '#R-20180', 'credit-card', 'Քարտ', 1100, ['ok', 'check', 'Վճարված']]]
+    add(`<div class="blk"><h3><i data-lucide="wallet"></i>Idram · այս շաբաթ<span class="end faint mono" style="font-weight:400">0412 5581</span></h3>
+      <div class="sum"><b>${amd(PO.reduce((a, r) => a + r[4], 0) + 31400)}</b><span class="num">24 անկանխիկ պատվեր</span></div></div>
+    <div class="blk" style="margin-bottom:12px"><h3><i data-lucide="list"></i>Վճարումներ<span class="end faint" style="font-weight:400">ETAPI → Idram</span></h3>
+      <table class="lt"><colgroup><col class="w"><col><col style="width:80px"><col style="width:108px"></colgroup>
+      <thead><tr><th>Երբ</th><th>Պատվեր</th><th class="n">Գումար</th><th class="n">Վիճակ</th></tr></thead><tbody>
+      ${PO.map(([t, id, ic, m, a, [tone, sic, w]]) => `<tr><td class="mono">${t}</td><td><span class="mono">${id}</span><small style="display:flex;align-items:center;gap:4px;white-space:nowrap"><i data-lucide="${ic}" style="width:12px;height:12px"></i>${m}</small></td>
+        <td class="n mono">${amd(a)}</td><td class="n"><span class="pill ${tone}" style="height:20px"><i data-lucide="${sic}"></i>${w}</span></td></tr>`).join('')}
+      </tbody></table></div>`)
+  }
+
   /* ── C29 Rating (drawn ahead: no rating view in the console yet). ── */
   if (TAB === 'rating') {
     setTab(4); clearBelow()
@@ -127,8 +146,10 @@
     document.querySelector('.filters').insertAdjacentHTML('afterend', `<form class="newrow" onsubmit="return false" aria-label="Նոր վարորդ">
       <div><span class="lbl">Հեռախոս</span><div class="input focus"><i data-lucide="phone"></i><span class="val mono">077 18-44-90</span></div></div>
       <div><span class="lbl">Անուն</span><div class="input"><span class="val ph">օր. Արմեն Սարգսյան</span></div></div>
+      <div><span class="lbl">ՀՎՀՀ</span><div class="input"><span class="val ph mono">8 թիվ</span></div></div>
+      <div><span class="lbl">Idram ID</span><div class="input"><span class="val ph mono">0412 5581</span></div></div>
       <div style="display:flex;gap:6px"><button class="btn ghost s">Չեղարկել</button><button class="btn primary s">Ավելացնել</button></div>
-      <span class="faint" style="font:var(--c-small);grid-column:1 / -1">Մուտքի կոդը՝ SMS-ով</span></form>`)
+      <span class="faint" style="font:var(--c-small);grid-column:1 / -1">Մուտքի կոդը՝ SMS-ով · ՀՎՀՀ և Idram ID՝ ոչ պարտադիր, բայց առանց դրանց անկանխիկ պատվերները ETAPI-ին չեն գնա</span></form>`)
     const nb = document.querySelector('.filters .btn'); if (nb) nb.style.boxShadow = 'inset 0 0 0 2px var(--ink)'
   }
   if (ACT === 'code') {

@@ -77,13 +77,26 @@
   const B = ECO.BOOKINGS.air
   const pre = { no: B.id, tier: B.tier, pickup: B.pickup, pickupNote: 'Աննա · հիմա', drop: B.drop, dropNote: 'Մալաթիա-Սեբաստիա', approachMin: 7, approachKm: 2.6, km: B.km, min: B.min, fare: B.fare, pay: B.pay }
   const R = ECO.RIDE
+  /* Payment on the offer (owner 2026-10-15). The driver needs one fact: does he collect? In-app card / Apple Pay / Google Pay
+     are charged by the app («Անկանխիկ», nothing to collect); NFC is a tap on HIS phone at the end. D.offer draws ECO.PAY's
+     plain label, so the chip is rewritten here after render. */
+  const PAYCHIP = {
+    card: { icon: 'credit-card', text: 'Քարտ · վճարված հավելվածով' },
+    nfc: { icon: 'smartphone-nfc', text: 'NFC · ձեր հեռախոսին' },
+  }
+  /* fixed: a zone-to-zone price (ECO.BOOKINGS.bag, Կենտրոն → Զվարթնոց, 4 500 ֏). The fare is set, not estimated, and the
+     context line says so; the airport +500 ֏ is inside it. Geometry: DROUTES.air (Բաղրամյան 24 → Զվարթնոց). */
+  const BG = ECO.BOOKINGS.bag
+  const fixed = { no: '2431', tier: BG.tier, pickup: BG.pickup, pickupNote: 'Կենտրոն', drop: 'Զվարթնոց օդանավակայան', dropNote: 'Օդանավակայանի գոտի',
+    approachMin: 3, approachKm: 0.9, km: BG.km, min: 19, fare: BG.fare, pay: BG.pay }
   const ios = `<div class="ios" role="img" aria-label="Կողպված էկրան, ժամանակազգայուն ծանուցում">
       <div class="clk"><div class="d">Ուրբաթ, 9 հոկտեմբերի</div><div class="t">9:41</div></div>
       <div class="ntf" role="alert"><div class="h"><img src="assets/eco/mark.png" alt="">Eco Taxi<span class="ts"><i data-lucide="clock-alert"></i>Ժամանակազգայուն</span></div>
         <div class="t1">Նոր պատվեր · ${ECO.amd(R.fare)}</div><div class="t2">${R.pickup} · ${R.approachMin} րոպե · ${ECO.km(R.approachKm)}</div></div>
       <div class="cap">Փակ հավելվածում՝ ծանուցում, ոչ թե զանգ</div>
       <div class="bar" aria-hidden="true"><span><i data-lucide="flashlight"></i></span><span><i data-lucide="camera"></i></span></div></div>`
-  s.innerHTML = st === 'lock-ios' ? ios : D.offer(res ? { result: res, foot: home } : st === 'company' ? { secs: 9, pay: 'company' }
+  s.innerHTML = st === 'lock-ios' ? ios : D.offer(res ? { result: res, foot: home } : st === 'company' ? { secs: 9, pay: 'company' } : st === 'card' || st === 'nfc' ? { secs: 9 }
+    : st === 'fixed' ? { secs: 9, ride: fixed, context: { icon: 'lock', text: 'Ֆիքսված գին · ' + ECO.amd(fixed.fare) } }
     : st === 'preorder-now' ? { secs: 9, ride: pre, context: { text: 'Ձեր նախնական պատվերը · ուղևորը սկսեց հիմա' } }
     : st === 'preorder-any' ? { secs: 9, ride: { ...pre, pickupNote: 'Աննա · ' + B.time + '-ին', approachMin: 9, approachKm: 3.4 }, context: { text: 'Նախնական պատվեր · ' + B.time } } : st === 'lock-android' ? { secs: 6, context: { icon: 'lock', text: 'Կողպված էկրանին · ապակողպել պետք չէ' } } : { secs: 6 })
     + (st === 'lock-android' ? '<span class="lockdot" aria-hidden="true"><i data-lucide="lock"></i></span>' : '') + (st === 'decline' ? `
@@ -102,15 +115,18 @@
   </section>` : '')
   statusBar(s, st === 'preorder-now' ? '9:52' : st === 'preorder-any' ? '8:15' : undefined)
   D.init([
-    ['taken', 'Taken by another driver'], ['expired', 'Expired (no answer)'], ['decline', 'Decline: one tap on a reason (ticking)'], ['declined', 'Declined, back on the line'], ['company', 'Company ride (paid by company)'],
+    ['taken', 'Taken by another driver'], ['expired', 'Expired (no answer)'], ['decline', 'Decline: one tap on a reason (ticking)'], ['declined', 'Declined, back on the line'], ['company', 'Company ride (paid by company)'], ['card', 'Paid in the app by card · nothing to collect'], ['nfc', 'NFC · rider taps on the driver phone'], ['fixed', 'Fixed fare · Կենտրոն → Զվարթնոց 4 500 ֏'],
     ['preorder-now', 'Pre-order started now · first offer to its driver'], ['preorder-any', 'Pre-order due · offered to any Eco City driver'], ['lock-android', 'Locked screen · Android full-screen'], ['lock-ios', 'Locked screen · iOS Time-Sensitive'],
   ])
   const r3 = document.getElementById('ring3')
   if (r3) r3.outerHTML = D.ring(48, 4, .5, '<span class="v">6</span>', 'var(--warn)')
   icons()
   if (st === 'decline') for (const el of [s.querySelector('.offer')]) { el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true'); el.inert = true }
+  /* ECO.BOOKINGS.air is a fixed zone-to-zone fare (B.fixed): the pre-order offers say «Ֆիքսված» beside the tier. */
+  if ((st === 'preorder-now' || st === 'preorder-any') && B.fixed) s.querySelector('.offer .tags .chip').insertAdjacentHTML('afterend', '<span class="chip"><i data-lucide="lock"></i>Ֆիքսված</span>'), icons()
+  if (PAYCHIP[st]) { const c = s.querySelector('.offer .tags .chip:last-child'); c.innerHTML = `<i data-lucide="${PAYCHIP[st].icon}"></i>${PAYCHIP[st].text}`; if (st === 'card') c.classList.add('co'); icons() }
   if (st === 'lock-ios') D.noMap()
-  else if (st === 'preorder-now' || st === 'preorder-any') {
+  else if (st === 'preorder-now' || st === 'preorder-any' || st === 'fixed') {
     /* Trip geometry: DROUTES.air (Բաղրամյան 24 → Զվարթնոց) stands in for Կոմիտասի 22 → Զվարթնոց; the approach is a short
        dashed run into its start. */
     const T = DROUTES.air.pts, a0 = T[0]

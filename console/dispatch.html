@@ -102,6 +102,23 @@
   .in-tabs button[aria-selected="true"] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--ink); }
   .in-tabs .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand-vivid); }
   .textarea { min-height: 56px; align-items: flex-start; padding-top: 8px; height: auto; }
+  /* ?intake=pay / ?intake=airport (owner 2026-10-15): the payment list in the form's flow (no popover to clip), the zone line */
+  .payopts { margin-top: -8px; border-radius: var(--r-ctl); background: var(--surface); box-shadow: var(--e2), 0 0 0 1px var(--line-soft); padding: 4px; }
+  .payopts div { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border-radius: 6px; font: var(--c-body); white-space: nowrap; min-width: 0; }
+  .payopts div.on { background: var(--surface-alt); }
+  .payopts div.off { color: var(--ink-faint); }
+  .payopts div svg { width: 14px; height: 14px; color: var(--ink-faint); }
+  .payopts .end { margin-left: auto; font: var(--c-small); color: var(--ink-faint); overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .payopts .k { font: 500 11px/16px var(--mono); color: var(--ink-faint); min-width: 16px; text-align: center; box-shadow: inset 0 0 0 1px var(--line-control); border-radius: 4px; }
+  .payopts div:not(:has(.end)) .k { margin-left: auto; }
+  .payopts p { display: flex; gap: 6px; align-items: flex-start; padding: 6px 8px 4px; margin-top: 4px; border-top: 1px solid var(--line-soft); font: var(--c-small); color: var(--ink-muted); }
+  .payopts p svg { width: 14px; height: 14px; flex: none; margin-top: 1px; color: var(--ink-faint); }
+  .zline { display: flex; align-items: center; gap: 6px; margin: 4px 0 0 28px; font: var(--c-small); color: var(--ink-muted); }
+  .zline svg { width: 14px; height: 14px; color: var(--ink-faint); }
+  .zline a { color: var(--brand-text); text-decoration: none; font-weight: 500; }
+  .tierb.off { background: var(--surface-alt); color: var(--ink-faint); box-shadow: none; }
+  .tierb.off .car { opacity: .45; }
+  .tierb.off .p { color: var(--ink-faint); }
 
   /* Intake */
   .in .card-b { display: flex; flex-direction: column; gap: 12px; padding: 12px var(--inset); }
@@ -404,6 +421,70 @@
     document.getElementById('sumtxt').textContent = `${ECO.TRANSFER_TIER.name} · Վաղը ${TF.time}`
     document.querySelector('.actbar .btn.primary').innerHTML = 'Ստեղծել տրանսֆեր <span class="kbd">↵</span>'
   }
+  /* ── ?intake=pay (owner 2026-10-15): the «Վճարում» list open. By phone a dispatcher can take only what needs no
+     device in the rider's hand: cash, the caller's saved card (charged by the app, iPay / ArCa) and company — the last
+     only when the caller is an employee on account, so here it is shown off with the reason, not hidden. Apple Pay,
+     Google Pay and NFC are the rider's own choices (app, or the driver's phone at the end); the console shows them as
+     what the rider chose, never offers them. Cash is chosen, so the read-back is the fare alone; the card row says what
+     choosing it adds (+2 % service fee, bank cards only). ── */
+  const FEE = (f) => Math.round(f * 0.02) /* owner 2026-10-15 (final): +2 % on top, bank-card payments only (card, Apple Pay, Google Pay); cash and company: none */
+  if (INTAKE === 'pay') {
+    const two = document.querySelector('#intake .two')
+    const pay = two.children[1].querySelector('.input')
+    pay.classList.add('focus'); pay.setAttribute('aria-expanded', 'true')
+    pay.innerHTML = '<i data-lucide="banknote"></i><span class="val">Կանխիկ</span><i data-lucide="chevron-up"></i>'
+    two.insertAdjacentHTML('afterend', `<div class="payopts" role="listbox" aria-label="Վճարում" data-overlay data-truncate>
+      <div class="on" role="option" aria-selected="true"><i data-lucide="banknote"></i>Կանխիկ<span class="k">1</span></div>
+      <div role="option"><i data-lucide="credit-card"></i>Քարտ <span class="mono faint">·· 3318</span><span class="end">պահված քարտը · +2 % վճար</span><span class="k">2</span></div>
+      <div role="option" aria-disabled="true" class="off"><i data-lucide="building-2"></i>Ընկերություն<span class="end">զանգողը կցված չէ ընկերության</span></div>
+      <p><i data-lucide="smartphone"></i>Apple Pay, Google Pay, NFC՝ ուղևորն ընտրում է հավելվածում կամ մեքենայում</p></div>`)
+    document.querySelector('#intake .in-tabs').parentElement.remove()
+    const f = fare(TIERS[0], IK, IM)
+    document.getElementById('sumfare').textContent = amd(f)
+    document.getElementById('sumtxt').textContent = `քարտով՝ ${amd(f + FEE(f))}`
+  }
+  /* ── ?intake=airport (zones.html rules, owner 2026-10-15). Pickup inside «Զվարթնոց օդանավակայան»: the zone's rules
+     arrive with the address, not at «Ստեղծել». Cash is off with the zone's reason in ONE amber line (a domain refusal);
+     Eco Kids keeps its key but is off («Eco Kids-ը չի սպասարկում»), so keys 1–8 never move under the fingers; the
+     zone-to-zone price Զվարթնոց → Կենտրոն is fixed (zones?pair=1: 5 000 ֏, which includes the +500 ֏ zone charge) and
+     fills the agreed-price band, locked, read as «Ֆիքսված · 5 000 ֏»; paid by card, so the read-back adds the 2 % fee. ── */
+  if (INTAKE === 'airport') {
+    const FX = 5000, AK = 14.2, AM = 22
+    document.getElementById('intake').innerHTML = `
+    <div><label class="label">Հեռախոս</label><div class="input l"><i data-lucide="phone"></i><span class="val mono">091 70-33-14</span></div></div>
+    <div class="cust"><div class="t"><span>Լևոն Ավագյան</span><span class="faint num">· 6 պատվեր · Քարտ <span class="mono">·· 5520</span></span></div></div>
+    <div><label class="label">Որտեղից</label><div class="pinrow"><span class="pin">Ա</span><div class="input l"><span class="val">Զվարթնոց, ժամանման սրահ</span><i data-lucide="circle-check" style="color:var(--ok)"></i></div></div>
+      <p class="zline"><i data-lucide="map"></i>Գոտի՝ <b>Զվարթնոց</b> · <a href="zones.html?theme=${THEME}">5 կանոն</a></p></div>
+    <div><label class="label">Ուր <span class="faint" style="font-weight:400">· ոչ պարտադիր</span></label><div class="pinrow"><span class="pin b">Բ</span><div class="input l"><span class="val">Աբովյան 10, Կենտրոն</span><i data-lucide="circle-check" style="color:var(--ok)"></i></div></div></div>
+    <div><label class="label">Սակագին <span class="faint" style="font-weight:400">· 1–8</span></label><div class="tiers" id="tiers" data-truncate></div></div>
+    <div class="two">
+      <div><label class="label">Երբ</label><div class="input"><i data-lucide="clock"></i><span class="val">Հիմա</span><i data-lucide="chevron-down"></i></div></div>
+      <div><label class="label">Վճարում</label><div class="input" aria-describedby="zcash"><i data-lucide="credit-card"></i><span class="val">Քարտ <span class="mono faint">·· 5520</span></span><i data-lucide="chevron-down"></i></div></div>
+    </div>
+    <div class="notice amber" id="zcash" role="status"><i data-lucide="banknote-x"></i><span class="grow">Զվարթնոց · կանխիկ չի ընդունվում նստեցման ժամանակ (օդանավակայանի կանգառ)</span></div>
+    <div><div class="in-tabs" role="tablist" aria-label="Նոր պատվեր"><button role="tab" aria-selected="false" tabindex="-1">Քարտեզ</button><button role="tab" aria-selected="false" tabindex="-1">Նշումներ</button><button role="tab" aria-selected="true">Համաձայնեցված գին<span class="dot" aria-hidden="true"></span></button></div>
+      <div role="tabpanel" style="padding-top:8px"><div class="row-flex"><div class="input l" style="width:160px;background:var(--surface-alt);box-shadow:inset 0 0 0 1px var(--line-soft)" aria-readonly="true"><i data-lucide="lock"></i><span class="val mono">${nf(FX)}</span><span class="faint">֏</span></div>
+        <p style="font:var(--c-small);color:var(--ink-muted)"><b style="color:var(--ink)">Ֆիքսված · ${amd(FX)}</b><br>Զվարթնոց → Կենտրոն · գոտուց գոտի</p></div></div></div>`
+    let t = `<button class="tierb any"><span class="anyic"><i data-lucide="locate-fixed"></i></span><span class="n">Մոտակա ազատը</span></button>`
+    TIERS.forEach((x, i) => {
+      const fixed = x.id === 'city' || x.id === 'partner', off = x.id === 'kids'
+      t += off ? `<button class="tierb off" aria-disabled="true" aria-label="${x.name}, ${i + 2}, Զվարթնոցում չի սպասարկվում" title="Զվարթնոց · Eco Kids-ը չի սպասարկում"><span class="car xs">${carImg(x.id)}</span><span class="n">${x.name.replace('Eco ', '')}</span><span class="p">ոչ այստեղ</span></button>`
+        : `<button class="tierb${i === 0 ? ' on' : ''}" aria-label="${x.name}, ${i + 2}"><span class="car xs">${carImg(x.id)}</span><span class="n">${x.name.replace('Eco ', '')}</span><span class="p">${fixed ? amd(FX) : amd(fare(x, AK, AM) + 500)}</span></button>`
+    })
+    t += `<span class="tierb" aria-label="${ECO.TRANSFER_TIER.name}, 8"><span class="anyic"><i data-lucide="plane-landing"></i></span><span class="n">${ECO.TRANSFER_TIER.name}</span><span class="p">${amd(ECO.TRANSFER_TIER.fare)}</span></span>`
+    document.getElementById('tiers').innerHTML = t
+    document.getElementById('sumfare').textContent = amd(FX + FEE(FX))
+    document.getElementById('sumtxt').textContent = `քարտով · 2 % · +${nf(FEE(FX))}`
+    document.getElementById('sumtxt').title = `Ֆիքսված ${amd(FX)} + սպասարկման վճար ${amd(FEE(FX))}`
+  }
+  /* Scrolled to the foot (the payment list / the fixed price), snapped to a field's top edge so no label sits half under the head. */
+  if (INTAKE === 'pay' || INTAKE === 'airport') document.fonts.ready.then(() => {
+    const ib = document.getElementById('intake'), max = ib.scrollHeight - ib.clientHeight
+    const top0 = ib.getBoundingClientRect().top - ib.scrollTop
+    const snap = [...ib.children].map((c) => c.getBoundingClientRect().top - top0 - 12).find((y) => y >= max)
+    if (snap !== undefined && snap > max) ib.style.paddingBottom = (12 + snap - max) + 'px'
+    if (max > 0) ib.scrollTop = snap !== undefined ? snap : max
+  })
   /* The state's subject in view: the refusal (company) or the agreed-price band (price) sits at the foot of the
      scrolled form, as it does after the operator has tabbed down to it. */
   if (CO || INTAKE === 'price') document.fonts.ready.then(() => {

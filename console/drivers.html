@@ -13,6 +13,11 @@
   .content { grid-template-columns: minmax(0, 1fr) 420px; }
   @media (max-width: 1400px) { .content { grid-template-columns: minmax(0, 1fr) 384px; } .carcell .car { display: none; } col.c-car { width: 100px !important; } col.c-doc { width: 132px !important; } col.c-typ { width: 128px !important; } .tabsl { gap: 10px; } .shift { grid-template-columns: 128px minmax(0, 1fr) !important; } }
   .dt td { height: 52px; }
+  /* ETAPI block (owner 2026-10-15): the two ids ETAPI needs per driver. Mono, fixed label column. */
+  .etp dl { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 6px 12px; font: var(--c-body); margin-top: 8px; align-items: center; }
+  .etp dt { color: var(--ink-muted); white-space: nowrap; } .etp dd { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .etp .input { height: var(--h-s); }
+  .etp .btns { display: flex; gap: 6px; justify-content: flex-end; margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -61,7 +66,9 @@
   /* Owner #5: expired insurance stops orders until a new document is approved. The live example is Վահե (ECO.DOCS.blocked,
      FLEET index 3); the Documents tab opens on him unless &d= says otherwise. Արամ (index 0) is valid until 20.10. */
   const BLK = ECO.DOCS.blocked, ARAM = ECO.DOCS.aram, VAHE = FLEET.findIndex((d) => d.name === BLK.name)
-  const sel = +(QS.get('d') ?? (QS.get('tab') === 'docs' ? VAHE : 0))
+  /* ?etapi=missing (owner 2026-10-15): Սուրեն Մ. has no ՀՎՀՀ and no Idram ID yet, so his non-cash rides cannot be filed. */
+  const MISS = QS.get('etapi') === 'missing'
+  const sel = +(QS.get('d') ?? (QS.get('tab') === 'docs' ? VAHE : MISS ? 1 : 0))
   const short = (s) => s.slice(0, 5) /* 20.10.2026 → 20.10 */
   /* Per row: [tone, icon, word]. Lilit and Vardan M.: 9 days left; Արամ: insurance valid until 20.10. */
   const docState = FLEET.map((d, i) => i === 0 ? ['warn', 'clock', 'մինչև ' + short(ARAM.insurance)] : i === VAHE ? ['bad', 'circle-alert', 'Ժամկետանց'] : [2, 9].includes(i) ? ['warn', 'clock', '9 օր'] : ['ok', 'circle-check', 'Կարգին'])
@@ -72,7 +79,7 @@
     const [dt, di, dw] = docState[i], [n, f] = today[i]
     return `<tr class="${i === sel ? 'on' : ''}"><td><span class="who"><span class="av">${d.ini}</span><span class="nm"><b>${d.name}</b><span>${d.phone}</span></span></span></td>
       <td>${d.state === 'off' ? '<span class="faint">—</span>' : `<span class="carcell"><span class="car xs">${carImg(d.tier)}</span><span class="plate">${d.plate}</span></span>`}</td>
-      <td>${stPill(stateOf(d, i))}</td><td><span class="pill ${dt}"><i data-lucide="${di}"></i>${dw}</span></td>
+      <td>${stPill(stateOf(d, i))}</td><td>${i === 1 ? '<span class="pill warn" title="ՀՎՀՀ և Idram ID լրացված չեն · անկանխիկը ETAPI-ին չի գնա"><i data-lucide="receipt-text"></i>ՀՎՀՀ չկա</span>' : `<span class="pill ${dt}"><i data-lucide="${di}"></i>${dw}</span>`}</td>
       <td class="r mono">${n ? `<span class="faint">${n} ·</span> ${amd(f)}` : '<span class="faint">—</span>'}</td></tr>`
   }).join('')
 
@@ -99,6 +106,16 @@
     : { head: '<span class="end pill ok" style="height:20px"><i data-lucide="circle-check"></i>Կարգին</span>',
       rows: docRow('Վարորդական վկայական', 'licence.pdf', okP('09.11.2028')) + docRow('Ապահովագրություն (ԱՊՊԱ)', 'osago.pdf', okP('30.03.2027')) + docRow('Տաքսու թույլտվություն', 'taxi-permit.pdf', okP('01.02.2027')) }
   const stop = sel === VAHE ? `<div style="margin:12px var(--inset) 0"><div class="notice amber"><i data-lucide="lock"></i><span><b>Պատվերները կանգնած են · ապահովագրություն</b><br><span class="num">Ժամկետանց՝ ${BLK.expired} · նոր լուսանկար՝ ${BLK.uploaded}</span></span></div></div>` : ''
+  /* ETAPI needs each driver's ՀՎՀՀ (receipt: the ride is the driver's income, filed through the platform) and Idram ID
+     (non-cash payout). Fleet drivers too (owner 2026-10-15). Missing → amber: a domain refusal, not a fault — ETAPI is
+     not called, and the rides wait until the ids are filled (then they are sent). */
+  const TIN = sel === 0 ? ECO.FISCAL.driverTin : '2345' + String(7700 + sel * 37).padStart(4, '0')
+  const etapi = MISS ? `<div style="margin:12px var(--inset) 0"><div class="notice amber" role="status"><i data-lucide="receipt-text"></i><span><b>Անկանխիկ պատվերները ETAPI-ին չեն գնա</b><br>Չկա ՊԵԿ կտրոն և Idram վճարում, մինչև չլրացնեք · այսօր սպասում է <span class="num">2</span> պատվեր</span></div></div>
+      <div class="blk etp"><h3><i data-lucide="receipt-text"></i>ETAPI · կտրոն և Idram<span class="end pill warn" style="height:20px"><i data-lucide="triangle-alert"></i>Լրացված չէ</span></h3>
+        <dl><dt>ՀՎՀՀ</dt><dd><div class="input focus"><span class="val ph mono">8 թիվ</span></div></dd><dt>Idram ID</dt><dd><div class="input"><span class="val ph mono">օր. 0412 5581</span></div></dd></dl>
+        <div class="btns"><button class="btn primary s">Պահել և ուղարկել 2-ը</button></div></div>`
+    : `<div class="blk etp"><h3><i data-lucide="receipt-text"></i>ETAPI · կտրոն և Idram<span class="end pill ok" style="height:20px"><i data-lucide="circle-check"></i>Կարգին</span></h3>
+        <dl data-truncate><dt>ՀՎՀՀ</dt><dd class="mono">${TIN}</dd><dt>Idram ID</dt><dd class="mono">0412 ${String(5581 + sel * 113).slice(0, 4)}</dd><dt>Վերջին վճարումը</dt><dd><span class="num">${amd(1500)}</span> · <span class="mono">13:12</span> · Վճարված</dd></dl></div>`
   document.getElementById('dp').innerHTML = `
     <div class="scroll-y grow">
       <div class="head"><span class="av l">${d.ini}</span>
@@ -106,13 +123,14 @@
           <div class="meta"><span class="mono muted" style="font-size:12px">+374 ${d.phone.slice(1)}</span>${stPill(stateOf(d, sel))}</div></div>
         <button class="btn ghost icon s" aria-label="Փակել (Esc)"><i data-lucide="x"></i></button></div>
       <div class="acts"><button class="btn secondary s"><i data-lucide="key-round"></i>Տալ մուտքի կոդ</button><button class="btn secondary s icon" aria-label="Զանգել"><i data-lucide="phone"></i></button><span style="flex:1"></span><button class="btn danger s"><i data-lucide="power"></i>Ավարտել հերթափոխը</button></div>
-      <div class="tabsl" role="tablist"><button class="on">Ընդհանուր</button><button>Պատվերներ</button><button>Հերթափոխեր</button><button>Փաստաթղթեր <span class="c num">${sel === VAHE ? 5 : 4}</span></button><button aria-label="Գնահատական 4,9"><i data-lucide="star"></i><span class="num">4,9</span></button></div>
-      ${stop}
+      <div class="tabsl" role="tablist"><button class="on">Ընդհանուր</button><button>Պատվերներ</button><button>Հերթափոխեր</button><button>Փաստաթղթեր <span class="c num">${sel === VAHE ? 5 : 4}</span></button><button aria-label="Գնահատական 4,9"><i data-lucide="star"></i><span class="num">4,9</span></button><button aria-label="Idram վճարումներ">Idram</button></div>
+      ${stop}${MISS ? etapi : ''}
       <div class="blk">
         <h3><i data-lucide="car"></i>Ընթացիկ հերթափոխ<span class="end faint num" style="font-weight:400">08:12-ից · 6 ժ 14 ր</span></h3>
         <div class="shift"><span class="car" style="width:100%;height:80px">${carImg(d.tier, T.name)}</span>
           <dl class="facts"><dt>Մեքենա</dt><dd><span class="plate">${d.plate}</span></dd><dt>Սակագին</dt><dd>${T.name}</dd><dt>Մոդել</dt><dd>ID.3 · ավտոպարկի</dd><dt>Այսօր</dt><dd>${n} պատվեր · ${amd(f)}</dd></dl></div>
       </div>
+      ${MISS ? '' : etapi}
       <div class="blk" style="margin-bottom:12px">
         <h3><i data-lucide="file-text"></i>Փաստաթղթեր${docs.head}</h3>
         <div class="docs" data-truncate>${docs.rows}</div>

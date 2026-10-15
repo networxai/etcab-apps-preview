@@ -43,7 +43,7 @@
     /* iOS Armenian phonetic keyboard (ք ո ե ռ տ … = q w e r t …). */
     keyboard() {
       const row = (ks, cls = '') => `<div class="kr ${cls}">${[...ks].filter((c) => c !== ' ').map((c) => `<span class="kk">${c}</span>`).join('')}</div>`
-      return `<div class="keyboard" data-overlay aria-hidden="true">${row('քոեռտըւիօպ')}${row('ասդֆգհյկլ', 'in')}
+      return `<div class="keyboard" data-overlay aria-hidden="true" translate="no">${row('քոեռտըւիօպ')}${row('ասդֆգհյկլ', 'in')}
         <div class="kr"><span class="kk fn">${R.i('arrow-big-up')}</span>${[...'զղցվբնմ'].map((c) => `<span class="kk">${c}</span>`).join('')}<span class="kk fn">${R.i('delete')}</span></div>
         <div class="kr"><span class="kk fn w">123</span><span class="kk sp">բացատ</span><span class="kk fn w">${R.i('corner-down-left')}</span></div></div>`
     },

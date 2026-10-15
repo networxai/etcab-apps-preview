@@ -35,13 +35,14 @@
     font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; }
   .paid svg { width: 16px; height: 16px; color: var(--ok); }
   .bd { margin-top: var(--s3); border-radius: var(--r-card); background: var(--surface-2); padding: var(--s1) var(--s4); }
-  .bd .l { display: flex; justify-content: space-between; align-items: center; min-height: 34px; font: var(--t-body); color: var(--ink-2); white-space: nowrap; }
+  .bd .l { display: flex; justify-content: space-between; align-items: center; min-height: 32px; /* 34 → 32: the fee line (2026-10-15) must not push the stars under the foot */ font: var(--t-body); color: var(--ink-2); white-space: nowrap; }
   .bd .l span:last-child { color: var(--ink); font-variant-numeric: tabular-nums; }
   .bd .l.tot { border-top: 1px solid var(--hairline); margin-top: var(--s1); min-height: 40px; }
   .bd .l.tot span { font: var(--t-body-strong); color: var(--ink); }
   .paid.co svg { color: var(--ink-2); }
   .billed { display: flex; align-items: center; gap: var(--s2); margin-top: var(--s2); font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
   .billed svg { width: 16px; height: 16px; flex: none; }
+  .billed + .billed { margin-top: var(--s1); }
   .bdrow { display: flex; align-items: center; justify-content: space-between; min-height: 44px; margin-top: var(--s2); font: var(--t-body); color: var(--ink-2); width: 100%; white-space: nowrap; }
   .bdrow svg { width: 20px; height: 20px; color: var(--ink-3); }
   .who { display: flex; align-items: center; gap: var(--s3); margin-top: var(--s5); }
@@ -88,6 +89,24 @@
   .fis .wait svg { width: 20px; height: 20px; flex: none; color: var(--ink-2); margin-top: 1px; }
   .fis .wait b { display: block; font: var(--t-body-strong); color: var(--ink); }
   .fis .wait span { font: var(--t-secondary); color: var(--ink-2); }
+  /* Card declined (owner 2026-10-15: the iPay / ArCa gateway can refuse): amber, not red — the ride is fine, one step is left. */
+  .decl { display: flex; gap: var(--s3); align-items: flex-start; margin-top: var(--s4); padding: var(--s3) var(--s4); border-radius: var(--r-card); background: var(--warn-soft); }
+  .decl svg { width: 20px; height: 20px; flex: none; color: var(--warn); margin-top: 1px; }
+  .decl b { display: block; font: var(--t-body-strong); color: var(--ink); }
+  .decl span { font: var(--t-secondary); color: var(--ink); }
+  .paid.due svg { color: var(--warn); }
+  .page.on-surface .paylist .choice .ico { background: var(--surface); }
+  .paylist { margin-top: var(--s2); }
+  .paylist .choice { min-height: 56px; }
+  .paylist .choice .ico { width: 36px; height: 36px; border-radius: 10px; background: var(--surface-2); display: grid; place-items: center; flex: none; }
+  .paylist .choice .ico svg { width: 20px; height: 20px; } .paylist .choice .ico.cashc { color: var(--ok); }
+  .paylist .choice .t2 { display: block; font: var(--t-caption); color: var(--ink-2); }
+  .paylist .choice[aria-disabled="true"] .t, .paylist .choice[aria-disabled="true"] .ico { color: var(--ink-3); }
+  .paylist .choice[aria-disabled="true"] .radio { opacity: .4; }
+  .paylist > .divider:last-of-type, .paylist > .choice:last-child { display: none; } /* no «Ավելացնել քարտ» mid-recovery */
+  /* Below the Tax Service receipt: what it covers, said once (it is the driver's fare; the service fee is ours). */
+  .fisnote { display: flex; gap: var(--s2); align-items: flex-start; margin-top: var(--s3); font: var(--t-secondary); color: var(--ink-2); }
+  .fisnote svg { width: 16px; height: 16px; flex: none; margin-top: 2px; }
   .bd .l.promo span:first-child { display: inline-flex; align-items: center; gap: 6px; }
   .bd .l.promo svg { width: 16px; height: 16px; }
   .bd .l.promo span { color: var(--brand-ink, var(--brand)); }
@@ -103,21 +122,28 @@
   /* pay: 'cash' or 'company' — a company ride names the company where the method would be (receipt.tsx). */
   const paidChip = (pay) => pay === 'company'
     ? `<span class="paid co">${R.i('building-2')}${C.short}</span>`
+    : pay === 'card' ? `<span class="paid">${R.i('credit-card')}·· ${ECO.PAY.card.last4}</span>`
     : `<span class="paid">${R.i('banknote')}${ECO.PAY.cash.label}</span>`
   const PA = ECO.PROMO.applied /* change list 2026-10-14: AUTUMN15 on this ride, 1 100 → 935 ֏ */
+  /* Owner 2026-10-15 (final): the service fee is the fleet's, +2 % on the final fare when paid by bank card (card, Apple Pay,
+     Google Pay); cash and company rides carry none. Card on the walkthrough: 1 100 + 22 = 1 122 ֏. Never on the Tax Service receipt. */
+  const fee = (pay, f = RD.fare) => pay === 'card' ? Math.round(f * 2 / 100) : 0
+  const CARD = ECO.PAY.card
   const tripHead = (pay = 'cash', promo) => `<div class="trip">${R.trace('pickupToDrop', 96, 96, { pad: 14, sw: 3.5, r: 4.5, grid: false })}
     <div class="stops"><div class="st"><span class="m"><span class="dot"></span></span><span class="tx"><span class="t1">${RD.pickup}</span><span class="t2">${RD.pickupAt}</span></span></div>
       <div class="st"><span class="m"><span class="sq"></span></span><span class="tx"><span class="t1">${RD.drop}</span><span class="t2">${RD.dropAt} · ${ECO.km(RD.km)} · ${RD.min} րոպե</span></span></div></div></div>
-    <div class="fare"><span class="n">${R.amd(promo ? PA.pay : RD.fare)}</span>${paidChip(pay)}</div>`
+    <div class="fare"><span class="n">${R.amd((promo ? PA.pay : RD.fare) + fee(pay))}</span>${paidChip(pay)}</div>`
   /* Eco City, fixed_upfront: 600 + 90·4,3 + 12·6 = 1 059 → rounded to 100 ֏. Line names are the app's fare.* strings. */
   const breakdown = (pay = 'cash', promo) => `<div class="bd" aria-label="Գնի մանրամասները">
     <div class="l"><span>Նստեցում</span><span>${R.amd(600)}</span></div>
     <div class="l"><span>Ըստ կիլոմետրի · ${ECO.km(RD.km)}</span><span>${R.amd(387)}</span></div>
     <div class="l"><span>Ըստ րոպեի · ${RD.min} րոպե</span><span>${R.amd(72)}</span></div>
     <div class="l"><span>Կլորացում</span><span>+${R.amd(41)}</span></div>
+    ${fee(pay) ? `<div class="l"><span>Սպասարկման վճար · քարտով 2 %</span><span>${R.amd(fee(pay))}</span></div>` : ''}
     ${promo ? `<div class="l promo"><span>${R.i('ticket-percent')}Պրոմոկոդ · ${PA.code}</span><span>−${R.amd(PA.off)}</span></div>` : ''}
-    <div class="l tot"><span>Ընդամենը</span><span>${R.amd(promo ? PA.pay : RD.fare)}</span></div></div>
-    ${pay === 'company' ? `<div class="billed">${R.i('building-2')}<span>Վճարում է՝ ${C.name}</span></div>` : ''}`
+    <div class="l tot"><span>Ընդամենը</span><span>${R.amd((promo ? PA.pay : RD.fare) + fee(pay))}</span></div></div>
+    ${pay === 'company' ? `<div class="billed">${R.i('building-2')}<span>Վճարում է՝ ${C.name}</span></div>
+      <div class="billed">${R.i('file-text')}<span>Ընկերության ամսական հաշվետվությունում</span></div>` : ''}`
   const collapsed = `<button class="bdrow"><span>Գնի մանրամասները</span>${R.i('chevron-down')}</button>`
   const who = `<div class="who">${R.avatar()}<span class="nm"><span class="n1">${DV.first}</span><span class="n2">${DV.car} · ${DV.plate}</span></span></div>`
   const stars = (n) => `<div class="stars" role="radiogroup" aria-label="Գնահատեք վարորդին">${[1, 2, 3, 4, 5].map((i) =>
@@ -132,21 +158,33 @@
     const f = (a, b) => `M${b * 3} ${a * 3}h21v21h-21zM${b * 3 + 3} ${a * 3 + 3}v15h15v-15zM${b * 3 + 6} ${a * 3 + 6}h9v9h-9z`
     return `<svg width="88" height="88" viewBox="0 0 75 75" aria-hidden="true"><path fill="#111113" fill-rule="evenodd" d="${d}${f(0, 0)}${f(0, 18)}${f(18, 0)}"/></svg>`
   }
+  /* The Tax Service receipt is the driver's income (ETAPI register-income): the fare, 1 100 ֏. The fee is the fleet's and is not on it. */
+  const fisNote = `<div class="fisnote">${R.i('info')}<span>ՊԵԿ կտրոնում՝ միայն ուղևորության գինը · քարտով վճարման 2 %-ը Էկո Տաքսիի սպասարկման վճարն է՝ մեր ստացականում</span></div>`
+  /* Card declined at the end (iPay / ArCa refusal), or an Apple / Google Pay sheet the rider dismissed: the same recovery. */
+  const DECL = (() => { const h = R.payList('applepay'), w = 'կգանձվի ավարտին', i = h.indexOf(w), j = h.lastIndexOf('aria-checked="false"', i)
+    return h.slice(0, j) + 'aria-checked="false" aria-disabled="true"' + h.slice(j + 20, i) + 'մերժվեց' + h.slice(i + w.length) })()
   const page = (body, foot) => `<div class="page on-surface">${nav}<div class="body">${body}</div><div class="foot">${foot}</div></div>`
 
   Rider.page({
     title: 'Rider · Trip complete',
     sub: 'The fare is the hero, broken down from the real Eco City tariff. Stars, then compliments or a reason. Close is always there',
     states: [
-      { id: 'rate', label: 'Fare + rate', time: '9:51', note: 'Base 600 + 4,3 km × 90 + 6 min × 12 = 1 059, rounded to 1 100 ֏ (fixed upfront). «Ուղարկել» is pinned, disabled until a star is chosen, so the layout does not jump',
+      { id: 'rate', label: 'Fare + rate', time: '9:51', note: 'Base 600 + 4,3 km × 90 + 6 min × 12 = 1 059, rounded to 1 100 ֏ (fixed upfront) . Paid in cash, so no service fee (owner 2026-10-15, final: only bank-card payments carry the 2 %). «Ուղարկել» is pinned, disabled until a star is chosen, so the layout does not jump',
         html: () => page(`${tripHead()}${breakdown()}${who}<div class="ask">Գնահատեք վարորդին</div>${stars(0)}`,
           '<button class="btn" disabled>Ուղարկել</button><button class="btn-text">Բաց թողնել</button>') },
-      { id: 'company', label: 'Company ride', time: '9:51', note: 'Billed to the rider\'s company (receipt.tsx): «Վճարում է՝ …» stands where the method would; never a balance or a limit. Nothing is paid to the driver',
+      { id: 'company', label: 'Company ride', time: '9:51', note: 'Billed to the rider\'s company (receipt.tsx): «Վճարում է՝ …» stands where the method would; never a balance or a limit. Nothing is paid to the driver. Owner 2026-10-15: company rides are not sent to ETAPI, so there is no Tax Service receipt and no link to one; the second line says where the ride is accounted for: «Ընկերության ամսական հաշվետվությունում». No service fee on company rides',
         html: () => page(`${tripHead('company')}${breakdown('company')}${who}<div class="ask">Գնահատեք վարորդին</div>${stars(0)}`,
           '<button class="btn" disabled>Ուղարկել</button><button class="btn-text">Բաց թողնել</button>') },
-      { id: 'promo', label: 'Promo discount', time: '9:51', note: 'Change list 2026-10-14 (drawn ahead): ECO.PROMO.applied AUTUMN15 on the walkthrough ride. The breakdown keeps the tariff lines, adds one «Պրոմոկոդ · AUTUMN15 −165 ֏» line in brand, and the hero and total are what the rider pays: 935 ֏',
+      { id: 'promo', label: 'Promo discount', time: '9:51', note: 'Change list 2026-10-14 (drawn ahead): ECO.PROMO.applied AUTUMN15 on the walkthrough ride. The breakdown keeps the tariff lines, adds one «Պրոմոկոդ · AUTUMN15 −165 ֏» line in brand, and the hero and total are what the rider pays: 935 ֏ (cash, no service fee)',
         html: () => page(`${tripHead('cash', true)}${breakdown('cash', true)}${who}<div class="ask">Գնահատեք վարորդին</div>${stars(0)}`,
           '<button class="btn" disabled>Ուղարկել</button><button class="btn-text">Բաց թողնել</button>') },
+      { id: 'card', label: 'Paid by card', time: '9:51', note: 'Owner 2026-10-15 (final): the same ride charged to the saved card ·· 4242 (Apple Pay / Google Pay alike). The tariff lines still add to the fare, 1 100 ֏; «Սպասարկման վճար · քարտով 2 %» 22 ֏ is its own line, and the hero and total are 1 122 ֏. The Tax Service receipt for this ride still shows 1 100 ֏ only',
+        html: () => page(`${tripHead('card')}${breakdown('card')}${who}<div class="ask">Գնահատեք վարորդին</div>${stars(0)}`,
+          '<button class="btn" disabled>Ուղարկել</button><button class="btn-text">Բաց թողնել</button>') },
+      { id: 'card-declined', label: 'Card declined', time: '9:51', note: 'Owner 2026-10-15: the card gateway (iPay / ArCa) refused ·· 4242 when the ride ended. The ride is over and fine, so amber, not red, and no modal: the fare stays the hero with a «Չվճարված» chip, one line says what happened and what to do, and the payment list is right there with the declined card greyed («մերժվեց»). Apple Pay is picked here, so the button carries the 2 % fee (1 100 + 22 = 1 122 ֏) and a quiet line says which methods carry it; choosing cash turns the button into «Վճարել կանխիկ՝ վարորդին», who is still at the car. An Apple / Google Pay sheet the rider cancelled lands on this same screen, with the line «Վճարումը չավարտվեց». Unpaid and left, it becomes the account debt (rider-account wallet)',
+        html: () => page(`${tripHead().replace(paidChip('cash'), `<span class="paid due">${R.i('clock')}Չվճարված</span>`)}
+          <div class="decl" role="status">${R.i('credit-card')}<div><b>Քարտը ·· ${ECO.PAY.card.last4} մերժվեց</b><span>Ընտրեք այլ եղանակ կամ վճարեք վարորդին կանխիկ</span></div></div>${DECL}<div class="fisnote">${R.i('info')}<span>Քարտով, Apple Pay կամ Google Pay՝ +2 % սպասարկման վճար · կանխիկ՝ ոչ</span></div>`,
+          `<button class="btn btn-brand">Վճարել · ${R.amd(RD.fare + fee('card'))}</button>`) },
       { id: 'rated', label: 'Five stars', note: 'Compliments are optional; two picked',
         html: () => page(`${tripHead()}${collapsed}${who}${stars(5)}<div class="q" style="text-align:center">Ի՞նչը դուր եկավ</div>
           ${chips(['Մաքուր մեքենա', 'Զգույշ վարում', 'Հաճելի զրույց', 'Ճշտապահ', 'Լավ երաժշտություն'], [0, 1])}`,
@@ -155,7 +193,7 @@
         html: () => page(`${tripHead()}${collapsed}${who}${stars(LOW)}<div class="q" style="text-align:center">Ի՞նչը չստացվեց</div>
           ${chips(['Ուշացավ', 'Անզգույշ վարում', 'Մեքենան մաքուր չէր', 'Երկար երթուղի', 'Անհարմար զրույց'], [1])}`,
           '<button class="btn btn-brand">Ուղարկել</button><button class="btn-text">Բաց թողնել</button>') },
-      { id: 'fiscal', label: 'Tax Service receipt', time: '9:52', note: 'Owner 2026-10-15: we send the receipt ourselves, through ETAPI (register-income with the Tax Service: platform ՀՎՀՀ + driver ՀՎՀՀ, receipt_id and receipt_url). Cashless rides are filed at once; cash after ETAPI\'s 24 h hold, so until then the receipt reads «պատրաստվում է». Shown: platform and driver ՀՎՀՀ, receipt number, time, the one service line, total, method, and the QR to receipt_url. Share sends the PDF (system share sheet); nothing else on screen (new strings)',
+      { id: 'fiscal', label: 'Tax Service receipt', time: '9:52', note: 'Owner 2026-10-15: we send the receipt ourselves, through ETAPI (register-income with the Tax Service: platform ՀՎՀՀ + driver ՀՎՀՀ, receipt_id and receipt_url). Cashless rides are filed at once; cash after ETAPI\'s 24 h hold, so until then the receipt reads «պատրաստվում է». Shown: platform and driver ՀՎՀՀ, receipt number, time, the one service line, total, method, and the QR to receipt_url. Share sends the PDF (system share sheet); nothing else on screen (new strings). Owner 2026-10-15: the Tax Service receipt shows the ride\'s fare only (1 100 ֏), never the 2 % card service fee; one line under it says so, and that the fee is Eco Taxi\'s and on our receipt. Company rides are never sent to ETAPI, so they have no such screen',
         html: () => `<div class="page">${nav.replace('Ուղևորությունն ավարտված է', 'ՊԵԿ կտրոն').replace('aria-label="Փակել">' + R.i('x'), 'aria-label="Փակել">' + R.i('x'))}<div class="body">
           <div class="fis" aria-label="ՊԵԿ կտրոն">
             <div class="seller">${ECO.FISCAL.seller}</div>
@@ -171,9 +209,9 @@
             <div class="tot"><span>Ընդամենը</span><span>${R.amd(RD.fare)}</span></div>
             <div class="m" style="margin-top:var(--s1)"><span>${ECO.PAY.cash.label}</span><b>${R.amd(RD.fare)}</b></div>
             <div class="qr">${qr()}<span>Ստուգեք կտրոնը ՊԵԿ կայքում</span></div>
-          </div></div>
+          </div>${fisNote}</div>
           <div class="foot"><button class="btn btn-brand">${R.i('share')}Կիսվել</button><button class="btn btn-quiet">${R.i('download')}Պահել PDF</button></div></div>` },
-      { id: 'fiscal-pending', label: 'Receipt · cash, pending', time: '9:52', note: 'Cash rides reach the Tax Service only after ETAPI\'s 24 h hold (cashless ones at once), so right after a cash ride the receipt has no number yet. The same receipt, with «պատրաստվում է» in place of the number and a neutral line giving the time it will be ready; no QR until then. A push says when it is issued, and History shows the number from then on. Never red: nothing failed',
+      { id: 'fiscal-pending', label: 'Receipt · cash, pending', time: '9:52', note: 'Cash rides reach the Tax Service only after ETAPI\'s 24 h hold (cashless ones at once), so right after a cash ride the receipt has no number yet. The same receipt, with «պատրաստվում է» in place of the number and a neutral line giving the time it will be ready; no QR until then. A push says when it is issued, and History shows the number from then on. Never red: nothing failed. The same line as the issued receipt says it carries the fare only, never the card service fee',
         html: () => `<div class="page">${nav.replace('Ուղևորությունն ավարտված է', 'ՊԵԿ կտրոն')}<div class="body">
           <div class="fis" aria-label="ՊԵԿ կտրոն · պատրաստվում է">
             <div class="seller">${ECO.FISCAL.seller}</div>
@@ -189,7 +227,7 @@
             <div class="tot"><span>Ընդամենը</span><span>${R.amd(RD.fare)}</span></div>
             <div class="m" style="margin-top:var(--s1)"><span>${ECO.PAY.cash.label}</span><b>${R.amd(RD.fare)}</b></div>
             <div class="wait" role="status">${R.i('clock')}<div><b>Կտրոնը պատրաստ կլինի մինչև վաղը, 9:51</b><span>Կանխիկ վճարումները ՊԵԿ են ուղարկվում 24 ժամվա ընթացքում · կծանուցենք</span></div></div>
-          </div></div>
+          </div>${fisNote}</div>
           <div class="foot"><button class="btn btn-brand">Լավ</button><button class="btn btn-quiet">${R.i('download')}Պահել ստացականը</button></div></div>` },
       { id: 'thanks', label: 'Thanks', note: 'Calm close; the next ride is one tap',
         html: () => page(`<div class="thanks"><span class="ok">${R.i('check')}</span><h1 class="large">Շնորհակալություն</h1>

@@ -26,6 +26,17 @@
   .fd .input .val { font-family: var(--mono); }
   .ft { display: flex; align-items: center; gap: 8px; padding: 12px var(--inset); margin-top: auto; border-top: 1px solid var(--line-soft); }
   .ft .notice { flex: 1; }
+  /* ?tab=pay (owner 2026-10-15): four payment cards in a 2×2 grid, the same card pattern, denser. */
+  .pay .content { grid-template-rows: auto minmax(0, 1fr) minmax(0, 1fr); }
+  .pay .fl { gap: 8px; padding-bottom: 8px; }
+  .pay .fd .hint { margin-top: 2px; }
+  .pay .ft { padding: 8px var(--inset); }
+  .head2 .seg { align-self: flex-start; }
+  .seg a { height: 26px; padding: 0 10px; border-radius: 6px; font: var(--c-strong); color: var(--ink-muted); white-space: nowrap; display: flex; align-items: center; gap: 6px; text-decoration: none; }
+  .seg a.on { background: var(--surface); color: var(--ink); box-shadow: var(--e1); }
+  .facts1 { display: flex; flex-wrap: wrap; gap: 4px 12px; font: var(--c-small); color: var(--ink-muted); padding: 8px var(--inset) 0; }
+  .facts1 b { color: var(--ink); font-weight: 500; }
+  .fd .seg { display: inline-flex; }
 </style>
 </head>
 <body>
@@ -36,7 +47,7 @@
       <div class="live"></div>
     </header>
     <div class="content">
-      <div class="head2"><p>Քարտեզի և SMS-ի բանալիներ · պահվածը չի ցուցադրվում</p></div>
+      <div class="head2"><nav class="seg" id="itabs" aria-label="Ինտեգրումներ"></nav><p id="lead">Քարտեզի և SMS-ի բանալիներ · պահվածը չի ցուցադրվում</p></div>
       <section class="card" aria-labelledby="k-maps" id="maps"></section>
       <section class="card" aria-labelledby="k-sms" id="sms"></section>
     </div>
@@ -73,8 +84,46 @@
       <div class="scroll-y grow"><div class="fl">${fields}</div></div>
       <div class="ft">${foot}<button class="btn ${kind === 'maps' ? 'primary' : 'secondary'}">Պահել</button></div>`
   }
+  const PAYTAB = new URLSearchParams(location.search).get('tab') === 'pay'
+  document.getElementById('itabs').innerHTML = `<a href="?theme=${THEME}" class="${PAYTAB ? '' : 'on'}"${PAYTAB ? '' : ' aria-current="page"'}><i data-lucide="map"></i>Քարտեզ և SMS</a><a href="?theme=${THEME}&tab=pay" class="${PAYTAB ? 'on' : ''}"${PAYTAB ? ' aria-current="page"' : ''}><i data-lucide="credit-card"></i>Վճարումներ և ETAPI</a>`
+  if (!PAYTAB) {
   document.getElementById('maps').innerHTML = card('maps', 'Քարտեզ', '2GIS', '02.10.2026, 14:20')
   document.getElementById('sms').innerHTML = card('sms', 'SMS', 'մատակարար', '28.09.2026, 11:05')
+  } else {
+    /* ── ?tab=pay (owner 2026-10-15, drawn ahead: no payment or ETAPI integration in the API). Same rules as above:
+       secrets are write-only and render empty even when set; vendor field names stay English. Two things are read back
+       because they are not secrets and an operator must see them: ETAPI's mode (sandbox / live) and its last success,
+       and Apple Pay's domain verification. ETAPI = Eco Taxi's Tax Service + Idram service: one token files the ՊԵԿ
+       receipt and pays the driver's Idram. ── */
+    document.querySelector('.screen').classList.add('pay')
+    document.getElementById('lead').textContent = 'Վճարային դարպասներ և ETAPI · գաղտնի դաշտերը չեն ցուցադրվում'
+    const content = document.querySelector('.content')
+    content.querySelectorAll('section.card').forEach((c) => c.remove())
+    const fld = (n, req, secret, hint, ctl) => `<div class="fd"><label class="label"><span class="mono">${n}</span>${req ? '<span class="req">· պարտադիր</span>' : ''}</label>
+      ${ctl || `<span class="input">${secret ? '<i data-lucide="key-round"></i>' : ''}<span class="val ph"></span></span>`}<div class="hint">${hint}</div></div>`
+    const mode = (live) => `<div class="seg" role="radiogroup" aria-label="mode"><button role="radio" aria-checked="${!live}" class="${live ? '' : 'on'}">sandbox</button><button role="radio" aria-checked="${live}" class="${live ? 'on' : ''}">live</button></div>`
+    const ok = (when) => `<span class="pill ok"><i class="d"></i>Կարգավորված է · <span class="num">${when}</span></span>`
+    const pcard = (id, title, sub, status, facts, fields, primary) => `<section class="card" aria-labelledby="k-${id}"><div class="card-h"><h2 id="k-${id}">${title}</h2><span class="sub">${sub}</span><span class="end">${status}</span></div>
+      <div class="scroll-y grow">${facts ? `<div class="facts1">${facts}</div>` : ''}<div class="fl">${fields}</div></div>
+      <div class="ft"><div class="notice neutral"><i data-lucide="info"></i><span>Պահելը փոխարինում է բոլոր դաշտերը</span></div><button class="btn ${primary ? 'primary' : 'secondary'}">Պահել</button></div></section>`
+    content.insertAdjacentHTML('beforeend',
+      pcard('etapi', 'ETAPI', 'ՊԵԿ կտրոն + Idram', ok('14.10.2026, 10:02'),
+        '<span><i data-lucide="circle-check" style="width:12px;height:12px;color:var(--ok-text);vertical-align:-2px"></i> Վերջին հաջողը՝ <b class="mono">14:19</b> · <b class="mono">#R-20352</b></span><span>Ռեժիմ՝ <b>live</b></span><span>Այսօր՝ <b class="num">55</b> անկանխիկ · <b class="num">51</b> կանխիկ պահված</span>',
+        fld('apiToken', 1, 1, 'Bearer token issued by ETAPI. One token files the Tax Service receipt and sends the Idram payout.')
+        + fld('platformTin', 1, 0, 'The platform’s ՀՎՀՀ (8 digits). Each receipt is the driver’s income filed through this platform.')
+        + fld('mode', 1, 0, 'sandbox files nothing real. Switch to live only after a test ride shows a receipt.', mode(true)), 1)
+      + pcard('ipay', 'iPay · ArCa', 'քարտ', ok('12.10.2026, 16:40'), '',
+        fld('merchantId', 1, 0, 'The ArCa merchant id from the iPay contract.') + fld('apiUser', 1, 0, 'The API user iPay issued for this merchant.')
+        + fld('apiPassword', 1, 1, 'The API user’s password.') + fld('mode', 1, 0, 'test charges no real card.', mode(true)))
+      + pcard('applepay', 'Apple Pay', 'iOS', ok('12.10.2026, 17:05'),
+        '<span class="pill ok" style="height:20px"><i data-lucide="badge-check"></i>Դոմենը հաստատված է · <span class="mono">pay.ecotaxi.am</span></span><span>վավեր՝ մինչև <b class="num">12.10.2027</b></span>',
+        fld('merchantIdentifier', 1, 0, 'From the Apple developer account, e.g. merchant.am.&lt;fleet&gt;.')
+        + fld('paymentProcessingCertificate', 1, 1, 'The .p12 the card gateway decrypts Apple Pay tokens with.')
+        + fld('domainVerification', 0, 0, 'Served at /.well-known/apple-developer-merchantid-domain-association.', '<button class="btn secondary s"><i data-lucide="download"></i>Ներբեռնել ֆայլը</button>'))
+      + pcard('googlepay', 'Google Pay', 'Android', ok('12.10.2026, 17:12'), '',
+        fld('merchantId', 1, 0, 'From the Google Pay & Wallet console.') + fld('merchantName', 1, 0, 'Shown to the rider on the Google Pay sheet.')
+        + fld('gatewayMerchantId', 1, 0, 'The ArCa merchant id the Google Pay token is issued for (same as iPay’s).')))
+  }
   icons()
   document.documentElement.dataset.mapReady = 'none'
 </script>

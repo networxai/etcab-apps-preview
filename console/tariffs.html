@@ -219,9 +219,12 @@
     const sh = (h, sub, end) => `<div class="sh"><h3>${h}</h3>${sub ? `<span class="sub">${sub}</span>` : ''}${end ? `<span class="end">${end}</span>` : ''}</div>`
     /* Service fee and commission per tariff: Comfort shows percent + min/max; Business is hybrid; Vip is fixed. */
     const COMM = { city: [0, 15, 0, 100, 1200], comfort: [0, R.fee || 15, 0, 150, 1500], kids: [0, 15, 0, 150, 1500], business: [2, 10, 100, 200, 2000], van: [0, 15, 0, 200, 2000], vip: [1, 0, 600, 600, 600] }[K]
-    const SVC = { city: [2, 3, 50, 100, 300], comfort: [2, 3, 50, 100, 500], kids: [2, 3, 50, 100, 500], business: [0, 4, 0, 100, 600], van: [2, 3, 50, 100, 500], vip: null }[K]
+    /* Owner 2026-10-15 (final): the rider's service fee is the fleet's, 2 % on top of the final fare, and only when the rider
+       pays by bank card (card, Apple Pay, Google Pay). Cash and company: no fee. It is shown on OUR receipt only; the Tax
+       Service (ETAPI) receipt carries the fare alone. Min / max are optional and empty by default. */
+    const SVC = [0, 2, 0, null, null]
     const f = fare(T, 2.1, 4)
-    const svcOf = (x) => SVC ? Math.min(SVC[4], Math.max(SVC[3], Math.round(x * SVC[1] / 100) + SVC[2])) : 0
+    const svcOf = (x) => Math.round(x * SVC[1] / 100) /* card payments only */
     const comOf = (x) => Math.min(COMM[4], Math.max(COMM[3], Math.round(x * COMM[1] / 100) + COMM[2]))
     const comTxt = (c) => (c[0] === 1 ? amd(c[2]) : c[0] === 2 ? `${c[1]} % + ${amd(c[2])}` : `${c[1]} %`)
     const tabs = [['price', 'Գին', 'banknote'], ['preorder', 'Նախնական պատվեր', 'calendar-clock'], ['commission', 'Միջնորդավճար', 'percent'], ['other', 'Այլ', 'sliders-horizontal']]
@@ -270,14 +273,13 @@
         + row('Զգուշացում', 'հաշվեկշիռը ցածր է', n('&lt; ' + nf(R.warnBelow), '֏'))
         + row('Կանգ', 'նոր պատվեր չի գալիս, ընթացիկն ավարտվում է', n('&lt; ' + nf(R.blockBelow), '֏'))
         + `<div style="padding:6px var(--inset) 4px" class="chips"><span class="chip"><i data-lucide="power"></i>Առցանց անցնելիս</span><span class="chip"><i data-lucide="car"></i>Հերթափոխ բացելիս</span><span class="chip"><i data-lucide="send"></i>Առաջարկ ուղարկելիս</span><span class="chip"><i data-lucide="calendar-clock"></i>Նախնական պատվեր սկսելիս</span></div>`
-        + sh('Ուղևորի սպասարկման վճար', 'ավելանում է գնին · առանձին տող գնի և կտրոնի մեջ', sw(!!SVC, 'Սպասարկման վճար'))
-        + (SVC ? row('Տեսակ', 'տոկոս, ֆիքսված կամ երկուսը', seg(['Տոկոս', 'Ֆիքսված', 'Երկուսը'], SVC[0], 'Սպասարկման վճարի տեսակ'))
-          + row('Տոկոս + ֆիքսված', 'գնից', `${n(SVC[1], '%', 'p')}<span class="x">+</span>${n(nf(SVC[2]), '֏', SVC[2] ? '' : 'dis')}`)
-          + row('Նվազագույն / առավելագույն', 'մեկ պատվերից', `${n(nf(SVC[3]), '֏')}<span class="x">–</span>${n(nf(SVC[4]), '֏')}`)
-          + `<div style="padding:8px var(--inset) 12px" class="chips">${chk('Կանխիկ', true)}${chk('Քարտ', true)}${chk('Ընկերության հաշիվ', false)}<span class="faint" style="font:var(--c-small);align-self:center">ընկերության պատվերին՝ ոչ</span></div>`
-          : `<div style="padding:4px var(--inset) 12px"><div class="notice neutral"><i data-lucide="info"></i><span>${T.name}-ում սպասարկման վճար չկա</span></div></div>`)
+        + sh('Ուղևորի սպասարկման վճար', 'քարտով · մեր կտրոնում, ոչ ՊԵԿ-ում', sw(true, 'Սպասարկման վճար'))
+        + row('Տեսակ', 'տոկոս կամ ֆիքսված', seg(['Տոկոս', 'Ֆիքսված'], 0, 'Սպասարկման վճարի տեսակ'))
+        + row('Տոկոս', 'վերջնական գնից', n(SVC[1], '%', 'p'))
+        + row('Նվազագույն / առավելագույն', 'ոչ պարտադիր', `${n('—', '֏', 'dis')}<span class="x">–</span>${n('—', '֏', 'dis')}`)
+        + `<div style="padding:8px var(--inset) 12px" class="chips">${chk('Քարտ', true)}${chk('Apple Pay', true)}${chk('Google Pay', true)}${chk('Կանխիկ', false)}${chk('NFC / POS', false)}${chk('Ընկերության հաշիվ', false)}<span class="faint" style="font:var(--c-small);align-self:center">միայն բանկային քարտով</span></div>`
         + sh('Բոլոր սակագները', 'մի հայացքով') + `<table class="tbl ovt"><colgroup><col><col style="width:160px"><col style="width:160px"></colgroup><thead><tr><th>Սակագին</th><th class="r">Գործընկերոջ միջնորդավճար</th><th class="r">Սպասարկման վճար</th></tr></thead><tbody>
-          ${TIERS.map((t) => { const k = kidOf(t), c = { city: [0, 15, 0], comfort: [0, R.fee || 15, 0], kids: [0, 15, 0], business: [2, 10, 100], van: [0, 15, 0], vip: [1, 0, 600] }[k], s2 = { city: '3 % + 50', comfort: '3 % + 50', kids: '3 % + 50', business: '4 %', van: '3 % + 50', vip: '—' }[k]
+          ${TIERS.map((t) => { const k = kidOf(t), c = { city: [0, 15, 0], comfort: [0, R.fee || 15, 0], kids: [0, 15, 0], business: [2, 10, 100], van: [0, 15, 0], vip: [1, 0, 600] }[k], s2 = '2 % · քարտով'
             return `<tr${t === T ? ' class="on"' : ''}><td><a href="tariffs.html?theme=${THEME}&t=${kidOf(t)}&sec=commission" style="color:inherit;text-decoration:none">${t.name}</a></td><td class="r">${comTxt(c)}</td><td class="r">${s2}</td></tr>` }).join('')}</tbody></table>`
     } else {
       body = sh('Վճարման եղանակներ')
@@ -323,8 +325,9 @@
             <span>2,1 կմ × ${T.km} ֏</span><span>${amd(Math.round(T.km * 2.1))}</span>
             <span>4 ր × ${T.min} ֏</span><span>${amd(T.min * 4)}</span>
             <span class="faint">${T.base + Math.round(T.km * 2.1) + T.min * 4 < T.floor ? 'նվազագույնը' : 'կլորացում 100 ֏'}</span><span class="faint">${amd(f)}</span>
-            <span>Սպասարկման վճար</span><span>${svc ? '+' + amd(svc) : '—'}</span>
-            <span class="tot">Ուղևորը վճարում է</span><span class="tot">${amd(f + svc)}</span>
+            <span>Սպասարկման վճար · կանխիկ</span><span>—</span>
+            <span>Սպասարկման վճար · քարտով 2 %</span><span>+${amd(svc)}</span>
+            <span class="tot">Ուղևորը վճարում է · քարտով</span><span class="tot">${amd(f + svc)}</span>
             <span class="faint">Միջնորդավճար · ${comTxt(COMM)}</span><span class="faint">−${amd(com)}</span>
             <span class="faint">Գործընկերին մնում է</span><span class="faint">${amd(f - com)}</span>
           </div></section>

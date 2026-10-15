@@ -36,6 +36,9 @@
   .doc .m.disc span, .doc .m.disc b { color: var(--brand-ink); }
   .doc .m.disc span { display: inline-flex; align-items: center; gap: 6px; }
   .doc .m.disc svg { width: 15px; height: 15px; }
+  /* The driver's fare as a subtotal (2026-10-15): the tariff lines end here; the service fee and the promo follow. */
+  .doc .m.sub { border-top: 1px solid var(--hairline); margin-top: var(--s1); padding-top: var(--s1); } .doc .m.sub span { color: var(--ink); }
+  .doc .feecap { font: var(--t-caption); color: var(--ink-2); margin: -2px 0 var(--s1); }
   .doc .tot { display: flex; justify-content: space-between; font: var(--t-headline); color: var(--ink); font-variant-numeric: tabular-nums; }
   .doc .rt { font: var(--t-secondary); color: var(--ink); line-height: 22px; }
   .doc .rt span { color: var(--ink-2); }
@@ -143,6 +146,9 @@
      Komitas 22 → Mashtots 37  Partner 4.3 km 7 min: 700 + 473 + 98 = 1 271 → 1 300
      Tumanyan → Opera          City    1.4 km 3 min: 600 + 126 + 36 =   762 →   800
      Komitas 22 → Zvartnots    City   12.6 km 17 min: 600 + 1 134 + 204 = 1 938 → ≈ 1 900 (estimate, scheduled) */
+  /* Owner 2026-10-15 (final): the service fee is the fleet's, +2 % on bank-card payments only (card, Apple Pay, Google Pay); cash and
+     company rides carry none. These rides were cash or company, so their amounts are the fares. */
+  const FEE = (f) => Math.round(f * 2 / 100)
   const rides = [
     ['pickupToDrop', ECO.RIDE.drop, 'Այսօր, ' + ECO.RIDE.pickupAt.padStart(5, '0'), 'Eco City', A(ECO.RIDE.fare)],
     ['republicToCascade', 'Կասկադ', 'Երեկ, 08:50', 'Eco City', A(800), true],
@@ -195,10 +201,41 @@
               <div class="ln"><span>Կլորացում</span><b>+${A(41)}</b></div>
               <div class="ln tot"><span>Ընդամենը</span><b>${A(RD.fare)}</b></div>
               <div class="ln paid"><span class="pay ${pay === 'company' ? 'co' : ''}">${pay === 'company' ? R.i('building-2') + 'Վճարում է՝ ' + C.name : R.i('banknote') + ECO.PAY.cash.label}</span></div>
+              ${pay === 'company' ? `<div class="ln"><span class="pay co">${R.i('file-text')}Ընկերության ամսական հաշվետվությունում</span></div>` : ''}
             </div>
             ${pay === 'downgraded' ? `<div class="notice">${R.i('info')}<span><b>Վճարել եք դուք · կանխիկ</b>Ընկերության սահմանաչափը սպառված էր</span></div>` : ''}
             <div class="btns"><button class="btn btn-brand">${R.i('rotate-ccw')}Կրկին պատվիրել</button><button class="btn btn-quiet">${R.i('receipt-text')}Ստացական</button></div>
           </section>`
+
+  /* The receipt document (change list 2026-10-14). o.card: paid by the saved card, so the 2 % service fee line and its caption,
+     no promo (owner 2026-10-15, final). o.pending: a cash ride inside ETAPI's 24 h hold — no Tax Service number yet. */
+  const doc = (o) => { const F = ECO.FISCAL, PA = ECO.PROMO.applied, fee = o.card ? FEE(RD.fare) : 0
+    return `<div class="page on-surface"><nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl">Ստացական</span><button class="navbtn" aria-label="Կիսվել">${R.i('share')}</button></nav>
+          <div class="scroll"><div class="doc" aria-label="Ստացական">
+            <div class="dh"><img src="assets/eco/logo-wide.png" alt="Eco Taxi" width="88" height="16"><span class="no"><b>R-${RD.no}</b>9 հոկտ. 2026</span></div>
+            <div class="m" style="margin-top:var(--s2)"><span>${F.seller}</span><b>ՀՎՀՀ ${F.tin}</b></div>
+            <div class="cut"></div>
+            <div class="rt">${RD.pickup} <span>· ${RD.pickupAt}</span><br>${RD.drop} <span>· ${RD.dropAt}</span></div>
+            <div class="m"><span>${RD.tier} · ${ECO.km(RD.km)} · ${RD.min} րոպե</span><b>${DV.plate}</b></div>
+            <div class="cut"></div>
+            <div class="m"><span>Նստեցում</span><b>${A(600)}</b></div>
+            <div class="m"><span>Ըստ կիլոմետրի · ${ECO.km(RD.km)}</span><b>${A(387)}</b></div>
+            <div class="m"><span>Ըստ րոպեի · ${RD.min} րոպե</span><b>${A(72)}</b></div>
+            <div class="m"><span>Կլորացում</span><b>+${A(41)}</b></div>
+            ${o.card ? `<div class="m sub"><span>Ուղևորության գին</span><b>${A(RD.fare)}</b></div>
+            <div class="m"><span>Սպասարկման վճար · քարտով վճարում 2 %</span><b>${A(fee)}</b></div>
+            <div class="feecap">Էկո Տաքսիի վճարն է · ՊԵԿ կտրոնում չի ներառվում</div>`
+            : `<div class="m disc"><span>${R.i('ticket-percent')}Պրոմոկոդ · ${PA.code}</span><b>−${A(PA.off)}</b></div>`}
+            <div class="cut"></div>
+            <div class="tot"><span>Ընդամենը</span><span>${A(o.card ? RD.fare + fee : PA.pay)}</span></div>
+            <div class="m" style="margin-top:var(--s1)"><span>Վճարում</span><b>${o.card ? `${ECO.PAY.card.label} ·· ${ECO.PAY.card.last4}` : ECO.PAY.cash.label}</b></div>
+            ${o.pending ? `<div class="m"><span>ՊԵԿ կտրոն №</span><span class="pend">${R.i('clock')}մինչև 10 հոկտ., 9:51</span></div>`
+              : `<div class="m"><span>ՊԵԿ կտրոն №</span><b>${F.no}</b></div>`}
+            ${o.card ? `<div class="m"><span>ՊԵԿ կտրոնի գումար</span><b>${A(RD.fare)}</b></div>` : ''}
+            <div class="m"><span>Վարորդ · ՀՎՀՀ</span><b>${F.driverTin}</b></div>
+            ${o.pending ? '' : `<div class="m"><span>Ստուգել</span><b style="color:var(--brand-text, var(--ink))">${F.url}</b></div>`}
+          </div></div>
+          <div class="foot two"><button class="btn btn-brand">${R.i('download')}Ներբեռնել PDF</button></div></div>` }
 
   Rider.page({
     title: 'Rider · Ride history',
@@ -212,9 +249,9 @@
       { id: 'empty', label: 'Empty', note: 'One line (hub.noRecent) and the way out',
         html: () => `<div class="page">${head()}<div class="empty"><div class="halo">${R.car('city', 184, 88, '')}</div><p>Ձեր ուղևորությունները կերևան այստեղ</p></div>
           <div class="foot"><button class="btn btn-brand">Պատվիրել</button></div></div>` },
-      { id: 'detail', label: 'Receipt', note: 'The one ride: 9:45 → 9:51, 4,3 km, 6 min. Lines are the tariff\'s own (receipt.tsx fare.* strings), rounded to 100 ֏; book again is the one primary',
+      { id: 'detail', label: 'Receipt', note: 'The one ride: 9:45 → 9:51, 4,3 km, 6 min. Lines are the tariff\'s own (receipt.tsx fare.* strings), rounded to 100 ֏; paid in cash, so no service fee (owner 2026-10-15: only bank-card payments carry the 2 %); book again is the one primary',
         html: () => receipt('cash'), map: mapFor('pickupToDrop') },
-      { id: 'detail-company', label: 'Receipt · company', note: 'A company ride: «Վճարում է՝ {company}» stands where the payment method would (receipt.tsx). No balance, no limit — those are the company\'s, not the employee\'s',
+      { id: 'detail-company', label: 'Receipt · company', note: 'A company ride: «Վճարում է՝ {company}» stands where the payment method would (receipt.tsx). No balance, no limit — those are the company\'s, not the employee\'s. Owner 2026-10-15: company rides are not sent to ETAPI, so there is no Tax Service receipt number or link; that row reads «Ընկերության ամսական հաշվետվությունում». No service fee on company rides',
         html: () => receipt('company'), map: mapFor('pickupToDrop') },
       { id: 'detail-downgraded', label: 'Receipt · paid by you', note: 'A company pre-booking downgraded at activation (corporate R2): one neutral notice says why, and the payment is cash',
         html: () => receipt('downgraded'), map: mapFor('pickupToDrop') },
@@ -222,51 +259,12 @@
         html: () => `<div class="page">${head().replace('<h1 class="large">Ուղևորություններ</h1>', '<h1 class="large">Ուղևորություն</h1>')}
           <div class="errbox" role="status"><span class="eo">${R.i('wifi-off')}</span><span class="et">Կապ չկա</span><span class="es">Ստացականը կբացվի կապի հետ</span></div>
           <div class="foot"><button class="btn btn-quiet">${R.i('rotate-ccw')}Կրկնել</button></div></div>` },
-      { id: 'receipt', label: 'Receipt document', time: '9:58', note: 'Change list 2026-10-14 (drawn ahead): the row\'s receipt button opens the ride\'s receipt as a document — seller and ՀՎՀՀ, ride number and date, route and times, tariff and driver, the tariff lines, a promo line when one was used (ECO.PROMO.applied AUTUMN15 −165 ֏), total, payment, and the Tax Service receipt (ECO.FISCAL, via ETAPI: receipt number, driver ՀՎՀՀ, the check link). «Ներբեռնել PDF» is the one primary; share is the quiet second. A company ride shows «Վճարում է՝ {company}» in the payment line',
-        html: () => { const F = ECO.FISCAL, PA = ECO.PROMO.applied
-          return `<div class="page on-surface"><nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl">Ստացական</span><button class="navbtn" aria-label="Կիսվել">${R.i('share')}</button></nav>
-          <div class="scroll"><div class="doc" aria-label="Ստացական">
-            <div class="dh"><img src="assets/eco/logo-wide.png" alt="Eco Taxi" width="88" height="16"><span class="no"><b>R-${RD.no}</b>9 հոկտ. 2026</span></div>
-            <div class="m" style="margin-top:var(--s2)"><span>${F.seller}</span><b>ՀՎՀՀ ${F.tin}</b></div>
-            <div class="cut"></div>
-            <div class="rt">${RD.pickup} <span>· ${RD.pickupAt}</span><br>${RD.drop} <span>· ${RD.dropAt}</span></div>
-            <div class="m"><span>${RD.tier} · ${ECO.km(RD.km)} · ${RD.min} րոպե</span><b>${DV.plate}</b></div>
-            <div class="cut"></div>
-            <div class="m"><span>Նստեցում</span><b>${A(600)}</b></div>
-            <div class="m"><span>Ըստ կիլոմետրի · ${ECO.km(RD.km)}</span><b>${A(387)}</b></div>
-            <div class="m"><span>Ըստ րոպեի · ${RD.min} րոպե</span><b>${A(72)}</b></div>
-            <div class="m"><span>Կլորացում</span><b>+${A(41)}</b></div>
-            <div class="m disc"><span>${R.i('ticket-percent')}Պրոմոկոդ · ${PA.code}</span><b>−${A(PA.off)}</b></div>
-            <div class="cut"></div>
-            <div class="tot"><span>Ընդամենը</span><span>${A(PA.pay)}</span></div>
-            <div class="m" style="margin-top:var(--s1)"><span>Վճարում</span><b>${ECO.PAY.cash.label}</b></div>
-            <div class="m"><span>ՊԵԿ կտրոն №</span><b>${F.no}</b></div>
-            <div class="m"><span>Վարորդ · ՀՎՀՀ</span><b>${F.driverTin}</b></div>
-            <div class="m"><span>Ստուգել</span><b style="color:var(--brand-text, var(--ink))">${F.url}</b></div>
-          </div></div>
-          <div class="foot two"><button class="btn btn-brand">${R.i('download')}Ներբեռնել PDF</button></div></div>` } },
-      { id: 'receipt-pending', label: 'Receipt document · cash, pending', time: '9:58', note: 'The same document within 24 h of a cash ride: ETAPI has not filed it with the Tax Service yet, so the receipt number row gives the time it will be ready and the check link is absent. Everything else, PDF included, is already final. Change list 2026-10-14 (drawn ahead): the row\'s receipt button opens the ride\'s receipt as a document — seller and ՀՎՀՀ, ride number and date, route and times, tariff and driver, the tariff lines, a promo line when one was used (ECO.PROMO.applied AUTUMN15 −165 ֏), total, payment, and the Tax Service receipt (ECO.FISCAL, via ETAPI: receipt number, driver ՀՎՀՀ, the check link). «Ներբեռնել PDF» is the one primary; share is the quiet second. A company ride shows «Վճարում է՝ {company}» in the payment line',
-        html: () => { const F = ECO.FISCAL, PA = ECO.PROMO.applied
-          return `<div class="page on-surface"><nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl">Ստացական</span><button class="navbtn" aria-label="Կիսվել">${R.i('share')}</button></nav>
-          <div class="scroll"><div class="doc" aria-label="Ստացական">
-            <div class="dh"><img src="assets/eco/logo-wide.png" alt="Eco Taxi" width="88" height="16"><span class="no"><b>R-${RD.no}</b>9 հոկտ. 2026</span></div>
-            <div class="m" style="margin-top:var(--s2)"><span>${F.seller}</span><b>ՀՎՀՀ ${F.tin}</b></div>
-            <div class="cut"></div>
-            <div class="rt">${RD.pickup} <span>· ${RD.pickupAt}</span><br>${RD.drop} <span>· ${RD.dropAt}</span></div>
-            <div class="m"><span>${RD.tier} · ${ECO.km(RD.km)} · ${RD.min} րոպե</span><b>${DV.plate}</b></div>
-            <div class="cut"></div>
-            <div class="m"><span>Նստեցում</span><b>${A(600)}</b></div>
-            <div class="m"><span>Ըստ կիլոմետրի · ${ECO.km(RD.km)}</span><b>${A(387)}</b></div>
-            <div class="m"><span>Ըստ րոպեի · ${RD.min} րոպե</span><b>${A(72)}</b></div>
-            <div class="m"><span>Կլորացում</span><b>+${A(41)}</b></div>
-            <div class="m disc"><span>${R.i('ticket-percent')}Պրոմոկոդ · ${PA.code}</span><b>−${A(PA.off)}</b></div>
-            <div class="cut"></div>
-            <div class="tot"><span>Ընդամենը</span><span>${A(PA.pay)}</span></div>
-            <div class="m" style="margin-top:var(--s1)"><span>Վճարում</span><b>${ECO.PAY.cash.label}</b></div>
-            <div class="m"><span>ՊԵԿ կտրոն №</span><span class="pend">${R.i('clock')}մինչև 10 հոկտ., 9:51</span></div>
-            <div class="m"><span>Վարորդ · ՀՎՀՀ</span><b>${F.driverTin}</b></div>
-          </div></div>
-          <div class="foot two"><button class="btn btn-brand">${R.i('download')}Ներբեռնել PDF</button></div></div>` } },
+      { id: 'receipt', label: 'Receipt document', time: '9:58', note: 'Change list 2026-10-14 (drawn ahead): the row\'s receipt button opens the ride\'s receipt as a document — seller and ՀՎՀՀ, ride number and date, route and times, tariff and driver, the tariff lines, a promo line when one was used (ECO.PROMO.applied AUTUMN15 −165 ֏), total, payment, and the Tax Service receipt (ECO.FISCAL, via ETAPI: receipt number, driver ՀՎՀՀ, the check link). «Ներբեռնել PDF» is the one primary; share is the quiet second. A company ride shows «Վճարում է՝ {company}» in the payment line and has no Tax Service rows (not sent to ETAPI). This one is cash, so there is no service fee line (rider-history#receipt-card has one)',
+        html: () => doc({}) },
+      { id: 'receipt-card', label: 'Receipt document · card', time: '9:58', note: 'Owner 2026-10-15 (final): the same document for a ride paid by the saved card ·· 4242. The tariff lines add up to «Ուղևորության գին» 1 100 ֏; «Սպասարկման վճար · քարտով վճարում 2 %» 22 ֏ is its own line, with a caption under it that it is Eco Taxi\'s fee and not part of the Tax Service receipt; total 1 122 ֏. The Tax Service rows carry the fare only: «ՊԵԿ կտրոնի գումար» 1 100 ֏. Cashless, so ETAPI has filed it at once (number and check link present). No promo here',
+        html: () => doc({ card: true }) },
+      { id: 'receipt-pending', label: 'Receipt document · cash, pending', time: '9:58', note: 'The same document within 24 h of a cash ride: ETAPI has not filed it with the Tax Service yet, so the receipt number row gives the time it will be ready and the check link is absent. Everything else, PDF included, is already final. Change list 2026-10-14 (drawn ahead): the row\'s receipt button opens the ride\'s receipt as a document — seller and ՀՎՀՀ, ride number and date, route and times, tariff and driver, the tariff lines, a promo line when one was used (ECO.PROMO.applied AUTUMN15 −165 ֏), total, payment, and the Tax Service receipt (ECO.FISCAL, via ETAPI: receipt number, driver ՀՎՀՀ, the check link). «Ներբեռնել PDF» is the one primary; share is the quiet second. A company ride shows «Վճարում է՝ {company}» in the payment line and has no Tax Service rows (not sent to ETAPI).',
+        html: () => doc({ pending: true }) },
       { id: 'detail-cancelled', label: 'Cancelled', note: 'No fare was charged, and the reason the rider gave',
         html: () => `<div class="map" id="map" aria-label="Երթուղի"></div>${nav()}
           <section class="sheet" id="sheet">

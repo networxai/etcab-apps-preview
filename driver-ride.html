@@ -69,6 +69,9 @@
      final; only the method changes; the dispatcher and the receipt follow). The rider can switch Cash ↔ Card mid-ride. */
   .cash.pos { background: var(--info-soft); } .cash.pos svg { color: var(--info); }
   .cash.card { background: var(--surface-2); } .cash.card svg { color: var(--ink-2); }
+  /* A payment that failed at the end (NFC tap, a declined in-app card): amber, a domain refusal, not red. */
+  .cash.warn { background: var(--warn-soft); } .cash.warn svg { color: var(--warn); }
+  .payhint { font: var(--t-caption); color: var(--ink-2); text-align: center; margin: calc(-1 * var(--s2)) 0 var(--s3); white-space: nowrap; }
   .paylbl { font: var(--t-caption); color: var(--ink-2); margin: 0 0 var(--s2) var(--s1); }
   .done-pay { margin-bottom: var(--s4); }
   .facts { display: flex; justify-content: space-between; padding: 0 var(--s2) var(--s4); }
@@ -319,6 +322,37 @@
     <button class="go" aria-disabled="true" style="opacity:.5">Սպասում ենք վճարմանը…</button>
   </section>
 
+  <!-- ── complete, NFC failed (owner 2026-10-15): the tap timed out or the card was refused on the driver's phone. Amber, not red:
+       nothing is lost. One primary action, try again; the way out is the switch above it (Cash or POS), never a second button. ── -->
+  <section class="sheet" data-s="done-nfc-failed" data-sheet>
+    <div class="grabber"></div>
+    <div class="done-top">
+      <span class="ok"><i data-lucide="check"></i></span>
+      <div class="l">Կոմիտասի պող. 22 · 9:51</div>
+      <div class="big">1 100<small>֏</small></div>
+    </div>
+    <div class="cash warn" role="status"><i data-lucide="smartphone-nfc"></i><div><div class="t1">Վճարումը չանցավ</div><div class="t2">Քարտը չկարդացվեց · 30 վրկ անցավ</div></div></div>
+    <div class="done-pay"><div class="paylbl">Ինչպես է վճարում ուղևորը</div><div class="seg" role="radiogroup" aria-label="Վճարման եղանակ"><button role="radio" aria-pressed="false" aria-checked="false">Կանխիկ</button><button role="radio" aria-pressed="false" aria-checked="false">POS</button><button role="radio" aria-pressed="true" aria-checked="true">NFC</button></div></div>
+    <div class="payhint">Չի՞ ստացվում · ընտրեք Կանխիկ կամ POS</div>
+    <div class="facts"><div><b>4,3 կմ</b><span>Ճանապարհ</span></div><div><b>6 րոպե</b><span>Տևողություն</span></div><div><b>1:20</b><span>Սպասում</span></div></div>
+    <button class="go"><i data-lucide="rotate-cw"></i>Կրկին փորձել</button>
+  </section>
+
+  <!-- ── complete, the rider's in-app card was declined at the end (owner 2026-10-15): the app has already put the switch on
+       Cash, so the collect line is the hero again; the card's 2 % fee falls away with the card, cash is the bare fare. ── -->
+  <section class="sheet" data-s="done-declined" data-sheet>
+    <div class="grabber"></div>
+    <div class="done-top">
+      <span class="ok"><i data-lucide="check"></i></span>
+      <div class="l">Կոմիտասի պող. 22 · 9:51</div>
+      <div class="big">1 100<small>֏</small></div>
+    </div>
+    <div class="cash warn" role="alert"><i data-lucide="credit-card"></i><div><div class="t1">Քարտը մերժվեց</div><div class="t1">Վերցրեք կանխիկ 1 100 ֏</div><div class="t2">քարտ ·· 4242 · հավելվածով չանցավ</div></div></div>
+    <div class="done-pay"><div class="paylbl">Ինչպես է վճարում ուղևորը</div><div class="seg" role="radiogroup" aria-label="Վճարման եղանակ"><button role="radio" aria-pressed="true" aria-checked="true">Կանխիկ</button><button role="radio" aria-pressed="false" aria-checked="false">POS</button><button role="radio" aria-pressed="false" aria-checked="false">NFC</button></div></div>
+    <div class="facts"><div><b>4,3 կմ</b><span>Ճանապարհ</span></div><div><b>6 րոպե</b><span>Տևողություն</span></div><div><b>1:20</b><span>Սպասում</span></div></div>
+    <button class="go">Պատրաստ եմ</button>
+  </section>
+
   <!-- ── complete, the rider switched to card mid-ride: nothing to collect, no switch ── -->
   <section class="sheet" data-s="done-card" data-sheet>
     <div class="grabber"></div>
@@ -443,11 +477,11 @@
 <script>
   const st0 = new URLSearchParams(location.search).get('state') || 'assigned'
   /* The clock follows ECO.RIDE: assigned 9:41, at the pickup 9:45, riding 9:47, dropped 9:51. */
-  statusBar(document.getElementById('s'), { enroute: '9:43', arrived: '9:45', noshow: '9:50', noshowsent: '9:51', offline: '9:45', call: '9:45', cancel: '9:45', inprogress: '9:47', done: '9:51', 'done-pos': '9:51', 'done-nfc': '9:51', 'done-card': '9:51', paychanged: '9:48', chat: '9:43', 'company-inprogress': '9:47', 'company-done': '9:51', changed: '9:43', destchanged: '9:48', sos: '9:48' }[st0] || '9:41')
+  statusBar(document.getElementById('s'), { enroute: '9:43', arrived: '9:45', noshow: '9:50', noshowsent: '9:51', offline: '9:45', call: '9:45', cancel: '9:45', inprogress: '9:47', done: '9:51', 'done-pos': '9:51', 'done-nfc': '9:51', 'done-card': '9:51', 'done-nfc-failed': '9:52', 'done-declined': '9:51', paychanged: '9:48', chat: '9:43', 'company-inprogress': '9:47', 'company-done': '9:51', changed: '9:43', destchanged: '9:48', sos: '9:48' }[st0] || '9:41')
   const st = D.init([
     ['assigned', 'Assigned · On my way'], ['enroute', 'En route · Arrived (guidance)'], ['arrived', 'Arrived · wait, slide Start'],
     ['noshow', 'No-show available (5:00+)'], ['noshowsent', 'No-show raised'], ['inprogress', 'In progress · slide Complete'],
-    ['done', 'Complete · collect cash'], ['done-pos', 'Complete · switched to POS terminal'], ['done-nfc', 'Complete · NFC on the driver phone'], ['paychanged', 'Rider switched to card (in ride)'], ['done-card', 'Complete · paid by card'], ['forced', 'Forced acknowledgement'], ['offline', 'Offline · actions will sync'],
+    ['done', 'Complete · collect cash'], ['done-pos', 'Complete · switched to POS terminal'], ['done-nfc', 'Complete · NFC on the driver phone'], ['paychanged', 'Rider switched to card (in ride)'], ['done-card', 'Complete · paid by card'], ['done-nfc-failed', 'Complete · NFC tap failed → retry or switch'], ['done-declined', 'Complete · card declined → collect cash'], ['forced', 'Forced acknowledgement'], ['offline', 'Offline · actions will sync'],
     ['call', 'Call sheet'], ['cancel', 'Cancel or give back'], ['chat', 'Chat · quick replies (ahead)'],
     ['company-inprogress', 'Company ride · in progress'], ['company-done', 'Company ride · complete, collect nothing'],
     ['changed', 'Order cancelled (mid-approach)'],
@@ -459,7 +493,7 @@
   const A = ROUTES.driverToPickup.pts, B = ROUTES.pickupToDrop.pts
   const bear = (p, q) => Math.atan2((q[1] - p[1]) * Math.cos(p[0] * Math.PI / 180), q[0] - p[0]) * 180 / Math.PI
   const car = (pts, i) => `<div class="me">${carTop(bear(pts[i], pts[Math.min(i + 2, pts.length - 1)]), 'var(--brand)', 'rgb(255 255 255 / .75)')}</div>`
-  const base = ['call', 'cancel'].includes(st) ? 'arrived' : st === 'chat' ? 'enroute' : { 'company-inprogress': 'inprogress', 'company-done': 'done', 'done-pos': 'done', 'done-nfc': 'done', 'done-card': 'done', paychanged: 'inprogress', sos: 'inprogress' }[st] || st
+  const base = ['call', 'cancel'].includes(st) ? 'arrived' : st === 'chat' ? 'enroute' : { 'company-inprogress': 'inprogress', 'company-done': 'done', 'done-pos': 'done', 'done-nfc': 'done', 'done-card': 'done', 'done-nfc-failed': 'done', 'done-declined': 'done', paychanged: 'inprogress', sos: 'inprogress' }[st] || st
   const main = document.querySelector('.sheet[data-sheet]:not([hidden]):not(.top)') || (st === 'sos' ? document.querySelector('.sheet[data-s~="inprogress"]') : document.querySelector('.sheet[data-s~="arrived"]'))
   if (st === 'sos') main.hidden = false
   if (['call', 'cancel', 'chat', 'sos'].includes(st)) { main.hidden = false; for (const el of [main, document.getElementById('fab'), document.getElementById('map'), ...document.querySelectorAll('.guide:not([hidden])')]) { el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true') } }
