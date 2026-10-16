@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Company new order</title>
+<link rel="stylesheet" href="../console.css">
+<link rel="stylesheet" href="../corporate.css">
+<link rel="stylesheet" href="portal.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../../kit.js"></script>
+<script src="../console.js"></script>
+<script src="../company-report.js"></script>
+<script src="portal.js"></script>
+<script src="../console-audit.js"></script>
+</head>
+<body>
+<!-- Company console, «Նոր պատվեր» (decision P1; owner 2026-10-16: the dispatch intake, without a map, for the company's
+     own employees only). The phone field accepts only a registered employee's number; any other number is refused in
+     amber with a way to add the employee. The tariff list shows only the tariffs the company allows. A ride for an
+     employee is always on the company's account (the
+     portal books nothing else, so there is no payment choice: «Ընկերության հաշվին» is shown locked). The employee's
+     monthly limit and allowed places apply before the press, not after: the places are the pickup and destination
+     shortcuts, a typed address outside them is refused in amber on its own field, and an over-limit price is refused in
+     the summary. Required: employee, pickup, destination (the destination is what the places rule checks). Price is the
+     company's price for the route (fixed upfront), never editable. Keyboard: N opens, ↵ books. No modal anywhere.
+     window.STATES (?state=):
+       (none)     Աննա, office → home, Eco City, now: ready to book
+       empty      the form as it opens: the employee phone focused
+       pick       the phone typed «09»: matching employees listed
+       unknown    a number that is not one of the company's employees: amber, «Ավելացնել աշխատակից»
+       scheduled  a pre-order: Mon 12 Oct 09:00
+       outside    destination «Աբովյան 10» is not one of her places: amber on the field, booking disabled
+       overlimit  600 ֏ left of her monthly limit against an 1 100 ֏ price: amber, disabled
+       credit     the company's own credit limit is used up: amber at the top, disabled
+       stopped    Գևորգ, whose service the fleet stopped: amber, disabled
+       changed    the price moved between quote and press (a 409): blue «changed» line, press again
+       done       booked: neutral line with «Հետևել», the form cleared for the next one -->
+<div class="screen pt" id="screen">
+  <div class="main">
+    <header class="bar"><h1>Նոր պատվեր</h1><span class="sub">ընկերության հաշվին</span><div class="live"></div></header>
+    <div class="content one">
+      <section class="card page" aria-label="Նոր պատվեր" id="page"></section>
+    </div>
+  </div>
+</div>
+<script>
+  window.STATES = ['', 'empty', 'pick', 'unknown', 'scheduled', 'outside', 'overlimit', 'credit', 'stopped', 'changed', 'done']
+  const st = STATE, amd = ECO.amd, C = ECO.COMPANY
+  portalShell('new')
+  const blank = ['empty', 'pick', 'unknown', 'done'].includes(st)
+  const E = st === 'stopped' ? EMP[13] : EMP[0]
+  const L = limOf(E), left = st === 'overlimit' ? C.empLimit.low.left : L.left
+  const KM = 4.1, MIN = 11, T = TIERS[0]
+  const price = st === 'changed' ? 1200 : fare(T, KM, MIN)
+  const refused = { outside: 'to', overlimit: 'sum', credit: 'top', stopped: 'emp', unknown: 'emp' }[st]
+  const PL = st === 'stopped' ? [{ kind: 'office', label: 'Գրասենյակ', addr: C.places.office.addr }] : C.places.rider
+  const ic = (k) => (k === 'home' ? 'house' : k === 'office' ? 'building-2' : 'plane')
+  const chips = (on) => `<div class="places" role="radiogroup" aria-label="Թույլատրված հասցեներ">${PL.map((p) => `<button class="chip${p.label === on ? ' on' : ''}" role="radio" aria-checked="${p.label === on}"><i data-lucide="${ic(p.kind)}"></i>${p.label}<span class="a">${p.addr}</span></button>`).join('')}</div>`
+  const field = (label, html, opt) => `<div><label class="label">${label}${opt ? ` <span class="faint" style="font-weight:400">· ${opt}</span>` : ''}</label>${html}</div>`
+  const pin = (k, val, cls = '', extra = '') => `<div class="pinrow"><span class="pin${k === 'Բ' ? ' b' : ''}">${k}</span><div class="input l${cls}"${extra}>${val}</div></div>`
+  const caret = '<span style="border-left:1.5px solid var(--ink);margin-left:1px"></span>'
+
+  /* ── Employee, by phone (the intake's first field). Only the company's registered employees are accepted. ── */
+  const ini = (e) => e.name.split(' ').map((w) => w[0]).join('')
+  const ok = '<i data-lucide="circle-check" style="color:var(--ok)"></i>'
+  const card = (e) => `<div class="emp-card" data-truncate style="margin-top:8px"><span class="av">${ini(e)}</span><div style="min-width:0"><b>${e.name}</b><span>${e.stopped ? 'աշխատակից' : `մնացել է՝ ${limOf(e).leftTxt} այս ամիս`}</span></div></div>`
+  const PICK = EMP.filter((e) => e.phone.startsWith('09') && !e.stopped).slice(0, 3)
+  const empField = st === 'empty' || st === 'done'
+    ? `<div class="input l focus" role="combobox" aria-expanded="false" aria-label="Աշխատակցի հեռախոս" aria-describedby="emp-hint"><i data-lucide="phone"></i><span class="val">${caret}<span class="ph mono">0XX XX-XX-XX</span></span><span class="faint num" style="font:var(--c-small)">${EMP.length}</span></div>
+       <p class="hint" id="emp-hint">Միայն ձեր ընկերության աշխատակիցների համարները</p>`
+    : st === 'pick'
+    ? `<div class="pickpop"><div class="input l focus" role="combobox" aria-expanded="true" aria-label="Աշխատակցի հեռախոս"><i data-lucide="phone"></i><span class="val mono">09${caret}</span><span class="kbd">↑↓</span></div>
+        <div class="pop" data-overlay role="listbox" aria-label="Աշխատակիցներ">${PICK.map((e, i) => `<div class="${i === 0 ? 'on' : ''}" role="option" aria-selected="${i === 0}"><span class="av">${ini(e)}</span><span style="min-width:0"><b>${e.name}</b><span><mark>09</mark>${e.phone.slice(2)}</span></span><em>մնացել է՝ <span class="mono">${limOf(e).leftTxt}</span></em></div>`).join('')}</div></div>`
+    : st === 'unknown'
+    ? `<div class="input l focus" aria-invalid="true" aria-describedby="emp-why"><i data-lucide="phone"></i><span class="val mono">093 15-62-40${caret}</span><i data-lucide="circle-alert" style="color:var(--warning)"></i></div>
+       <p id="emp-why" role="status" style="margin-top:6px;font:var(--c-small);color:var(--warning);display:flex;gap:6px"><i data-lucide="triangle-alert" style="width:14px;height:14px;flex:none;margin-top:1px"></i><span>Այս համարը ձեր աշխատակիցների ցանկում չկա · <a href="${u('employees.html', 'state=add')}" style="color:inherit;font-weight:500">Ավելացնել աշխատակից</a></span></p>`
+    : `<div class="input l"><i data-lucide="phone"></i><span class="val mono">${E.phone}</span>${ok}</div>${card(E)}
+       ${st === 'stopped' ? `<div class="notice amber" role="status" id="emp-why" style="margin-top:8px"><i data-lucide="octagon-alert"></i><span>Այս աշխատակցի սպասարկումը դադարեցված է տաքսի ծառայության կողմից։ Հարցերի համար՝ <span class="mono">${FLEET_PHONE}</span></span></div>` : ''}`
+
+  /* ── From / to: the employee's places first; the address itself below ── */
+  const fromField = blank ? pin('Ա', '<span class="val ph">Նախ ընտրեք աշխատակցին</span>')
+    : chips('Գրասենյակ') + `<div style="margin-top:8px">${pin('Ա', `<span class="val">${C.places.office.addr}, Կենտրոն</span><i data-lucide="circle-check" style="color:var(--ok)"></i>`)}</div>`
+  const toField = blank ? pin('Բ', '<span class="val ph">Հասցե</span>')
+    : st === 'stopped' ? pin('Բ', '<span class="val ph">Հասցե</span>')
+    : chips(st === 'outside' ? '' : 'Տուն') + `<div style="margin-top:8px">${st === 'outside'
+      ? pin('Բ', `<span class="val">Աբովյան 10${caret}</span><i data-lucide="circle-alert" style="color:var(--warning)"></i>`, ' focus', ' aria-describedby="to-why" aria-invalid="true"')
+        + `<p class="hint-w" id="to-why" role="status" style="margin:6px 0 0 28px;font:var(--c-small);color:var(--warning);display:flex;gap:6px"><i data-lucide="triangle-alert" style="width:14px;height:14px;flex:none;margin-top:1px"></i><span>Այս հասցեն ${E.name.split(' ')[0]}յի թույլատրված հասցեներից չէ․ ընկերության հաշվին՝ միայն վերևի հասցեների միջև · <a href="${u('employees.html', 'state=edit')}" style="color:inherit;font-weight:500">Ավելացնել հասցե</a></span></p>`
+      : pin('Բ', `<span class="val">${C.places.rider[0].addr}, Կենտրոն</span><i data-lucide="circle-check" style="color:var(--ok)"></i>`)}</div>`
+
+  /* ── Tariff: the company's price for this route on each tier ── */
+  const tiers = `<div class="tiers3" role="radiogroup" aria-label="Սակագին" data-truncate>${allowedTiers().map((t, i) => `<button class="tierc${i === 0 ? ' on' : ''}" role="radio" aria-checked="${i === 0}"><span class="car s">${carImg(t.id)}</span><b>${t.name}</b><span class="pr">${blank || st === 'stopped' ? '—' : amd(i === 0 ? price : fare(t, KM, MIN))}</span></button>`).join('')}</div>`
+  const plan = st === 'scheduled'
+  const when = `<div class="row-flex" style="gap:8px;flex-wrap:wrap"><div class="seg" role="radiogroup" aria-label="Երբ"><button class="${plan ? '' : 'on'}" role="radio" aria-checked="${!plan}">Հիմա</button><button class="${plan ? 'on' : ''}" role="radio" aria-checked="${plan}"><i data-lucide="calendar-clock"></i>Նախնական</button></div>
+      ${plan ? `<div class="input" style="width:170px"><i data-lucide="calendar"></i><span class="val">Երկ, 12 հոկտ.</span></div><div class="input focus" style="width:96px"><i data-lucide="clock"></i><span class="val mono">09:00</span></div>` : ''}</div>`
+
+  const topLine = st === 'credit'
+    ? `<div class="notice amber" role="status"><i data-lucide="triangle-alert"></i><span>Ընկերության սահմանաչափը սպառված է՝ <span class="mono">${amd(C.limit)} / ${amd(C.limit)}</span>։ Նոր պատվերներն ընկերության հաշվին հնարավոր չեն մինչև վճարումը։ Հարցերի համար՝ <span class="mono">${FLEET_PHONE}</span></span></div>`
+    : st === 'done' ? `<div class="notice neutral" role="status"><i data-lucide="check"></i><span class="grow">Պատվերն ընդունված է՝ <span class="mono">#R-2427</span> · ${C.rider} · Գրասենյակ → Տուն · <span class="mono">${amd(1100)}</span></span><a class="btn ghost s" href="${u('index.html', 'state=ride')}" style="margin:-5px -4px -5px 0">Հետևել<i data-lucide="arrow-right"></i></a></div>`
+    : st === 'changed' ? `<div class="notice blue" role="status"><i data-lucide="refresh-cw"></i><span>Գինը փոխվել է՝ <span class="mono">${amd(1100)} → ${amd(1200)}</span>։ Ստուգեք և պատվիրեք կրկին։</span></div>` : ''
+
+  const form = `<div class="form">${topLine ? `<div>${topLine}</div>` : ''}
+      ${field('Աշխատակցի հեռախոս', empField)}
+      ${field('Որտեղից', fromField)}
+      ${field('Ուր', toField)}
+      ${field('Սակագին', tiers, 'ընկերության թույլատրածները')}
+      ${field('Երբ', when)}
+      ${field('Նշում վարորդին', '<div class="input textarea"><span class="val ph">օր. Մուտքը՝ բակից</span></div>', 'ոչ պարտադիր')}
+    </div>`
+
+  /* ── Summary: the price, the account (locked), what the employee's limit will be after this ride, and the press ── */
+  const off = !!refused || blank
+  const after = Math.max(0, left - price)
+  const sum = `<aside class="sum" aria-label="Ամփոփում">
+      <h3>Գին</h3>
+      <div class="price">${off && st !== 'outside' && st !== 'overlimit' ? '<span class="dash">—</span>' : amd(price)}<small>Ձեր պայմանագրի գինը · ${T.name} · ${ECO.dec(KM)} կմ · ${MIN} ր</small></div>
+      <div><label class="label">Վճարում</label><div class="input locked" aria-readonly="true"><i data-lucide="building-2"></i><span class="val">Ընկերության հաշվին</span><i data-lucide="lock"></i></div></div>
+      ${blank || st === 'stopped' ? '' : `<div class="leftbar${st === 'overlimit' || after / L.n < 0.1 ? ' near' : ''}"><span class="label" style="margin:0">Ամսական սահմանաչափ՝ ${E.name.split(' ')[0]}</span>
+        <span class="bar2" role="img" aria-label="${L.pct} % օգտագործված"><i style="width:${st === 'overlimit' ? 99 : L.pct}%"></i></span>
+        <span class="row"><span>Մնացել է</span><b>${amd(left)}</b></span>
+        ${st === 'overlimit' ? '' : `<span class="row"><span>Այս պատվերից հետո</span><b>${amd(after)}</b></span>`}</div>`}
+      ${st === 'overlimit' ? `<div class="notice amber" role="status"><i data-lucide="triangle-alert"></i><span>Գինը՝ <span class="mono">${amd(price)}</span>, իսկ ամսական սահմանաչափից մնացել է <span class="mono">${amd(left)}</span>։ Ընկերության հաշվին պատվիրել հնարավոր չէ։ <a href="${u('employees.html', 'state=edit')}" style="color:inherit;font-weight:500">Փոխել սահմանաչափը</a></span></div>` : ''}
+      ${st === 'outside' ? '<div class="notice amber" role="status"><i data-lucide="map-pin-off"></i><span>Ուր հասցեն թույլատրված չէ</span></div>' : ''}
+      ${off ? '' : `<p class="hint" style="margin:0;display:flex;gap:6px"><i data-lucide="message-square" style="width:14px;height:14px;flex:none;margin-top:1px"></i><span>${E.name.split(' ')[0]}ն SMS կստանա մեքենայի և վարորդի տվյալներով</span></p>`}
+      <div class="foot"><button class="btn primary l"${off ? ' disabled aria-disabled="true"' : ''}><i data-lucide="check"></i>${plan ? 'Պատվիրել՝ երկ 09:00' : 'Պատվիրել'} <span class="kbd">↵</span></button></div>
+    </aside>`
+
+  document.getElementById('page').innerHTML = `<div class="nw">${form}${sum}</div>`
+  icons()
+</script>
+</body>
+</html>

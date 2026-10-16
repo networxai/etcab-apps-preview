@@ -43,13 +43,13 @@
     PAY: {
       cash: { label: 'Կանխիկ', icon: 'banknote', live: true },
       company: { label: 'Ընկերության հաշվին', short: 'Ընկերություն', icon: 'building-2', live: true },
-      /* Owner 2026-10-15: cash, card, NFC, Google Pay, Apple Pay. In-app card / wallets are charged by the app (ETAPI
-         CASHLESS); POS and NFC are paid at the driver's terminal or phone (ETAPI CASHLESS_POS); cash is ETAPI CASH. */
+      /* Owner 2026-10-15: cash, card, Google Pay, Apple Pay, NFC · POS. In-app card / wallets are charged by the app (ETAPI
+         CASHLESS); NFC · POS is ONE method, a tap on the driver's phone, taken in the bank's ACBA app and confirmed by the driver (owner 2026-10-16; fleet cars only; ETAPI CASHLESS_POS); cash is
+         ETAPI CASH. Card, wallets and NFC · POS carry the 2 % service fee; cash and company do not. */
       card: { label: 'Քարտ', icon: 'credit-card', live: true, last4: '4242' },
       applepay: { label: 'Apple Pay', icon: 'smartphone', live: true },
       googlepay: { label: 'Google Pay', icon: 'smartphone', live: true },
-      pos: { label: 'POS տերմինալ', icon: 'credit-card', live: true },
-      nfc: { label: 'NFC', icon: 'smartphone-nfc', live: true },
+      nfc: { label: 'NFC · POS', icon: 'smartphone-nfc', live: true },
       idram: { label: 'Idram', live: false }, telcell: { label: 'Telcell', live: false },
       soon: 'Շուտով',
     },

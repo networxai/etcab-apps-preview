@@ -122,7 +122,7 @@
       <td><span class="pill ${lane}" style="${lane ? 'color:var(--lane)' : ''}"><i class="d"></i>${w}</span></td>
       <td class="r mono">${r[7] ? amd(r[7]) : '<span class="dash">—</span>'}</td></tr>` }
   const rideBlock = (list, more) => `<section aria-label="Պատվերներ"><div class="blkh"><i data-lucide="list"></i>Պատվերներ <span class="n">${list.length}</span>${more ? '<span class="end">ցույց է տրված վերջին 8-ը · նեղացրեք որոնումը</span>' : ''}</div>
-      ${list.length ? `<table class="tbl"><colgroup><col style="width:132px"><col><col style="width:148px"><col style="width:200px"><col style="width:120px"><col style="width:160px"><col style="width:96px"></colgroup>
+      ${list.length ? `<table class="tbl"><colgroup><col style="width:160px"><col><col style="width:148px"><col style="width:200px"><col style="width:120px"><col style="width:160px"><col style="width:96px"></colgroup>
         <thead><tr><th>Ժամը</th><th>Որտեղից</th><th>Հեռախոս</th><th>Վարորդ</th><th>Մեքենա</th><th>Վիճակ</th><th class="r">Գին</th></tr></thead><tbody>${list.map(ride).join('')}</tbody></table>`
         : '<p class="msg">Պատվերներ չգտնվեցին</p>'}</section>`
   /* [name, phone, rides, last, blacklisted, href] */

@@ -37,6 +37,7 @@
   .drv .n2 svg { width: 14px; height: 14px; color: var(--ink); fill: currentColor; }
   .sheet .acts { margin-top: var(--s2); }
   .act { width: 84px; }
+  .cancelq { display: block; width: 100%; height: 44px; margin-top: var(--s2); font: var(--t-body-strong); color: var(--danger); text-align: center; }
   .act.on .o { background: var(--ink); color: var(--surface); }
 
   /* arrived: the plate is the hero */
@@ -45,6 +46,11 @@
   .wait svg { width: 16px; height: 16px; }
   .bigid { display: flex; align-items: center; justify-content: space-between; margin-top: var(--s4); padding: var(--s4); border-radius: var(--r-card); background: var(--surface-2); }
   .bigid .who { display: flex; flex-direction: column; gap: var(--s2); }
+  /* Arrived: the rider is on the kerb matching a plate to a car, so the plate is the hero here, a step up from the
+     assigned card (UX audit 2026-10-15, Von Restorff: the change of state must be visible in the one thing being read). */
+  .bigid .plate.lg { height: 48px; border-radius: 9px; }
+  .bigid .plate.lg .no { font-size: 29px; line-height: 48px; padding: 0 12px 0 10px; }
+  .bigid .plate.lg .eu { width: 22px; }
 
   /* riding */
   .trip { display: flex; align-items: center; gap: var(--s3); margin-top: var(--s4); padding: var(--s3) var(--s4); border-radius: var(--r-card); background: var(--surface-2); }
@@ -168,7 +174,9 @@
   const face = (d) => d === DV ? R.avatar() : `<span class="avatar ini" role="img" aria-label="Վարորդ՝ ${d.name}">${d.ini}</span>`
   const driver = (d = DV) => `<div class="drv">${face(d)}<span class="nm"><span class="n1">${d.first}</span><span class="n2">${star}${d.rating}${d === DV ? ' · ' + ECO.num(1240) + ' ուղևորություն' : ''}</span></span></div>`
   const acts = (list) => `<div class="acts">${list.map(([ic, l, c]) => `<button class="act ${c || ''}" aria-label="${l}"><span class="o">${R.i(ic)}</span><span class="l">${l}</span></button>`).join('')}</div>`
-  const A_WAIT = [['phone', 'Զանգել'], ['message-circle', 'Գրել'], ['share-2', 'Կիսվել'], ['x', 'Չեղարկել', 'danger']]
+  const A_WAIT = [['phone', 'Զանգել'], ['message-circle', 'Գրել'], ['share-2', 'Կիսվել']]
+  /* UX audit 2026-10-16 (Fitts): Cancel is not a fourth circle beside Share; it is a danger-toned text button under the row, a full 44 px high. */
+  const waitActs = () => `${acts(A_WAIT)}<button class="cancelq">Չեղարկել</button>`
 
   /* o: { d: driver, pre: pill above the ETA, tags: under the status, after: under the actions } */
   const approachSheet = (eta, status, clock, o = {}) => `<div class="map" id="map" aria-label="Քարտեզ"></div>
@@ -177,7 +185,7 @@
       ${o.pre ? `<div class="tags" style="margin:0 0 var(--s2)">${o.pre}</div>` : ''}
       <div class="head2"><div><div class="eta">${eta}</div><div class="status">${status}${clock ? ` · <b>${clock}</b>` : ''}</div></div></div>
       ${o.tags ? `<div class="tags">${o.tags}</div>` : ''}${o.cap ? `<div class="cap">${o.cap}</div>` : ''}
-      ${identity(o.d)}${driver(o.d)}${acts(A_WAIT)}${o.after || ''}</section>`
+      ${identity(o.d)}${driver(o.d)}${waitActs()}${o.after || ''}</section>`
   const preTag = (t) => `<span class="tagp pre">${R.i('calendar-clock')}Նախնական պատվեր · ${t}-ին</span>`
   const payrow = (card) => `<button class="payrow" aria-label="Փոխել վճարման եղանակը">${card ? R.i('wallet') : `<span class="cashc" style="display:contents">${R.i('banknote')}</span>`}<span class="t">${card ? 'Քարտ ·· 4242' : 'Կանխիկ'} · ${ECO.amd(PAYS(RD.fare, card))}</span>${card ? '<span class="fee">+2 %</span>' : ''}<span class="ch">Փոխել</span></button>`
   const notice = (body, icon = 'info') => `<div class="notice" role="status">${R.i(icon)}<span>${body}</span></div>`
@@ -211,7 +219,7 @@
     title: 'Rider · On the way and in the ride',
     sub: 'Live 2GIS map; ETA is the one hero number; the plate chip carries the identity. Same ride as the driver offer and the console (kit.js ECO.RIDE): Eco City, Մաշտոցի 37 → Կոմիտասի 22, 9:41 → 9:45 → 9:51, 1 100 ֏',
     states: [
-      { id: 'assigned', group: 'Before pickup', label: 'Assigned', note: 'ETA hero, plate first, then car, then driver. Cancel is visible, not buried',
+      { id: 'assigned', group: 'Before pickup', label: 'Assigned', note: 'ETA hero, plate first, then car, then driver. Cancel is visible, not buried: a text button under the call / write / share row, away from Share (UX audit 2026-10-16)',
         time: RD.assigned, html: () => approachSheet(RD.approachMin + ' րոպե', 'Մեքենան ճանապարհին է', RD.pickupAt), map: approachMap(0) },
       { id: 'arriving', group: 'Before pickup', label: 'Arriving', note: 'One minute out: the same card, the car at the corner',
         time: '9:44', html: () => approachSheet('1 րոպե', 'Մեքենան մոտենում է', RD.pickupAt), map: approachMap(.8) },
@@ -221,8 +229,8 @@
           <section class="sheet r" id="sheet"><div class="grabber"></div>
             <h2 class="arr-title">Մեքենան սպասում է</h2>
             <div class="wait">${R.i('timer')}Անվճար սպասում · 2:41</div>
-            <div class="bigid"><div class="who">${R.plate(DV.plate, true)}<span class="model" style="font:var(--t-secondary);color:var(--ink-2)">Սպիտակ ${DV.car}</span></div>${R.car('city', 132, 66, DV.car)}</div>
-            ${driver()}${acts(A_WAIT)}</section>`,
+            <div class="bigid"><div class="who">${R.plate(DV.plate, true)}<span class="model" style="font:var(--t-secondary);color:var(--ink-2)">Սպիտակ ${DV.car}</span></div>${R.car('city', 112, 56, DV.car)}</div>
+            ${driver()}${waitActs()}</section>`,
         map: (s) => {
           const m = R.map(s, { fit: R.bbox(PICK, .0016, .0022), padTL: [48, 120], padBR: [48, s.querySelector('#sheet').offsetHeight + 40] })
           htmlMarker(m, PICK, '<div class="puck"></div>', [22, 22])
@@ -247,7 +255,7 @@
           htmlMarker(m, k.ll, carTop(k.deg), [18, 34])
         } },
 
-      { id: 'pay-change', group: 'In the ride', label: 'Change payment', note: 'Change list 2026-10-15: «Փոխել» on the ride card opens the payment sheet mid-ride. Any method (cash, card, Apple / Google Pay, NFC at the driver); allowed until the driver completes the ride (then the row locks). The driver sees the change at once (driver-ride#paychanged). Company rides do not show the row. Card payments are drawn ahead',
+      { id: 'pay-change', group: 'In the ride', label: 'Change payment', note: 'Change list 2026-10-15: «Փոխել» on the ride card opens the payment sheet mid-ride. Any method (cash, card, Apple / Google Pay, NFC · POS on the driver\'s phone at the end, fleet cars only, +2 % like card); allowed until the driver completes the ride (then the row locks). The driver sees the change at once (driver-ride#paychanged). Company rides do not show the row. Card payments are drawn ahead',
         time: '9:48', ...modal('Վճարման եղանակ', `${R.payList('card', { ride: true })}
           <div class="inline-note" style="margin:var(--s3) 0">${R.i('info')}<span>Կարող եք փոխել մինչև ուղևորության ավարտը · վարորդը կտեսնի անմիջապես</span></div>
           <button class="btn btn-brand">Պահել</button>`, 'riding'),

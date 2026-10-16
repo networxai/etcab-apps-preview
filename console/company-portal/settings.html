@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Company settings</title>
+<link rel="stylesheet" href="../console.css">
+<link rel="stylesheet" href="../corporate.css">
+<link rel="stylesheet" href="portal.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../../kit.js"></script>
+<script src="../console.js"></script>
+<script src="../company-report.js"></script>
+<script src="portal.js"></script>
+<script src="../console-audit.js"></script>
+</head>
+<body>
+<!-- Company console, «Կարգավորումներ» (decision P1, owner 2026-10-16). Three tabs under one nav item: Employees
+     (employees.html), Tariffs and Company & account (this file). Tariffs: which tariffs the company's employees may use;
+     the fleet sees and can change the same setting on the console's company page, and the latest change wins (audited).
+     New order and the employees' rider app offer only the allowed ones. Company & account: what the company may see but
+     not change (legal details, agreement) read-only with whom to ask; report addresses; notifications; the manager's own
+     account. One login per company, so there are no users or roles here. Nothing is a modal.
+     window.STATES (?state=):
+       (none)          Tariffs: five allowed, Eco Vip off; nothing changed
+       saved           Tariffs: Eco Vip just switched off and saved
+       account         Company & account
+       account-saved   report addresses saved -->
+<div class="screen pt" id="screen">
+  <div class="main">
+    <header class="bar"><h1>Կարգավորումներ</h1><div class="live"></div></header>
+    <div class="content one">
+      <section class="card page" aria-label="Կարգավորումներ" id="page"></section>
+    </div>
+  </div>
+</div>
+<script>
+  window.STATES = ['', 'saved', 'account', 'account-saved']
+  const st = STATE, amd = ECO.amd, C = ECO.COMPANY
+  portalShell('settings')
+  const ACC = st.startsWith('account')
+  const sec = (title, body, end = '') => `<section class="sec"><h3>${title}${end ? `<span class="end">${end}</span>` : ''}</h3>${body}</section>`
+  const dl = (rows) => `<div class="pad"><dl class="terms" style="grid-template-columns:repeat(2,minmax(0,1fr))">${rows.map(([k, v]) => `<div><dt>${k}</dt><dd style="white-space:normal">${v}</dd></div>`).join('')}</dl></div>`
+  const ask = `<div class="pad" style="border-top:1px solid var(--line-soft);padding-top:10px;padding-bottom:10px"><p class="hint" style="margin:0">Փոփոխությունների համար՝ տաքսի ծառայությանը, <span class="mono">${FLEET_PHONE}</span></p></div>`
+
+  /* ── Tariffs the company allows ── */
+  const tariffs = `<div class="tb" style="max-width:880px">
+      <p class="explain" style="padding:0">Աշխատակիցները կարող են պատվիրել միայն միացված սակագներով՝ հավելվածում, այստեղ և դիսպետչերի միջոցով։ Գները՝ ձեր պայմանագրով։</p>
+      ${sec('Թույլատրված սակագներ', `<div>${TIERS.map((t) => { const on = ALLOWED.includes(t.id); return `<div class="tier-row${on ? '' : ' off'}"><span class="car s">${carImg(t.id)}</span>
+          <span class="tn"><b>${t.name}</b><span>${t.blurb}</span></span>
+          ${st === 'saved' && t.id === 'vip' ? '<span class="pill ok" role="status"><i data-lucide="check"></i>Պահված է</span>' : ''}
+          <span class="switch${on ? ' on' : ''}" role="switch" aria-checked="${on}" aria-label="${t.name}"><i class="t"></i>${on ? 'Թույլատրված' : 'Անջատված'}</span></div>` }).join('')}</div>
+        <div class="pad" style="border-top:1px solid var(--line-soft)"><p class="hint" style="margin:0">Տաքսի ծառայությունը տեսնում և կարող է փոխել նույն կարգավորումը։ Արդեն պատվիրված ուղևորությունները չեն փոխվում։</p></div>`,
+        `<span class="faint num" style="font:var(--c-small)">${ALLOWED.length} / ${TIERS.length}</span>`)}
+    </div>`
+
+  /* ── Company & account ── */
+  const company = sec('Ընկերություն', dl([['Անվանում', C.name], ['Իրավաբանական անվանում', '«Արարատ Սոֆթ» ՍՊԸ'], ['ՀՎՀՀ', `<span class="mono">${C.tin}</span>`], ['Իրավաբանական հասցե', 'Երևան 0010, Վազգեն Սարգսյանի 26/1']]) + ask)
+  const agreement = sec('Պայմանագիր', dl([['Վճարում', 'Հետվճար · ամսական հաշվետվությամբ'], ['Գործում է', '<span class="mono">01.09.2026</span>-ից'], ['Ընկերության սահմանաչափ', `<span class="mono">${amd(C.limit)}</span>`], ['Աշխատակցի լռելյայն սահմանաչափ', `<span class="mono">${amd(C.empLimit.default.amount)}</span> ամսական`]]))
+  const saved = st === 'account-saved'
+  const emails = sec('Հաշվետվության էլ. հասցեներ', `<div class="pad">
+      <div class="input${saved ? '' : ' focus'}"><i data-lucide="at-sign"></i><span class="val mono">${CO.EMAIL}, l.avetisyan@araratsoft.am</span></div><p class="hint">Մինչև 5՝ ստորակետով</p>
+      <div style="margin-top:12px"><span class="switch on"><i class="t"></i>Ամսվա հաշվետվությունը ուղարկել ինքնաշխատ՝ ամսի 1-ին</span></div>
+      <div class="formfoot">${saved ? '<span class="pill ok" role="status"><i data-lucide="check"></i>Պահված է</span>' : '<span class="faint" style="font:var(--c-small)">Փոխվել է 1 դաշտ</span>'}<span class="sp"></span><button class="btn primary"${saved ? ' disabled' : ''}>Պահել</button></div></div>`)
+  const notif = sec('Ծանուցումներ', `<div class="pad" style="display:flex;flex-direction:column;gap:12px">
+      <span class="switch on"><i class="t"></i>SMS աշխատակցին, երբ մեքենան նշանակվի</span>
+      <span class="switch on"><i class="t"></i>Ինձ՝ էլ. նամակ, եթե մեքենա չգտնվի <span class="mono">10 ր</span>-ում</span>
+      <span class="switch"><i class="t"></i>Ինձ՝ էլ. նամակ ամեն չեղարկման մասին</span></div>`)
+  const me = sec('Իմ հաշիվը', `<div class="pad" style="display:flex;flex-direction:column;gap:12px">
+      <div class="fgrid"><div><span class="label">Անուն</span><div class="input"><span class="val">${ME.name}</span></div></div><div><span class="label">Հեռախոս</span><div class="input locked"><span class="val mono">${ME.phone}</span><i data-lucide="lock"></i></div></div></div>
+      <p class="hint" style="margin:0">Ընկերությունն ունի մեկ մուտք՝ մենեջերի համարով։ Համարը փոխում է տաքսի ծառայությունը։</p>
+      <div class="row-flex" style="gap:8px;flex-wrap:wrap"><span class="label" style="margin:0">Լեզու</span><div class="seg" role="radiogroup" aria-label="Լեզու"><button class="on" role="radio" aria-checked="true">Հայերեն</button><button role="radio" aria-checked="false">Русский</button><button role="radio" aria-checked="false">English</button></div>
+        <span class="sp" style="flex:1"></span><a class="btn secondary" href="${u('login.html')}"><i data-lucide="log-out"></i>Դուրս գալ</a></div></div>`)
+  const account = `<div class="tb two"><div class="col">${company}${agreement}${notif}</div><div class="col">${me}${emails}</div></div>`
+
+  document.getElementById('page').innerHTML = setTabs(ACC ? 'account' : 'tariffs') + `<div class="scroll-y grow" data-truncate>${ACC ? account : tariffs}</div>`
+  icons()
+</script>
+</body>
+</html>

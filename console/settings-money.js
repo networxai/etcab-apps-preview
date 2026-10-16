@@ -33,7 +33,7 @@ window.drawMoneyTab = function () {
     ${G('Վճարման եղանակներ ուղևորի համար', [
       ['banknote', 'Կանխիկ', 'ETAPI · CASH · կտրոնը՝ 24 ժ պահումից հետո', true], ['credit-card', 'Քարտ', 'iPay · ArCa · CASHLESS', true],
       ['smartphone', 'Apple Pay', 'CASHLESS', true], ['smartphone', 'Google Pay', 'CASHLESS', true],
-      ['smartphone-nfc', 'NFC և POS վարորդի մոտ', 'ավարտին վարորդը կարող է փոխել · CASHLESS_POS', true], ['building-2', 'Ընկերության հաշվին', 'ETAPI-ին չի ուղարկվում', true],
+      ['smartphone-nfc', 'NFC · POS վարորդի մոտ', 'միայն ավտոպարկի մեքենաներ · ACBA հավելվածով, վարորդը հաստատում է · CASHLESS_POS', true], ['building-2', 'Ընկերության հաշվին', 'ETAPI-ին չի ուղարկվում', true],
     ].map(([ic, l, h, on]) => `<div class="set new"><span class="l"><span class="pm"><i data-lucide="${ic}"></i><b>${l}</b></span><small>${h}</small></span><span class="v"><span class="switch${on ? ' on' : ''}" role="switch" aria-checked="${on}"><i class="t"></i>${on ? 'Միացված' : 'Անջատված'}</span><span class="u"></span></span></div>`)
       .concat([`<div class="set"><span class="l">ETAPI ինքնահաստատում<small>ավելի մեծ գումարը սպասում է հաստատման ETAPI-ում · սահմանում է ETAPI-ն</small></span><span class="v"><span class="ro">մինչև ${ECO.amd(50000)}</span><span class="u"></span></span></div>`,
         `<div class="tok"><i data-lucide="plug" style="width:14px;height:14px"></i>Բանալիները՝ <a href="integrations.html?theme=${THEME}&tab=pay" style="color:var(--brand-text);font-weight:500;text-decoration:none">Ինտեգրումներ → Վճարումներ և ETAPI</a></div>`]),

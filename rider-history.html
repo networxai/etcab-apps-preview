@@ -20,6 +20,9 @@
   .hrow { display: flex; align-items: center; gap: var(--s2); min-height: 72px; width: 100%; }
   .hrow .hmain { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--s3); min-height: 72px; text-align: left; }
   .hrow .l1 { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s2); }
+  /* UX audit 2026-10-16 (Proximity): the fare has its own right-aligned column, so a long street name never runs into the price. */
+  .hrow .l1 .t1 { flex: 1; min-width: 0; }
+  .hrow .l1 .fare, .hrow .l1 .st { flex: none; min-width: 56px; justify-content: flex-end; }
   .hrow .rcpt { flex: none; width: 44px; height: 44px; border-radius: 50%; background: var(--surface-2); color: var(--ink); display: grid; place-items: center; margin-right: -4px; }
   .hrow .rcpt svg { width: 20px; height: 20px; }
   .hrow .rcpt.none { background: none; }

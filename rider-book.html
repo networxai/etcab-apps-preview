@@ -61,13 +61,15 @@
   .promo { display: flex; align-items: center; gap: var(--s2); min-height: 48px; padding: 0 var(--s3) 0 var(--s4); margin-bottom: var(--s3); border-radius: var(--r-control);
     background: var(--surface-2); font: var(--t-secondary-strong); color: var(--ink); width: 100%; text-align: left; }
   .promo svg { width: 18px; height: 18px; flex: none; color: var(--brand); }
-  .promo .off { margin-left: auto; color: var(--brand); font-variant-numeric: tabular-nums; }
+  .promo .off { margin-left: auto; color: var(--brand-ink); /* brand as text: --brand is a fill, 3.2:1 on dark */ font-variant-numeric: tabular-nums; }
   .promo .x { width: 32px; height: 32px; display: grid; place-items: center; color: var(--ink-2); }
   .promo .x svg { color: var(--ink-2); }
-  .promo.add { color: var(--ink-2); font: var(--t-secondary); }
+  /* Not yet entered: a quiet text row, not a filled field (UX audit 2026-10-15, Pareto / Von Restorff): most rides carry no code,
+     so the add affordance must not be the second-biggest shape on the sheet, right above Order. Still a 44 pt target. */
+  .promo.add { color: var(--ink-2); font: var(--t-secondary); background: none; min-height: 44px; padding: 0 var(--s1); margin: calc(-1 * var(--s1)) 0 var(--s2); width: auto; }
   .tier .was { font: var(--t-caption); color: var(--ink-3); text-decoration: line-through; margin-top: 6px; font-variant-numeric: tabular-nums; }
-  .tier .was + .price { margin-top: 0; color: var(--brand); }
-  .btn s { opacity: .65; font-weight: 500; margin-right: 4px; }
+  .tier .was + .price { margin-top: 0; color: var(--brand-ink); }
+  .btn s { font-weight: 500; margin-right: 4px; } /* the strike says "was"; dimming it cost the label its 4.5:1 */
   .modal .mcode { height: 56px; border-radius: var(--r-control); background: var(--surface-2); box-shadow: inset 0 0 0 2px var(--ink); display: flex; align-items: center; padding: 0 var(--s4);
     font: 600 17px/24px var(--font); letter-spacing: 1px; color: var(--ink); margin-bottom: var(--s2); }
   .modal .mhint { font: var(--t-secondary); color: var(--ok); display: flex; gap: 6px; align-items: center; margin-bottom: var(--s4); }
@@ -104,17 +106,19 @@
   .seg button { flex: 1; height: 44px; border-radius: 10px; font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; }
   .seg button[aria-checked="true"] { background: var(--raised); color: var(--ink); box-shadow: var(--e1); }
   /* "When?" (apps/rider components/when-sheet.tsx + lib/schedule.ts): «Հիմա», then 7 day chips in one scrolling row;
-     under them every quarter-hour of that day that is ≥ now + 30 min (LEAD_MINUTES), four to a row. No wheel. */
+     under them every quarter-hour of that day that is ≥ now + 30 min (LEAD_MINUTES), four to a row, chunked under part-of-day headers. No wheel. */
   .days { display: flex; gap: var(--s2); overflow: hidden; margin: 0 calc(-1 * var(--margin)) var(--s3); padding: 0 var(--margin); }
   .days .chip { height: 44px; padding: 0 14px; flex: none; }
   .days .chip svg { width: 18px; height: 18px; }
   .days .chip[aria-checked="true"] { background: var(--ink); color: var(--surface); box-shadow: none; }
-  .slots { position: relative; height: 252px; overflow: hidden; margin-bottom: var(--s4); }
+  .slots { position: relative; height: 300px; overflow: hidden; margin-bottom: var(--s4); }
+  .slots .part + .part { margin-top: var(--s2); }
+  .slots .ph { display: flex; align-items: center; gap: 6px; height: 24px; margin-bottom: var(--s2); font: var(--t-caption); color: var(--ink-2); }
+  .slots .ph svg { width: 14px; height: 14px; }
   .slots .in { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s2); }
   .slots button { height: 44px; border-radius: var(--r-card); background: var(--surface-2); font: var(--t-body-strong); color: var(--ink); font-variant-numeric: tabular-nums; }
   .slots button[aria-checked="true"] { background: var(--ink); color: var(--surface); }
-  .slots::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 28px; pointer-events: none; background: linear-gradient(transparent, var(--surface)); }
-  .slots.top::before { content: ''; position: absolute; z-index: 1; left: 0; right: 0; top: 0; height: 20px; pointer-events: none; background: linear-gradient(var(--surface), transparent); }
+  .slots::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 20px; pointer-events: none; background: linear-gradient(transparent, var(--surface)); }
   /* The note is off while a time is set (book.tsx noteOff): scheduled_ride has no notes column. */
   .opt[aria-disabled="true"] { color: var(--ink-3); background: var(--surface-2); }
   .opt.whenset { background: var(--brand-soft); color: var(--brand-ink); }
@@ -151,6 +155,7 @@
   .onotice svg { width: 20px; height: 20px; color: var(--ink-2); margin-top: 0; }
   .onotice b { display: block; font: var(--t-secondary-strong); }
   .tier .price.dash { color: var(--ink-3); }
+  .btn .btnsk { display: inline-block; width: 44px; height: 16px; border-radius: 5px; vertical-align: -2px; margin-left: 2px; background: rgb(255 255 255 / .35); animation: none; }
   .tier .price .sk { display: block; width: 72px; height: 20px; border-radius: 6px; }
   .tier .est { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; }
   .whennote { display: flex; align-items: center; gap: var(--s2); font: var(--t-secondary); color: var(--ink-2); margin: calc(-1 * var(--s1)) 0 var(--s3); }
@@ -207,9 +212,9 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
   if (price('city', B.co.km, B.co.min) !== B.co.fare) console.error('[rider-book] tariff and ECO.BOOKINGS fares disagree')
 
   /* Rider service fee (owner 2026-10-15, final): the fleet's own income, +2 % on top of the final fare when the rider pays by bank
-     card (the saved card, Apple Pay, Google Pay). Cash, NFC at the driver and company rides carry none. Whole dram: 1 100 → 22, 4 500 → 90.
+     card (the saved card, Apple Pay, Google Pay, or NFC · POS on the driver's phone). Cash and company rides carry none. Whole dram: 1 100 → 22, 4 500 → 90.
      It is its own line, and never on the Tax Service receipt. */
-  const CARDY = ['card', 'applepay', 'googlepay']
+  const CARDY = ['card', 'applepay', 'googlepay', 'nfc']
   const fee = (fare, pay = 'cash') => CARDY.includes(pay) ? Math.round(fare * 2 / 100) : 0
   /* The driver's fare after the zone layer: { fare, fixed, metered, base, air, min }. */
   const fareOf = (k, trip) => {
@@ -234,7 +239,7 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
   const tiers = (trip, mode, later, promo, sel, pay) => `<div class="tiers" role="radiogroup" aria-label="Սակագին">${TIERS.filter(([, n]) => !later || preOk(n)).map(([k, n, eta, seats], i) => {
     const on = sel ? k === sel : !i, off = offTier(k, trip)
     return `<button class="tier ${on ? 'on' : ''}${off ? ' off' : ''}" role="radio" aria-checked="${on}"${off ? ` aria-disabled="true" aria-label="${n}, օդանավակայանից չի սպասարկվում"` : ''} ${i >= 3 ? 'data-peek' : ''}>
-      ${on ? `<span class="tick" aria-hidden="true">${R.i('leaf')}</span>` : ''}
+      ${on ? `<span class="tick" aria-hidden="true">${R.i('check')}</span>` : ''}
       <span class="art">${k === 'kids' ? carImg('city') + `<span class="seat" role="img" aria-label="Մանկական նստոցով">${R.i('baby')}</span>` : carImg(k)}</span><span class="name">${n}</span>
       <span class="meta"><span aria-label="Մեքենան՝ ${eta} րոպեում">${R.i('car-front')}${eta} ր</span><span>${R.i('user-round')}${seats}</span></span>
       ${promo && on ? `<span class="was">${R.amd(promo.fare)}</span><span class="price">${R.amd(promo.pay)}</span>` : tierPrice(k, trip, mode, pay)}</button>` }).join('')}</div>`
@@ -288,7 +293,7 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
   const details = (when, trip, o = {}) => base(`<section class="sheet r" id="sheet"><div class="grabber"></div>${tiers(trip, undefined, !!when, null, o.sel, o.pay)}${opts(when, o.pay)}
       ${o.why || ''}${o.lines ? fareLines(trip, o.sel, o.pay) : ''}${when || o.why ? '' : promoRow(false)}
       <button class="btn btn-brand">${cta(trip, 'Պատվիրել', when, o.sel, o.pay)}</button></section>`)
-  /* The payment sheet with a quiet «+2 %» on the bank-card methods (owner 2026-10-15; page-local, rider.js stays as it is). */
+  /* The payment sheet with a quiet «+2 %» on the bank-card methods (owner 2026-10-15; page-local; NFC · POS carries it in rider.js). */
   const payL = (sel) => R.payList(sel).replace('կգանձվի ավարտին', 'կգանձվի ավարտին · +2 %').replace('iPhone-ում', 'iPhone-ում · +2 %').replace('Android-ում', 'Android-ում · +2 %')
   /* A zone rule said once, in a neutral line with its own icon: never red, never a modal (owner 2026-10-15). */
   const zoneWhy = (icon, text) => `<div class="whennote" role="note">${R.i(icon)}${text}</div>`
@@ -333,19 +338,28 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
   const slotsFor = (day, nowMin = nh * 60 + nm, lead = 30) => { const out = []; for (let m = 0; m < 1440; m += 15) if (day * 1440 + m >= nowMin + lead) out.push(m); return out }
   /* late: { now, note, icon, lead } — lead = minutes ahead of now for the first slot (30, LEAD_MINUTES; a zone may ask more:
      Զվարթնոց, 120). With a lead, today keeps its chip; without one (late evening) today has no slot and is struck through. */
-  /* The slot list scrolls inside the sheet. rowsScrolled = 0: today from the first slot (5 full rows, then more under the fade);
-     rowsScrolled = n: already scrolled to row n (a sliver of the row above shows). Rows not fully in view are data-peek. */
-  const whenSheet = (day, picked, rowsScrolled = 0, late = null) => {
-    const list = slotsFor(day, late ? late.now : undefined, late && late.lead), rows = []
-    for (let i = 0; i < list.length; i += 4) rows.push(list.slice(i, i + 4))
-    const first = rowsScrolled ? rowsScrolled - 1 : 0, full = rowsScrolled ? [rowsScrolled, rowsScrolled + 4] : [0, 5]
-    const shown = rows.slice(first, full[1] + 1)
+  /* Choice Overload (UX audit 2026-10-16): the quarter-hours are chunked under part-of-day headers (Գիշեր 00–05, Առավոտ 05–12,
+     Ցերեկ 12–18, Երեկո 18–24), four to a row, still no wheel. The list scrolls inside a fixed 300 px window; only whole rows that fit are
+     drawn (a half-drawn row would sit over «Հաստատել»), and the fade says there is more. from = 'morning': already scrolled to the morning. */
+  const PARTS = [['night', 'Գիշեր', 'moon', 0, 300], ['morning', 'Առավոտ', 'sunrise', 300, 720], ['day', 'Ցերեկ', 'sun', 720, 1080], ['evening', 'Երեկո', 'sunset', 1080, 1440]]
+  const SLOTS_H = 300, HEAD_H = 32, ROW_H = 52
+  const whenSheet = (day, picked, from = null, late = null) => {
+    const list = slotsFor(day, late ? late.now : undefined, late && late.lead)
+    const parts = PARTS.map(([id, label, icon, lo, hi]) => ({ id, label, icon, ms: list.filter((m) => m >= lo && m < hi) })).filter((p) => p.ms.length)
+    const start = from ? Math.max(0, parts.findIndex((p) => p.id === from)) : 0
+    let used = 0
+    const drawn = []
+    for (const p of parts.slice(start)) {
+      if (used + HEAD_H + 44 > SLOTS_H) break
+      let n = 0
+      used += HEAD_H
+      while (n < p.ms.length && used + 44 <= SLOTS_H) { n += 4; used += ROW_H }
+      drawn.push(`<div class="part" role="group" aria-labelledby="ph-${p.id}"><div class="ph" id="ph-${p.id}">${R.i(p.icon)}${p.label}</div><div class="in">${p.ms.slice(0, n).map((m) =>
+        `<button role="radio" aria-checked="${clock(m) === picked}" aria-label="${clock(m)}">${clock(m)}</button>`).join('')}</div></div>`)
+    }
     const chips = `<div class="days" role="radiogroup" aria-label="Օր"><button class="chip" aria-label="Հիմա">${R.i('clock')}Հիմա</button>${days.map((l, i) =>
       `<button class="chip" role="radio" aria-checked="${i === day}"${late && !late.lead && i === 0 ? ' aria-disabled="true"' : ''}>${l}</button>`).join('')}</div>${late ? `<div class="whennote" role="note">${R.i(late.icon || 'moon')}${late.note}</div>` : ''}`
-    const grid = `<div class="slots${rowsScrolled ? ' top' : ''}" role="radiogroup" aria-label="Ժամ"><div class="in" style="margin-top:${rowsScrolled ? -30 : 0}px">${shown.map((row, j) => {
-      const r = first + j, peek = r < full[0] || r >= full[1]
-      return row.map((m) => `<button role="radio" aria-checked="${clock(m) === picked}" aria-label="${clock(m)}"${peek ? ' data-peek' : ''}>${clock(m)}</button>`).join('')
-    }).join('')}</div></div>`
+    const grid = `<div class="slots" role="radiogroup" aria-label="Ժամ">${drawn.join('')}</div>`
     return modal('Ե՞րբ', `${chips}${grid}${picked ? '<button class="btn btn-brand">Հաստատել</button>' : '<button class="btn" disabled>Հաստատել</button>'}`)
   }
 
@@ -357,7 +371,7 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
 
   Rider.page({
     title: 'Rider · Booking details',
-    sub: 'Extends the approved tier sheet: when (now, or a quarter-hour up to 7 days ahead), a note for the driver (now only), payment (cash, card, Apple / Google Pay, NFC at the driver), and the company / personal choice for corporate riders (monthly limit left, allowed places), and a promo code',
+    sub: 'Extends the approved tier sheet: when (now, or a quarter-hour up to 7 days ahead), a note for the driver (now only), payment (cash, card, Apple / Google Pay, NFC · POS on the driver\'s phone), and the company / personal choice for corporate riders (monthly limit left, allowed places), and a promo code',
     states: [
       { id: 'details', group: 'Sheet', label: 'Details', note: 'One compact line under the tiers: when · note · payment. Order stays the one accent. The walkthrough ride (ECO.RIDE), paid in cash: 1 100 ֏ on the card and the button, no fee line (owner 2026-10-15, final: the service fee is only on bank-card payments)',
         html: () => details(null, TRIPS.ride), map: (s) => drawRide(s, true, TRIPS.ride) },
@@ -375,10 +389,10 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
       { id: 'when', group: 'Sheets', label: 'When · today', note: 'when-sheet.tsx: «Հիմա» clears a time; 7 day chips; under them every quarter-hour ≥ now + 30 min. At 9:41 today starts at 10:15. «Հաստատել» stays off until a slot is picked',
         html: () => whenSheet(0, null), after: daysInView, map: (s) => drawRide(s, false, TRIPS.air) },
       { id: 'when-tomorrow', group: 'Sheets', label: 'When · tomorrow', note: 'Tomorrow picked: the whole day from 00:00, scrolled to the morning; 08:30 is the chosen slot (ink fill). Picking a day clears the slot',
-        html: () => whenSheet(1, B.air.time, 7), after: daysInView, map: (s) => drawRide(s, false, TRIPS.air) },
+        html: () => whenSheet(1, B.air.time, 'morning'), after: daysInView, map: (s) => drawRide(s, false, TRIPS.air) },
       { id: 'when-late', group: 'Sheets', label: 'When · late evening', time: '23:41', note: 'R29 (drawn ahead: the real sheet opens on an empty «Այսօր»). At 23:41 the first slot is past midnight, so today has none: its chip is struck through and the sheet opens on Tomorrow from 00:15. The row ends at the seventh day, and the line says both limits once',
         html: () => whenSheet(1, null, 0, { now: 23 * 60 + 41, note: 'Այսօր ազատ ժամ չկա · առավելագույնը 7 օր առաջ' }), after: (s) => s.querySelectorAll('.days .chip').forEach((c) => { const r = c.getBoundingClientRect(); if (r.right > 390) c.dataset.peek = '' }), map: (s) => drawRide(s, false, TRIPS.air) },
-      { id: 'pay', group: 'Sheets', label: 'Payment', note: 'Owner 2026-10-15: cash, a saved card, Apple Pay (iPhone) / Google Pay (Android), or NFC (tap a card or phone on the driver\'s phone); «Ավելացնել քարտ» at the foot. Owner 2026-10-15 (final): the card, Apple Pay and Google Pay rows carry a quiet «+2 %», the service fee on bank-card payments; cash and NFC have none. Drawn ahead of card processing. A company rider chooses Company / Personal on the sheet itself',
+      { id: 'pay', group: 'Sheets', label: 'Payment', note: 'Owner 2026-10-15: cash, a saved card, Apple Pay (iPhone) / Google Pay (Android), or NFC · POS (owner 2026-10-16: tap a card or phone on the driver\'s phone at the end, taken in the bank\'s ACBA app and confirmed by the driver; fleet cars only, so a quiet line under the list says it); «Ավելացնել քարտ» at the foot. Owner 2026-10-15 (final): the card, Apple Pay, Google Pay and NFC · POS rows carry a quiet «+2 %», the service fee on bank-card payments (1 100 → 1 122 ֏); cash and company have none. Drawn ahead of card processing. A company rider chooses Company / Personal on the sheet itself',
         html: () => modal('Վճարում', payL('cash')), map: (s) => drawRide(s, false) },
 
       { id: 'airport', group: 'Airport', label: 'To the airport · fixed', note: 'Owner 2026-10-15, zone-to-zone: Mashtots 37 (Կենտրոն) → Զվարթնոց is a fixed 4 500 ֏ for City / Comfort; the fixed fare replaces the metered one and already includes the zone charges (the 500 ֏ drop-off charge, the Կենտրոն per-minute rule). Paid by the saved card here, so the 2 % service fee goes on top: 4 500 + 90 = 4 590 ֏, its own line (owner 2026-10-15, final). «Ֆիքսված» under the fixed cards; the other tiers are metered + the airport charge, each + 2 %',
@@ -421,8 +435,8 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
       { id: 'offline-order', group: 'Refused', label: 'Offline at order', note: 'R24: no network when Order was pressed (app.offline). The banner says why at the top; the line by the button says the order did not go',
         html: () => orderSheet({ notice: onotice('wifi-off', 'Պատվերը չի ուղարկվել') }) + R.banner({ t1: 'Կապ չկա', action: 'Կրկնել' }), map: (s) => drawRide(s, false) },
 
-      { id: 'quote-loading', group: 'Quote', label: 'Pricing', note: 'R25: quotes in flight. Each tier holds its price slot with a skeleton (TierCard Skeleton); Order already works and reads without a price',
-        html: () => orderSheet({ mode: 'pending', btn: '<button class="btn btn-brand">Պատվիրել</button>' }), map: (s) => drawRide(s, false) },
+      { id: 'quote-loading', group: 'Quote', label: 'Pricing', note: 'R25: quotes in flight. Each tier holds its price slot with a skeleton (TierCard Skeleton); Order already works; its price slot is a skeleton too (UX audit 2026-10-16), so the label does not jump when the quote lands',
+        html: () => orderSheet({ mode: 'pending', btn: '<button class="btn btn-brand" aria-label="Պատվիրել · Eco City · գինը հաշվարկվում է">Պատվիրել · Eco City · <span class="sk btnsk" aria-hidden="true"></span></button>' }), map: (s) => drawRide(s, false) },
       { id: 'no-quote', group: 'Quote', label: 'No price', note: 'R25, §14.1: pricing failed but the order can still be taken (the server prices it). Every tier shows «—», never an old number; the button drops the price',
         html: () => orderSheet({ mode: 'dash', btn: '<button class="btn btn-brand">Պատվիրել · Eco City</button>' }), map: (s) => drawRide(s, false) },
       { id: 'no-route', group: 'Quote', label: 'No route line', note: 'R25: routing failed independently of pricing. The pins stay, the line and its km · min go; prices are unaffected',

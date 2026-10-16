@@ -45,7 +45,7 @@
   --brand-text: #215606;     /* green as small text: 7.88 on surface-alt */
 
   /* ── Guarded console colours, unchanged (e2e queue.spec pins them) ── */
-  --info: #2563EB;
+  --info: #1E40AF; /* 7.63:1 on --info-soft (was #2563EB, 4.52:1), 2026-10-16 */
   --warning: #6B4400;  --warning-surface: #FFF3D6;
   --danger-c: #8A1C1C; --danger-ink: #FFFFFF;
   --lane-unassigned: oklch(0.44 0.16 65);
@@ -69,7 +69,7 @@
   --brand-fill: #7CC90C;     /* logo-end green; ink #0E0E0F on it 9.39 */
   --brand-fill-ink: #0E0E0F;
   --brand-text: #7CC90C;     /* 8.00 on surface-alt */
-  --info: #6B9BFF;
+  --info: #8AB0FF; /* 7.39:1 on --info-soft (was #6B9BFF, 5.89:1), 2026-10-16 */
   --warning: #F2C464;  --warning-surface: #2B2311;
   --danger-c: #FF9C9C; --danger-ink: #171717;
   --lane-unassigned: oklch(0.79 0.15 65);

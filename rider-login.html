@@ -136,11 +136,13 @@
           <div class="resend"><button class="link">Փոխել համարը</button><button class="link" style="color:var(--ink)">${R.i('phone', 'style="width:18px;height:18px;margin-right:6px"')}Զանգել դիսպետչերին</button></div>`) },
       { id: 'expired', group: 'Phone', label: 'Session ended', note: 'R07 (drawn ahead: _layout.tsx replaces to /login silently). Said once, in place, with the number kept: nothing the rider saved is lost, so the line says so',
         html: () => phonePage({ fcls: '', clear: false, note: `<div class="notice" role="status">${R.i('log-out')}<div><b>Մուտք գործեք կրկին</b><span>Ուղևորություններն ու հասցեները պահված են</span></div></div>` }) },
-      { id: 'name', group: 'First sign-in', label: 'Name', note: 'Only on the first sign-in; the driver greets the rider by it',
+      { id: 'name', group: 'First sign-in', label: 'Name', note: 'Only on the first sign-in; the driver greets the rider by it. Team review 2026-10-16 (R1): an OPTIONAL e-mail field follows the name, with one line saying receipts (our receipt + the link to the Tax Service receipt) are sent there; nothing is required, «Շարունակել» works with it empty. It is editable later in Account (Էլ. հասցե). There are no invoices; company reports are separate',
         html: () => `<div class="page on-surface">
           <nav class="nav"><span class="navend"></span><span class="navttl"></span><button class="navbtn" aria-label="Բաց թողնել" style="width:auto;padding:0 8px;font:var(--t-body-strong);color:var(--ink-2)">Հետո</button></nav>
           <div class="form" style="margin-top:var(--s2);margin-bottom:0"><h1 class="large">Ինչպե՞ս դիմենք ձեզ</h1>
           <div class="field focus" style="padding-left:var(--s4)"><span class="num"><span class="lbl">Անուն</span><span class="v">Աննա<span class="caret"></span></span></span></div>
+          <div class="field" style="padding-left:var(--s4);margin-top:var(--s3)"><span class="num"><span class="lbl">Էլ. հասցե · ըստ ցանկության</span><span class="v ph">name@example.com</span></span></div>
+          <div class="inline-note">${R.i('mail')}<span>Ստացականները կուղարկենք այստեղ</span></div>
           <button class="btn btn-brand">Շարունակել</button></div>${R.keyboard()}</div>` },
       { id: 'terms', group: 'Phone', label: 'Terms not ticked', note: 'Change list 2026-10-14 (store requirement; drawn ahead: no consent step today): a checkbox row above «Ուղարկել կոդը», both documents linked. Unticked, the button stays off. The accepted version is stored with the customer; a returning rider sees it ticked',
         html: () => phonePage({ agree: false, btn: '<button class="btn" disabled>Ուղարկել կոդը</button>' }) },

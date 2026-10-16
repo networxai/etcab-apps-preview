@@ -143,7 +143,7 @@
   shell('rides')
   const ST = {
     created: ['l-unassigned', 'Ընդունված'], searching: ['l-searching', 'Որոնում'], nodrv: ['l-problems', 'Վարորդ չկա'], assigned: ['l-active', 'Նշանակված'],
-    enroute: ['l-active', 'Ճանապարհին'], arrived: ['l-active', 'Տեղում'], inprog: ['l-active', 'Ուղևորի հետ'], done: ['', 'Ավարտված'], cancel: ['', 'Չեղարկված'],
+    enroute: ['l-active', 'Ճանապարհին'], arrived: ['l-active', 'Տեղում'], inprog: ['l-active', 'Ուղևորի հետ'], done: ['', 'Ավարտված'], rfail: ['bad', 'Կտրոն չկա'], cancel: ['', 'Չեղարկված'],
   }
   const R = [
     ['14:26', 'Տիգրան Մեծի 67', 'Կենտրոն', '099 11-22-33', '20431', 'city', null, null, 'nodrv', null],
@@ -151,7 +151,7 @@
     ['14:21', 'Սայաթ-Նովա 19', 'Կասկադ', '094 77-31-08', '20428', 'city', null, null, 'searching', 700],
     ['14:12', 'Թումանյան 21', 'Երևան Մոլ', '098 23-55-90', '20424', 'city', 'Սուրեն Մկրտչյան', '22 OU 447', 'enroute', 1500],
     ['14:07', 'Հանրապետության հրապարակ', 'Կասկադ', '077 41-22-08', '20417', 'city', 'Արամ Պետրոսյան', '01 ET 001', 'inprog', 800, 1],
-    ['13:58', 'Աբովյան 12', 'Երևան Մոլ', '093 55-18-44', '20409', 'partner', 'Կարեն Մելքոնյան', '44 KM 771', 'done', 1900],
+    ['13:58', 'Աբովյան 12', 'Երևան Մոլ', '093 55-18-44', '20409', 'partner', 'Կարեն Մելքոնյան', '44 KM 771', 'rfail', 1900],
     ['13:41', 'Մաշտոցի պող. 37', 'Դավթաշեն 4-րդ թաղ.', '091 08-76-30', '20402', 'kids', 'Լիլիթ Մանուկյան', '18 OL 220', 'done', 2100],
     ['13:20', 'Մաշտոց 41', 'Դավթաշեն 4', '098 23-55-90', '20398', 'city', 'Նարեկ Հովհաննիսյան', '07 AB 913', 'done', 2100],
     ['12:57', 'Չարենցի 1', 'Գայի պող. 16', '044 71-03-82', '20391', 'city', null, null, 'cancel', null],
@@ -172,7 +172,7 @@
       <td><div class="route"><span class="l1">${a}<span class="arr">→</span>${b}</span><span class="l2"><span class="mono">${ph}</span> · <span class="mono">#R-${id}</span></span></div></td>
       <td><span class="tiercell"><span class="car xs">${carImg(tier)}</span><span class="trunc">${T.name.replace('Eco ', '')}</span></span></td>
       <td>${drv ? `<span class="drvcell"><span class="nm"><span>${drv.split(' ')[0]} ${drv.split(' ')[1][0]}.</span><span>${pl}</span></span></span>` : '<span class="faint">—</span>'}</td>
-      <td><span class="pill ${lane}" style="${lane ? 'color:var(--lane)' : ''}">${st === 'nodrv' ? '<i data-lucide="circle-alert"></i>' : '<i class="d"></i>'}${word}</span></td>
+      <td><span class="pill ${lane}" style="${lane && lane !== 'bad' ? 'color:var(--lane)' : ''}">${['nodrv', 'rfail'].includes(st) ? '<i data-lucide="circle-alert"></i>' : '<i class="d"></i>'}${word}</span></td>
       <td class="r mono">${f ? amd(f) : '<span class="faint">—</span>'}</td></tr>`
   }).join('')
   /* ── ?ride=booking (C06, drawn ahead of the console: the API has PATCH /scheduled-rides/:id and POST …/cancel, the
@@ -187,7 +187,7 @@
     const BR = [
       ['', '10:00', 'Հալաբյան 41', 'Զվարթնոց օդանավակայան', '041 33-21-90', 'B-0889', 'vip', 'Դավիթ Կարապետյան', '09 DK 118', ['ok', 'Վարորդը մեկնեց'], 5200],
       ['', B.kom.time, B.kom.pickup, B.kom.drop, B.kom.phone, B.kom.id, 'city', B.kom.driver.name, B.kom.driver.plate, null, B.kom.fare],
-      ['Շբթ', B.bag.time, B.bag.pickup, B.bag.drop, B.bag.phone, B.bag.id, 'city', B.bag.driver.name, B.bag.driver.plate, ['bad', 'Չի հասցնի'], B.bag.fare],
+      ['Շբթ', B.bag.time, B.bag.pickup, B.bag.drop, B.bag.phone, B.bag.id, 'city', B.bag.driver.name, B.bag.driver.plate, null, B.bag.fare],
       ['Շբթ', A.time, A.pickup, A.drop, A.phone, A.id, 'city', A.driver.name, A.driver.plate, null, A.fare, 1],
       ['Կիր', B.sun.time, B.sun.pickup, B.sun.drop, B.sun.phone, B.sun.id, 'partner', null, null, ['', 'Ավտոմատ · ' + B.sun.activates], B.sun.fare],
       ['Երկ', B.co.time, B.co.pickup, B.co.drop, B.co.phone, B.co.id, 'city', null, null, ['', 'Ավտոմատ · ' + B.co.activates], B.co.fare],

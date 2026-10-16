@@ -123,10 +123,10 @@
   const mix = [['city', 71], ['partner', 22], ['kids', 9], ['business', 13], ['van', 5], ['vip', 6]]
   const tot = mix.reduce((a, [, v]) => a + v, 0), mmax = Math.max(...mix.map(([, v]) => v))
   document.getElementById('mix').innerHTML = mix.map(([id, v]) => `<div class="mixr"><span class="car xs">${carImg(id)}</span><span class="n">${tierById(id).name}</span><span><span class="bar" style="display:block;width:${v / mmax * 100}%"></span></span><span class="v">${v}<span>${Math.round(v / tot * 100)}%</span></span></div>`).join('')
-  /* Owner 2026-10-15: the full roster. Card / Apple Pay / Google Pay are charged by the app (ETAPI CASHLESS); NFC and
-     POS are paid at the driver's phone or terminal and share one row (ETAPI CASHLESS_POS); company is on account and
+  /* Owner 2026-10-15: the full roster. Card / Apple Pay / Google Pay are charged by the app (ETAPI CASHLESS); NFC · POS
+     is one method, taken in ACBA's app on a fleet driver's phone and confirmed by the driver (ETAPI CASHLESS_POS); company is on account and
      never goes to ETAPI. One hue, sorted by share; the icon + word name the row, never the colour. */
-  const pay = [['banknote', 'Կանխիկ', 47], ['credit-card', 'Քարտ', 21], ['smartphone', 'Apple Pay', 12], ['smartphone', 'Google Pay', 7], ['building-2', 'Ընկերություն', 7], ['smartphone-nfc', 'NFC / POS', 6]]
+  const pay = [['banknote', 'Կանխիկ', 47], ['credit-card', 'Քարտ', 21], ['smartphone', 'Apple Pay', 12], ['smartphone', 'Google Pay', 7], ['building-2', 'Ընկերություն', 7], ['smartphone-nfc', 'NFC · POS', 6]]
   document.querySelector('[data-eco=today]').textContent = ECO.DAY.today + ' · 00:00–14:26 · Երևան'
   document.getElementById('pay').innerHTML = pay.map(([ic, n, v]) => `<div class="mixr"><span style="display:grid;place-items:center;color:var(--ink-faint)"><i data-lucide="${ic}"></i></span><span class="n">${n}</span><span><span class="bar" style="display:block;width:${v / 47 * 100}%"></span></span><span class="v">${v}%</span></div>`).join('')
   /* «Պետք է որոշում»: the same facts as Dispatch (problems), Requests and Partners. */

@@ -58,6 +58,9 @@
   .sum { margin-top: var(--s4); padding: var(--s4); }
   .sum .lbl { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
   .sum .hero { font: var(--t-hero); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -.5px; }
+  /* Peak-End (UX audit): one comparison makes the day feel finished. */
+  .sum .cmp { display: flex; align-items: center; gap: 6px; margin-top: 2px; font: var(--t-secondary-strong); color: var(--ok); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .sum .cmp svg { width: 16px; height: 16px; }
   .sum .hero small { font: 600 22px/1 var(--font); color: var(--ink-2); margin-left: 4px; letter-spacing: 0; }
   .stats { display: flex; margin-top: var(--s3); padding-top: var(--s3); border-top: 1px solid var(--hairline); }
   .stats div { flex: 1; display: flex; flex-direction: column; gap: 2px; }
@@ -144,6 +147,7 @@
     <div class="card sum">
       <div class="lbl">Պատվերների գումարը</div>
       <div class="hero">9 800<small>֏</small></div>
+      <div class="cmp"><i data-lucide="trending-up"></i>+1 400 ֏ երեկվանից</div>
       <div class="split" role="img" aria-label="Կանխիկ 7 600 ֏, ընկերության հաշվին 2 200 ֏"><i class="cash"></i><i class="company"></i></div>
       <div class="legend"><span><i class="sw" style="background:var(--c-cash)"></i>Կանխիկ <b>7 600 ֏</b></span><span><i class="sw" style="background:var(--c-company)"></i>Ընկերություն <b>2 200 ֏</b></span></div>
       <div class="stats"><div><b>7</b><span>պատվեր</span></div><div><b>6 ժ 08 ր</b><span>առցանց</span></div><div><b>58 կմ</b><span>ճանապարհ</span></div></div>

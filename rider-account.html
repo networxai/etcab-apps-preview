@@ -152,7 +152,7 @@
   const back = (t = '') => `<nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl">${t}</span><span class="navend"></span></nav>`
 
   const main = (debt = true) => `<div class="page">${back()}
-    <div class="prof"><span class="avatar lg ini" aria-hidden="true">Ա</span><span class="txt"><span class="nm">${ECO.COMPANY.rider}</span><span class="ph">+374 ${ECO.RIDE.rider.phone.replace(/^0/, '')}</span></span>
+    <div class="prof"><span class="avatar lg ini" aria-hidden="true">Ա</span><span class="txt"><span class="nm">${ECO.COMPANY.rider}</span><span class="ph">+374 ${ECO.RIDE.rider.phone.replace(/^0/, '')}</span><span class="ph">anna@example.com</span></span>
       <button class="edit" aria-label="Խմբագրել անունը">${R.i('pencil')}</button></div>
     <div class="gap"></div>
     ${grp([
@@ -197,7 +197,7 @@
       r('banknote', ECO.PAY.cash.label, `<span class="def">${R.i('check')}Հիմնական</span>`, { chev: false, btn: false, cls: 'cash' }),
       r('building-2', ECO.COMPANY.name, `<span class="val">${A(ECO.COMPANY.empLimit.rider.left)}</span>`, { t2: 'Մնացել է այս ամիս' }),
       r('credit-card', `${ECO.PAY.card.label} ·· ${ECO.PAY.card.last4}`, '', { t2: 'Visa · 09/28' }),
-      r('smartphone', `${ECO.PAY.applepay.label} / ${ECO.PAY.googlepay.label}`, '', { t2: 'հեռախոսի դրամապանակից' }),
+      r('smartphone', ECO.PAY.applepay.label, /* the phone's own wallet only (UX audit 2026-10-16, Hick): Google Pay on Android */ '', { t2: 'հեռախոսի դրամապանակից' }),
       r('plus', 'Ավելացնել քարտ', '', {}),
     ])}</div>`
 
@@ -244,6 +244,11 @@
       { id: 'name', group: 'Account', label: 'Edit name', note: 'One field; the driver greets the rider by it',
         html: () => `<div class="page on-surface">${back('Անուն')}<div class="form">
           <div class="field focus"><span class="num"><span class="lbl">Անուն</span><span class="v">${ECO.CUSTOMER.name}<span class="caret"></span></span></span></div>
+          <button class="btn btn-brand">Պահել</button></div>${R.keyboard()}</div>` },
+      { id: 'email', group: 'Account', label: 'Edit e-mail', note: 'Team review 2026-10-16 (R1): the optional e-mail given (or skipped) at first sign-in is edited here, from the pencil beside the name. Receipts (ours + the link to the Tax Service receipt) go to it; empty is allowed and the profile then reads «Ավելացնել էլ. հասցե». No invoices',
+        html: () => `<div class="page on-surface">${back('Էլ. հասցե')}<div class="form">
+          <div class="field focus"><span class="num"><span class="lbl">Էլ. հասցե</span><span class="v">anna@example.com<span class="caret"></span></span></span></div>
+          <div class="inline-note">${R.i('mail')}<span>Ստացականները կուղարկենք այստեղ</span></div>
           <button class="btn btn-brand">Պահել</button></div>${R.keyboard()}</div>` },
       { id: 'places', group: 'Places', label: 'Saved places', note: 'Remove is visible on every row (44pt), not a hidden swipe', html: () => places(true) },
       { id: 'place-removed', group: 'Places', label: 'Removed + undo', note: 'No confirm dialog: the undo is the safety net', html: () => places(false) },

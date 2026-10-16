@@ -65,15 +65,30 @@
   .cash svg { width: 24px; height: 24px; color: var(--ok); flex: none; }
   .cash .t1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
   .cash .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  /* Change list 2026-10-15: on Complete the driver can switch Cash → POS terminal or NFC (his phone) before «Պատրաստ եմ» (the fare is
-     final; only the method changes; the dispatcher and the receipt follow). The rider can switch Cash ↔ Card mid-ride. */
+  /* Change list 2026-10-15: on Complete the driver can switch Cash → «NFC · POS» (owner 2026-10-16: taken in the bank's ACBA app, fleet cars only)
+     before «Պատրաստ եմ». The fare is final; NFC · POS adds the 2 % service fee (1 100 → 1 122 ֏, the company's);
+     the dispatcher and the receipt follow. The rider can switch Cash ↔ Card mid-ride. */
+  .cash .t2.wrap, .cash .t1.wrap { white-space: normal; }
   .cash.pos { background: var(--info-soft); } .cash.pos svg { color: var(--info); }
   .cash.card { background: var(--surface-2); } .cash.card svg { color: var(--ink-2); }
-  /* A payment that failed at the end (NFC tap, a declined in-app card): amber, a domain refusal, not red. */
+  /* A payment that failed at the end (the driver marked the NFC payment «Չստացվեց», a declined in-app card): amber, a domain refusal, not red. */
   .cash.warn { background: var(--warn-soft); } .cash.warn svg { color: var(--warn); }
+  .payacts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); } .payacts .go { height: 56px; font: var(--t-body-strong); }
   .payhint { font: var(--t-caption); color: var(--ink-2); text-align: center; margin: calc(-1 * var(--s2)) 0 var(--s3); white-space: nowrap; }
   .paylbl { font: var(--t-caption); color: var(--ink-2); margin: 0 0 var(--s2) var(--s1); }
   .done-pay { margin-bottom: var(--s4); }
+  /* D3 (team review 2026-10-16): fleet drivers only. One labelled button, not a segmented control: the other method is a decision, and the line under it says it is recorded. */
+  .swbtn { width: 100%; height: 52px; border-radius: var(--r-control); background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--line); display: flex; align-items: center; justify-content: center; gap: var(--s2); font: var(--t-body-strong); color: var(--ink); white-space: nowrap; }
+  .swbtn svg { width: 22px; height: 22px; flex: none; }
+  .swbtn .fg { color: var(--ink-2); font-variant-numeric: tabular-nums; font-weight: 500; }
+  :root[data-sun] .swbtn { box-shadow: inset 0 0 0 1.5px #000; }
+  .paylbl.rec { text-align: center; margin: var(--s1) 0 0; white-space: nowrap; }
+  /* Peak-End (UX audit): the screen closes on the day's progress; the trip's facts are one quiet line above it.
+     The hero amount above stays what to collect (done) or nothing (done-card / company-done). */
+  .tripln { font: var(--t-caption); color: var(--ink-2); text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; padding-bottom: var(--s3); }
+  .today { display: flex; align-items: baseline; gap: var(--s4); margin-bottom: var(--s5); padding-top: var(--s3); border-top: 1px solid var(--hairline); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .today .tl { font: var(--t-secondary-strong); color: var(--ink-2); flex: 1; }
+  .today b { font: var(--t-title); color: var(--ink); }
   .facts { display: flex; justify-content: space-between; padding: 0 var(--s2) var(--s4); }
   .facts div { display: flex; flex-direction: column; align-items: center; gap: 2px; }
   .facts b { font: var(--t-headline); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -156,6 +171,8 @@
   :root[data-sun] .qr button { box-shadow: inset 0 0 0 1.5px #000; }
   .chat .cap { font: var(--t-caption); color: var(--ink-2); text-align: center; margin-top: var(--s3); white-space: nowrap; }
   .tool .b { position: relative; }
+  /* Moving: the unread mark is a dot, never a count (the count invites reading at speed). */
+  .tool .badge.dot { top: 2px; right: 2px; min-width: 14px; width: 14px; height: 14px; padding: 0; border-radius: 50%; box-shadow: 0 0 0 2px var(--surface); }
   .tool .badge { position: absolute; top: -2px; right: -2px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--brand); color: var(--on-brand); font: 600 12px/20px var(--font); }
 </style>
 </head>
@@ -193,10 +210,14 @@
   <section class="sheet" data-s="enroute chat" data-sheet>
     <div class="grabber"></div>
     <div class="head">
-      <div><div class="eyebrow"><span class="d"></span>4 րոպե · 1,4 կմ · 9:45</div><div class="addr" data-eco="RIDE.pickup">Մաշտոցի պող. 37</div></div>
-      <div style="display:flex;gap:var(--s2)"><button class="tool" aria-label="Հաղորդագրություն ուղևորից, 1 նոր"><span class="b"><i data-lucide="message-circle"></i><span class="badge" aria-hidden="true">1</span></span></button><button class="tool" aria-label="Զանգել ուղևորին"><span class="b"><i data-lucide="phone"></i></span></button></div>
+      <div><div class="eyebrow"><span class="d"></span>1,4 կմ · 9:45 · 1 100 ֏</div><div class="addr" data-eco="RIDE.pickup">Մաշտոցի պող. 37</div></div>
+      <div class="big">4<small>րոպե</small></div>
     </div>
-    <button class="go" style="margin-top:var(--s4)">Տեղում եմ</button>
+    <div class="tools" style="justify-content:flex-start;gap:var(--s4)">
+      <button class="tool" aria-label="Հաղորդագրություն ուղևորից, 1 նոր"><span class="b"><i data-lucide="message-circle"></i><span class="badge dot" aria-hidden="true"></span></span>Գրել</button>
+      <button class="tool"><span class="b"><i data-lucide="phone"></i></span>Զանգել</button>
+    </div>
+    <button class="go">Տեղում եմ</button>
   </section>
 
   <!-- ── arrived / no-show / no-show raised / offline: wait timer, slide Start ── -->
@@ -230,8 +251,8 @@
   <section class="sheet" data-s="inprogress" data-sheet>
     <div class="grabber"></div>
     <div class="head">
-      <div><div class="eyebrow"><span class="d"></span>4 րոպե · 2,9 կմ · 9:51</div><div class="addr" data-eco="RIDE.drop">Կոմիտասի պող. 22</div></div>
-      <div class="big" style="font:var(--t-title)" data-eco="RIDE.fare|amd">1 100 ֏</div>
+      <div><div class="eyebrow"><span class="d"></span>2,9 կմ · 9:51 · 1 100 ֏</div><div class="addr" data-eco="RIDE.drop">Կոմիտասի պող. 22</div></div>
+      <div class="big">4<small>րոպե</small></div>
     </div>
     <div class="tools" style="justify-content:flex-start;gap:var(--s4)">
       <button class="tool"><span class="b"><i data-lucide="phone"></i></span>Զանգել</button>
@@ -248,8 +269,8 @@
     <div class="grabber"></div>
     <div class="notice info" role="status"><i data-lucide="wallet"></i><div><b>Ուղևորը կվճարի հավելվածով՝ քարտ</b>Կանխիկ մի վերցրեք · 9:48</div></div>
     <div class="head" style="margin-top:var(--s3)">
-      <div><div class="eyebrow"><span class="d"></span>3 րոպե · 2,1 կմ · 9:51</div><div class="addr">Կոմիտասի պող. 22</div></div>
-      <div class="big" style="font:var(--t-title)">1 100 ֏</div>
+      <div><div class="eyebrow"><span class="d"></span>2,1 կմ · 9:51 · 1 100 ֏</div><div class="addr">Կոմիտասի պող. 22</div></div>
+      <div class="big">3<small>րոպե</small></div>
     </div>
     <div class="tools" style="justify-content:flex-start;gap:var(--s4)">
       <button class="tool"><span class="b"><i data-lucide="phone"></i></span>Զանգել</button>
@@ -266,8 +287,8 @@
     <div class="grabber"></div>
     <div class="notice info" role="status"><i data-lucide="route"></i><div><b>Դիսպետչերը փոխեց նպատակակետը</b>Ուղևորի խնդրանքով · 9:48</div></div>
     <div class="head" style="margin-top:var(--s3)">
-      <div><div class="eyebrow"><span class="d"></span>2 րոպե · 1,1 կմ · 9:50</div><div class="addr">Կոմիտասի պող. 8</div></div>
-      <div class="big" style="font:var(--t-title)">1 000 ֏</div>
+      <div><div class="eyebrow"><span class="d"></span>1,1 կմ · 9:50 · 1 000 ֏</div><div class="addr">Կոմիտասի պող. 8</div></div>
+      <div class="big">2<small>րոպե</small></div>
     </div>
     <div class="chg"><span class="old">Կոմիտասի պող. 22 · 1 100 ֏</span></div>
     <div class="tools" style="justify-content:flex-start;gap:var(--s4)">
@@ -289,52 +310,44 @@
       <div class="big">1 100<small>֏</small></div>
     </div>
     <div class="cash"><i data-lucide="banknote"></i><div><div class="t1">Վերցրեք կանխիկ</div><div class="t2">Աննա · Eco City · 1 100 ֏</div></div></div>
-    <div class="done-pay"><div class="paylbl">Ինչպես է վճարում ուղևորը</div><div class="seg" role="radiogroup" aria-label="Վճարման եղանակ"><button role="radio" aria-pressed="true" aria-checked="true">Կանխիկ</button><button role="radio" aria-pressed="false" aria-checked="false">POS</button><button role="radio" aria-pressed="false" aria-checked="false">NFC</button></div></div>
-    <div class="facts"><div><b>4,3 կմ</b><span>Ճանապարհ</span></div><div><b>6 րոպե</b><span>Տևողություն</span></div><div><b>1:20</b><span>Սպասում</span></div></div>
+    <div class="done-pay"><button class="swbtn" aria-label="Վերցնում եմ NFC-ով · 1 122 ֏"><i data-lucide="smartphone-nfc"></i>Վերցնում եմ NFC-ով<span class="fg">1 122 ֏</span></button><div class="paylbl rec">Փոփոխությունը գրանցվում է պատվերում</div></div>
+    <div class="tripln">4,3 կմ · 6 րոպե · սպասում 1:20</div>
+    <div class="today"><span class="tl">Այսօր</span><b>2 պատվեր</b><b>2 300 ֏</b></div>
     <button class="go">Պատրաստ եմ</button>
   </section>
 
-  <!-- ── complete, switched to POS (change list 2026-10-15): the hero says so; «Պատրաստ եմ» records the method ── -->
-  <section class="sheet" data-s="done-pos" data-sheet>
-    <div class="grabber"></div>
-    <div class="done-top">
-      <span class="ok"><i data-lucide="check"></i></span>
-      <div class="l">Կոմիտասի պող. 22 · 9:51</div>
-      <div class="big">1 100<small>֏</small></div>
-    </div>
-    <div class="cash pos"><i data-lucide="credit-card"></i><div><div class="t1">Վճարում՝ POS տերմինալով</div><div class="t2">Ուղևորը քարտը մոտեցնում է ձեր տերմինալին</div></div></div>
-    <div class="done-pay"><div class="paylbl">Ինչպես է վճարում ուղևորը</div><div class="seg" role="radiogroup" aria-label="Վճարման եղանակ"><button role="radio" aria-pressed="false" aria-checked="false">Կանխիկ</button><button role="radio" aria-pressed="true" aria-checked="true">POS</button><button role="radio" aria-pressed="false" aria-checked="false">NFC</button></div></div>
-    <div class="facts"><div><b>4,3 կմ</b><span>Ճանապարհ</span></div><div><b>6 րոպե</b><span>Տևողություն</span></div><div><b>1:20</b><span>Սպասում</span></div></div>
-    <button class="go">Պատրաստ եմ</button>
-  </section>
-
-  <!-- ── complete, NFC: the driver's phone takes the tap (change list 2026-10-15); «Պատրաստ եմ» waits for the payment ── -->
+  <!-- ── complete, NFC · POS (owner 2026-10-16, supersedes 10-15): there is no reader in our app. The driver takes the payment in the
+       ACBA app (words only, no button that opens it: no confirmed deep link); the rider taps a card or phone on the driver's phone.
+       Our app cannot see the tap, so it waits, and the DRIVER says what happened: «Վճարվեց» / «Չստացվեց». The charge is 1 122 ֏
+       (fare + 2 % fee, the company's); the driver still earns 1 100 ֏. Fleet cars only. ── -->
   <section class="sheet" data-s="done-nfc" data-sheet>
     <div class="grabber"></div>
     <div class="done-top">
       <span class="ok"><i data-lucide="check"></i></span>
       <div class="l">Կոմիտասի պող. 22 · 9:51</div>
-      <div class="big">1 100<small>֏</small></div>
+      <div class="big">1 122<small>֏</small></div>
     </div>
-    <div class="cash pos" role="status"><i data-lucide="smartphone-nfc"></i><div><div class="t1">Մոտեցրեք քարտը հեռախոսին</div><div class="t2">1 100 ֏ · սպասում ենք վճարմանը</div></div></div>
-    <div class="done-pay"><div class="paylbl">Ինչպես է վճարում ուղևորը</div><div class="seg" role="radiogroup" aria-label="Վճարման եղանակ"><button role="radio" aria-pressed="false" aria-checked="false">Կանխիկ</button><button role="radio" aria-pressed="false" aria-checked="false">POS</button><button role="radio" aria-pressed="true" aria-checked="true">NFC</button></div></div>
-    <div class="facts"><div><b>4,3 կմ</b><span>Ճանապարհ</span></div><div><b>6 րոպե</b><span>Տևողություն</span></div><div><b>1:20</b><span>Սպասում</span></div></div>
-    <button class="go" aria-disabled="true" style="opacity:.5">Սպասում ենք վճարմանը…</button>
+    <div class="cash pos" role="status"><i data-lucide="smartphone-nfc"></i><div><div class="t1 wrap">Վերցրեք վճարումը ACBA հավելվածով</div><div class="t2 wrap">Ուղևորը քարտը կամ հեռախոսը մոտեցնում է ձեր հեռախոսին · 1 100 ֏ + 22 ֏ վճար</div></div></div>
+    <div class="done-pay"><button class="swbtn" aria-label="Վերցնում եմ կանխիկ · 1 100 ֏"><i data-lucide="banknote"></i>Վերցնում եմ կանխիկ<span class="fg">1 100 ֏</span></button><div class="paylbl rec">Փոփոխությունը գրանցվում է պատվերում</div></div>
+    <div class="payhint">Սպասում ենք… հավելվածը վճարումը չի տեսնում</div>
+    <div class="tripln">4,3 կմ · 6 րոպե · սպասում 1:20</div>
+    <div class="today"><span class="tl">Այսօր</span><b>2 պատվեր</b><b>2 300 ֏</b></div>
+    <div class="payacts"><button class="go quiet">Չստացվեց</button><button class="go">Վճարվեց</button></div>
   </section>
 
-  <!-- ── complete, NFC failed (owner 2026-10-15): the tap timed out or the card was refused on the driver's phone. Amber, not red:
-       nothing is lost. One primary action, try again; the way out is the switch above it (Cash or POS), never a second button. ── -->
+  <!-- ── complete, the driver marked «Չստացվեց» (owner 2026-10-16). Amber, not red: nothing is lost. Primary: try again in the ACBA app
+       at 1 122 ֏ (back to the waiting state); the way out is the switch (Cash, the bare 1 100 ֏, no fee), never a second button. ── -->
   <section class="sheet" data-s="done-nfc-failed" data-sheet>
     <div class="grabber"></div>
     <div class="done-top">
       <span class="ok"><i data-lucide="check"></i></span>
       <div class="l">Կոմիտասի պող. 22 · 9:51</div>
-      <div class="big">1 100<small>֏</small></div>
+      <div class="big">1 122<small>֏</small></div>
     </div>
-    <div class="cash warn" role="status"><i data-lucide="smartphone-nfc"></i><div><div class="t1">Վճարումը չանցավ</div><div class="t2">Քարտը չկարդացվեց · 30 վրկ անցավ</div></div></div>
-    <div class="done-pay"><div class="paylbl">Ինչպես է վճարում ուղևորը</div><div class="seg" role="radiogroup" aria-label="Վճարման եղանակ"><button role="radio" aria-pressed="false" aria-checked="false">Կանխիկ</button><button role="radio" aria-pressed="false" aria-checked="false">POS</button><button role="radio" aria-pressed="true" aria-checked="true">NFC</button></div></div>
-    <div class="payhint">Չի՞ ստացվում · ընտրեք Կանխիկ կամ POS</div>
-    <div class="facts"><div><b>4,3 կմ</b><span>Ճանապարհ</span></div><div><b>6 րոպե</b><span>Տևողություն</span></div><div><b>1:20</b><span>Սպասում</span></div></div>
+    <div class="cash warn" role="status"><i data-lucide="smartphone-nfc"></i><div><div class="t1">Վճարումը չստացվեց</div><div class="t2 wrap">Կրկին փորձեք ACBA հավելվածով</div></div></div>
+    <div class="done-pay"><button class="swbtn" aria-label="Վերցնում եմ կանխիկ · 1 100 ֏"><i data-lucide="banknote"></i>Վերցնում եմ կանխիկ<span class="fg">1 100 ֏</span></button><div class="paylbl rec">Փոփոխությունը գրանցվում է պատվերում</div></div>
+        <div class="tripln">4,3 կմ · 6 րոպե · սպասում 1:20</div>
+    <div class="today"><span class="tl">Այսօր</span><b>2 պատվեր</b><b>2 300 ֏</b></div>
     <button class="go"><i data-lucide="rotate-cw"></i>Կրկին փորձել</button>
   </section>
 
@@ -348,21 +361,24 @@
       <div class="big">1 100<small>֏</small></div>
     </div>
     <div class="cash warn" role="alert"><i data-lucide="credit-card"></i><div><div class="t1">Քարտը մերժվեց</div><div class="t1">Վերցրեք կանխիկ 1 100 ֏</div><div class="t2">քարտ ·· 4242 · հավելվածով չանցավ</div></div></div>
-    <div class="done-pay"><div class="paylbl">Ինչպես է վճարում ուղևորը</div><div class="seg" role="radiogroup" aria-label="Վճարման եղանակ"><button role="radio" aria-pressed="true" aria-checked="true">Կանխիկ</button><button role="radio" aria-pressed="false" aria-checked="false">POS</button><button role="radio" aria-pressed="false" aria-checked="false">NFC</button></div></div>
-    <div class="facts"><div><b>4,3 կմ</b><span>Ճանապարհ</span></div><div><b>6 րոպե</b><span>Տևողություն</span></div><div><b>1:20</b><span>Սպասում</span></div></div>
+    <div class="done-pay"><button class="swbtn" aria-label="Վերցնում եմ NFC-ով · 1 122 ֏"><i data-lucide="smartphone-nfc"></i>Վերցնում եմ NFC-ով<span class="fg">1 122 ֏</span></button><div class="paylbl rec">Փոփոխությունը գրանցվում է պատվերում</div></div>
+    <div class="tripln">4,3 կմ · 6 րոպե · սպասում 1:20</div>
+    <div class="today"><span class="tl">Այսօր</span><b>2 պատվեր</b><b>2 300 ֏</b></div>
     <button class="go">Պատրաստ եմ</button>
   </section>
 
-  <!-- ── complete, the rider switched to card mid-ride: nothing to collect, no switch ── -->
+  <!-- ── complete, the rider switched to card mid-ride: nothing to collect, no switch. Like company-done, no figure hero:
+       the biggest number on a done screen reads as «collect this», and here the answer is nothing (UX audit 2026-10-15). ── -->
   <section class="sheet" data-s="done-card" data-sheet>
     <div class="grabber"></div>
     <div class="done-top">
       <span class="ok"><i data-lucide="check"></i></span>
-      <div class="l">Կոմիտասի պող. 22 · 9:51</div>
-      <div class="big">1 100<small>֏</small></div>
+      <div class="l">Կոմիտասի պող. 22 · 9:51 · 1 100 ֏</div>
     </div>
+    <!-- A change of Cash/NFC·POS re-renders the hero: Cash 1 100 ֏, NFC · POS 1 122 ֏ (done-nfc-failed keeps 1 122 until the switch moves). -->
     <div class="cash card"><i data-lucide="wallet"></i><div><div class="t1">Վճարված է հավելվածով</div><div class="t2">քարտ ·· 4242 · ոչինչ մի վերցրեք</div></div></div>
-    <div class="facts"><div><b>4,3 կմ</b><span>Ճանապարհ</span></div><div><b>6 րոպե</b><span>Տևողություն</span></div><div><b>1:20</b><span>Սպասում</span></div></div>
+    <div class="tripln">4,3 կմ · 6 րոպե · սպասում 1:20</div>
+    <div class="today"><span class="tl">Այսօր</span><b>2 պատվեր</b><b>2 300 ֏</b></div>
     <button class="go">Պատրաստ եմ</button>
   </section>
 
@@ -370,7 +386,8 @@
   <section class="sheet" data-s="company-inprogress" data-sheet>
     <div class="grabber"></div>
     <div class="head">
-      <div><div class="eyebrow"><span class="d"></span>4 րոպե · 2,9 կմ · 9:51</div><div class="addr" data-eco="RIDE.drop">Կոմիտասի պող. 22</div></div>
+      <div><div class="eyebrow"><span class="d"></span>2,9 կմ · 9:51</div><div class="addr" data-eco="RIDE.drop">Կոմիտասի պող. 22</div></div>
+      <div class="big">4<small>րոպե</small></div>
     </div>
     <div class="cobox" style="margin-top:var(--s4)"><i data-lucide="building-2"></i><div><div class="t1">Վճարում է ընկերությունը</div><div class="t2">ոչինչ մի վերցրեք</div></div></div>
     <div class="tools" style="justify-content:flex-start;gap:var(--s4)">
@@ -391,7 +408,8 @@
       <div class="l">Կոմիտասի պող. 22 · ավարտված</div>
     </div>
     <div class="cobox" style="margin:var(--s5) 0 var(--s4)"><i data-lucide="building-2"></i><div><div class="t1">Վճարում է ընկերությունը</div><div class="t2">ոչինչ մի վերցրեք · Աննա · Eco City</div></div></div>
-    <div class="facts"><div><b>4,3 կմ</b><span>Ճանապարհ</span></div><div><b>6 րոպե</b><span>Տևողություն</span></div><div><b>1:20</b><span>Սպասում</span></div></div>
+    <div class="tripln">4,3 կմ · 6 րոպե · սպասում 1:20</div>
+    <div class="today"><span class="tl">Այսօր</span><b>2 պատվեր</b><b>2 300 ֏</b></div>
     <button class="go">Պատրաստ եմ</button>
   </section>
 
@@ -419,7 +437,7 @@
   </section>
 
   <!-- ── call ── -->
-  <div class="scrim" data-s="call cancel chat sos"></div>
+  <div class="scrim" data-s="call cancel cancel-reason chat sos"></div>
   <!-- ── SOS (D39, drawn ahead; reached from «Ավելին»): alert the dispatcher with the live position, or call 112 ── -->
   <section class="sheet top sos" data-s="sos" data-sheet="modal" role="alertdialog" aria-label="Անվտանգություն">
     <div class="grabber"></div>
@@ -437,22 +455,30 @@
     <button class="btn btn-quiet" style="margin-top:var(--s4)">Փակել</button>
   </section>
 
-  <!-- ── MoreSheet: cancel or give back (D19, components/ride/sheets.tsx) ── -->
-  <section class="sheet top more" data-s="cancel" data-sheet="modal" role="dialog" aria-label="Չեղարկե՞լ պատվերը">
+  <!-- ── MoreSheet: cancel or give back (D19, components/ride/sheets.tsx). UX audit: two outcomes first, reasons only after «Չեղարկել» ── -->
+  <section class="sheet top more" data-s="cancel" data-sheet="modal" role="dialog" aria-label="Ի՞նչ անել պատվերի հետ">
     <div class="grabber"></div>
-    <div class="stitle">Չեղարկե՞լ պատվերը</div>
-    <div class="rchips" role="radiogroup" aria-label="Պատճառ">
-      <button class="chip" role="radio" aria-checked="false">Ուղևորը խնդրեց</button>
-      <button class="chip" role="radio" aria-checked="false">Մեքենան անսարք է</button>
-      <button class="chip" role="radio" aria-checked="false">Ճանապարհը փակ է</button>
-      <button class="chip" role="radio" aria-checked="false">Այլ պատճառ</button>
-    </div>
+    <div class="stitle">Ի՞նչ անել պատվերի հետ</div>
     <div class="foot">
       <button class="btn btn-danger-quiet">Չեղարկել պատվերը</button>
       <button class="btn btn-line">Վերադարձնել պատվերը</button>
-      <button class="btn btn-quiet">Հետ</button>
+      <button class="btn btn-text">Հետ</button>
     </div>
     <div class="cap">Վերադարձնել՝ կանցնի այլ վարորդի · Չեղարկել՝ կավարտվի</div>
+  </section>
+
+  <!-- ── after «Չեղարկել պատվերը»: the reasons, scoped to Cancel. Tapping a reason cancels (as on the offer's decline); «Հետ» returns to the two outcomes ── -->
+  <section class="sheet top more" data-s="cancel-reason" data-sheet="modal" role="dialog" aria-label="Ինչո՞ւ եք չեղարկում">
+    <div class="grabber"></div>
+    <div class="stitle">Ինչո՞ւ եք չեղարկում</div>
+    <div class="rchips" role="group" aria-label="Պատճառ">
+      <button class="chip">Ուղևորը խնդրեց</button>
+      <button class="chip">Մեքենան անսարք է</button>
+      <button class="chip">Ճանապարհը փակ է</button>
+      <button class="chip">Այլ պատճառ</button>
+    </div>
+    <button class="btn btn-text">Հետ</button>
+    <div class="cap">Ընտրեք պատճառը՝ պատվերը կչեղարկվի</div>
   </section>
 
   <!-- ── chat (drawn ahead): quick replies only while moving ── -->
@@ -477,12 +503,12 @@
 <script>
   const st0 = new URLSearchParams(location.search).get('state') || 'assigned'
   /* The clock follows ECO.RIDE: assigned 9:41, at the pickup 9:45, riding 9:47, dropped 9:51. */
-  statusBar(document.getElementById('s'), { enroute: '9:43', arrived: '9:45', noshow: '9:50', noshowsent: '9:51', offline: '9:45', call: '9:45', cancel: '9:45', inprogress: '9:47', done: '9:51', 'done-pos': '9:51', 'done-nfc': '9:51', 'done-card': '9:51', 'done-nfc-failed': '9:52', 'done-declined': '9:51', paychanged: '9:48', chat: '9:43', 'company-inprogress': '9:47', 'company-done': '9:51', changed: '9:43', destchanged: '9:48', sos: '9:48' }[st0] || '9:41')
+  statusBar(document.getElementById('s'), { enroute: '9:43', arrived: '9:45', noshow: '9:50', noshowsent: '9:51', offline: '9:45', call: '9:45', cancel: '9:45', 'cancel-reason': '9:45', inprogress: '9:47', done: '9:51', 'done-nfc': '9:51', 'done-card': '9:51', 'done-nfc-failed': '9:52', 'done-declined': '9:51', paychanged: '9:48', chat: '9:43', 'company-inprogress': '9:47', 'company-done': '9:51', changed: '9:43', destchanged: '9:48', sos: '9:48' }[st0] || '9:41')
   const st = D.init([
     ['assigned', 'Assigned · On my way'], ['enroute', 'En route · Arrived (guidance)'], ['arrived', 'Arrived · wait, slide Start'],
     ['noshow', 'No-show available (5:00+)'], ['noshowsent', 'No-show raised'], ['inprogress', 'In progress · slide Complete'],
-    ['done', 'Complete · collect cash'], ['done-pos', 'Complete · switched to POS terminal'], ['done-nfc', 'Complete · NFC on the driver phone'], ['paychanged', 'Rider switched to card (in ride)'], ['done-card', 'Complete · paid by card'], ['done-nfc-failed', 'Complete · NFC tap failed → retry or switch'], ['done-declined', 'Complete · card declined → collect cash'], ['forced', 'Forced acknowledgement'], ['offline', 'Offline · actions will sync'],
-    ['call', 'Call sheet'], ['cancel', 'Cancel or give back'], ['chat', 'Chat · quick replies (ahead)'],
+    ['done', 'Complete · collect cash · fleet: «Վերցնում եմ NFC-ով» switch'], ['done-nfc', 'Complete · NFC (switched from cash) · take it in the ACBA app, wait, driver confirms (1 122 ֏) · «Վերցնում եմ կանխիկ»'], ['paychanged', 'Rider switched to card (in ride)'], ['done-card', 'Complete · paid by card'], ['done-nfc-failed', 'Complete · NFC marked «Չստացվեց» → retry 1 122 ֏ or «Վերցնում եմ կանխիկ» 1 100 ֏'], ['done-declined', 'Complete · card declined → collect cash (NFC switch offered)'], ['forced', 'Forced acknowledgement'], ['offline', 'Offline · actions will sync'],
+    ['call', 'Call sheet'], ['cancel', 'Cancel or give back'], ['cancel-reason', 'Cancel · reason (after Cancel)'], ['chat', 'Chat · quick replies (ahead)'],
     ['company-inprogress', 'Company ride · in progress'], ['company-done', 'Company ride · complete, collect nothing'],
     ['changed', 'Order cancelled (mid-approach)'],
     ['destchanged', 'Destination changed by dispatcher (re-priced)'], ['sos', 'SOS · alert dispatcher / 112 (ahead)'],
@@ -493,10 +519,10 @@
   const A = ROUTES.driverToPickup.pts, B = ROUTES.pickupToDrop.pts
   const bear = (p, q) => Math.atan2((q[1] - p[1]) * Math.cos(p[0] * Math.PI / 180), q[0] - p[0]) * 180 / Math.PI
   const car = (pts, i) => `<div class="me">${carTop(bear(pts[i], pts[Math.min(i + 2, pts.length - 1)]), 'var(--brand)', 'rgb(255 255 255 / .75)')}</div>`
-  const base = ['call', 'cancel'].includes(st) ? 'arrived' : st === 'chat' ? 'enroute' : { 'company-inprogress': 'inprogress', 'company-done': 'done', 'done-pos': 'done', 'done-nfc': 'done', 'done-card': 'done', 'done-nfc-failed': 'done', 'done-declined': 'done', paychanged: 'inprogress', sos: 'inprogress' }[st] || st
+  const base = ['call', 'cancel', 'cancel-reason'].includes(st) ? 'arrived' : st === 'chat' ? 'enroute' : { 'company-inprogress': 'inprogress', 'company-done': 'done', 'done-nfc': 'done', 'done-card': 'done', 'done-nfc-failed': 'done', 'done-declined': 'done', paychanged: 'inprogress', sos: 'inprogress' }[st] || st
   const main = document.querySelector('.sheet[data-sheet]:not([hidden]):not(.top)') || (st === 'sos' ? document.querySelector('.sheet[data-s~="inprogress"]') : document.querySelector('.sheet[data-s~="arrived"]'))
   if (st === 'sos') main.hidden = false
-  if (['call', 'cancel', 'chat', 'sos'].includes(st)) { main.hidden = false; for (const el of [main, document.getElementById('fab'), document.getElementById('map'), ...document.querySelectorAll('.guide:not([hidden])')]) { el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true') } }
+  if (['call', 'cancel', 'cancel-reason', 'chat', 'sos'].includes(st)) { main.hidden = false; for (const el of [main, document.getElementById('fab'), document.getElementById('map'), ...document.querySelectorAll('.guide:not([hidden])')]) { el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true') } }
   const sheetH = main.offsetHeight
   document.getElementById('fab').style.bottom = (sheetH + 12) + 'px'
   const topPad = { enroute: 200, inprogress: 200, destchanged: 200, offline: 140 }[base] || 110

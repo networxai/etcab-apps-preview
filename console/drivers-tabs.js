@@ -64,8 +64,8 @@
         <span class="m"><span class="mono">${B.kom.phone}</span>·<span class="mono">#${B.kom.id}</span>·<span>նոր պատվերներ չեն գա ${B.kom.held}-ից</span></span>
         <span class="b"><button class="btn secondary s">Ազատել</button></span></div>
       <div class="cm"><time><small>Շբթ</small>${B.bag.time}</time><span class="a">${B.bag.pickup} → ${B.bag.drop}</span>
-        <span class="m"><span class="mono">${B.bag.phone}</span>·<span class="mono">#${B.bag.id}</span><span class="pill bad" style="height:20px"><i data-lucide="clock-alert"></i>Չեմ հասցնի · 09:31</span></span>
-        <span class="b"><button class="btn secondary s">Ազատել</button><button class="btn secondary s">Վերանշանակել <span class="kbd">A</span></button><button class="btn ghost s">Թողնել իրեն</button></span></div>
+        <span class="m"><span class="mono">${B.bag.phone}</span>·<span class="mono">#${B.bag.id}</span><span>նոր պատվերներ չեն գա 09:00-ից</span></span>
+        <span class="b"><button class="btn secondary s">Ազատել</button><button class="btn secondary s">Վերանշանակել <span class="kbd">A</span></button></span></div>
       <div class="cm"><time><small>Կիր</small>11:30</time><span class="a">Կոմիտասի պող. 49 → Էրեբունի օդանավակայան</span>
         <span class="m"><span class="mono">091 44-02-17</span>·<span class="mono">#B-0930</span>·<span>նոր պատվերներ չեն գա 11:00-ից</span></span>
         <span class="b"><button class="btn secondary s">Ազատել</button></span></div></div>
@@ -109,19 +109,20 @@
 
   /* ── ?tab=payouts «Վճարումներ» (owner 2026-10-15, drawn ahead: no ETAPI yet). Every completed non-cash, non-company
      ride is filed through ETAPI, which pays the fare to the driver's Idram — fleet drivers too. One row per ride, the
-     newest first; cash rides have no payout and company rides are never sent, so neither appears. A refunded ride shows
-     the hold-back as its own negative row (rides?pay=refund). Status is icon + word: paid, sending, held. ── */
+     newest first; cash rides have no payout and company rides are never sent, so neither appears. NFC · POS rides
+     pay out the fare alone (the 2 % fee is the company's) and only once the ride is matched in ACBA's statement (owner 2026-10-16):
+     until then the row waits, with the reason under the method. Fleet drivers only; partners have no NFC. Status is icon + word: paid, sending. ── */
   if (TAB === 'payouts') {
     setTab(5); clearBelow(); tabs.scrollLeft = tabs.scrollWidth
     const PO = [['13:12', '#R-20395', 'credit-card', 'Քարտ', 1500, ['', 'loader', 'Ուղարկվում է']], ['12:40', '#R-20388', 'smartphone', 'Apple Pay', 2200, ['ok', 'check', 'Վճարված']],
-      ['11:05', '#R-20354', 'smartphone-nfc', 'NFC', 900, ['ok', 'check', 'Վճարված']], ['10:22', '#R-20341', 'smartphone', 'Google Pay', 1300, ['ok', 'check', 'Վճարված']],
-      ['Հնգ', '#R-20217', 'credit-card', 'POS', 2600, ['ok', 'check', 'Վճարված']], ['Հնգ', '#R-20196', 'undo-2', 'Վերադարձ', -1100, ['', 'minus', 'Պահվեց']], ['Հնգ', '#R-20180', 'credit-card', 'Քարտ', 1100, ['ok', 'check', 'Վճարված']]]
+      ['11:05', '#R-20354', 'smartphone-nfc', 'NFC · POS', 900, ['ok', 'check', 'Վճարված'], 'Կանխիկ → NFC · 9:51'], ['10:22', '#R-20341', 'smartphone', 'Google Pay', 1300, ['ok', 'check', 'Վճարված']], ['14:08', '#R-20399', 'smartphone-nfc', 'NFC · POS', 1700, ['', 'clock', 'Սպասում է'], 'Կանխիկ → NFC · 14:02</small><small>ACBA քաղվածքում չկա'],
+      ['Հնգ', '#R-20217', 'smartphone-nfc', 'NFC · POS', 2600, ['ok', 'check', 'Վճարված']], ['Հնգ', '#R-20180', 'credit-card', 'Քարտ', 1100, ['ok', 'check', 'Վճարված']]]
     add(`<div class="blk"><h3><i data-lucide="wallet"></i>Idram · այս շաբաթ<span class="end faint mono" style="font-weight:400">0412 5581</span></h3>
-      <div class="sum"><b>${amd(PO.reduce((a, r) => a + r[4], 0) + 31400)}</b><span class="num">24 անկանխիկ պատվեր</span></div></div>
-    <div class="blk" style="margin-bottom:12px"><h3><i data-lucide="list"></i>Վճարումներ<span class="end faint" style="font-weight:400">ETAPI → Idram</span></h3>
+      <div class="sum"><b>${amd(PO.filter((r) => r[5][0] === 'ok' || r[5][2] === 'Ուղարկվում է').reduce((a, r) => a + r[4], 0) + 30300)}</b><span class="num">24 անկանխիկ պատվեր</span></div></div>
+    <div class="blk" style="margin-bottom:12px"><h3><i data-lucide="list"></i>Վճարումներ<span class="end faint" style="font-weight:400">ETAPI → Idram · եղանակը՝ վերջնականը</span></h3>
       <table class="lt"><colgroup><col class="w"><col><col style="width:80px"><col style="width:108px"></colgroup>
       <thead><tr><th>Երբ</th><th>Պատվեր</th><th class="n">Գումար</th><th class="n">Վիճակ</th></tr></thead><tbody>
-      ${PO.map(([t, id, ic, m, a, [tone, sic, w]]) => `<tr><td class="mono">${t}</td><td><span class="mono">${id}</span><small style="display:flex;align-items:center;gap:4px;white-space:nowrap"><i data-lucide="${ic}" style="width:12px;height:12px"></i>${m}</small></td>
+      ${PO.map(([t, id, ic, m, a, [tone, sic, w], why]) => `<tr><td class="mono">${t}</td><td><span class="mono">${id}</span><small style="display:flex;align-items:center;gap:4px;white-space:nowrap"><i data-lucide="${ic}" style="width:12px;height:12px"></i>${m}</small>${why ? `<small>${why}</small>` : ''}</td>
         <td class="n mono">${amd(a)}</td><td class="n"><span class="pill ${tone}" style="height:20px"><i data-lucide="${sic}"></i>${w}</span></td></tr>`).join('')}
       </tbody></table></div>`)
   }

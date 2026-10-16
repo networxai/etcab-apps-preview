@@ -93,7 +93,7 @@
   .ins { display: flex; align-items: center; gap: var(--s3); margin: var(--s4) 0; }
   .ins .ic { width: 48px; height: 48px; border-radius: 50%; background: var(--warn-soft); color: var(--warn); display: grid; place-items: center; flex: none; }
   .ins .ic svg { width: 24px; height: 24px; }
-  .ins .t1 { font: var(--t-title); color: var(--ink); white-space: nowrap; }
+  .ins .t1 { font: var(--t-title); color: var(--ink); }
   .ins .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; margin-top: 2px; }
   .steps3 { margin-top: var(--s1); }
   .btn-text.call { margin-top: var(--s2); }
@@ -123,6 +123,7 @@
   .pend .tg svg { width: 16px; height: 16px; }
   .pend .km { font: var(--t-secondary-strong); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .pend .t1 { font: var(--t-headline); color: var(--ink); white-space: nowrap; }
+  .pend .sec { color: var(--warn); font-weight: 700; } /* the seconds left: the reason this card outranks everything else */
   .notice.doc { text-decoration: none; color: var(--ink); }
   .notice.doc .chev { margin-left: auto; color: var(--ink-3); align-self: center; }
   .notice .s { white-space: nowrap; font-variant-numeric: tabular-nums; }
@@ -166,7 +167,7 @@
       <div class="line warn" data-s="insurance"><i data-lucide="lock"></i>Պատվերները դադարեցված են</div>
       <div class="line" data-s="insurance-sent"><i data-lucide="hourglass"></i>Ստուգում է գրասենյակը</div>
       <div class="line warn" data-s="held"><i data-lucide="pause"></i><span class="mono-t">10:05-ից</span> զբաղված եք</div>
-      <span class="mycar" data-not="noshift" aria-label="Volkswagen ID.3, 01 ET 001"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="plate">01 ET 001</span></span>
+      <span class="mycar" data-not="noshift insurance" aria-label="Volkswagen ID.3, 01 ET 001"><img class="carimg" src="assets/eco/cars/city.webp" alt=""><span class="plate">01 ET 001</span></span>
     </div>
 
     <!-- earnings hero: away, offline, lost -->
@@ -182,7 +183,7 @@
          the date orders stop (state insurance), so the banner is the early warning and links to the upload. -->
     <a class="notice warn doc" data-s="docexpiry" href="driver-account.html?state=docs" style="margin:0 0 var(--s4)"><i data-lucide="file-clock"></i><div><b>Ապահովագրությունը՝ 11 օրից</b><span class="s">Ժամկետը լրանում է <span data-eco="DOCS.aram.insurance">20.10.2026</span></span></div><i class="chev" data-lucide="chevron-right"></i></a>
     <!-- newoffer: the offer screen was left while the offer still runs; the card is the way back (HomeSheet onOpenOffer) -->
-    <a class="pend" data-s="newoffer" href="driver-offer.html" aria-label="Նոր պատվեր, Մաշտոցի պող. 37"><span class="r"><span class="tg"><i data-lucide="bell-ring"></i>Նոր պատվեր</span><span class="km">1,4 կմ</span></span><span class="t1" data-eco="RIDE.pickup">Մաշտոցի պող. 37</span></a>
+    <a class="pend" data-s="newoffer" href="driver-offer.html" aria-label="Նոր պատվեր, Մաշտոցի պող. 37"><span class="r"><span class="tg"><i data-lucide="bell-ring"></i>Նոր պատվեր</span><span class="km"><b class="sec">6 վրկ</b> · 1,4 կմ</span></span><span class="t1" data-eco="RIDE.pickup">Մաշտոցի պող. 37</span></a>
 
     <!-- active ride -->
     <a class="ride" href="driver-ride.html?state=enroute" data-s="active" aria-label="Վերադառնալ պատվերին, Մաշտոցի պող. 37">
@@ -219,13 +220,14 @@
 
     <a class="go" href="driver-shift.html?state=choose" data-s="noshift"><i data-lucide="key-round"></i>Սկսել հերթափոխը</a>
     <a class="go" href="driver-preorders.html?state=started" data-s="held"><i data-lucide="navigation"></i>Ճանապարհին եմ</a>
-    <button class="drive" data-s="location nomap newoffer docexpiry"><i data-lucide="power"></i>Դադարեցնել</button>
+    <a class="go" href="driver-offer.html" data-s="newoffer"><i data-lucide="bell-ring"></i>Բացել պատվերը</a>
+    <button class="drive" data-s="location nomap docexpiry"><i data-lucide="power"></i>Դադարեցնել</button>
     <button class="go" data-s="away"><i data-lucide="power"></i>Ընդունել պատվերներ</button>
     <button class="go" data-s="offline"><i data-lucide="power"></i>Ընդունել պատվերներ</button>
     <button class="drive" data-s="lost"><i data-lucide="power"></i>Դադարեցնել</button>
     <a class="go" href="driver-ride.html?state=enroute" data-s="active"><i data-lucide="navigation"></i>Վերադառնալ պատվերին</a>
     <button class="go ink" data-s="demo"><i data-lucide="flag"></i>Ավարտել փորձը</button>
-    <a class="go" href="driver-account.html?state=docs" data-s="insurance"><i data-lucide="camera"></i>Վերբեռնել ապահովագրությունը</a>
+    <a class="go" href="driver-account.html?state=docs" data-s="insurance"><i data-lucide="camera"></i>Վերբեռնել նորը</a>
     <button class="drive" data-s="insurance-sent"><i data-lucide="phone"></i>Զանգել դիսպետչերին</button>
     <button class="btn-text call" data-s="insurance"><i data-lucide="phone"></i>Զանգել դիսպետչերին</button>
   </section>

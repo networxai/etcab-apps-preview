@@ -20,7 +20,11 @@
      or chosen days): rides with employee, route, tariff and price, totals, Excel / CSV / PDF, the optional
      «Վճարված» mark, and «Ուղարկել ընկերությանը» inline with the company's email. ?tab=report; the old ids statement,
      rides, invoices and months open it too. Every confirmation is an armed button or a panel under its
-     row; nothing is a modal (§9.8). -->
+     row; nothing is a modal (§9.8).
+     Company console (owner 2026-10-16, company-portal/): ?tab=settings carries «Ընկերության վահանակ»: the portal on/off
+     for this company, its one login (the manager's name and phone), and the tariffs the company allows its employees
+     (the same setting the company edits in its console; the latest change wins, audited). ?tab=settings&portal=off is a
+     company without a portal: the login is closed, the allowed tariffs still govern the rider app and dispatch intake. -->
 <div class="screen" id="screen">
   <div class="main">
     <header class="bar">
@@ -163,6 +167,19 @@
         : `<span class="faint" style="font:var(--c-small);margin-top:-4px"><i data-lucide="at-sign" style="width:14px;height:14px;vertical-align:-2px"></i> <span class="mono">${CO.EMAIL}</span></span>`}
       <section class="sec">${CO.table(M)}</section></div>`
 
+  /* ── Company console block (owner 2026-10-16): portal on/off, the one manager login, allowed tariffs ── */
+  const OFF = q.get('portal') === 'off', ALLOW = ['city', 'partner', 'kids', 'business', 'van']
+  const portal = `<section class="sec" aria-label="Ընկերության վահանակ"><h3>Ընկերության վահանակ<span class="end"><span class="switch${OFF ? '' : ' on'}" role="switch" aria-checked="${!OFF}"><i class="t"></i>${OFF ? 'Անջատված' : 'Միացված'}</span></span></h3>
+      <div class="pad" style="display:flex;flex-direction:column;gap:12px">
+        ${OFF ? '<div class="notice neutral"><i data-lucide="info"></i><span>Ընկերությունը վահանակ չունի․ աշխատակիցները պատվիրում են հավելվածից և դիսպետչերով</span></div>'
+          : `<div class="fgrid"><div><label class="label">Մենեջեր</label><div class="input"><span class="val">Լուսինե Ավետիսյան</span></div></div>
+            <div><label class="label">Մենեջերի հեռախոս</label><div class="input"><i data-lucide="phone"></i><span class="val mono">091 40-22-18</span></div></div></div>
+          <p class="hint" style="margin-top:-6px">Միակ մուտքը՝ այս համարով, SMS կոդով · վերջին մուտքը՝ այսօր, <span class="mono">9:12</span></p>`}
+        <div><span class="label">Թույլատրված սակագներ</span><div class="row-flex" style="gap:6px 14px;flex-wrap:wrap">${TIERS.map((t) => `<span class="check${ALLOW.includes(t.id) ? ' on' : ''}" role="checkbox" aria-checked="${ALLOW.includes(t.id)}"><i class="b"></i>${t.name}</span>`).join('')}</div>
+          <p class="hint">${OFF ? 'Գործում է հավելվածում և դիսպետչերի պատվերներում' : 'Գործում է հավելվածում, դիսպետչերի և վահանակի պատվերներում․ ընկերությունը տեսնում և կարող է փոխել նույնը'}</p></div>
+        <div class="formfoot" style="margin-top:0"><span class="sp"></span><button class="btn primary">Պահել</button></div>
+      </div></section>`
+
   /* ── Settings (company-settings.tsx): one Save, PATCH of what changed; close is armed, reopen is one press ── */
   const settings = `<div class="tb split">
       <section class="sec"><h3>Տվյալներ</h3><div class="pad"><div class="fgrid">
@@ -176,13 +193,14 @@
         <div class="full"><label class="label">Նշում</label><div class="input"><span class="val">Ամսական հաշվետվությունը՝ ֆինանսական բաժնին</span></div></div>
       </div>
       <div class="formfoot"><span class="faint" style="font:var(--c-small)">Փոխվել է 1 դաշտ</span><span class="sp"></span><button class="btn primary">Պահել</button></div></div></section>
+      <div style="display:flex;flex-direction:column;gap:12px;min-width:0">${portal}
       <section class="sec"><h3>Ընկերության հաշվին</h3><div class="pad" style="display:flex;flex-direction:column;gap:12px">
         <span class="switch on"><i class="t"></i>Միացված</span>
         <span class="faint" style="font:var(--c-small)">Վերաբերում է միայն նոր պատվերներին</span>
         <div style="border-top:1px solid var(--line-soft);padding-top:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-start">
           <span class="faint" style="font:var(--c-small)">Նոր պատվերներն այլևս ընկերության հաշվին չեն լինի․ նախկինները մնում են</span>
           <button class="btn danger"><i data-lucide="archive"></i>Փակել ընկերությունը</button></div>
-      </div></section></div>`
+      </div></section></div></div>`
 
   const BODY = { agreement, employees, report, settings }
   document.getElementById('page').innerHTML = head + `<div class="scroll-y grow" role="tabpanel" aria-label="${TABS.find((t) => t[0] === tab)[1]}" data-truncate>${BODY[tab]}</div>`

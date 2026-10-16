@@ -97,6 +97,13 @@
   const page = (body, extra = '') => `<div class="page on-surface">${nav()}${fields(...(body.to || []))}${body.html}</div>${extra}`
 
   const M = 'Մաշտ'
+  /* The suggest list: the matched part of each Armenian result is bold whichever script was typed (hy «Մաշտ», en «mashtots», ru «Маштоц»). */
+  const suggestList = (m, tail) => `<div class="list">${rows([
+    ['map-pin', `<b>${m}</b>${tail} պողոտա`, 'Կենտրոն, Երևան', '0,8 կմ'],
+    ['landmark', 'Մատենադարան', `<b>${m}</b>${tail} պող. 53`, '1,6 կմ'],
+    ['trees', `<b>${m}</b>${tail} պուրակ`, 'Կենտրոն, Երևան', '1,2 կմ'],
+    ['map-pin', `<b>${m}</b>${tail} պող. 7`, 'Կենտրոն, Երևան', '0,9 կմ'],
+    ['map-pin', `<b>${m}</b>${tail} փողոց`, 'Աբովյան', '18 կմ']])}</div>`
   const blank = (ic, msg, btns) => `<div class="blank"><span class="big">${R.i(ic)}</span><div class="msg">${msg}</div><div class="btns">${btns}</div></div>`
 
   /* Pick on map: a real point in central Yerevan; the map is fitted so it sits at the centre of the visible map. */
@@ -134,17 +141,17 @@
           <div class="sect">Պահպանված հասցեներ</div>${rows([['house', 'Տուն', 'Կոմիտասի պող. 22', '4,3 կմ'], ['briefcase', 'Աշխատանք', 'Վազգեն Սարգսյանի 26/1', '0,4 կմ']])}
           <div class="sect">Վերջին</div>${rows([['plane', 'Զվարթնոց օդանավակայան', 'Զվարթնոց', '12 կմ'], ['history', 'Կասկադ', 'Թամանյան փողոց', '2,1 կմ']])}</div>` }) },
       { id: 'suggest', group: 'Search', label: 'Suggest', note: '2GIS suggest; the typed part is bolded where it matched (name or street)',
-        html: () => page({ to: [M], html: `<div class="list">${rows([
-          ['map-pin', `<b>${M}</b>ոցի պողոտա`, 'Կենտրոն, Երևան', '0,8 կմ'],
-          ['landmark', 'Մատենադարան', `<b>${M}</b>ոցի պող. 53`, '1,6 կմ'],
-          ['trees', `<b>${M}</b>ոցի պուրակ`, 'Կենտրոն, Երևան', '1,2 կմ'],
-          ['map-pin', `<b>${M}</b>ոցի պող. 7`, 'Կենտրոն, Երևան', '0,9 կմ'],
-          ['map-pin', `<b>${M}</b>ոցի փողոց`, 'Աբովյան', '18 կմ']])}</div>` }, R.keyboard()) },
+        html: () => page({ to: [M], html: suggestList(M, 'ոցի') }, R.keyboard()) },
+      { id: 'suggest-latin', group: 'Search', label: 'Suggest · Latin', note: 'UX audit 2026-10-16 (Postel): a tourist types «mashtots» on the English keyboard. 2GIS suggest is hy/ru/en, so the same Armenian streets come back, the matched name bolded; the rider is never told to switch keyboard',
+        html: () => page({ to: ['mashtots'], html: suggestList('Մաշտոց', 'ի') }, R.keyboard('en')) },
+      { id: 'suggest-ru', group: 'Search', label: 'Suggest · Cyrillic', note: 'UX audit 2026-10-16 (Postel): a Russian speaker types «Маштоц» on the Russian keyboard; the same Armenian results, the same bolded name',
+        html: () => page({ to: ['Маштоц'], html: suggestList('Մաշտոց', 'ի') }, R.keyboard('ru')) },
       { id: 'loading', group: 'Search', label: 'Loading', note: 'Skeleton rows hold the layout; no spinner over the list',
         html: () => page({ to: [M], html: `<div class="list" aria-busy="true" aria-label="Որոնում ենք">${[150, 200, 120, 170].map((w) =>
           `<div class="skrow" aria-hidden="true"><span class="sk c"></span><span class="lines"><span class="sk" style="width:${w}px;height:16px"></span><span class="sk" style="width:${w - 50}px;height:12px"></span></span></div>`).join('')}</div>` }, R.keyboard()) },
-      { id: 'empty', group: 'Search', label: 'No results', note: 'One line, and the map is the way out',
-        html: () => page({ to: ['Մաշտոցի 999'], html: blank('search-x', 'Ոչինչ չի գտնվել', `<button class="btn btn-quiet">${R.i('map')}Նշել քարտեզին</button>`) }) },
+      { id: 'empty', group: 'Search', label: 'No results', note: 'One line, and the map is the way out. UX audit 2026-10-15 (Postel): a house number 2GIS does not know is not a dead end — the street it does know is offered as the nearest result (the pin then goes on the building), with the map right under it. The bare «Ոչինչ չի գտնվել» blank is only for a query with no match at all',
+        html: () => page({ to: ['Մաշտոցի 999'], html: `<div class="list"><div class="sect">«Մաշտոցի 999» չգտնվեց · ամենամոտը</div>${rows([
+          ['map-pin', '<b>Մաշտոցի</b> պողոտա', 'Կենտրոն, Երևան · շենքը նշեք քարտեզին', '0,8 կմ']])}<div class="divider"></div>${onMap()}</div>` }) },
       { id: 'error', group: 'Search', label: 'Error', note: 'Search service down: retry, or pick on the map, which still works',
         html: () => page({ to: [M], html: blank('cloud-off', 'Որոնումը հասանելի չէ', `<button class="btn btn-brand">${R.i('rotate-cw')}Կրկնել</button><button class="btn btn-quiet">${R.i('map')}Նշել քարտեզին</button>`) }) },
       { id: 'pick', group: 'On the map', label: 'Pin set', note: 'Fixed centre pin; the address snaps to the nearest building and shows on the pin and in the sheet',

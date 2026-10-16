@@ -11,7 +11,7 @@
 <script src="console-audit.js"></script>
 <style>
   .content { grid-template-columns: minmax(0, 1fr) 420px; }
-  @media (max-width: 1400px) { .content { grid-template-columns: minmax(0, 1fr) 384px; } .carcell .car { display: none; } col.c-car { width: 100px !important; } col.c-doc { width: 132px !important; } col.c-typ { width: 128px !important; } .tabsl { gap: 10px; } .shift { grid-template-columns: 128px minmax(0, 1fr) !important; } }
+  @media (max-width: 1400px) { .content { grid-template-columns: minmax(0, 1fr) 384px; } .carcell .car { display: none; } col.c-car { width: 100px !important; } col.c-doc { width: 132px !important; } col.c-typ { width: 160px !important; } .tabsl { gap: 10px; } .shift { grid-template-columns: 128px minmax(0, 1fr) !important; } }
   .dt td { height: 52px; }
   /* ETAPI block (owner 2026-10-15): the two ids ETAPI needs per driver. Mono, fixed label column. */
   .etp dl { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 6px 12px; font: var(--c-body); margin-top: 8px; align-items: center; }
@@ -44,7 +44,7 @@
         </div>
         <div class="scroll-y grow">
           <table class="tbl dt">
-            <colgroup><col><col class="c-car" style="width:150px"><col style="width:132px"><col class="c-doc" style="width:132px"><col class="c-typ" style="width:132px"></colgroup>
+            <colgroup><col><col class="c-car" style="width:150px"><col style="width:132px"><col class="c-doc" style="width:132px"><col class="c-typ" style="width:168px"></colgroup>
             <thead><tr><th>Վարորդ</th><th>Մեքենա</th><th>Վիճակ</th><th>Փաստաթղթեր</th><th class="r">Այսօր</th></tr></thead>
             <tbody id="rows"></tbody>
           </table>
@@ -80,7 +80,7 @@
     return `<tr class="${i === sel ? 'on' : ''}"><td><span class="who"><span class="av">${d.ini}</span><span class="nm"><b>${d.name}</b><span>${d.phone}</span></span></span></td>
       <td>${d.state === 'off' ? '<span class="faint">—</span>' : `<span class="carcell"><span class="car xs">${carImg(d.tier)}</span><span class="plate">${d.plate}</span></span>`}</td>
       <td>${stPill(stateOf(d, i))}</td><td>${i === 1 ? '<span class="pill warn" title="ՀՎՀՀ և Idram ID լրացված չեն · անկանխիկը ETAPI-ին չի գնա"><i data-lucide="receipt-text"></i>ՀՎՀՀ չկա</span>' : `<span class="pill ${dt}"><i data-lucide="${di}"></i>${dw}</span>`}</td>
-      <td class="r mono">${n ? `<span class="faint">${n} ·</span> ${amd(f)}` : '<span class="faint">—</span>'}</td></tr>`
+      <td class="r mono">${n ? `<span class="faint">${n} պ. ·</span> ${amd(f)}` : '<span class="faint">—</span>'}</td></tr>`
   }).join('')
 
   const d = FLEET[sel], T = tierById(d.tier)

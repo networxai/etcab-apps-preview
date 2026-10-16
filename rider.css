@@ -175,3 +175,7 @@
 .spin { width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid currentColor; border-right-color: transparent; animation: spin .8s linear infinite; flex: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .spin, .sk::after { animation: none; } }
+
+/* Under the payment list (owner 2026-10-16): NFC is paid on the driver's phone in the bank's ACBA app, fleet cars only. */
+.paynote { display: flex; gap: var(--s2); align-items: flex-start; margin-top: var(--s3); font: var(--t-secondary); color: var(--ink-2); }
+.paynote svg { width: 16px; height: 16px; flex: none; margin-top: 2px; }

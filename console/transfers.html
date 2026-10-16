@@ -75,7 +75,7 @@
 
   /* Rows: ECO's four plus page-local ones so each tab reads at a real density. */
   const LOCAL = [
-    { id: 'T-0033', dir: 'dep', flight: 'FR 7514', to: 'Միլան', time: '05:30', day: 'Կիր', passenger: 'Լիլիթ Բաբայան', phone: '093 61-08-24', pickup: 'Արաբկիր 31', drop: 'Զվարթնոց օդանավակայան', fare: 6000, pay: 'cash', status: 'unassigned', depart: '08:25' },
+    { id: 'T-0033', dir: 'dep', flight: 'FR 7514', to: 'Միլան', time: '05:30', day: 'Կիր', passenger: 'Լիլիթ Բաբայան', phone: '093 61-08-24', pickup: 'Արաբկիր 31', drop: 'Զվարթնոց օդանավակայան', fare: 6000, pay: 'nfc', status: 'unassigned', depart: '08:25' },
     { id: 'T-0034', dir: 'arr', flight: 'SU 1860', from: 'Մոսկվա', time: '11:05', day: 'Երկ', land: '10:35', passenger: 'Олег Ковалёв', phone: '+7 925 118-40-27', pickup: 'Զվարթնոց օդանավակայան', drop: 'Վազգեն Սարգսյանի 26/1', fare: 6000, pay: 'company', company: true, status: 'unassigned' },
     { id: 'T-0026', dir: 'dep', flight: 'QR 290', to: 'Դոհա', time: '01:10', day: '8 հոկտ.', passenger: 'Մարինե Ադամյան', phone: '099 40-17-63', pickup: 'Թումանյան 21', drop: 'Զվարթնոց օդանավակայան', fare: 6000, pay: 'cash', status: 'done', driver: { short: 'Դավիթ Կ.', plate: '09 DK 118' }, depart: '04:05' },
     { id: 'T-0025', dir: 'arr', flight: 'LH 1820', from: 'Մյունխեն', time: '03:05', day: '7 հոկտ.', land: '02:35', passenger: 'Hans Becker', phone: '+49 171 552 0193', pickup: 'Զվարթնոց օդանավակայան', drop: 'Ամիրյան 1, Մարիոթ հյուրանոց', fare: 6000, pay: 'company', company: true, status: 'done', driver: { short: 'Սուրեն Մ.', plate: '22 OU 447' } },
@@ -95,7 +95,7 @@
       <td><span class="two2"><b>${x.passenger}</b><span class="mono">${x.phone}</span></span></td>
       <td><span class="two2"><b>${x.pickup}</b><span>→ ${x.drop}</span></span></td>
       <td>${x.driver ? `<span class="two2"><b>${x.driver.short}</b><span><span class="plate" style="height:18px;font-size:11px">${x.driver.plate}</span></span></span>` : `<span class="faint">Ավտոմատ</span>`}</td>
-      ${SEL ? '' : `<td>${x.company ? `<span class="pill"><i data-lucide="building-2"></i>${ECO.COMPANY.short}</span>` : '<span class="faint">Կանխիկ</span>'}</td>`}
+      ${SEL ? '' : `<td>${x.company ? `<span class="pill"><i data-lucide="building-2"></i>${ECO.COMPANY.short}</span>` : x.pay === 'nfc' ? '<span class="pill"><i data-lucide="smartphone-nfc"></i>NFC</span>' : '<span class="faint">Կանխիկ</span>'}</td>`}
       <td class="m">${amd(x.fare)}</td>
       ${SEL ? '' : `<td><span class="pill ${ST[x.status][0]}"><i class="d"></i>${ST[x.status][1]}</span></td>`}
       <td style="text-align:right"><a class="btn ghost s icon" href="${U({ t: x.id })}" aria-label="Բացել ${x.id}"><i data-lucide="chevron-right"></i></a></td></tr>`
@@ -114,8 +114,8 @@
       <div class="s6"><label class="label">Որտեղից</label><span class="input l"><i data-lucide="plane-landing"></i><span class="val">Զվարթնոց օդանավակայան</span><span class="faint">Ժամանման սրահ · ելք 2</span></span></div>
       <div class="s6"><label class="label">Ուր</label><span class="input l"><i data-lucide="map-pin"></i><span class="val">Վազգեն Սարգսյանի 26/1</span><i data-lucide="circle-check" style="color:var(--ok)"></i></span></div>
       <div class="s4"><label class="label">Ցուցանակ <span class="faint" style="font-weight:400">· ոչ պարտադիր</span></label><span class="input"><span class="val mono">ARARAT SOFT · O. KOVALEV</span></span></div>
-      <div class="s4"><label class="label">Վճարող</label><div class="seg" role="radiogroup" aria-label="Վճարող"><button role="radio" aria-checked="false">Կանխիկ</button><button class="on" role="radio" aria-checked="true">Ընկերություն</button></div></div>
-      <div class="s4"><label class="label">Ընկերություն</label><span class="input"><i data-lucide="building-2"></i><span class="val">${ECO.COMPANY.name}</span><i data-lucide="chevron-down"></i></span></div>
+      <div class="s6"><label class="label">Վճարում</label><div class="seg" role="radiogroup" aria-label="Վճարում"><button role="radio" aria-checked="false">Կանխիկ</button><button role="radio" aria-checked="false">NFC</button><button class="on" role="radio" aria-checked="true">Ընկերություն</button></div><div class="hint">Քարտ չկա · NFC՝ միայն ավտոպարկի մեքենաներով, +2 % · «առանց կանխիկի» կանոնը վերաբերում է միայն հավելվածի պատվերներին</div></div>
+      <div class="s6"><label class="label">Ընկերություն</label><span class="input"><i data-lucide="building-2"></i><span class="val">${ECO.COMPANY.name}</span><i data-lucide="chevron-down"></i></span></div>
     </div>
     <div class="foot"><button class="btn primary"><i data-lucide="check"></i>Ստեղծել <span class="kbd">↵</span></button><a class="btn secondary" href="${U({})}">Չեղարկել</a><span class="faint">Վարորդին կհասնի որպես նախնական պատվեր</span></div>
   </div>`
@@ -148,7 +148,7 @@
         <div class="blk"><h3><i data-lucide="route"></i>Երթուղի և գին</h3><dl class="kv2">
           <dt>Որտեղից</dt><dd>${X.pickup}</dd><dt>Ուր</dt><dd>${X.drop}</dd>
           <dt>Գին</dt><dd><b class="mono">${amd(X.fare)}</b> <span class="faint">· ${X.km ? ECO.km(X.km) : ''}</span></dd>
-          <dt>Վճարող</dt><dd>${X.company ? 'Ընկերություն · ' + ECO.COMPANY.name : 'Կանխիկ'}</dd></dl></div>
+          <dt>Վճարող</dt><dd>${X.company ? 'Ընկերություն · ' + ECO.COMPANY.name : X.pay === 'nfc' ? 'NFC · ավտոպարկի մեքենա' : 'Կանխիկ'}</dd></dl></div>
         <div class="blk"><h3><i data-lucide="user-check"></i>Վարորդ</h3>${X.driver ? `<div class="drvc"><span class="av">${X.driver.short.slice(0, 1)}${X.driver.short.split(' ')[1][0]}</span><span class="nm2"><b>${X.driver.short}</b><span class="faint" style="font:var(--c-small)">Կարող է մեկնել <span class="mono">${X.held}</span>-ից</span></span><span class="plate">${X.driver.plate}</span><button class="btn ghost icon s" aria-label="Զանգել վարորդին"><i data-lucide="phone"></i></button></div>` : '<span class="faint">Ավտոմատ որոնում՝ 15 րոպե առաջ</span>'}</div>
         <div class="blk"><h3><i data-lucide="history"></i>Պատմություն</h3><div class="tl">
           <div><span class="mono">${(X.booked || '').replace(/^.*, /, '')}</span><i class="dt2 on"></i><span>Ստեղծեց ${X.by || 'Անի Դավթյան'}</span></div>

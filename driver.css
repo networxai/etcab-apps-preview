@@ -129,7 +129,7 @@
 /* ── Countdown / progress ring ── */
 .dring { position: relative; flex: none; }
 .dring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
-.dring .in { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.dring .in { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; } /* value and unit boxes overlapped by 1px */
 .dring .v { font: 600 15px/18px var(--font); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .dring .u { font: 500 11px/14px var(--font); color: var(--ink-2); white-space: nowrap; }
 

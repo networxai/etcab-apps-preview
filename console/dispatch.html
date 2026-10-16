@@ -42,6 +42,7 @@
   .btn.xs { height: 24px; padding: 0 8px; font: var(--c-label); gap: 6px; }
   .btn.xs .kbd { height: 16px; min-width: 16px; font-size: 11px; }
   .btn.xs.icon { width: 24px; padding: 0; }
+  .r.p .btn.xs { height: 28px; } .r.p .btn.xs.icon { width: 28px; }
   .r.p { grid-template-areas: 'a age' 'm m' 'acts acts'; }
   .r.p .a { grid-area: a; } .r.p .age { grid-area: age; } .r.p .m { grid-area: m; } .r.p .acts { grid-area: acts; justify-content: flex-start; height: 28px; align-items: flex-end; }
   .sla { position: absolute; left: 3px; bottom: -1px; height: 2px; background: var(--lane); }
@@ -74,11 +75,6 @@
   .bk .x { align-self: start; }
   .bk .acts { grid-column: 2 / 4; display: flex; gap: 4px; align-items: flex-end; height: 28px; }
   .bk.p { --lane: var(--lane-problems); }
-  .q-book { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 12px 12px 16px; border-bottom: 1px solid var(--line-soft); background: var(--surface); position: relative; }
-  .q-book .full { grid-column: 1 / 3; }
-  .q-book .foot { display: flex; align-items: center; gap: 8px; min-height: 28px; }
-  .q-book .reads { flex: 1; min-width: 0; font: var(--c-small); color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .q-book .reads .mono { color: var(--ink); font-weight: 500; }
   .dtp { position: absolute; left: 16px; top: calc(100% - 4px); z-index: 12; width: 304px; background: var(--surface); border-radius: var(--r-ctl); box-shadow: var(--e2), 0 0 0 1px var(--line-soft); padding: 8px; }
   .dtp .mh { display: flex; align-items: center; justify-content: space-between; font: 600 13px/18px var(--font); margin-bottom: 6px; }
   .dtp .grid7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
@@ -120,13 +116,48 @@
   .tierb.off .car { opacity: .45; }
   .tierb.off .p { color: var(--ink-faint); }
 
+  /* Team review 2026-10-16: the calendar inside New order, the driver picker, the edit side panel, the strip's search, the car card */
+  .input.ro { background: var(--surface-alt); box-shadow: inset 0 0 0 1px var(--line-soft); }
+  .dtp.flow { position: static; width: auto; margin-top: -4px; }
+  .dpick { border-radius: var(--r-ctl); background: var(--surface); box-shadow: var(--e2), 0 0 0 1px var(--line-soft); padding: 4px; display: flex; flex-direction: column; gap: 2px; }
+  .dpick > div[role=option] { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border-radius: 6px; font: var(--c-body); white-space: nowrap; min-width: 0; }
+  .dpick > div[role=option].on { background: var(--surface-alt); }
+  .dpick > div[role=option].off { color: var(--ink-faint); }
+  .dpick .end { margin-left: auto; font: var(--c-small); color: var(--ink-faint); overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .dpick > .input { margin-bottom: 2px; }
+  .dpick p { display: flex; gap: 6px; align-items: flex-start; padding: 6px 8px 4px; margin-top: 2px; border-top: 1px solid var(--line-soft); font: var(--c-small); color: var(--ink-muted); }
+  .dpick p svg { width: 14px; height: 14px; flex: none; margin-top: 1px; color: var(--ink-faint); }
+  .input .btn.xs { margin-left: auto; flex: none; }
+  .r .tag.sw { gap: 4px; margin-left: auto; font: 500 12px/16px var(--mono); }
+  .r .tag.sw svg { width: 12px; height: 12px; }
+  .card:has(> .epanel) { position: relative; }
+  .epanel { position: absolute; z-index: 8; top: 0; right: 0; bottom: 0; width: min(380px, 100%); display: flex; flex-direction: column; background: var(--surface); border-left: 1px solid var(--line-soft); box-shadow: var(--e2); border-radius: 0 var(--r-card) var(--r-card) 0; }
+  .epanel .eh { display: flex; align-items: center; gap: 8px; height: var(--h-bar); padding: 0 8px 0 var(--inset); border-bottom: 1px solid var(--line-soft); flex: none; }
+  .epanel .eh h2 { font: var(--c-head); }
+  .epanel .eh .end { margin-left: auto; }
+  .epanel .eb { display: flex; flex-direction: column; gap: 12px; padding: 12px var(--inset); }
+  .epanel .ef { display: flex; gap: 8px; padding: 10px 88px 10px var(--inset); /* clear of the 2GIS attribution under the panel */ border-top: 1px solid var(--line-soft); flex: none; }
+  .epanel .ef .btn.primary { flex: 1; justify-content: center; }
+  .payrec { display: flex; align-items: center; gap: 6px; margin-top: 6px; font: var(--c-strong); color: var(--ink); }
+  .payrec svg { width: 14px; height: 14px; color: var(--ink-faint); }
+  .strip .list.fs { align-items: center; }
+  .fsearch { flex: none; width: 320px; display: flex; flex-direction: column; gap: 6px; }
+  .fsearch p { font: var(--c-small); }
+  .carcard { position: absolute; z-index: 7; width: 236px; padding: 10px 12px; border-radius: var(--r-ctl); background: var(--surface); box-shadow: var(--e2), 0 0 0 1px var(--line-soft); pointer-events: none; }
+  .carcard[hidden] { display: none; }
+  .carcard .ch { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .carcard .cn { font: var(--c-strong); margin: 6px 0; }
+  .carcard dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font: var(--c-small); }
+  .carcard dt { color: var(--ink-muted); } .carcard dd { text-align: right; white-space: nowrap; }
+  .mk-car:focus-visible, .mk-car.hov { outline: 2px solid var(--focus-ring); outline-offset: -4px; border-radius: 50%; }
+
   /* Intake */
   .in .card-b { display: flex; flex-direction: column; gap: 12px; padding: 12px var(--inset); }
   .pinrow { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 8px; align-items: center; }
   .pin { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font: 600 11px/1 var(--font); background: var(--ink); color: var(--surface); }
   .pin.b { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
   .cust { border-radius: var(--r-ctl); background: var(--surface-alt); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
-  .cust .t { display: flex; align-items: center; gap: 8px; font: var(--c-strong); white-space: nowrap; }
+  .cust .t { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; font: var(--c-strong); white-space: nowrap; }
   .cust .t .faint { font: var(--c-small); }
   .cust .rec { display: flex; gap: 4px; flex-wrap: wrap; }
   .cust .rec .chip { height: 24px; font: var(--c-small); padding: 0 8px; }
@@ -139,7 +170,9 @@
   .tierb .n { font: var(--c-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tierb .p { font: 500 12px/16px var(--font); color: var(--ink-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .tierb.on { box-shadow: inset 0 0 0 2px var(--ink); }
-  .tierb.any { grid-template-columns: 40px minmax(0, 1fr); }
+  .tierb.any { grid-template-columns: 20px minmax(0, 1fr) auto; }
+  .tierb .tk { display: block; text-align: right; font: 400 11px/11px var(--mono); color: var(--ink-faint); font-style: normal; }
+  .tierb.any .anyic { width: 20px; }
   .tierb .anyic { width: 40px; display: grid; place-items: center; color: var(--ink-faint); }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .actbar { margin-top: auto; display: flex; align-items: center; gap: 8px; padding: 10px var(--inset); border-top: 1px solid var(--line-soft); flex: none; }
@@ -279,23 +312,24 @@
     }
     h += '</div>'
   }
-  /* ── Views (mock switches): ?tab=scheduled · ?intake=booking (the booking form inside the scheduled lane, as in the
-     real console: BookingIntake sits at the top of ScheduledLaneSection) · ?intake=company · ?intake=price ── */
+  /* ── Views (mock switches): ?tab=scheduled · ?intake=booking (New order with a future «Երբ»: every order, pre-orders
+     included, is created in New order, F2 — the scheduled lane has no form of its own, team review 2026-10-16, C1) · ?intake=company · ?intake=price ── */
   const QS = new URLSearchParams(location.search)
   const INTAKE = QS.get('intake')
   const TAB = QS.get('tab') === 'scheduled' || INTAKE === 'booking' ? 'scheduled' : 'now'
   const B = ECO.BOOKINGS
-  /* The lane, ordered by the promised hour (scheduled-lane.tsx). Five bookings from ECO plus one local row: Դավիթ Կ.'s
-     10:00 airport run, which he set off for at 09:35 — the same car the Active lane shows «Ճանապարհին» to Հալաբյան 41.
-     problem: driver_blocked = problem.driver_blocked (real); cantmake = the driver's «Չեմ հասցնի» request (owner decision
-     2026-10-12, drawn ahead: no API yet). */
+  /* The lane, ordered by the promised hour (scheduled-lane.tsx) — except a row that needs a human, which leads the lane
+     as Problems leads the Now tab (UX audit 2026-10-15: a departure from code order). Five bookings from ECO plus one
+     local row: Դավիթ Կ.'s 10:00 airport run, which he set off for at 09:35 — the same car the Active lane shows
+     «Ճանապարհին» to Հալաբյան 41. problem: driver_blocked = problem.driver_blocked (real). There is no «Չեմ հասցնի»:
+     a driver cannot refuse a pre-order, the dispatcher handles it (team review 2026-10-16, D1). */
   const BROWS = [
     { t: '10:00', a: 'Հալաբյան 41', d: 'Զվարթնոց օդանավակայան', ph: '041 33-21-90', drv: 'Դավիթ Կ.', pl: '09 DK 118', started: '09:35' },
     { t: B.kom.time, a: B.kom.pickup, d: B.kom.drop, ph: B.kom.phone, drv: B.kom.driver.short, pl: B.kom.driver.plate, from: B.kom.held },
     /* Transfers (owner 2026-10-14) ride the same lane, badged with the flight. The phone column is the booker's
        (a foreign passenger number would not fit the mono column; the full passenger record is on Transfers). */
     ...[ECO.TRANSFERS[1], ECO.TRANSFERS[2]].map((x) => ({ t: x.time, a: x.pickup, d: x.drop, ph: x.phone.startsWith('+') ? '010 59-12-34' : x.phone, trf: x.flight, drv: x.driver && x.driver.short, pl: x.driver && x.driver.plate, from: x.driver ? x.held : null, tier: 'Transfer', auto: x.driver ? null : '23:25' })),
-    { day: 'Շբթ', t: B.bag.time, a: B.bag.pickup, d: B.bag.drop, ph: B.bag.phone, drv: B.bag.driver.short, pl: B.bag.driver.plate, cant: '09:31' },
+    { day: 'Շբթ', t: B.bag.time, a: B.bag.pickup, d: B.bag.drop, ph: B.bag.phone, drv: B.bag.driver.short, pl: B.bag.driver.plate },
     { day: 'Շբթ', t: B.air.time, a: B.air.pickup, d: B.air.drop, ph: B.air.phone, drv: B.air.driver.short, pl: B.air.driver.plate, from: B.air.held, sel: INTAKE !== 'booking' },
     { day: 'Շբթ', t: ECO.TRANSFERS[0].time, a: ECO.TRANSFERS[0].pickup, d: ECO.TRANSFERS[0].drop, ph: ECO.CUSTOMER.phone, trf: ECO.TRANSFERS[0].flight, drv: ECO.TRANSFERS[0].driver.short, pl: ECO.TRANSFERS[0].driver.plate, from: ECO.TRANSFERS[0].held },
     { day: 'Կիր', tier: B.sun.tier, auto: B.sun.activates, t: B.sun.time, a: B.sun.pickup, d: B.sun.drop, ph: B.sun.phone, blocked: 1 },
@@ -312,36 +346,19 @@
       : r.from ? `<span class="st">Կարող է մեկնել <span class="mono">${r.from}</span>-ից</span>`
       /* Owner Q1: a pre-order with no driver is searched AUTOMATICALLY among its tariff's drivers when it comes due. */
       : r.auto ? `<span class="st"><i data-lucide="${r.blocked ? 'user-x' : 'search'}"></i>${r.blocked ? 'Վարորդն արգելափակված է · ' : ''}ավտոմատ որոնում · ${r.tier} · <span class="mono">${r.auto}</span>-ին</span>` : ''
-    const ctx = r.cant ? `<span class="why trunc">Վարորդը չի հասցնի · ${r.drv} · <span class="mono">${r.cant}</span></span>`
-      : r.why ? `<span class="why trunc">${r.why}</span>` : `${r.trf ? `<span class="co-badge"><i data-lucide="plane"></i><span class="mono">${r.trf}</span></span>` : ''}<span class="trunc">${r.d}</span>`
-    const who = r.cant || r.why ? '' : r.drv ? `<span class="drv"><i data-lucide="user-check"></i>${r.drv}</span>`
+    const ctx = r.why ? `<span class="why trunc">${r.why}</span>` : `${r.trf ? `<span class="co-badge"><i data-lucide="plane"></i><span class="mono">${r.trf}</span></span>` : ''}<span class="trunc">${r.d}</span>`
+    const who = r.why ? '' : r.drv ? `<span class="drv"><i data-lucide="user-check"></i>${r.drv}</span>`
       : r.co ? `<span class="co-badge"><i data-lucide="building-2"></i>${ECO.COMPANY.short}</span>` : '<span class="none">Ավտոմատ</span>'
-    const acts = r.cant ? `<span class="acts"><button class="btn secondary xs">Ազատել</button><button class="btn secondary xs">Վերանշանակել <span class="kbd">A</span></button><button class="btn ghost xs icon" aria-label="Զանգել վարորդին"><i data-lucide="phone"></i></button></span>`
-      : r.why ? `<span class="acts"><button class="btn secondary xs">Նշանակել <span class="kbd">A</span></button><button class="btn ghost xs icon" aria-label="Զանգել ուղևորին"><i data-lucide="phone"></i></button></span>` : ''
-    return `<div class="bk${r.cant || r.why ? ' p' : ''}${r.sel ? ' sel' : ''}" tabindex="0"><time>${r.day ? `<span class="dd">${r.day}</span>` : ''}${r.t}</time>
+    const acts = r.why ? `<span class="acts"><button class="btn secondary xs">Նշանակել <span class="kbd">A</span></button><button class="btn ghost xs icon" aria-label="Զանգել ուղևորին"><i data-lucide="phone"></i></button></span>` : ''
+    return `<div class="bk${r.why ? ' p' : ''}${r.sel ? ' sel' : ''}" tabindex="0"><time>${r.day ? `<span class="dd">${r.day}</span>` : ''}${r.t}</time>
       <span class="a">${r.a}</span>
       <button class="btn ghost xs x" aria-label="${named}">Չեղարկել</button>
       <span class="m"><span class="ph">${r.ph}</span>${ctx}${who}</span>${l1 ? `<span class="m3">${l1}</span>` : ''}${acts}</div>`
   }
-  /* DateTimePicker (ui/date-time-picker.tsx): typed «dd.mm hh:mm» in the console's language, a calendar on demand,
-     the three quick picks, and the read-back under the form. October 2026, Monday first; today Friday the 9th. */
-  const picker = () => {
-    let g = ['Երկ', 'Երք', 'Չրք', 'Հնգ', 'Ուրբ', 'Շբթ', 'Կիր'].map((w) => `<span class="wd">${w}</span>`).join('')
-    g += '<span></span><span></span><span></span>'
-    for (let d = 1; d <= 31; d++) g += `<span class="d${d < 9 ? ' past' : ''}${d === 9 ? ' today' : ''}${d === 10 ? ' on' : ''}">${d}</span>`
-    return `<div class="dtp" data-overlay role="dialog" aria-label="Օրացույց"><div class="mh"><button class="btn ghost icon s" aria-label="Նախորդ ամիս"><i data-lucide="chevron-left"></i></button><span>Հոկտեմբեր 2026</span><button class="btn ghost icon s" aria-label="Հաջորդ ամիս"><i data-lucide="chevron-right"></i></button></div>
-      <div class="grid7">${g}</div><div class="quick"><span class="chip">+30 ր</span><span class="chip">Մեկ ժամից</span><span class="chip">Վաղն առավոտյան</span></div><div class="ft">⏎ հաստատել · Esc փակել</div></div>`
-  }
-  const bookingForm = (filled) => `<form class="q-book" aria-label="Նոր նախնական պատվեր" onsubmit="return false">
-      <div><label class="label">Հեռախոս</label><div class="input"><i data-lucide="phone"></i>${filled ? `<span class="val mono">${B.air.phone}</span>` : '<span class="val ph">օր. 091 23 45 67</span>'}</div></div>
-      <div><label class="label">Որտեղից</label><div class="input">${filled ? `<span class="val">${B.air.pickup}</span>` : '<span class="val ph">օր. Կոմիտաս 12</span>'}</div></div>
-      ${filled ? `<div class="full billing"><div class="seg" role="radiogroup" aria-label="Վճարող"><button role="radio" aria-checked="false">Ընկերություն · ${ECO.COMPANY.short}</button><button class="on" role="radio" aria-checked="true">Անձնական</button></div></div>` : ''}
-      <div class="full" style="position:relative"><label class="label">Ե՞րբ</label><div class="input${filled ? ' focus' : ''}"><i data-lucide="calendar"></i>${filled ? '<span class="val mono">10.10 08:30</span><button class="btn ghost icon s" aria-label="Մաքրել"><i data-lucide="x"></i></button>' : '<span class="val ph mono">օր. 25.10 18:30</span>'}<button class="btn ghost icon s" aria-label="Օրացույց"><i data-lucide="calendar-days"></i></button></div>${QS.get('picker') ? picker() : ''}</div>
-      <div class="full foot">${filled ? '<p class="reads">Նստեցում՝ <span class="mono">Շբթ, 10 հոկտ., 08:30</span></p>' : '<span class="reads"></span>'}<button class="btn secondary s">Ստեղծել պատվեր</button></div></form>`
-
   document.getElementById('qtabs').innerHTML = `<button class="${TAB === 'now' ? 'on' : ''}" role="tab" aria-selected="${TAB === 'now'}">Հիմա <span class="c num">13</span></button><button class="${TAB === 'scheduled' ? 'on' : ''}" role="tab" aria-selected="${TAB === 'scheduled'}">Նախնական <span class="c num">${BROWS.length}</span></button>`
-  if (TAB === 'scheduled') h = bookingForm(INTAKE === 'booking') + `<div class="l-scheduled"><div class="lane-h"><i data-lucide="calendar-clock"></i>Նախնական պատվերներ <span class="c num">${BROWS.length}</span><span class="end">ըստ նստեցման ժամի</span></div>${BROWS.map(bookingRow).join('')}</div>`
+  if (TAB === 'scheduled') h = `<div class="l-scheduled"><div class="lane-h"><i data-lucide="calendar-clock"></i>Նախնական պատվերներ <span class="c num">${BROWS.length}</span><span class="end">խնդիրները՝ վերևում · ապա ըստ ժամի</span></div>${[...BROWS.filter((r) => r.why), ...BROWS.filter((r) => !r.why)].map(bookingRow).join('')}</div>`
   document.getElementById('queue').innerHTML = h
+  if (TAB === 'scheduled' || QS.get('state') === 'problems' || QS.get('panel') === 'pay') document.getElementById('queue').setAttribute('data-peek', '') /* a long list is cut by its own scroll edge, not by an overlap */
 
   /* ── Intake (intake-panel.tsx). Phone and pickup are the only required fields (§9.1). Band 3 is the real sub-tabs
      (intake-sub-tabs.tsx): Քարտեզ · Նշումներ · Համաձայնեցված գին — each a createRideSchema field; the map tab here
@@ -373,18 +390,19 @@
     <div><label class="label">Սակագին <span class="faint" style="font-weight:400">· 1–8</span></label><div class="tiers" id="tiers" data-truncate></div></div>
     <div class="two">
       <div><label class="label">Երբ</label><div class="input"><i data-lucide="clock"></i><span class="val">Հիմա</span><i data-lucide="chevron-down"></i></div></div>
-      <div><label class="label">Վճարում</label><div class="input"><i data-lucide="${CO ? 'building-2' : 'banknote'}"></i><span class="val">${CO ? 'Ընկերություն' : 'Կանխիկ'}</span><i data-lucide="chevron-down"></i></div></div>
+      <div><label class="label">Վճարում</label>${CO ? '<div class="input" aria-readonly="true" style="background:var(--surface-alt);box-shadow:inset 0 0 0 1px var(--line-soft)"><i data-lucide="building-2"></i><span class="val">Ընկերություն</span><i data-lucide="lock"></i></div>' : '<div class="input"><i data-lucide="banknote"></i><span class="val">Կանխիկ</span><i data-lucide="chevron-down"></i></div>'}</div>
     </div>
+    <div><label class="label">Վարորդ <span class="faint" style="font-weight:400">· ոչ պարտադիր</span></label><div class="input" id="drvf"><i data-lucide="search"></i><span class="val">Ավտոմատ ընտրություն</span><i data-lucide="chevron-down"></i></div></div>
     ${subTabs()}`
 
   /* Tier picker: prices for the typed phone order, Կոմիտաս 12 → Հալաբյան 41 (3,6 կմ, 9 ր). The walkthrough trip is in the queue. */
   const IK = CO ? B.co.km : 3.6, IM = CO ? B.co.min : 9
   document.getElementById('sumfare').textContent = INTAKE === 'price' ? amd(2400) : amd(fare(TIERS[0], IK, IM))
   document.getElementById('sumtxt').textContent = INTAKE === 'price' ? 'Համաձայնեցված գին' : `${TIERS[0].name} · ${ECO.dec(IK)} կմ · ${IM} ր`
-  let t = `<button class="tierb any"><span class="anyic"><i data-lucide="locate-fixed"></i></span><span class="n">Մոտակա ազատը</span></button>`
-  TIERS.forEach((x, i) => { t += `<button class="tierb${i === 0 ? ' on' : ''}" aria-label="${x.name}, ${i + 2}"><span class="car xs">${carImg(x.id)}</span><span class="n">${x.name.replace('Eco ', '')}</span><span class="p">${amd(fare(x, IK, IM))}</span></button>` })
+  let t = `<button class="tierb any"><span class="anyic"><i data-lucide="locate-fixed"></i></span><span class="n">Մոտակա ազատը</span><span class="p"><i class="tk">1</i></span></button>`
+  TIERS.forEach((x, i) => { t += `<button class="tierb${i === 0 ? ' on' : ''}" aria-label="${x.name}, ${i + 2}"><span class="car xs">${carImg(x.id)}</span><span class="n">${x.name.replace('Eco ', '')}</span><span class="p"><i class="tk">${i + 2}</i>${amd(fare(x, IK, IM))}</span></button>` })
   /* Owner 2026-10-14: «Transfer» is a tariff (key 8). Choosing it turns the form into the transfer form (?intake=transfer). */
-  t += `<a class="tierb" href="?theme=${THEME}&intake=transfer" style="text-decoration:none;color:inherit" aria-label="${ECO.TRANSFER_TIER.name}, 8"><span class="anyic"><i data-lucide="plane-landing"></i></span><span class="n">${ECO.TRANSFER_TIER.name}</span><span class="p">${amd(ECO.TRANSFER_TIER.fare)}</span></a>`
+  t += `<a class="tierb" href="?theme=${THEME}&intake=transfer" style="text-decoration:none;color:inherit" aria-label="${ECO.TRANSFER_TIER.name}, 8"><span class="anyic"><i data-lucide="plane-landing"></i></span><span class="n">${ECO.TRANSFER_TIER.name}</span><span class="p"><i class="tk">8</i>${amd(ECO.TRANSFER_TIER.fare)}</span></a>`
   document.getElementById('tiers').innerHTML = t
   /* ── ?intake=transfer (owner 2026-10-14): the dispatcher picks «Transfer» (key 8) while a company's contact is on the
      line booking for a guest (ECO.TRANSFERS[0], T-0031). Phone and pickup stay the only required fields of the ride;
@@ -395,7 +413,7 @@
     document.getElementById('intake').innerHTML = `
     <div><label class="label">Հեռախոս · զանգողը</label><div class="input l"><i data-lucide="phone"></i><span class="val mono">${ECO.CUSTOMER.phone}</span></div></div>
     <div class="cust"><div class="t"><span>${ECO.COMPANY.rider}</span><span class="co-badge"><i data-lucide="building-2"></i>${ECO.COMPANY.short}</span></div></div>
-    <div><label class="label">Սակագին</label><div class="tiers"><span class="tierb any"><span class="anyic"><i data-lucide="arrow-left"></i></span><span class="n">Մյուսները</span></span><span class="tierb on" style="grid-template-columns:40px minmax(0,1fr) auto"><span class="anyic"><i data-lucide="plane-landing"></i></span><span class="n">${ECO.TRANSFER_TIER.name}</span><span class="p">${amd(TF.fare)}</span></span></div></div>
+    <div><label class="label">Սակագին</label><div class="tiers"><span class="tierb any"><span class="anyic"><i data-lucide="arrow-left"></i></span><span class="n">Մյուսները</span></span><span class="tierb on" style="grid-template-columns:40px minmax(0,1fr) auto"><span class="anyic"><i data-lucide="plane-landing"></i></span><span class="n">${ECO.TRANSFER_TIER.name}</span><span class="p"><i class="tk">8</i>${amd(TF.fare)}</span></span></div></div>
     <div class="two">
       <div><label class="label">Ուղղություն</label><div class="seg" role="radiogroup" aria-label="Ուղղություն" style="display:flex"><button class="on" role="radio" aria-checked="true" style="flex:1;justify-content:center">Ժամանում</button><button role="radio" aria-checked="false" style="flex:1;justify-content:center">Մեկնում</button></div></div>
       <div><label class="label">Չվերթ</label><div class="input focus"><i data-lucide="plane"></i><span class="val mono">${TF.flight}</span><i data-lucide="circle-check" style="color:var(--ok)"></i></div></div>
@@ -416,18 +434,19 @@
       <div><label class="label">Ուղևորներ · ուղեբեռ</label><div class="input"><i data-lucide="users"></i><span class="val mono">${TF.pax}</span><i data-lucide="luggage"></i><span class="val mono">${TF.bags}</span></div></div>
     </div>
     <div class="billing" role="group" aria-label="Վճարող"><label class="label" style="margin:0">Վճարող</label>
-      <div class="seg" role="radiogroup"><button class="on" role="radio" aria-checked="true">Ընկերություն · ${ECO.COMPANY.short}</button><button role="radio" aria-checked="false">Կանխիկ</button></div></div>`
+      <div class="seg" role="radiogroup"><button class="on" role="radio" aria-checked="true">Ընկերություն · ${ECO.COMPANY.short}</button><button role="radio" aria-checked="false">Կանխիկ</button><button role="radio" aria-checked="false">NFC</button></div></div>`
     document.getElementById('sumfare').textContent = amd(TF.fare)
     document.getElementById('sumtxt').textContent = `${ECO.TRANSFER_TIER.name} · Վաղը ${TF.time}`
     document.querySelector('.actbar .btn.primary').innerHTML = 'Ստեղծել տրանսֆեր <span class="kbd">↵</span>'
   }
-  /* ── ?intake=pay (owner 2026-10-15): the «Վճարում» list open. By phone a dispatcher can take only what needs no
-     device in the rider's hand: cash, the caller's saved card (charged by the app, iPay / ArCa) and company — the last
-     only when the caller is an employee on account, so here it is shown off with the reason, not hidden. Apple Pay,
-     Google Pay and NFC are the rider's own choices (app, or the driver's phone at the end); the console shows them as
-     what the rider chose, never offers them. Cash is chosen, so the read-back is the fare alone; the card row says what
-     choosing it adds (+2 % service fee, bank cards only). ── */
-  const FEE = (f) => Math.round(f * 0.02) /* owner 2026-10-15 (final): +2 % on top, bank-card payments only (card, Apple Pay, Google Pay); cash and company: none */
+  /* ── ?intake=pay (owner 2026-10-15, revised by the team review 2026-10-16, C2): the «Վճարում» list open. By phone a
+     dispatcher takes Cash · NFC · POS · Company — and NO card: a card is the rider's own choice in the app, charged by
+     the app (iPay / ArCa), so the console's list has no card row and no saved card (the order the rider booked with a
+     card shows it read-only in the edit panel, ?panel=card). NFC · POS (owner 2026-10-16): fleet cars only (they have
+     the ACBA app), +2 % on the fare; the driver takes the tap in ACBA's app and confirms it in ours. Company is shown
+     off with the reason when the caller is not an employee on account. Cash is chosen, so the read-back is the fare
+     alone; the NFC row says what choosing it adds. ── */
+  const FEE = (f) => Math.round(f * 0.02) /* owner 2026-10-15 (final): +2 % on top of NFC · POS (and card / wallets in the app); cash and company: none */
   if (INTAKE === 'pay') {
     const two = document.querySelector('#intake .two')
     const pay = two.children[1].querySelector('.input')
@@ -435,50 +454,55 @@
     pay.innerHTML = '<i data-lucide="banknote"></i><span class="val">Կանխիկ</span><i data-lucide="chevron-up"></i>'
     two.insertAdjacentHTML('afterend', `<div class="payopts" role="listbox" aria-label="Վճարում" data-overlay data-truncate>
       <div class="on" role="option" aria-selected="true"><i data-lucide="banknote"></i>Կանխիկ<span class="k">1</span></div>
-      <div role="option"><i data-lucide="credit-card"></i>Քարտ <span class="mono faint">·· 3318</span><span class="end">պահված քարտը · +2 % վճար</span><span class="k">2</span></div>
+      <div role="option"><i data-lucide="smartphone-nfc"></i>NFC · POS<span class="end">+2 % · ավտոպարկի մեքենա</span><span class="k">2</span></div>
       <div role="option" aria-disabled="true" class="off"><i data-lucide="building-2"></i>Ընկերություն<span class="end">զանգողը կցված չէ ընկերության</span></div>
-      <p><i data-lucide="smartphone"></i>Apple Pay, Google Pay, NFC՝ ուղևորն ընտրում է հավելվածում կամ մեքենայում</p></div>`)
+      <p><i data-lucide="smartphone"></i>Քարտով վճարում՝ ուղևորն ընտրում է հավելվածում</p></div>`)
     document.querySelector('#intake .in-tabs').parentElement.remove()
     const f = fare(TIERS[0], IK, IM)
     document.getElementById('sumfare').textContent = amd(f)
-    document.getElementById('sumtxt').textContent = `քարտով՝ ${amd(f + FEE(f))}`
+    document.getElementById('sumtxt').textContent = `NFC-ով՝ ${amd(f + FEE(f))}`
   }
-  /* ── ?intake=airport (zones.html rules, owner 2026-10-15). Pickup inside «Զվարթնոց օդանավակայան»: the zone's rules
-     arrive with the address, not at «Ստեղծել». Cash is off with the zone's reason in ONE amber line (a domain refusal);
-     Eco Kids keeps its key but is off («Eco Kids-ը չի սպասարկում»), so keys 1–8 never move under the fingers; the
+  /* ── ?intake=airport (zones.html rules, owner 2026-10-15; team review 2026-10-16, C3). Pickup inside «Զվարթնոց
+     օդանավակայան»: the zone's rules arrive with the address, not at «Ստեղծել». The zone's «no cash on pickup» rule
+     governs rider-app bookings ONLY: an airport dispatcher creates and escorts the guest's order from this console, so
+     Cash · NFC · Company are all allowed here (NFC if the guest says yes, otherwise cash, company in some cases) and the
+     single line under the choice says so, neutral (nothing is refused). Eco Kids keeps its key but is off («Eco Kids-ը չի սպասարկում»), so keys 1–8 never move under the fingers; the
      zone-to-zone price Զվարթնոց → Կենտրոն is fixed (zones?pair=1: 5 000 ֏, which includes the +500 ֏ zone charge) and
-     fills the agreed-price band, locked, read as «Ֆիքսված · 5 000 ֏»; paid by card, so the read-back adds the 2 % fee. ── */
+     fills the agreed-price band, locked, read as «Ֆիքսված · 5 000 ֏»; paid by NFC · POS (the guest said yes), so the read-back adds the 2 % fee. ── */
   if (INTAKE === 'airport') {
     const FX = 5000, AK = 14.2, AM = 22
     document.getElementById('intake').innerHTML = `
     <div><label class="label">Հեռախոս</label><div class="input l"><i data-lucide="phone"></i><span class="val mono">091 70-33-14</span></div></div>
-    <div class="cust"><div class="t"><span>Լևոն Ավագյան</span><span class="faint num">· 6 պատվեր · Քարտ <span class="mono">·· 5520</span></span></div></div>
+    <div class="cust"><div class="t"><span>Լևոն Ավագյան</span><span class="faint num">· 6 պատվեր · վերջինը՝ անցյալ շաբաթ</span></div></div>
     <div><label class="label">Որտեղից</label><div class="pinrow"><span class="pin">Ա</span><div class="input l"><span class="val">Զվարթնոց, ժամանման սրահ</span><i data-lucide="circle-check" style="color:var(--ok)"></i></div></div>
       <p class="zline"><i data-lucide="map"></i>Գոտի՝ <b>Զվարթնոց</b> · <a href="zones.html?theme=${THEME}">5 կանոն</a></p></div>
     <div><label class="label">Ուր <span class="faint" style="font-weight:400">· ոչ պարտադիր</span></label><div class="pinrow"><span class="pin b">Բ</span><div class="input l"><span class="val">Աբովյան 10, Կենտրոն</span><i data-lucide="circle-check" style="color:var(--ok)"></i></div></div></div>
     <div><label class="label">Սակագին <span class="faint" style="font-weight:400">· 1–8</span></label><div class="tiers" id="tiers" data-truncate></div></div>
     <div class="two">
       <div><label class="label">Երբ</label><div class="input"><i data-lucide="clock"></i><span class="val">Հիմա</span><i data-lucide="chevron-down"></i></div></div>
-      <div><label class="label">Վճարում</label><div class="input" aria-describedby="zcash"><i data-lucide="credit-card"></i><span class="val">Քարտ <span class="mono faint">·· 5520</span></span><i data-lucide="chevron-down"></i></div></div>
+      <div><label class="label">Վարորդ <span class="faint" style="font-weight:400">· ոչ պարտ.</span></label><div class="input"><i data-lucide="search"></i><span class="val">Ավտոմատ</span><i data-lucide="chevron-down"></i></div></div>
     </div>
-    <div class="notice amber" id="zcash" role="status"><i data-lucide="banknote-x"></i><span class="grow">Զվարթնոց · կանխիկ չի ընդունվում նստեցման ժամանակ (օդանավակայանի կանգառ)</span></div>
+    <div class="billing" role="group" aria-label="Վճարում"><label class="label" id="zpl" style="margin:0">Վճարում</label><div class="seg" role="radiogroup" aria-labelledby="zpl" aria-describedby="zcash"><button role="radio" aria-checked="false">Կանխիկ</button><button class="on" role="radio" aria-checked="true">NFC · +2 %</button><button role="radio" aria-checked="false">Ընկերություն</button></div></div>
+    <p class="zline" id="zcash" role="status" style="margin:-4px 0 0"><i data-lucide="info"></i>Զվարթնոց · «կանխիկ՝ ոչ» կանոնը հավելվածի պատվերների համար է · դիսպետչերի պատվերում թույլատրված են երեքն էլ</p>
     <div><div class="in-tabs" role="tablist" aria-label="Նոր պատվեր"><button role="tab" aria-selected="false" tabindex="-1">Քարտեզ</button><button role="tab" aria-selected="false" tabindex="-1">Նշումներ</button><button role="tab" aria-selected="true">Համաձայնեցված գին<span class="dot" aria-hidden="true"></span></button></div>
       <div role="tabpanel" style="padding-top:8px"><div class="row-flex"><div class="input l" style="width:160px;background:var(--surface-alt);box-shadow:inset 0 0 0 1px var(--line-soft)" aria-readonly="true"><i data-lucide="lock"></i><span class="val mono">${nf(FX)}</span><span class="faint">֏</span></div>
         <p style="font:var(--c-small);color:var(--ink-muted)"><b style="color:var(--ink)">Ֆիքսված · ${amd(FX)}</b><br>Զվարթնոց → Կենտրոն · գոտուց գոտի</p></div></div></div>`
-    let t = `<button class="tierb any"><span class="anyic"><i data-lucide="locate-fixed"></i></span><span class="n">Մոտակա ազատը</span></button>`
+    let t = `<button class="tierb any"><span class="anyic"><i data-lucide="locate-fixed"></i></span><span class="n">Մոտակա ազատը</span><span class="p"><i class="tk">1</i></span></button>`
     TIERS.forEach((x, i) => {
-      const fixed = x.id === 'city' || x.id === 'partner', off = x.id === 'kids'
-      t += off ? `<button class="tierb off" aria-disabled="true" aria-label="${x.name}, ${i + 2}, Զվարթնոցում չի սպասարկվում" title="Զվարթնոց · Eco Kids-ը չի սպասարկում"><span class="car xs">${carImg(x.id)}</span><span class="n">${x.name.replace('Eco ', '')}</span><span class="p">ոչ այստեղ</span></button>`
-        : `<button class="tierb${i === 0 ? ' on' : ''}" aria-label="${x.name}, ${i + 2}"><span class="car xs">${carImg(x.id)}</span><span class="n">${x.name.replace('Eco ', '')}</span><span class="p">${fixed ? amd(FX) : amd(fare(x, AK, AM) + 500)}</span></button>`
+      /* The pair's fixed fare is per tier (zones?pair=1 lists City · Comfort · Business · Vip); Van has none and is metered
+         plus the +500 ֏ zone charge. Business and Vip fixed too, so no dearer tier ever reads cheaper than City's 5 000 ֏. */
+      const FXT = { city: FX, partner: FX, business: 7000, vip: 8500 }, fixed = FXT[x.id], off = x.id === 'kids'
+      t += off ? `<button class="tierb off" aria-disabled="true" aria-label="${x.name}, ${i + 2}, Զվարթնոցում չի սպասարկվում" title="Զվարթնոց · Eco Kids-ը չի սպասարկում"><span class="car xs">${carImg(x.id)}</span><span class="n">${x.name.replace('Eco ', '')}</span><span class="p"><i class="tk">${i + 2}</i>ոչ այստեղ</span></button>`
+        : `<button class="tierb${i === 0 ? ' on' : ''}" aria-label="${x.name}, ${i + 2}"><span class="car xs">${carImg(x.id)}</span><span class="n">${x.name.replace('Eco ', '')}</span><span class="p"><i class="tk">${i + 2}</i>${fixed ? amd(fixed) : amd(fare(x, AK, AM) + 500)}</span></button>`
     })
-    t += `<span class="tierb" aria-label="${ECO.TRANSFER_TIER.name}, 8"><span class="anyic"><i data-lucide="plane-landing"></i></span><span class="n">${ECO.TRANSFER_TIER.name}</span><span class="p">${amd(ECO.TRANSFER_TIER.fare)}</span></span>`
+    t += `<span class="tierb" aria-label="${ECO.TRANSFER_TIER.name}, 8"><span class="anyic"><i data-lucide="plane-landing"></i></span><span class="n">${ECO.TRANSFER_TIER.name}</span><span class="p"><i class="tk">8</i>${amd(ECO.TRANSFER_TIER.fare)}</span></span>`
     document.getElementById('tiers').innerHTML = t
     document.getElementById('sumfare').textContent = amd(FX + FEE(FX))
-    document.getElementById('sumtxt').textContent = `քարտով · 2 % · +${nf(FEE(FX))}`
+    document.getElementById('sumtxt').textContent = `NFC · 2 % · +${nf(FEE(FX))}`
     document.getElementById('sumtxt').title = `Ֆիքսված ${amd(FX)} + սպասարկման վճար ${amd(FEE(FX))}`
   }
   /* Scrolled to the foot (the payment list / the fixed price), snapped to a field's top edge so no label sits half under the head. */
-  if (INTAKE === 'pay' || INTAKE === 'airport') document.fonts.ready.then(() => {
+  if (['pay', 'airport', 'driver', 'driver-set', 'booking'].includes(INTAKE)) document.fonts.ready.then(() => {
     const ib = document.getElementById('intake'), max = ib.scrollHeight - ib.clientHeight
     const top0 = ib.getBoundingClientRect().top - ib.scrollTop
     const snap = [...ib.children].map((c) => c.getBoundingClientRect().top - top0 - 12).find((y) => y >= max)
@@ -488,7 +512,7 @@
   /* The state's subject in view: the refusal (company) or the agreed-price band (price) sits at the foot of the
      scrolled form, as it does after the operator has tabbed down to it. */
   if (CO || INTAKE === 'price') document.fonts.ready.then(() => {
-    const ib = document.getElementById('intake'), tg = ib.querySelector(CO ? '.notice' : '[role=tabpanel]')
+    const ib = document.getElementById('intake'), tg = CO ? ib.lastElementChild : ib.querySelector('[role=tabpanel]') /* CO: to the form's foot, so no label straddles the action bar; the limit line stays in view */
     const top0 = ib.getBoundingClientRect().top - ib.scrollTop
     const need = tg.getBoundingClientRect().bottom - ib.getBoundingClientRect().bottom + 12 + ib.scrollTop
     /* Snap to a field's top edge so no label is left half under the card head. */
@@ -516,7 +540,7 @@
   const map = makeMap(document.getElementById('map'), { fit: [[40.170, 44.493], [40.208, 44.528]], padTL: [40, 56], padBR: [40, 24], badge: { bottom: '12px', right: '12px' } })
   DRIVERS.forEach((d, i) => {
     const fill = d.state === 'free' ? 'var(--brand)' : d.state === 'ride' ? 'var(--car-top)' : 'var(--ink-faint)'
-    htmlMarker(map, d.ll, `<div class="mk-car ${d.state}">${carTop((i * 47) % 360, fill)}</div>`, [40, 40])
+    htmlMarker(map, d.ll, `<div class="mk-car ${d.state}" data-overlay data-car="${i}" tabindex="0" role="button" aria-label="${d.plate} · ${d.name}">${carTop((i * 47) % 360, fill)}</div>`, [40, 40])
   })
   drawRoute(map, ROUTES.pickupToDrop.pts, { weight: 5 })
   const P = ROUTES.pickupToDrop.pts

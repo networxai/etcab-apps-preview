@@ -87,7 +87,7 @@
       <div class="two2"><div><label class="label">Փոխել վիճակը</label><div class="input"><span class="val">Չեղարկված</span><i data-lucide="chevron-down"></i></div></div>
         <div><label class="label">Ով չեղարկեց</label><div class="input" aria-describedby="h-party"><span class="val">ուղևոր</span><i data-lucide="chevron-down"></i></div></div></div>
       ${reason('Ուղևորը զանգեց և հրաժարվեց, վարորդը տեղյակ է')}
-      <div class="btns"><button class="btn danger s" disabled aria-describedby="h-ns" style="opacity:.55">Ուղևորը չեկավ</button><button class="btn danger-fill s">Կիրառել</button></div>
+      <div class="btns" style="justify-content:space-between"><button class="btn danger s" disabled aria-describedby="h-ns" style="opacity:.55">Ուղևորը չեկավ</button><button class="btn danger-fill s">Կիրառել</button></div>
       <div>${hint('h-ns', '«Ուղևորը չեկավ»՝ միայն երբ վարորդը տեղում է')}${hint('h-party', 'Կգրանցվի, թե ով չեղարկեց')}</div></section>`)
     scrollTo()
   }
@@ -107,7 +107,7 @@
         <div class="opts" role="listbox" aria-label="Վիճակներ" style="margin-top:4px"><div class="on" role="option">Ընդունված</div><div role="option">Որոնում</div><div role="option">Վարորդ չկա<span class="end">հիմա</span></div><div role="option">Չեղարկված</div></div></div>
       ${hint('h-nodrv', 'Վարորդով վիճակները՝ նշանակելուց հետո', 'user-x')}
       ${reason('')}
-      <div class="btns"><button class="btn danger s" disabled style="opacity:.55" aria-describedby="h-ns h-rs">Ուղևորը չեկավ</button><button class="btn danger-fill s" disabled style="opacity:.55" aria-describedby="h-st h-rs">Կիրառել</button></div>
+      <div class="btns" style="justify-content:space-between"><button class="btn danger s" disabled style="opacity:.55" aria-describedby="h-ns h-rs">Ուղևորը չեկավ</button><button class="btn danger-fill s" disabled style="opacity:.55" aria-describedby="h-st h-rs">Կիրառել</button></div>
       <div>${hint('h-ns', '«Ուղևորը չեկավ»՝ միայն երբ վարորդը տեղում է')}${hint('h-rs', 'Գրեք պատճառը, և կոճակները կմիանան')}${hint('h-st', 'Ընտրեք նոր վիճակը')}</div></section>`)
     dp.querySelector('.drv').closest('.sec').innerHTML = '<h3>Վարորդ</h3><p class="faint" style="font:var(--c-body)">Դեռ նշանակված չէ · 2 ալիք, 7 հարցված</p>'
     scrollTo()
@@ -184,7 +184,7 @@
       <div class="tbar" aria-hidden="true"><i style="width:100%"></i><em style="left:80.6%"></em></div>
       <div class="notice amber" role="status"><i data-lucide="hand"></i><span class="grow">Վարորդը նշեց «Ուղևորը չեկավ» · <span class="mono">14:21</span></span><button class="btn ghost s icon" aria-label="Զանգել ուղևորին"><i data-lucide="phone"></i></button></div>
       ${reason('Երկու զանգ, չպատասխանեց')}
-      <div class="btns"><button class="btn danger s">Ուղևորը չեկավ</button><button class="btn danger-fill s" disabled style="opacity:.55" aria-describedby="h-st">Կիրառել</button></div>
+      <div class="btns" style="justify-content:space-between"><button class="btn danger s">Ուղևորը չեկավ</button><button class="btn danger-fill s" disabled style="opacity:.55" aria-describedby="h-st">Կիրառել</button></div>
       ${hint('h-st', 'Ընտրեք նոր վիճակը')}</section>`)
     scrollTo()
   }
@@ -202,13 +202,13 @@
     top.querySelectorAll('.dest')[1].innerHTML = `<span class="mono">13:20</span>·<span class="mono">${ECO.CUSTOMER.phone}</span>·<span>Հավելվածից</span>`
     actsEl.innerHTML = '<button class="btn secondary s icon act-on" aria-label="Մանրամասներ" aria-expanded="true"><i data-lucide="pencil"></i></button><span style="flex:1"></span><span class="faint" style="font:var(--c-small)">Ավարտված պատվերը չի փոխվում</span>'
     const d = dp.querySelector('.drv'); d.querySelector('.nm').textContent = 'Նարեկ Հովհաննիսյան'; d.querySelector('.plate').textContent = '07 AB 913'; d.querySelector('.meta.mono').textContent = '098 23-55-90'
-    after(`<section class="xsec" aria-label="Վճարող"><h3><i data-lucide="building-2"></i>Վճարող</h3>
-      <dl class="kv"><dt>Վճարող</dt><dd>Ընկերություն · ${ECO.COMPANY.name}</dd><dt>Ամիս</dt><dd><a href="company.html?theme=${THEME}&tab=statement" style="color:var(--brand-text)">Հոկտեմբեր 2026</a> · <span class="faint">ընթացիկ</span></dd><dt>Ուղևոր</dt><dd><a href="customer.html?theme=${THEME}" style="color:var(--brand-text)">${ECO.COMPANY.rider}</a></dd></dl>
+    after(`<section class="xsec" aria-label="Ընկերության ամիս"><h3><i data-lucide="building-2"></i>Ընկերության ամիս</h3>
+      <dl class="kv"><dt>Ամիս</dt><dd><a href="company.html?theme=${THEME}&tab=statement" style="color:var(--brand-text)">Հոկտեմբեր 2026</a> · <span class="faint">ընթացիկ</span></dd><dt>Ուղևոր</dt><dd><a href="customer.html?theme=${THEME}" style="color:var(--brand-text)">${ECO.COMPANY.rider}</a></dd></dl>
       <h3 style="margin-top:4px"><i data-lucide="star"></i>Գնահատական</h3>
       <dl class="kv"><dt>Ուղևորից</dt><dd><span class="stars" aria-label="5 աստղ">${'<i data-lucide="star"></i>'.repeat(5)}</span></dd><dt>Մեկնաբանություն</dt><dd>«Մաքուր մեքենա, ճշտապահ»</dd><dt>Վարորդից</dt><dd><span class="stars" aria-label="5 աստղ">${'<i data-lucide="star"></i>'.repeat(5)}</span></dd>
         <dt>Փորձնական պատվեր</dt><dd>Ոչ</dd></dl></section>`)
     const kv = dp.querySelector('.kv:not(.xsec .kv)')
-    if (kv) kv.innerHTML = '<dt>Eco City · նստեցում</dt><dd>600 ֏</dd><dt>4,1 կմ × 90 ֏</dt><dd>369 ֏</dd><dt>11 ր × 12 ֏</dt><dd>132 ֏</dd><dt>Կլորացում (100 ֏)</dt><dd>−1 ֏</dd><dt class="tot">Ընդամենը · Ընկերության հաշվին</dt><dd class="tot">1 100 ֏</dd>'
+    if (kv) kv.innerHTML = '<dt>Eco City · նստեցում</dt><dd>600 ֏</dd><dt>4,1 կմ × 90 ֏</dt><dd>369 ֏</dd><dt>11 ր × 12 ֏</dt><dd>132 ֏</dd><dt>Կլորացում (100 ֏)</dt><dd>−1 ֏</dd><dt>Վճարող</dt><dd>Ընկերություն · ' + ECO.COMPANY.name + '</dd><dt class="tot">Ընդամենը · Ընկերության հաշվին</dt><dd class="tot">1 100 ֏</dd>'
     scrollTo()
   }
 

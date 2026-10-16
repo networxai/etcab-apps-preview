@@ -112,17 +112,21 @@
         fld('apiToken', 1, 1, 'Bearer token issued by ETAPI. One token files the Tax Service receipt and sends the Idram payout.')
         + fld('platformTin', 1, 0, 'The platform’s ՀՎՀՀ (8 digits). Each receipt is the driver’s income filed through this platform.')
         + fld('mode', 1, 0, 'sandbox files nothing real. Switch to live only after a test ride shows a receipt.', mode(true)), 1)
-      + pcard('ipay', 'iPay · ArCa', 'քարտ', ok('12.10.2026, 16:40'), '',
+      + pcard('ipay', 'iPay · ArCa', 'IDBank · քարտ', ok('12.10.2026, 16:40'), '',
         fld('merchantId', 1, 0, 'The ArCa merchant id from the iPay contract.') + fld('apiUser', 1, 0, 'The API user iPay issued for this merchant.')
         + fld('apiPassword', 1, 1, 'The API user’s password.') + fld('mode', 1, 0, 'test charges no real card.', mode(true)))
-      + pcard('applepay', 'Apple Pay', 'iOS', ok('12.10.2026, 17:05'),
+      + pcard('applepay', 'Apple Pay', 'iOS · IDBank', ok('12.10.2026, 17:05'),
         '<span class="pill ok" style="height:20px"><i data-lucide="badge-check"></i>Դոմենը հաստատված է · <span class="mono">pay.ecotaxi.am</span></span><span>վավեր՝ մինչև <b class="num">12.10.2027</b></span>',
         fld('merchantIdentifier', 1, 0, 'From the Apple developer account, e.g. merchant.am.&lt;fleet&gt;.')
         + fld('paymentProcessingCertificate', 1, 1, 'The .p12 the card gateway decrypts Apple Pay tokens with.')
         + fld('domainVerification', 0, 0, 'Served at /.well-known/apple-developer-merchantid-domain-association.', '<button class="btn secondary s"><i data-lucide="download"></i>Ներբեռնել ֆայլը</button>'))
-      + pcard('googlepay', 'Google Pay', 'Android', ok('12.10.2026, 17:12'), '',
+      + pcard('googlepay', 'Google Pay', 'Android · IDBank', ok('12.10.2026, 17:12'), '',
         fld('merchantId', 1, 0, 'From the Google Pay & Wallet console.') + fld('merchantName', 1, 0, 'Shown to the rider on the Google Pay sheet.')
-        + fld('gatewayMerchantId', 1, 0, 'The ArCa merchant id the Google Pay token is issued for (same as iPay’s).')))
+        + fld('gatewayMerchantId', 1, 0, 'The ArCa merchant id the Google Pay token is issued for (same as iPay’s).'))
+      + `<section class="card" aria-labelledby="k-acba"><div class="card-h"><h2 id="k-acba">ACBA · NFC</h2><span class="sub">քաղվածքի ներմուծում</span><span class="end"><span class="pill ok"><i class="d"></i>Ներմուծված է · <span class="num">15.10.2026, 23:59</span></span></span></div>
+      <div class="scroll-y grow"><div class="facts1"><span>API չկա · NFC-ն վարորդը ստանում է ACBA-ի հավելվածով</span><span>Համեմատվում է՝ <b class="num">10</b> NFC պատվեր · <b class="num">1</b> չկա քաղվածքում</span></div>
+        <div class="fl">${fld('statement', 1, 0, 'The ACBA account statement (CSV or XLSX). Each driver-confirmed NFC ride is matched by amount and time; a driver’s ETAPI payout is sent only after its match.', '<button class="btn secondary s"><i data-lucide="upload"></i>Ներմուծել քաղվածքը</button>')}</div></div>
+      <div class="ft"><div class="notice neutral"><i data-lucide="info"></i><span>Բանալիներ չեն պահանջվում</span></div></div></section>`)
   }
   icons()
   document.documentElement.dataset.mapReady = 'none'

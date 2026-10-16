@@ -77,12 +77,12 @@
   const B = ECO.BOOKINGS.air
   const pre = { no: B.id, tier: B.tier, pickup: B.pickup, pickupNote: 'Աննա · հիմա', drop: B.drop, dropNote: 'Մալաթիա-Սեբաստիա', approachMin: 7, approachKm: 2.6, km: B.km, min: B.min, fare: B.fare, pay: B.pay }
   const R = ECO.RIDE
-  /* Payment on the offer (owner 2026-10-15). The driver needs one fact: does he collect? In-app card / Apple Pay / Google Pay
-     are charged by the app («Անկանխիկ», nothing to collect); NFC is a tap on HIS phone at the end. D.offer draws ECO.PAY's
+  /* Payment on the offer (owner 2026-10-15). The driver needs one fact: does the driver collect? In-app card / Apple Pay / Google Pay
+     are charged by the app («Անկանխիկ», nothing to collect); NFC · POS is taken at the end in the ACBA app on the driver's phone, the driver confirms (+2 % fee; fleet cars only, owner 2026-10-16). D.offer draws ECO.PAY's
      plain label, so the chip is rewritten here after render. */
   const PAYCHIP = {
     card: { icon: 'credit-card', text: 'Քարտ · վճարված հավելվածով' },
-    nfc: { icon: 'smartphone-nfc', text: 'NFC · ձեր հեռախոսին' },
+    nfc: { icon: 'smartphone-nfc', text: 'NFC · POS · ավարտին' },
   }
   /* fixed: a zone-to-zone price (ECO.BOOKINGS.bag, Կենտրոն → Զվարթնոց, 4 500 ֏). The fare is set, not estimated, and the
      context line says so; the airport +500 ֏ is inside it. Geometry: DROUTES.air (Բաղրամյան 24 → Զվարթնոց). */
@@ -115,7 +115,7 @@
   </section>` : '')
   statusBar(s, st === 'preorder-now' ? '9:52' : st === 'preorder-any' ? '8:15' : undefined)
   D.init([
-    ['taken', 'Taken by another driver'], ['expired', 'Expired (no answer)'], ['decline', 'Decline: one tap on a reason (ticking)'], ['declined', 'Declined, back on the line'], ['company', 'Company ride (paid by company)'], ['card', 'Paid in the app by card · nothing to collect'], ['nfc', 'NFC · rider taps on the driver phone'], ['fixed', 'Fixed fare · Կենտրոն → Զվարթնոց 4 500 ֏'],
+    ['taken', 'Taken by another driver'], ['expired', 'Expired (no answer)'], ['decline', 'Decline: one tap on a reason (ticking)'], ['declined', 'Declined, back on the line'], ['company', 'Company ride (paid by company)'], ['card', 'Paid in the app by card · nothing to collect'], ['nfc', 'NFC · POS · rider taps at the end (+2 %)'], ['fixed', 'Fixed fare · Կենտրոն → Զվարթնոց 4 500 ֏'],
     ['preorder-now', 'Pre-order started now · first offer to its driver'], ['preorder-any', 'Pre-order due · offered to any Eco City driver'], ['lock-android', 'Locked screen · Android full-screen'], ['lock-ios', 'Locked screen · iOS Time-Sensitive'],
   ])
   const r3 = document.getElementById('ring3')
@@ -123,7 +123,7 @@
   icons()
   if (st === 'decline') for (const el of [s.querySelector('.offer')]) { el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true'); el.inert = true }
   /* ECO.BOOKINGS.air is a fixed zone-to-zone fare (B.fixed): the pre-order offers say «Ֆիքսված» beside the tier. */
-  if ((st === 'preorder-now' || st === 'preorder-any') && B.fixed) s.querySelector('.offer .tags .chip').insertAdjacentHTML('afterend', '<span class="chip"><i data-lucide="lock"></i>Ֆիքսված</span>'), icons()
+  if ((st === 'preorder-now' || st === 'preorder-any') && B.fixed) s.querySelector('.offer .tags .chip').innerHTML = '<i data-lucide="lock"></i>' + B.tier + ' · ֆիքսված', icons()
   if (PAYCHIP[st]) { const c = s.querySelector('.offer .tags .chip:last-child'); c.innerHTML = `<i data-lucide="${PAYCHIP[st].icon}"></i>${PAYCHIP[st].text}`; if (st === 'card') c.classList.add('co'); icons() }
   if (st === 'lock-ios') D.noMap()
   else if (st === 'preorder-now' || st === 'preorder-any' || st === 'fixed') {

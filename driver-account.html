@@ -162,7 +162,7 @@
   .group .pr + .pr { border-top: 1px solid var(--hairline); }
   .pr .tm { width: 44px; font: var(--t-secondary-strong); color: var(--ink); font-variant-numeric: tabular-nums; flex: none; }
   .pr .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-  .pr .t1 { font: var(--t-body-strong); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pr .t1 { font: var(--t-body-strong); color: var(--ink); } /* the route wraps: the destination is how a driver recognises the ride */
   .pr .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .pr .f { font: var(--t-body-strong); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; flex: none; }
   .locked { color: var(--ink-3); box-shadow: inset 0 0 0 1.5px var(--hairline); background: transparent; }
@@ -178,7 +178,7 @@
   .caret { width: 2px; height: 24px; background: var(--brand-ink); margin-left: 2px; border-radius: 1px; }
   .fhint { font: var(--t-caption); color: var(--ink-2); margin: var(--s2) 0 0 var(--s1); white-space: nowrap; }
   :root[data-sun] .field { box-shadow: inset 0 0 0 1.5px #000; } :root[data-sun] .field.focus { box-shadow: inset 0 0 0 2.5px #000; }
-  /* NFC (tap to pay on the driver's phone): a checklist, each line a fact with its state; the one failing line carries the action. */
+  /* NFC · POS (taken in the ACBA app on the driver's phone): a checklist, each line a fact with its state; the one failing line carries the action. */
   [data-s="nfc-unsupported"] .h2 { white-space: normal; max-width: 320px; }
 </style>
 </head>
@@ -200,7 +200,7 @@
       <div class="group">
         <a class="row" href="driver-inbox.html" style="text-decoration:none"><span class="ic"><i data-lucide="bell"></i></span><span class="txt"><span class="t1">Ծանուցումներ</span></span><span class="cnt" aria-label="3 նոր">3</span><i class="chev" data-lucide="chevron-right"></i></a>
         <a class="row" href="?state=docs" style="text-decoration:none"><span class="ic"><i data-lucide="file-text"></i></span><span class="txt"><span class="t1">Փաստաթղթեր</span></span><span class="tag warn"><i data-lucide="clock"></i>11 օր</span><i class="chev" data-lucide="chevron-right"></i></a>
-        <!-- Owner 2026-10-15: what non-cash rides need (ՀՎՀՀ, Idram ID, the phone's NFC) behind one row; amber while one is missing. -->
+        <!-- Owner 2026-10-15: what non-cash rides need (ՀՎՀՀ, Idram ID, the phone's NFC and the ACBA app) behind one row; amber while one is missing. -->
         <a class="row" href="?state=payout" style="text-decoration:none"><span class="ic"><i data-lucide="landmark"></i></span><span class="txt"><span class="t1">Վճարումներ</span></span><span class="tag warn solo" role="img" aria-label="Idram ID-ն լրացված չէ"><i data-lucide="circle-alert"></i></span><i class="chev" data-lucide="chevron-right"></i></a>
         <div class="row"><span class="ic"><i data-lucide="languages"></i></span><span class="txt"><span class="t1">Լեզու</span></span><span class="end">Հայերեն</span><i class="chev" data-lucide="chevron-right"></i></div>
         <div class="row"><span class="ic"><i data-lucide="sun-moon"></i></span><span class="txt"><span class="t1">Թեմա</span></span><span class="end">Ավտոմատ</span><i class="chev" data-lucide="chevron-right"></i></div>
@@ -210,7 +210,6 @@
       <div class="group">
         <div class="row"><span class="ic"><i data-lucide="life-buoy"></i></span><span class="txt"><span class="t1">Օգնություն և իրավական</span></span><i class="chev" data-lucide="chevron-right"></i></div>
         <div class="row"><span class="ic"><i data-lucide="log-out"></i></span><span class="txt"><span class="t1">Դուրս գալ</span></span></div>
-        <div class="row"><span class="ic danger"><i data-lucide="user-x"></i></span><span class="txt"><span class="t1 danger">Ջնջել հաշիվը</span></span></div>
       </div>
       <div class="ver">Տարբերակ 2.3.1 (241)</div>
     </section>
@@ -335,6 +334,11 @@
         <div class="row"><span class="ic"><i data-lucide="file-text"></i></span><span class="txt"><span class="t1">Օգտագործման պայմաններ</span></span><i class="chev" data-lucide="chevron-right"></i></div>
         <div class="row"><span class="ic"><i data-lucide="shield"></i></span><span class="txt"><span class="t1">Գաղտնիության քաղաքականություն</span></span><i class="chev" data-lucide="chevron-right"></i></div>
       </div>
+      <!-- UX audit (Fitts): «Ջնջել հաշիվը» left the main list, where it sat under Sign out at equal size; it lives here, a section apart. -->
+      <div class="gl">Հաշիվ</div>
+      <div class="group">
+        <div class="row"><span class="ic danger"><i data-lucide="user-x"></i></span><span class="txt"><span class="t1 danger">Ջնջել հաշիվը</span></span></div>
+      </div>
     </section>
 
     <!-- ── legal: one document, read in the app (headings, short sections; full text also on the web) ── -->
@@ -393,9 +397,9 @@
       </div>
       <div class="gl">Երեկ, հինգշաբթի, 8 հոկտ.</div>
       <div class="group">
-        <div class="pr"><span class="tm">19:12</span><span class="txt"><span class="t1" data-truncate>Կասկադ → Ծիծեռնակաբերդ</span><span class="t2">Կանխիկ · ★ 5</span></span><span class="f">1 000 ֏</span></div>
-        <div class="pr"><span class="tm">17:40</span><span class="txt"><span class="t1" data-truncate>Զվարթնոց → Բաղրամյան պող. 24</span><span class="t2">Ընկերություն · ★ 5</span></span><span class="f">2 000 ֏</span></div>
-        <div class="pr"><span class="tm">15:05</span><span class="txt"><span class="t1" data-truncate>Մաշտոցի պող. 37 → Արաբկիր</span><span class="t2">Կանխիկ · ★ 4</span></span><span class="f">900 ֏</span></div>
+        <div class="pr"><span class="tm">19:12</span><span class="txt"><span class="t1">Կասկադ → Ծիծեռնակաբերդ</span><span class="t2">Կանխիկ · ★ 5</span></span><span class="f">1 000 ֏</span></div>
+        <div class="pr"><span class="tm">17:40</span><span class="txt"><span class="t1">Զվարթնոց → Բաղրամյան պող. 24</span><span class="t2">Ընկերություն · ★ 5</span></span><span class="f">2 000 ֏</span></div>
+        <div class="pr"><span class="tm">15:05</span><span class="txt"><span class="t1">Մաշտոցի պող. 37 → Արաբկիր</span><span class="t2">Կանխիկ · ★ 4</span></span><span class="f">900 ֏</span></div>
       </div>
     </section>
 
@@ -408,10 +412,10 @@
         <div class="doc"><span class="ic"><i data-lucide="file-badge"></i></span><span class="txt"><span class="t1">ՀՎՀՀ</span><span class="t2" data-eco="FISCAL.driverTin">23457812</span></span><span class="tag ok solo" role="img" aria-label="Լրացված"><i data-lucide="check"></i></span></div>
         <div class="doc"><span class="ic"><i data-lucide="send"></i></span><span class="txt"><span class="t1">Idram ID</span><span class="t2">լրացված չէ</span></span><span class="tag warn"><i data-lucide="circle-alert"></i>Չկա</span></div>
       </div>
-      <div class="notice warn" style="margin-top:var(--s4)"><i data-lucide="pause"></i><div><b>Անկանխիկ գումարը չի փոխանցվում</b>Քարտով, NFC-ով և POS-ով պատվերները սպասում են Idram ID-ին</div></div>
+      <div class="notice warn" style="margin-top:var(--s4)"><i data-lucide="pause"></i><div><b>Անկանխիկ գումարը չի փոխանցվում</b>Քարտով և NFC · POS պատվերները սպասում են Idram ID-ին</div></div>
       <div class="notice on-ground" style="margin-top:var(--s3)"><i data-lucide="lock"></i><div>Փոխելու համար զանգեք գրասենյակ</div></div>
       <div class="group" style="margin-top:var(--s4)">
-        <a class="row" href="?state=nfc" style="text-decoration:none"><span class="ic"><i data-lucide="smartphone-nfc"></i></span><span class="txt"><span class="t1">NFC վճարում</span></span><span class="end">Անջատված</span><i class="chev" data-lucide="chevron-right"></i></a>
+        <a class="row" href="?state=nfc" style="text-decoration:none"><span class="ic"><i data-lucide="smartphone-nfc"></i></span><span class="txt"><span class="t1">NFC · POS վճարում</span></span><span class="end">Անջատված</span><i class="chev" data-lucide="chevron-right"></i></a>
       </div>
       <span class="grow"></span>
       <div class="foot"><button class="btn btn-brand lg"><i data-lucide="phone"></i>Զանգել գրասենյակ</button></div>
@@ -432,32 +436,34 @@
       <div class="foot"><button class="btn btn-brand lg"><i data-lucide="check"></i>Պահպանել</button></div>
     </section>
 
-    <!-- ── nfc (owner 2026-10-15): can this phone take a tap? Checked on the device, line by line; the one failing line (NFC off)
-         is amber and the single action opens the system setting. Then a test tap, no money moves. ── -->
+    <!-- ── nfc (owner 2026-10-16, supersedes 10-15): NFC payments are taken in the bank's own ACBA app, not in ours, so this is a
+         checklist for the driver, not a reader setup. Our app can read only the phone (NFC chip, NFC on); the ACBA lines are
+         described, not verified: the driver ticks them off by looking. The one failing line (NFC off) carries the action. ── -->
     <section data-s="nfc" class="grow" style="display:flex;flex-direction:column">
-      <div class="ptitle">NFC վճարում</div>
-      <div class="psub" style="margin-bottom:var(--s5)">Ուղևորը քարտը կամ հեռախոսը մոտեցնում է ձերին</div>
+      <div class="ptitle">NFC · POS վճարում</div>
+      <div class="psub" style="margin-bottom:var(--s5)">Վճարումը վերցնում եք ACBA հավելվածով</div>
       <div class="group">
         <div class="doc"><span class="ic"><i data-lucide="smartphone-nfc"></i></span><span class="txt"><span class="t1">Հեռախոսն աջակցում է</span><span class="t2">Xiaomi · Android 14</span></span><span class="tag ok solo" role="img" aria-label="Այո"><i data-lucide="check"></i></span></div>
         <div class="doc"><span class="ic"><i data-lucide="toggle-left"></i></span><span class="txt"><span class="t1">NFC</span><span class="t2">անջատված է</span></span><span class="tag warn solo" role="img" aria-label="Անջատված"><i data-lucide="circle-alert"></i></span></div>
-        <div class="doc"><span class="ic"><i data-lucide="lock-keyhole"></i></span><span class="txt"><span class="t1">Էկրանի կողպում</span><span class="t2">PIN կամ մատնահետք</span></span><span class="tag ok solo" role="img" aria-label="Միացված"><i data-lucide="check"></i></span></div>
-        <div class="doc"><span class="ic"><i data-lucide="credit-card"></i></span><span class="txt"><span class="t1">Փորձնական հպում</span><span class="t2">0 ֏ · գումար չի գանձվում</span></span><span class="end" style="font:var(--t-secondary);color:var(--ink-3)">Հետո</span></div>
+        <div class="doc"><span class="ic"><i data-lucide="smartphone"></i></span><span class="txt"><span class="t1">ACBA հավելվածը տեղադրված է</span><span class="t2">ստուգեք ինքներդ</span></span></div>
+        <div class="doc"><span class="ic"><i data-lucide="log-in"></i></span><span class="txt"><span class="t1">Մուտք եք գործել ACBA-ում</span><span class="t2">ստուգեք ինքներդ</span></span></div>
       </div>
+      <div class="notice on-ground" style="margin-top:var(--s4)"><i data-lucide="info"></i><div>Վճարումը տեսնում է միայն ACBA-ն։ Վերջում դուք եք նշում՝ Վճարվեց թե Չստացվեց</div></div>
       <span class="grow"></span>
       <div class="foot">
         <button class="btn btn-brand lg"><i data-lucide="settings"></i>Միացնել NFC-ն</button>
       </div>
     </section>
 
-    <!-- ── nfc-unsupported (owner 2026-10-15): no NFC chip. Not a fault: the switch on Complete simply hides NFC; POS and cash stay. ── -->
+    <!-- ── nfc-unsupported (owner 2026-10-16): no NFC chip, so the phone cannot take an NFC payment in the ACBA app. Not a fault:
+         the switch on Complete offers cash only; card and wallet rides are charged by the app. ── -->
     <section data-s="nfc-unsupported" class="grow" style="display:flex;flex-direction:column">
       <div class="center" style="margin-top:64px">
         <span class="bigic neutral"><i data-lucide="smartphone-nfc"></i></span>
         <div class="h2">Ձեր հեռախոսը NFC չի աջակցում</div>
-        <div class="sub">Օգտագործեք POS կամ կանխիկ</div>
+        <div class="sub">NFC պատվերներ չեք ստանա</div>
       </div>
       <div class="group fate">
-        <div class="row"><span class="ic ok"><i data-lucide="credit-card"></i></span><span class="txt"><span class="t1">POS տերմինալ</span><span class="t2">քարտով վճարում</span></span></div>
         <div class="row"><span class="ic ok"><i data-lucide="banknote"></i></span><span class="txt"><span class="t1">Կանխիկ</span></span></div>
         <div class="row"><span class="ic"><i data-lucide="smartphone"></i></span><span class="txt"><span class="t1">Քարտ, Apple Pay, Google Pay</span><span class="t2">ուղևորը վճարում է հավելվածով</span></span></div>
       </div>
@@ -507,7 +513,7 @@
     ['deleterequested', 'Deletion requested'], ['signout', 'Sign out · blocked by shift'],
     ['deleteblocked', 'Delete blocked · open ride'], ['help', 'Help · dispatcher, FAQ, legal'], ['legal', 'Privacy policy'],
     ['update', 'Update required'], ['diag', 'Shift diagnostics'], ['rating', 'Rating + past rides'],
-    ['payout', 'Payout details · fleet, set by the office'], ['payout-partner', 'Payout details · partner enters ՀՎՀՀ, Idram ID'], ['nfc', 'NFC tap-to-pay · check + enable'], ['nfc-unsupported', 'NFC not supported · POS or cash'],
+    ['payout', 'Payout details · fleet, set by the office'], ['payout-partner', 'Payout details · partner enters ՀՎՀՀ, Idram ID'], ['nfc', 'NFC · POS · phone has NFC, ACBA app (checklist)'], ['nfc-unsupported', 'No NFC on the phone · cash only'],
   ])
   const uv = document.getElementById('u-ver'); if (uv) uv.textContent = ECO.APP.driver.have + ' · նվազագույնը՝ ' + ECO.APP.driver.min
   if (st === 'signout') for (const id of ['bar', 'content']) { const el = document.getElementById(id); el.dataset.overlay = ''; el.setAttribute('aria-hidden', 'true') }

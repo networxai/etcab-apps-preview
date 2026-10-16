@@ -43,7 +43,8 @@
   .drv .n2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
   .fine { display: flex; gap: var(--s2); align-items: flex-start; font: var(--t-secondary); color: var(--ink-2); }
   .fine svg { width: 16px; height: 16px; flex: none; margin-top: 1px; }
-  a.btn { text-decoration: none; }
+  /* UX audit 2026-10-16 (Serial Position): the page ends on the ride's status and its privacy line; the sales ask is a small text link under them. */
+  a.getapp { align-self: center; display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--s3); font: var(--t-secondary-strong); color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
   .done-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--s3); padding: var(--s8) var(--margin) var(--s4); }
   .done-hero .badge { width: 64px; height: 64px; border-radius: 50%; background: var(--surface-2); color: var(--ink); display: grid; place-items: center; }
   .done-hero .badge svg { width: 28px; height: 28px; }
@@ -63,7 +64,7 @@
   const ended = new URLSearchParams(location.search).get('state') === 'ended'
   const plate = (no) => `<span class="plate" role="img" aria-label="Համարանիշ ${no}"><span class="eu" aria-hidden="true"><i></i><b>AM</b></span><span class="no">${no}</span></span>`
   const head = (on) => `<header class="top"><img src="assets/eco/logo-wide.png" alt="Eco Taxi" width="112" height="20"><span class="live ${on ? '' : 'off'}"><i></i>${on ? 'Ուղիղ' : 'Ավարտված'}</span></header>`
-  const cta = `<a class="btn btn-quiet" href="#">Պատվիրել Eco Taxi</a>`
+  const cta = `<a class="getapp" href="#">Պատվիրել Eco Taxi</a>`
   document.getElementById('w').innerHTML = ended
     ? `${head(false)}<div class="done-hero"><span class="badge"><i data-lucide="flag"></i></span><h1>Ուղևորությունն ավարտված է</h1>
          <p>${RD.rider.name}ն տեղ հասավ ${RD.dropAt}-ին</p></div>

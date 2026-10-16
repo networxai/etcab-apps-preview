@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Company employees</title>
+<link rel="stylesheet" href="../console.css">
+<link rel="stylesheet" href="../corporate.css">
+<link rel="stylesheet" href="portal.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../../kit.js"></script>
+<script src="../console.js"></script>
+<script src="../company-report.js"></script>
+<script src="portal.js"></script>
+<script src="../console-audit.js"></script>
+</head>
+<body>
+<!-- Company console, Settings › «Աշխատակիցներ» (decision P1; owner 2026-10-16: Employees live under Settings, the nav
+     shows only Settings). The people who may ride on the company's account. The same list the
+     fleet keeps on the console's company page (company.html?tab=employees), now kept by the company itself: add by phone,
+     remove (armed; past rides stay in the reports), and per employee the monthly limit (company default, or their own by
+     amount or by ride count) and the allowed places (pickup and destination must each be within 300 m of one; the office
+     is on everyone). Employees do not log in here; they ride from the rider app, or the manager books for them.
+     window.STATES (?state=):
+       (none)   the list
+       add      the inline add row: phone and name typed
+       added    the neutral result; the new employee on top
+       exists   the phone already rides for another company: amber on the phone field
+       edit     Աննա's limit and places open under her row
+       remove   «Հաստատե՞լ» armed on Էլեն's row -->
+<div class="screen pt" id="screen">
+  <div class="main">
+    <header class="bar"><h1>Կարգավորումներ</h1><div class="live"></div></header>
+    <div class="content one">
+      <section class="card page" aria-label="Աշխատակիցներ" id="page"></section>
+    </div>
+  </div>
+</div>
+<script>
+  window.STATES = ['', 'add', 'added', 'exists', 'edit', 'remove']
+  const st = STATE, amd = ECO.amd, C = ECO.COMPANY, EL = C.empLimit
+  portalShell('employees')
+  const PH = matchMedia('(max-width: 600px)').matches
+  const NEW = { name: 'Ռուզաննա Գասպարյան', phone: '093 77-41-20', rides: 0, amount: 0, limit: null, places: 1, sep: { rides: 0, amount: 0 } }
+  const L = st === 'added' ? [NEW, ...EMP] : EMP
+  const near = L.filter((e) => !e.stopped && limOf(e).pct >= 90).length
+
+  const adding = ['add', 'exists'].includes(st)
+  const tool = setTabs('employees') + `<div class="fl">
+      <div class="input" style="width:260px"><i data-lucide="search"></i><span class="val ph">Անուն կամ հեռախոս</span><span class="kbd">/</span></div>
+      <button class="chip"${near ? '' : ' disabled'}>Սահմանաչափին մոտ <span class="c num">${near}</span></button>
+      <span class="sp"></span>
+      <span class="faint desk" style="font:var(--c-small)">Թվերը՝ հոկտեմբեր, մինչ այսօր</span>
+      <button class="btn ${adding ? 'secondary' : 'primary'}" aria-expanded="${adding}"><i data-lucide="user-plus"></i>Ավելացնել աշխատակից</button>
+    </div>
+    ${adding ? `<div class="fl" style="background:var(--surface-alt);align-items:flex-start;padding-top:12px;padding-bottom:12px">
+      <div style="width:200px"><label class="label">Հեռախոս</label><div class="input l${st === 'exists' ? ' focus' : ''}"${st === 'exists' ? ' aria-invalid="true" aria-describedby="ph-why"' : ''}><i data-lucide="phone"></i><span class="val mono">${st === 'exists' ? '099 82-40-11' : NEW.phone}</span></div></div>
+      <div style="width:260px"><label class="label">Անուն ազգանուն</label><div class="input l${st === 'add' ? ' focus' : ''}"><span class="val">${st === 'exists' ? 'Հրանտ Մելիքյան' : NEW.name}</span></div></div>
+      <div style="padding-top:20px;display:flex;gap:6px"><button class="btn primary l"${st === 'exists' ? ' disabled' : ''}><i data-lucide="check"></i>Ավելացնել <span class="kbd">↵</span></button><button class="btn ghost l">Չեղարկել</button></div>
+      <div style="flex-basis:100%;margin-top:4px">${st === 'exists'
+        ? '<p id="ph-why" role="status" style="font:var(--c-small);color:var(--warning);display:flex;gap:6px"><i data-lucide="triangle-alert" style="width:14px;height:14px;flex:none;margin-top:1px"></i><span>Այս համարն արդեն կապված է այլ ընկերության հետ․ փոխելու համար դիմեք տաքսի ծառայությանը</span></p>'
+        : `<p class="hint" style="margin:0">Սահմանաչափը՝ լռելյայն (<span class="mono">${amd(EL.default.amount)}</span>), հասցեն՝ գրասենյակը․ փոխել կարող եք ավելացնելուց հետո։ Աշխատակիցը SMS կստանա, որ կարող է պատվիրել ընկերության հաշվին։</p>`}</div>
+    </div>` : ''}
+    ${st === 'added' ? `<div style="padding:8px var(--inset)"><div class="notice neutral" role="status"><i data-lucide="check"></i><span>Ավելացվեց՝ ${NEW.name} · <span class="mono">${NEW.phone}</span> · SMS-ն ուղարկված է</span></div></div>` : ''}`
+
+  /* Edit panel (the console's empPanel, company side): limit + places, one Save. */
+  const P = C.places
+  const placeRow = (ic, label, addr, fixed) => `<div class="row-flex" style="gap:8px;min-height:36px;border-bottom:1px solid var(--line-soft)"><i data-lucide="${ic}"></i><b style="font:var(--c-strong);width:88px;flex:none">${label}</b><span class="grow" style="overflow-wrap:anywhere">${addr}</span>${fixed ? '<span class="pill">ընկերության</span>' : '<button class="btn ghost s"><i data-lucide="x"></i>Հեռացնել</button>'}</div>`
+  const panel = (e) => `<div class="panel" style="margin:0;background:var(--surface);border-radius:var(--r-card);box-shadow:var(--e1);padding:12px var(--inset)">
+      <div class="tb two" style="padding:0">
+        <div><h4 style="font:var(--c-head);display:flex;gap:8px;align-items:center;margin-bottom:12px"><i data-lucide="gauge"></i>Ամսական սահմանաչափ</h4>
+          <div class="seg" role="radiogroup" aria-label="Սահմանաչափ" style="flex-wrap:wrap"><button role="radio" aria-checked="false">Լռելյայն · <span class="mono">${amd(EL.default.amount)}</span></button><button class="on" role="radio" aria-checked="true">Գումար</button><button role="radio" aria-checked="false">Ուղևորություններ</button></div>
+          <div class="fgrid" style="margin-top:12px"><div><label class="label">Գումարը ամսական</label><div class="input focus"><span class="val mono">65 000</span><span class="faint">֏</span></div><p class="hint">Ամեն ամսվա 1-ից՝ զրոյից</p></div>
+            <div><span class="label">Հոկտեմբեր</span><div class="facts" style="min-height:var(--h-m)"><span>Օգտագործված<b class="mono">${amd(EL.rider.used)}</b></span><span>Մնացել է<b class="mono">${amd(EL.rider.left)}</b></span></div></div></div>
+          <p class="hint" style="margin-top:8px">Սահմանաչափից հետո ընկերության հաշվին պատվիրել հնարավոր չէ․ աշխատակիցը կարող է վճարել ինքը</p></div>
+        <div><h4 style="font:var(--c-head);display:flex;gap:8px;align-items:center;margin-bottom:12px"><i data-lucide="map-pin"></i>Թույլատրված հասցեներ<span class="faint" style="font:var(--c-small);font-weight:400">շառավիղ ${P.radius} մ</span></h4>
+          ${P.rider.map((x) => placeRow(x.kind === 'home' ? 'house' : x.kind === 'office' ? 'building-2' : 'plane', x.label, x.addr, x.kind === 'office')).join('')}
+          <div class="row-flex" style="gap:8px;margin-top:8px;flex-wrap:wrap"><div class="input" style="width:130px"><span class="val ph">Անվանում</span></div><div class="input grow" style="min-width:160px"><i data-lucide="search"></i><span class="val ph">Հասցե</span></div><button class="btn secondary"><i data-lucide="plus"></i>Ավելացնել</button></div>
+          <p class="hint" style="margin-top:8px">Ընկերության հաշվին՝ միայն այս հասցեների միջև</p></div>
+      </div>
+      <div class="formfoot"><a class="btn ghost" href="${u('employees.html')}">Փակել</a><button class="btn primary"><i data-lucide="check"></i>Պահել</button></div></div>`
+
+  const OPEN = st === 'edit' ? 0 : -1, ARM = st === 'remove' ? 7 : -1
+  const lim = (e) => {
+    if (e.stopped) return '<td colspan="2"><span class="pill warn"><i data-lucide="octagon-alert"></i>Սպասարկումը դադարեցված է</span></td>'
+    const x = limOf(e)
+    return `<td class="wrap" style="padding-top:5px;padding-bottom:5px;line-height:1.2"><span class="mono">${x.txt}</span><br><span class="faint" style="font:var(--c-small)">${x.own ? 'անհատական' : 'լռելյայն'}</span></td>
+      <td><span class="lim${x.pct >= 90 ? ' near' : ''}" style="display:flex;justify-content:flex-end"><span class="bar3" style="width:40px" role="img" aria-label="${x.pct} % օգտագործված"><i style="width:${x.pct}%"></i></span>${x.pct >= 90 ? '<i data-lucide="triangle-alert" style="color:var(--warning);width:14px;height:14px"></i>' : ''}<span class="mono${x.pct >= 90 ? ' warnn' : ''}">${x.by === 'amd' ? amd(x.left) : x.left}</span></span></td>`
+  }
+  const acts = (e, i) => i === ARM
+    ? `<span class="row-flex" style="gap:6px;justify-content:flex-end"><button class="btn armed s" aria-label="Հաստատե՞լ հեռացումը՝ ${e.name}">Հաստատե՞լ</button></span>`
+    : `<span class="row-flex" style="gap:2px;justify-content:flex-end"><button class="btn ghost s icon rev-act" aria-label="Հեռացնել՝ ${e.name}" title="Հեռացնել"><i data-lucide="user-minus"></i></button><a class="btn ${i === OPEN ? 'secondary' : 'ghost'} s icon" href="${u('employees.html', 'state=edit')}" aria-expanded="${i === OPEN}" aria-label="Սահմանաչափ և հասցեներ՝ ${e.name}" title="Սահմանաչափ և հասցեներ"><i data-lucide="sliders-horizontal"></i></a></span>`
+  const table = `<table class="tbl emp" aria-label="Աշխատակիցներ"><colgroup><col><col style="width:136px"><col style="width:150px"><col style="width:110px"><col style="width:210px"><col style="width:140px"><col style="width:96px"><col style="width:124px"></colgroup>
+      <thead><tr><th>Անուն</th><th>Հեռախոս</th><th class="c">Ուղևորություններ</th><th class="m">Գումար</th><th>Սահմանաչափ</th><th class="m">Մնացել է</th><th class="c">Հասցեներ</th><th aria-label="Գործողություններ"></th></tr></thead>
+      <tbody>${L.map((e, i) => `<tr class="${i === OPEN || i === ARM || (st === 'added' && i === 0) ? 'on' : ''}"><td class="trunc">${e.name}</td><td class="mono">${e.phone}</td><td class="c">${e.rides || '<span class="dash">0</span>'}</td><td class="m">${e.amount ? amd(e.amount) : '<span class="dash">0</span>'}</td>
+        ${lim(e)}<td class="c">${e.places}</td><td style="text-align:right">${acts(e, i)}</td></tr>
+        ${i === OPEN ? `<tr class="under"><td colspan="8">${panel(e)}</td></tr>` : ''}
+        ${i === ARM ? '<tr class="under"><td colspan="8" style="padding-top:6px;padding-bottom:6px"><span class="faint" style="font:var(--c-small)">Էլենը այլևս չի կարող պատվիրել ընկերության հաշվին․ նախկին ուղևորությունները մնում են հաշվետվություններում</span></td></tr>' : ''}`).join('')}</tbody></table>`
+
+  /* Phone: one two-line row per employee; the edit panel stacks under its row. */
+  const list = L.map((e, i) => { const x = limOf(e); return `<div class="lr${i === OPEN ? ' on' : ''}" style="grid-template-columns:minmax(0,1fr) auto">
+      <span class="w"><b>${e.name}</b><span class="rt mono">${e.phone}</span></span>
+      <span class="s" style="grid-column:1 / 3">${e.stopped ? '<span class="pill warn"><i data-lucide="octagon-alert"></i>Սպասարկումը դադարեցված է</span>' : `<span class="lim${x.pct >= 90 ? ' near' : ''}"><span class="bar3" style="width:56px" aria-hidden="true"><i style="width:${x.pct}%"></i></span><span class="eta">Մնացել է՝ <span class="mono">${x.leftTxt}</span> · ${e.places} հասցե</span></span>`}</span>
+      <span class="p" style="grid-column:2;grid-row:1">${acts(e, i)}</span></div>${i === OPEN ? `<div style="padding:8px">${panel(e)}</div>` : ''}` }).join('')
+
+  document.getElementById('page').innerHTML = tool + `<div class="scroll-y grow" data-truncate>${PH ? list : table}</div>`
+  icons()
+</script>
+</body>
+</html>

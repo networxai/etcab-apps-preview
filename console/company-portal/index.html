@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Company today</title>
+<link rel="stylesheet" href="../console.css">
+<link rel="stylesheet" href="../corporate.css">
+<link rel="stylesheet" href="portal.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../../kit.js"></script>
+<script src="../console.js"></script>
+<script src="../company-report.js"></script>
+<script src="portal.js"></script>
+<script src="../console-audit.js"></script>
+</head>
+<body>
+<!-- Company console, «Ընթացիկ պատվերներ» (decision P1): the company's own rides, live. VIEW ONLY (owner 2026-10-16): no
+     cancel, no call, no action of any kind; the fleet's dispatch owns every change. The question this screen answers is
+     «where is my employee's car». No map (owner 2026-10-16). REST is truth: with the socket down the list polls every
+     30 s and says so. A ride opens in a docked, read-only panel, never a modal.
+     window.STATES (?state=):
+       (none)      three live rides, three pre-orders, two finished today; no panel
+       ride        Լիանա's ride open in the panel (en route, 3 min)
+       here        the same ride, driver waiting at the pickup
+       late        Արսեն's ride searching for 8 min: «Մեքենա դեռ չկա» as plain information
+       started     Տիգրան's ride (with passenger) open
+       offline     socket down: amber «Կապ չկա» pill + the neutral polling line
+       empty       nothing live or planned today -->
+<div class="screen pt" id="screen">
+  <div class="main">
+    <header class="bar">
+      <h1>Ընթացիկ պատվերներ</h1><span class="sub">Ուրբաթ, 9 հոկտ. · <span class="mono">9:41</span></span>
+      <a class="btn primary desk" id="newb" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր պատվեր <span class="kbd">N</span></a>
+      <div class="live"></div>
+    </header>
+    <div class="content one">
+      <section class="card page" aria-label="Ընկերության ուղևորություններն այսօր" id="page"></section>
+    </div>
+  </div>
+</div>
+<script>
+  window.STATES = ['', 'ride', 'here', 'late', 'started', 'offline', 'empty']
+  const st = STATE, amd = ECO.amd, C = ECO.COMPANY
+  portalShell('today', { offline: st === 'offline' })
+  document.getElementById('newb').href = u('new.html')
+
+  const live = LIVE.map((r) => ({ ...r }))
+  if (st === 'here') Object.assign(live[1], { st: 'here', eta: 'Սպասում է՝ <span class="mono">2 ր</span>' })
+  const empty = st === 'empty'
+  const OPEN = new URLSearchParams(location.search).get('ride') || { ride: '2423', here: '2423', late: '2425', started: '2421' }[st]
+  const sel = OPEN && (live.find((r) => r.id === OPEN) || byId(OPEN))
+  const late = st === 'late'
+
+  const mo = CO.MONTHS[1], pct = Math.round(C.used / C.limit * 100)
+  const doneToday = DONE.filter((r) => r.st === 'done')
+  const mtd = `<div class="mtd" role="group" aria-label="Ամփոփում">
+      <div class="kpi"><span class="k">Հիմա ճանապարհին</span><span class="v">${empty ? 0 : live.length}</span><span class="s">${empty ? 'ընթացիկ չկա' : `${live.filter((r) => r.st === 'search').length} որոնման մեջ`}</span></div>
+      <div class="kpi"><span class="k">Այսօր</span><span class="v">${empty ? 0 : live.length + doneToday.length}<small>ուղևորություն</small></span><span class="s mono">${amd(empty ? 0 : [...live, ...doneToday].reduce((a, r) => a + r.price, 0))}</span></div>
+      <div class="kpi desk2"><span class="k">Հոկտեմբեր՝ մինչ այսօր</span><span class="v">${mo.rides}<small>ուղևորություն</small></span><span class="s mono">${amd(mo.amount)}</span></div>
+      <div class="kpi credit2 desk2"><span class="k">Ընկերության սահմանաչափ</span><span class="v" style="font:600 15px/20px var(--font)"><span class="mono">${amd(C.used)}</span> <span class="faint" style="font:var(--c-small)">/ ${amd(C.limit)}</span></span>
+        <span class="bar2" role="img" aria-label="${pct} % օգտագործված"><i style="width:${pct}%"></i></span></div>
+    </div>`
+
+  const href = (r) => u('index.html', `state=ride&ride=${r.id}`)
+  const sect = (title, n, end = '') => `<div class="sect"><span>${title}</span><span class="c num">${n}</span>${end ? `<span class="end">${end}</span>` : ''}</div>`
+  const offline = st === 'offline' ? `<div class="notice neutral" role="status" style="margin:0 var(--inset) 8px"><i data-lucide="refresh-cw"></i><span>Կապը կորավ․ ցուցակը թարմացվում է 30 վայրկյանը մեկ · վերջինը՝ <span class="mono">9:41</span></span></div>` : ''
+
+  const list = empty
+    ? `<div class="empty"><span class="ic"><i data-lucide="car"></i></span><b>Այսօր ուղևորություն չկա</b><span>Աշխատակիցները պատվիրում են հավելվածից, իսկ դուք՝ այստեղից</span><a class="btn primary" href="${u('new.html')}"><i data-lucide="plus"></i>Նոր պատվեր</a></div>`
+    : offline + sect('Հիմա', live.length) + live.map((r) => lrow(r, href(r), r === sel, late && r.id === '2425')).join('')
+      + sect('Նախնական պատվերներ', PLANNED.length) + PLANNED.map((r) => lrow(r, href(r), r === sel)).join('')
+      + sect('Այսօր ավարտված', DONE.length, `<a class="btn ghost s" href="${u('history.html')}">Ամբողջ պատմությունը<i data-lucide="arrow-right"></i></a>`) + DONE.map((r) => lrow(r, href(r), r === sel)).join('')
+
+  /* ── The ride panel, read only: state, progress, route, car, facts. No buttons (owner 2026-10-16). ── */
+  const STEPS = [['Ընդունված', 'search'], ['Ճանապարհին', 'route'], ['Տեղում', 'here'], ['Ուղևորի հետ', 'ride'], ['Ավարտված', 'done']]
+  const TIMES = { 2425: ['9:40'], 2423: ['9:31', '9:32', '9:43'], 2421: ['9:18', '9:19', '9:24', '9:27'] }
+  const panel = (r) => {
+    const at = STEPS.findIndex(([, k]) => k === r.st), tm = TIMES[r.id] || []
+    return `<aside class="rp ${ST[r.st][0]}" aria-label="Ուղևորություն՝ ${r.who}">
+      <div class="hd"><div style="min-width:0"><h2>${r.who}</h2><div class="meta"><span class="mono">#R-${r.id}</span><span>·</span><span>${tierName(r.tier)}</span><span>·</span><span>պատվիրել է՝ ${r.by}</span></div></div>
+        <a class="btn ghost icon s x" href="${u('index.html')}" aria-label="Փակել"><i data-lucide="x"></i></a></div>
+      <div class="bd">
+        ${late ? `<div class="notice neutral" role="status"><i data-lucide="info"></i><span>Ազատ մեքենա դեռ չկա։ Դիսպետչերը տեսնում է պատվերը և շարունակում է որոնել։</span></div>`
+          : `<div class="row-flex" style="gap:10px">${stPill(r.st)}<span style="font:var(--c-strong)">${r.eta}</span></div>`}
+        <ol class="steps5" aria-label="Ընթացք">${STEPS.map(([w], i) => `<li class="${i < at ? 'done' : i === at ? 'now' : ''}"><i class="o"></i><span>${w}</span><span class="t">${tm[i] || ''}</span></li>`).join('')}</ol>
+        <div class="route2"><span class="pin">Ա</span><span>${r.a}</span><span class="pin b">Բ</span><span>${r.b}</span></div>
+        ${r.drv ? `<div class="drvc"><span class="car s">${carImg(r.drv.tier)}</span><div><b>${r.drv.short}</b><span><span class="plate">${r.drv.plate}</span>${r.drv.car}</span></div></div>`
+          : `<div class="drvc" style="grid-template-columns:minmax(0,1fr)"><span style="margin:0">Մեքենան կհայտնվի այստեղ, երբ վարորդն ընդունի պատվերը</span></div>`}
+        <dl><dt>Աշխատակցի հեռ.</dt><dd class="mono">${r.ph}</dd><dt>Գին</dt><dd><span class="mono">${amd(r.price)}</span> · ընկերության հաշվին</dd><dt>Պատվիրվել է</dt><dd><span class="mono">${r.t}</span> · ${r.by}</dd></dl>
+      </div></aside>`
+  }
+
+  document.getElementById('page').innerHTML = mtd + `<div class="md${sel ? ' open' : ''}"><div class="list" data-truncate>${list}</div>${sel ? panel(sel) : ''}</div>`
+  icons()
+</script>
+</body>
+</html>

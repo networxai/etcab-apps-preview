@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Company history</title>
+<link rel="stylesheet" href="../console.css">
+<link rel="stylesheet" href="../corporate.css">
+<link rel="stylesheet" href="portal.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../../kit.js"></script>
+<script src="../console.js"></script>
+<script src="../company-report.js"></script>
+<script src="portal.js"></script>
+<script src="../console-audit.js"></script>
+</head>
+<body>
+<!-- Company console, «Պատմություն» (decision P1; owner 2026-10-16: the Report is folded in here). A period (a month, a
+     week or chosen days) gives the accumulated ride count and amount, every ride or the per-employee totals, and the
+     Excel / CSV / PDF export of exactly that period. The «Վճարված» mark is read-only: the fleet's accountant sets it on a
+     closed month. One continuous list (no pages). Filters on the rides: employee, state, who booked it, and a search.
+     A ride opens in a docked read-only panel. Personal rides of an employee are never here. No invoices (owner #11).
+     Rows: CO.rides (company-report.js), the console's company report data set.
+     window.STATES (?state=):
+       (none)      October 2026 to date, every ride
+       employees   October to date, per-employee totals
+       month       September 2026 (closed), per-employee totals, «Վճարված» read-only
+       week        this week, 5–11 Oct, every ride
+       range       «Ընտրել օրերը»: 01.10–07.10 inline, every ride
+       filter      employee «Տիգրան Մանուկյան» + «Ավարտված»
+       ride        a finished ride open in the panel
+       cancelled   a cancelled ride open in the panel
+       pdf         September's PDF being prepared: the button busy, a polite status line
+       empty       a filter that matches nothing: «Մաքրել ֆիլտրերը» -->
+<div class="screen pt" id="screen">
+  <div class="main">
+    <header class="bar"><h1>Պատմություն</h1><span class="sub">ընկերության բոլոր ուղևորությունները</span><div class="live"></div></header>
+    <div class="content one">
+      <section class="card page" aria-label="Ուղևորությունների պատմություն" id="page"></section>
+    </div>
+  </div>
+</div>
+<script>
+  window.STATES = ['', 'employees', 'month', 'week', 'range', 'filter', 'ride', 'cancelled', 'pdf', 'empty']
+  const st = STATE, amd = ECO.amd
+  portalShell('history')
+  const PH = matchMedia('(max-width: 600px)').matches
+  const BYS = ['Հավելվածից', 'Վահանակից', 'Հավելվածից', 'Հավելվածից', 'Դիսպետչերով']
+  const addMin = (hm, d) => { const [h, m] = hm.split(':').map(Number), t = h * 60 + m + d; return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}` }
+
+  /* ── The period ── */
+  const SEP = ['month', 'pdf'].includes(st)
+  const KIND = st === 'week' ? 'week' : st === 'range' ? 'range' : 'month'
+  const P = SEP ? { label: 'Սեպտեմբեր 2026', key: '2026-09', rides: 214, amount: 268400, closed: true }
+    : KIND === 'week' ? { label: '5 – 11 հոկտ. 2026', key: '2026-10', rides: 71, amount: 98300, days: ['05', '06', '07', '08', '09'] }
+    : KIND === 'range' ? { label: '01.10 – 07.10.2026', key: '2026-10', rides: 98, amount: 136800, days: ['01', '02', '03', '04', '05', '06', '07'] }
+    : { label: 'Հոկտեմբեր 2026', key: '2026-10', rides: CO.MONTHS[1].rides, amount: CO.MONTHS[1].amount, open: true }
+  const VIEW = ['employees', 'month', 'pdf'].includes(st) ? 'emp' : 'rides'
+
+  /* ── Rides of the period: today's two first in October, then CO.rides without today's future hours. ── */
+  const mk = (r, i) => ({ ...r, id: String(2400 - i * 7), st: i % 7 === 5 ? 'cancel' : 'done', by: BYS[i % 5], price: i % 7 === 5 ? 0 : r.price })
+  let rows = SEP ? CO.rides('2026-09', 30).map(mk)
+    : [...DONE.map((r) => ({ at: '09.10 ' + r.t.padStart(5, '0'), who: r.who, a: r.a, b: r.b, tier: tierName(r.tier), price: r.price, st: r.st, by: r.by, id: r.id })),
+      ...CO.rides('2026-10', 30).filter((r) => !r.at.startsWith('09.')).map(mk)]
+  if (P.days) rows = rows.filter((r) => P.days.includes(r.at.slice(0, 2)))
+  const filter = st === 'filter', empty = st === 'empty'
+  if (filter) rows = rows.filter((r) => r.who === 'Տիգրան Մանուկյան' && r.st === 'done')
+  if (empty) rows = []
+  const OPEN = { ride: rows[2], cancelled: rows.find((r) => r.st === 'cancel' && r.id !== '2414') }[st]
+  const n = filter ? 29 : empty ? 0 : P.rides, sum = filter ? 61200 : empty ? 0 : P.amount
+
+  /* ── Head: period kind, stepper, the period's figures, export ── */
+  const kinds = [['month', 'Ըստ ամսի'], ['week', 'Ըստ շաբաթի'], ['range', 'Ընտրել օրերը']]
+  const M0 = CO.MONTHS[0]
+  const paid = P.closed ? `<span>Վճարում<b style="font:var(--c-body);padding-top:2px">${M0.paid ? `<span class="pill ok"><i data-lucide="check"></i>Վճարված · ${M0.paidOn}</span>` : '<span class="pill"><i class="d"></i>Սպասվում է</span>'}</b></span>` : ''
+  const head = `<div class="toolrow" style="gap:12px">
+      <div class="seg" role="radiogroup" aria-label="Ժամանակահատված">${kinds.map(([k, l]) => `<a class="${k === KIND ? 'on' : ''}" href="${u('history.html', k === 'month' ? '' : 'state=' + k)}" role="radio" aria-checked="${k === KIND}">${k === 'range' ? '<i data-lucide="calendar-range"></i>' : ''}${l}</a>`).join('')}</div>
+      ${KIND === 'range' ? '' : `<span class="month" role="group" aria-label="Ժամանակահատված"><a class="btn ghost icon s" href="${u('history.html', 'state=month')}" aria-label="Նախորդը"><i data-lucide="chevron-left"></i></a><span class="lbl">${P.label}</span><a class="btn ghost icon s" href="${u('history.html')}" aria-label="Հաջորդը"${P.closed ? '' : ' aria-disabled="true"'}><i data-lucide="chevron-right"></i></a></span>`}
+      ${P.open || KIND === 'week' ? '<span class="pill"><i data-lucide="clock"></i>Մինչ այսօր</span>' : ''}
+      <span class="facts"><span>Ուղևորություններ<b class="mono">${ECO.num(n)}</b></span><span>Գումար<b class="mono">${amd(sum)}</b></span>${paid}</span>
+      <span class="sp"></span>
+      <span class="xp" style="gap:6px"><button class="btn primary"><i data-lucide="file-spreadsheet"></i>Excel</button><button class="btn secondary">CSV</button>${st === 'pdf' ? '<button class="btn secondary" aria-busy="true" disabled><i data-lucide="loader"></i>Պատրաստվում է…</button>' : '<button class="btn secondary">PDF</button>'}</span>
+    </div>
+    ${KIND === 'range' ? `<div class="fl" style="background:var(--surface-alt);border-top:1px solid var(--line-soft)"><label class="label" style="margin:0">Սկսած</label><div class="input focus" style="width:150px"><i data-lucide="calendar"></i><span class="val mono">01.10.2026</span></div><label class="label" style="margin:0">մինչև</label><div class="input" style="width:150px"><i data-lucide="calendar"></i><span class="val mono">07.10.2026</span></div><button class="btn secondary">Ցույց տալ</button><span class="faint" style="font:var(--c-small)">Առավելագույնը՝ 12 ամիս</span></div>` : ''}
+    ${st === 'pdf' ? `<div style="padding:0 var(--inset) 8px"><div class="notice neutral" role="status"><i data-lucide="file-text"></i><span>PDF-ը պատրաստվում է՝ ${P.rides} ուղևորություն․ ներբեռնումը կսկսվի ինքնաշխատ</span></div></div>` : ''}`
+
+  /* ── View switch + ride filters (the filters narrow the rides view; the totals are always the whole period) ── */
+  const chipF = (label, on) => `<button class="chip${on ? ' on' : ''}"${on ? ' aria-pressed="true"' : ''}>${label}${on ? '<i data-lucide="x"></i>' : '<i data-lucide="chevron-down"></i>'}</button>`
+  const fl = `<div class="fl">
+      <div class="seg" role="radiogroup" aria-label="Տեսք"><a class="${VIEW === 'rides' ? 'on' : ''}" href="${u('history.html', SEP ? 'state=month' : '')}" role="radio" aria-checked="${VIEW === 'rides'}">Ուղևորություններ</a><a class="${VIEW === 'emp' ? 'on' : ''}" href="${u('history.html', SEP ? 'state=month' : 'state=employees')}" role="radio" aria-checked="${VIEW === 'emp'}">Ըստ աշխատակցի</a></div>
+      ${VIEW === 'rides' ? `<div class="input" style="width:240px"><i data-lucide="search"></i><span class="val ph">Անուն, հասցե, համար</span><span class="kbd">/</span></div>
+        ${chipF(filter || empty ? 'Տիգրան Մանուկյան' : 'Աշխատակից', filter || empty)}${chipF(filter || empty ? 'Ավարտված' : 'Վիճակ', filter || empty)}${chipF(empty ? 'Դիսպետչերով' : 'Պատվիրել է', empty)}`
+        : '<span class="faint desk" style="font:var(--c-small)">Սա ուղևորությունների հաշվետվություն է, ոչ թե հաշիվ․ հաշիվը տրամադրում է տաքսի ծառայության հաշվապահությունը</span>'}
+    </div>`
+
+  /* ── Rides ── */
+  const table = OPEN || PH ? '' : `<table class="tbl" aria-label="Ուղևորություններ · ${P.label}"><colgroup><col style="width:120px"><col style="width:180px"><col><col style="width:124px"><col style="width:128px"><col style="width:124px"><col style="width:104px"></colgroup>
+      <thead><tr><th>Ամսաթիվ</th><th>Աշխատակից</th><th>Երթուղի</th><th>Սակագին</th><th>Պատվիրել է</th><th>Վիճակ</th><th class="m">Գին</th></tr></thead>
+      <tbody>${rows.map((r) => `<tr><td class="mono">${r.at}</td><td class="trunc">${r.who}</td><td class="trunc">${r.a} → ${r.b}</td><td>${r.tier}</td><td class="trunc">${r.by}</td><td>${stPill(r.st)}</td><td class="m">${r.price ? amd(r.price) : '<span class="dash">—</span>'}</td></tr>`).join('')}
+        ${rows.length ? `<tr class="cut"><td colspan="7">Ցուցադրված է ${rows.length}-ը ${n}-ից · ոլորեք՝ ավելին բեռնելու համար</td></tr>` : ''}</tbody></table>`
+  const list = OPEN || PH ? rows.map((r) => lrow({ ...r, t: r.at.slice(6), day: r.at.slice(0, 5), eta: r.by }, u('history.html', 'state=ride'), r === OPEN)).join('') : ''
+  const none = `<div class="empty"><span class="ic"><i data-lucide="search-x"></i></span><b>Այս ֆիլտրերով ուղևորություն չկա</b><span>Տիգրան Մանուկյան · Ավարտված · Դիսպետչերով · ${P.label}</span><button class="btn secondary">Մաքրել ֆիլտրերը</button></div>`
+
+  /* ── Per-employee totals for the period; the total row sits under the scroll box ── */
+  const dk = (h) => (PH ? '' : h)
+  const E = EMP.map((e) => ({ ...e, m: SEP ? e.sep : { rides: e.rides, amount: e.amount } })).filter((e) => e.m.rides).sort((a, b) => b.m.amount - a.m.amount)
+  const max = Math.max(1, ...E.map((e) => e.m.amount))
+  const cg = `<colgroup><col>${dk('<col style="width:140px">')}<col style="width:${PH ? 72 : 150}px"><col style="width:${PH ? 104 : 120}px">${dk('<col style="width:200px">')}</colgroup>`
+  const empTable = `<table class="tbl rep" aria-label="Ըստ աշխատակցի · ${P.label}">${cg}
+      <thead><tr><th>Աշխատակից</th>${dk('<th>Հեռախոս</th>')}<th class="c">${PH ? 'Քանակ' : 'Ուղևորություններ'}</th><th class="m">Գումար</th>${dk('<th>Մասնաբաժին</th>')}</tr></thead>
+      <tbody>${E.map((e) => `<tr><td class="trunc">${e.name}</td>${dk(`<td class="mono">${e.phone}</td>`)}<td class="c">${e.m.rides}</td><td class="m">${amd(e.m.amount)}</td>
+        ${dk(`<td><span class="lim"><span class="bar3" style="width:120px" aria-hidden="true"><i style="width:${Math.round(e.m.amount / max * 100)}%"></i></span><span class="mono">${Math.round(e.m.amount / P.amount * 100)} %</span></span></td>`)}</tr>`).join('')}</tbody></table>`
+  const empTotal = `<div class="totrow"><table class="tbl rep">${cg}<tfoot><tr><td>Ընդամենը${PH ? "" : ` · ${E.length} աշխատակից`}</td>${dk('<td></td>')}<td class="c">${P.rides}</td><td class="m">${amd(P.amount)}</td>${dk('<td></td>')}</tr></tfoot></table></div>`
+
+  /* ── The ride panel (read only) ── */
+  const DRV = { 'Eco City': ['city', 'Տիգրան Ա.', '12 TT 304', 'Volkswagen ID.3 · սպիտակ'], 'Eco Comfort': ['partner', 'Գագիկ Ա.', '34 LS 108', 'Tesla Model 3 · սպիտակ'],
+    'Eco Business': ['business', 'Նարեկ Հ.', '07 AB 913', 'Volkswagen ID.4 · սպիտակ'] }
+  const panel = (r) => {
+    const can = r.st === 'cancel', t0 = r.at.slice(6)
+    return `<aside class="rp" aria-label="Ուղևորություն՝ ${r.who}">
+      <div class="hd"><div style="min-width:0"><h2>${r.who}</h2><div class="meta"><span class="mono">#R-${r.id}</span><span>·</span><span class="mono">${r.at}</span><span>·</span><span>${r.tier}</span></div></div>
+        <a class="btn ghost icon s x" href="${u('history.html')}" aria-label="Փակել"><i data-lucide="x"></i></a></div>
+      <div class="bd">
+        <div class="row-flex" style="gap:10px">${stPill(r.st)}<span style="font:var(--c-strong)">${can ? `Չեղարկեց աշխատակիցը՝ <span class="mono">${addMin(t0, 3)}</span>` : `Ավարտվեց՝ <span class="mono">${addMin(t0, 16)}</span>`}</span></div>
+        <div class="route2"><span class="pin">Ա</span><span>${r.a}</span><span class="pin b">Բ</span><span>${r.b}</span></div>
+        ${can ? '<div class="notice neutral"><i data-lucide="info"></i><span>Չեղարկված ուղևորությունը ընկերությանը չի հաշվարկվում</span></div>'
+          : (([id, nm, pl, car]) => `<div class="drvc"><span class="car s">${carImg(id)}</span><div><b>${nm}</b><span><span class="plate">${pl}</span>${car}</span></div></div>`)(DRV[r.tier] || DRV['Eco City'])}
+        <dl>
+          <dt>Գին</dt><dd>${r.price ? `<span class="mono">${amd(r.price)}</span> · ընկերության հաշվին` : '<span class="dash">—</span>'}</dd>
+          ${can ? '' : `<dt>Ժամեր</dt><dd><span class="mono">${t0}</span> պատվեր · <span class="mono">${addMin(t0, 4)}</span> նստեց · <span class="mono">${addMin(t0, 16)}</span> իջավ</dd>`}
+          <dt>Պատվիրել է</dt><dd>${r.by}</dd>
+        </dl>
+        <p class="hint">Հարց ունե՞ք այս ուղևորության վերաբերյալ․ զանգեք՝ <span class="mono">${FLEET_PHONE}</span>, նշելով <span class="mono">#R-${r.id}</span></p>
+      </div></aside>`
+  }
+
+  const body = VIEW === 'emp'
+    ? `<div class="scroll-y grow gut" data-truncate>${empTable}</div>${empTotal}`
+    : `<div class="md${OPEN ? ' open' : ''}"><div class="list gut" data-truncate>${empty ? none : table + list}</div>${OPEN ? panel(OPEN) : ''}</div>`
+  document.getElementById('page').innerHTML = head + fl + body
+  icons()
+</script>
+</body>
+</html>

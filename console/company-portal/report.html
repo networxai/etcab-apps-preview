@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Company report</title>
+<!-- Owner 2026-10-16: the Report is folded into History (period filter, per-employee totals, Excel / CSV / PDF).
+     Old links land on September's per-employee totals there. -->
+<script>
+  const q = new URLSearchParams(location.search)
+  location.replace('history.html?theme=' + (q.get('theme') === 'dark' ? 'dark' : 'light') + '&state=month')
+</script>
+</head>
+<body></body>
+</html>

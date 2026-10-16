@@ -64,6 +64,21 @@
   .thanks .ok { width: 72px; height: 72px; border-radius: 50%; background: var(--brand-soft); color: var(--brand-ink); display: grid; place-items: center; }
   .thanks .ok svg { width: 34px; height: 34px; stroke-width: 2; }
   .thanks .large { padding: 0; }
+  .thanks { padding-bottom: var(--s8); } /* UX audit 2026-10-16: the block sits at the optical centre, above the middle of the free space */
+  .recap { align-self: stretch; margin-top: var(--s3); padding: var(--s4); border-radius: var(--r-card); background: var(--surface-2); text-align: left; display: flex; flex-direction: column; gap: var(--s3); }
+  .recap .trip { margin: 0; }
+  .recap .stops::before { top: 16px; bottom: 16px; }
+  .recap .rsum { display: flex; justify-content: space-between; gap: var(--s3); border-top: 1px solid var(--hairline); padding-top: var(--s3); }
+  .recap .rsum b { font: var(--t-body-strong); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .recap .rsum span { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
+  /* Peak-End (2026-10-16): a 5 ★ rating goes on the tap; this bar is the short undo window (the foot is the only thing that changes). */
+  .undo { position: relative; display: flex; align-items: center; justify-content: space-between; gap: var(--s3); min-height: 52px; padding: 0 var(--s2) 0 var(--s4); border-radius: var(--r-control); background: var(--surface-2); overflow: hidden; }
+  .undo .un { font: var(--t-body); color: var(--ink); white-space: nowrap; display: inline-flex; align-items: center; gap: var(--s2); }
+  .undo .un svg { width: 18px; height: 18px; color: var(--ok); }
+  .undo .btn-text { width: auto; padding: 0 var(--s3); color: var(--ink); }
+  .undo .cd { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: var(--ink); transform-origin: left; animation: cd 4s linear forwards; }
+  @keyframes cd { to { transform: scaleX(0); } }
+  @media (prefers-reduced-motion: reduce) { .undo .cd { animation: none; width: 40%; } }
   .thanks .sum { font: var(--t-body); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
   /* Fiscal receipt (R58, drawn ahead): the tax receipt as the state issues it, set as a paper card on the ground —
      seller, TIN, device, number and time, the one service line, total and method, and the verification QR. */
@@ -95,6 +110,8 @@
   .decl b { display: block; font: var(--t-body-strong); color: var(--ink); }
   .decl span { font: var(--t-secondary); color: var(--ink); }
   .paid.due svg { color: var(--warn); }
+  /* NFC waiting (owner 2026-10-16): not a failure, so the neutral ground, same block shape as .decl. */
+  .decl.wait { background: var(--surface-2); } .decl.wait svg { color: var(--ink-2); }
   .page.on-surface .paylist .choice .ico { background: var(--surface); }
   .paylist { margin-top: var(--s2); }
   .paylist .choice { min-height: 56px; }
@@ -123,16 +140,19 @@
   const paidChip = (pay) => pay === 'company'
     ? `<span class="paid co">${R.i('building-2')}${C.short}</span>`
     : pay === 'card' ? `<span class="paid">${R.i('credit-card')}·· ${ECO.PAY.card.last4}</span>`
+    : pay === 'nfc' ? `<span class="paid">${R.i('smartphone-nfc')}${ECO.PAY.nfc.label}</span>`
     : `<span class="paid">${R.i('banknote')}${ECO.PAY.cash.label}</span>`
   const PA = ECO.PROMO.applied /* change list 2026-10-14: AUTUMN15 on this ride, 1 100 → 935 ֏ */
   /* Owner 2026-10-15 (final): the service fee is the fleet's, +2 % on the final fare when paid by bank card (card, Apple Pay,
-     Google Pay); cash and company rides carry none. Card on the walkthrough: 1 100 + 22 = 1 122 ֏. Never on the Tax Service receipt. */
-  const fee = (pay, f = RD.fare) => pay === 'card' ? Math.round(f * 2 / 100) : 0
+     Google Pay, NFC); cash and company rides carry none. Card on the walkthrough: 1 100 + 22 = 1 122 ֏. Never on the Tax Service receipt. */
+  const fee = (pay, f = RD.fare) => ['card', 'applepay', 'googlepay', 'nfc'].includes(pay) ? Math.round(f * 2 / 100) : 0
   const CARD = ECO.PAY.card
   const tripHead = (pay = 'cash', promo) => `<div class="trip">${R.trace('pickupToDrop', 96, 96, { pad: 14, sw: 3.5, r: 4.5, grid: false })}
     <div class="stops"><div class="st"><span class="m"><span class="dot"></span></span><span class="tx"><span class="t1">${RD.pickup}</span><span class="t2">${RD.pickupAt}</span></span></div>
       <div class="st"><span class="m"><span class="sq"></span></span><span class="tx"><span class="t1">${RD.drop}</span><span class="t2">${RD.dropAt} · ${ECO.km(RD.km)} · ${RD.min} րոպե</span></span></div></div></div>
     <div class="fare"><span class="n">${R.amd((promo ? PA.pay : RD.fare) + fee(pay))}</span>${paidChip(pay)}</div>`
+  const billedTo = `<div class="billed">${R.i('building-2')}<span>Վճարում է՝ ${C.name}</span></div>
+      <div class="billed">${R.i('file-text')}<span>Ընկերության ամսական հաշվետվությունում</span></div>`
   /* Eco City, fixed_upfront: 600 + 90·4,3 + 12·6 = 1 059 → rounded to 100 ֏. Line names are the app's fare.* strings. */
   const breakdown = (pay = 'cash', promo) => `<div class="bd" aria-label="Գնի մանրամասները">
     <div class="l"><span>Նստեցում</span><span>${R.amd(600)}</span></div>
@@ -142,8 +162,7 @@
     ${fee(pay) ? `<div class="l"><span>Սպասարկման վճար · քարտով 2 %</span><span>${R.amd(fee(pay))}</span></div>` : ''}
     ${promo ? `<div class="l promo"><span>${R.i('ticket-percent')}Պրոմոկոդ · ${PA.code}</span><span>−${R.amd(PA.off)}</span></div>` : ''}
     <div class="l tot"><span>Ընդամենը</span><span>${R.amd((promo ? PA.pay : RD.fare) + fee(pay))}</span></div></div>
-    ${pay === 'company' ? `<div class="billed">${R.i('building-2')}<span>Վճարում է՝ ${C.name}</span></div>
-      <div class="billed">${R.i('file-text')}<span>Ընկերության ամսական հաշվետվությունում</span></div>` : ''}`
+    ${pay === 'company' ? billedTo : ''}`
   const collapsed = `<button class="bdrow"><span>Գնի մանրամասները</span>${R.i('chevron-down')}</button>`
   const who = `<div class="who">${R.avatar()}<span class="nm"><span class="n1">${DV.first}</span><span class="n2">${DV.car} · ${DV.plate}</span></span></div>`
   const stars = (n) => `<div class="stars" role="radiogroup" aria-label="Գնահատեք վարորդին">${[1, 2, 3, 4, 5].map((i) =>
@@ -161,7 +180,7 @@
   /* The Tax Service receipt is the driver's income (ETAPI register-income): the fare, 1 100 ֏. The fee is the fleet's and is not on it. */
   const fisNote = `<div class="fisnote">${R.i('info')}<span>ՊԵԿ կտրոնում՝ միայն ուղևորության գինը · քարտով վճարման 2 %-ը Էկո Տաքսիի սպասարկման վճարն է՝ մեր ստացականում</span></div>`
   /* Card declined at the end (iPay / ArCa refusal), or an Apple / Google Pay sheet the rider dismissed: the same recovery. */
-  const DECL = (() => { const h = R.payList('applepay'), w = 'կգանձվի ավարտին', i = h.indexOf(w), j = h.lastIndexOf('aria-checked="false"', i)
+  const DECL = (() => { const h = R.payList('none'), w = 'կգանձվի ավարտին', i = h.indexOf(w), j = h.lastIndexOf('aria-checked="false"', i)
     return h.slice(0, j) + 'aria-checked="false" aria-disabled="true"' + h.slice(j + 20, i) + 'մերժվեց' + h.slice(i + w.length) })()
   const page = (body, foot) => `<div class="page on-surface">${nav}<div class="body">${body}</div><div class="foot">${foot}</div></div>`
 
@@ -169,11 +188,11 @@
     title: 'Rider · Trip complete',
     sub: 'The fare is the hero, broken down from the real Eco City tariff. Stars, then compliments or a reason. Close is always there',
     states: [
-      { id: 'rate', label: 'Fare + rate', time: '9:51', note: 'Base 600 + 4,3 km × 90 + 6 min × 12 = 1 059, rounded to 1 100 ֏ (fixed upfront) . Paid in cash, so no service fee (owner 2026-10-15, final: only bank-card payments carry the 2 %). «Ուղարկել» is pinned, disabled until a star is chosen, so the layout does not jump',
-        html: () => page(`${tripHead()}${breakdown()}${who}<div class="ask">Գնահատեք վարորդին</div>${stars(0)}`,
+      { id: 'rate', label: 'Fare + rate', time: '9:51', note: 'Base 600 + 4,3 km × 90 + 6 min × 12 = 1 059, rounded to 1 100 ֏ (fixed upfront) . Paid in cash, so no service fee (owner 2026-10-15, final: only bank-card payments carry the 2 %). «Ուղարկել» is pinned, disabled until a star is chosen, so the layout does not jump. UX audit 2026-10-15 (Peak-End): the breakdown opens on «Գնի մանրամասները», as on the rated states — the fixed price was agreed before the ride, and the end of the ride is the stars, not a «Կլորացում +41 ֏» line. Promo and card keep it open: there it explains why the number differs from the fare',
+        html: () => page(`${tripHead()}${collapsed}${who}<div class="ask">Գնահատեք վարորդին</div>${stars(0)}`,
           '<button class="btn" disabled>Ուղարկել</button><button class="btn-text">Բաց թողնել</button>') },
       { id: 'company', label: 'Company ride', time: '9:51', note: 'Billed to the rider\'s company (receipt.tsx): «Վճարում է՝ …» stands where the method would; never a balance or a limit. Nothing is paid to the driver. Owner 2026-10-15: company rides are not sent to ETAPI, so there is no Tax Service receipt and no link to one; the second line says where the ride is accounted for: «Ընկերության ամսական հաշվետվությունում». No service fee on company rides',
-        html: () => page(`${tripHead('company')}${breakdown('company')}${who}<div class="ask">Գնահատեք վարորդին</div>${stars(0)}`,
+        html: () => page(`${tripHead('company')}${billedTo}${collapsed}${who}<div class="ask">Գնահատեք վարորդին</div>${stars(0)}`,
           '<button class="btn" disabled>Ուղարկել</button><button class="btn-text">Բաց թողնել</button>') },
       { id: 'promo', label: 'Promo discount', time: '9:51', note: 'Change list 2026-10-14 (drawn ahead): ECO.PROMO.applied AUTUMN15 on the walkthrough ride. The breakdown keeps the tariff lines, adds one «Պրոմոկոդ · AUTUMN15 −165 ֏» line in brand, and the hero and total are what the rider pays: 935 ֏ (cash, no service fee)',
         html: () => page(`${tripHead('cash', true)}${breakdown('cash', true)}${who}<div class="ask">Գնահատեք վարորդին</div>${stars(0)}`,
@@ -181,12 +200,24 @@
       { id: 'card', label: 'Paid by card', time: '9:51', note: 'Owner 2026-10-15 (final): the same ride charged to the saved card ·· 4242 (Apple Pay / Google Pay alike). The tariff lines still add to the fare, 1 100 ֏; «Սպասարկման վճար · քարտով 2 %» 22 ֏ is its own line, and the hero and total are 1 122 ֏. The Tax Service receipt for this ride still shows 1 100 ֏ only',
         html: () => page(`${tripHead('card')}${breakdown('card')}${who}<div class="ask">Գնահատեք վարորդին</div>${stars(0)}`,
           '<button class="btn" disabled>Ուղարկել</button><button class="btn-text">Բաց թողնել</button>') },
-      { id: 'card-declined', label: 'Card declined', time: '9:51', note: 'Owner 2026-10-15: the card gateway (iPay / ArCa) refused ·· 4242 when the ride ended. The ride is over and fine, so amber, not red, and no modal: the fare stays the hero with a «Չվճարված» chip, one line says what happened and what to do, and the payment list is right there with the declined card greyed («մերժվեց»). Apple Pay is picked here, so the button carries the 2 % fee (1 100 + 22 = 1 122 ֏) and a quiet line says which methods carry it; choosing cash turns the button into «Վճարել կանխիկ՝ վարորդին», who is still at the car. An Apple / Google Pay sheet the rider cancelled lands on this same screen, with the line «Վճարումը չավարտվեց». Unpaid and left, it becomes the account debt (rider-account wallet)',
+      { id: 'card-declined', label: 'Card declined', time: '9:51', note: 'Owner 2026-10-15: the card gateway (iPay / ArCa) refused ·· 4242 when the ride ended. The ride is over and fine, so amber, not red, and no modal: the fare stays the hero with a «Չվճարված» chip, one line says what happened and what to do, and the payment list is right there with the declined card greyed («մերժվեց»). Team review 2026-10-16 (R2): «Կրկնել» (the same card again, 1 100 + 22 = 1 122 ֏) is the primary button, offered FIRST; the other methods sit below under «Կամ այլ եղանակ», none preselected, and picking one changes the button to that method (cash: «Վճարել կանխիկ՝ վարորդին», who is still at the car; a quiet line says which methods carry the 2 % fee). An Apple / Google Pay sheet the rider cancelled lands on this same screen, with the line «Վճարումը չավարտվեց». Unpaid and left, it becomes the account debt (rider-account wallet)',
         html: () => page(`${tripHead().replace(paidChip('cash'), `<span class="paid due">${R.i('clock')}Չվճարված</span>`)}
-          <div class="decl" role="status">${R.i('credit-card')}<div><b>Քարտը ·· ${ECO.PAY.card.last4} մերժվեց</b><span>Ընտրեք այլ եղանակ կամ վճարեք վարորդին կանխիկ</span></div></div>${DECL}<div class="fisnote">${R.i('info')}<span>Քարտով, Apple Pay կամ Google Pay՝ +2 % սպասարկման վճար · կանխիկ՝ ոչ</span></div>`,
-          `<button class="btn btn-brand">Վճարել · ${R.amd(RD.fare + fee('card'))}</button>`) },
-      { id: 'rated', label: 'Five stars', note: 'Compliments are optional; two picked',
+          <div class="decl" role="status">${R.i('credit-card')}<div><b>Քարտը ·· ${ECO.PAY.card.last4} մերժվեց</b><span>Կրկնեք նույն քարտով, կամ ընտրեք այլ եղանակ</span></div></div><div class="sect" style="padding:var(--s4) 0 0">Կամ այլ եղանակ</div>${DECL}<div class="fisnote">${R.i('info')}<span>Քարտով, Apple Pay կամ Google Pay՝ +2 % սպասարկման վճար · կանխիկ՝ ոչ</span></div>`,
+          `<button class="btn btn-brand">${R.i('rotate-cw')}Կրկնել · ·· ${ECO.PAY.card.last4} · ${R.amd(RD.fare + fee('card'))}</button>`) },
+      { id: 'nfc-wait', label: 'NFC · waiting for the driver', time: '9:51', note: 'Owner 2026-10-16: NFC is paid on the DRIVER\'s phone, in the bank\'s own ACBA app; our app reads no card and cannot see the tap. After drop-off the fare stays the hero at 1 122 ֏ (1 100 + 2 % fee, the same card-type fee line) with a neutral «Սպասում ենք» chip, one line says what to do («հպեք քարտը կամ հեռախոսը վարորդի հեռախոսին»), and the screen waits for the driver to confirm. No button opens ACBA. The driver is still at the car. When the driver taps «Վճարվեց» this becomes the normal done screen (Paid by NFC); «Չստացվեց» goes to the next state',
+        html: () => page(`${tripHead('nfc').replace(paidChip('nfc'), `<span class="paid wait">${R.i('clock')}Սպասում ենք</span>`)}
+          <div class="decl wait" role="status">${R.i('smartphone-nfc')}<div><b>Հպեք քարտը կամ հեռախոսը վարորդի հեռախոսին</b><span>Վճարում եք 1 122 ֏ · վարորդը կհաստատի</span></div></div>${breakdown('nfc')}`,
+          '<button class="btn" disabled>Սպասում ենք վարորդի հաստատմանը…</button>') },
+      { id: 'nfc-failed', label: 'NFC · driver marked failed', time: '9:52', note: 'Owner 2026-10-16: the driver tapped «Չստացվեց». Amber, not red, no modal: the fare stays the hero with a «Չվճարված» chip, one line says it did not go through, and the way out is cash to the driver, who is still at the car, at the bare 1 100 ֏ (the 2 % fee falls away with the card-type method, as when a card is declined). The driver may also try the tap again, in which case this returns to the waiting state',
+        html: () => page(`${tripHead('nfc').replace(paidChip('nfc'), `<span class="paid due">${R.i('clock')}Չվճարված</span>`)}
+          <div class="decl" role="status">${R.i('smartphone-nfc')}<div><b>Վճարումը չստացվեց</b><span>Վարորդը կրկին կփորձի, կամ վճարեք կանխիկ</span></div></div><div class="fisnote">${R.i('info')}<span>Կանխիկ՝ 1 100 ֏, առանց սպասարկման վճարի</span></div>`,
+          `<button class="btn btn-brand">Վճարել կանխիկ՝ ${R.amd(RD.fare)}</button>`) },
+      { id: 'rated', label: 'Five stars', note: 'UX audit 2026-10-16 (Peak-End): a 5 ★ goes on the tap, so the rider who is happy leaves in one move. A 4 s undo bar («5 աստղը ուղարկվում է · Հետարկել», the bar shrinks) replaces «Ուղարկել»; when it runs out the screen closes to «Շնորհակալություն». Compliments stay optional above it: touching a chip pauses the bar and brings «Ուղարկել» back. 1–4 ★ keep «Ուղարկել», because a reason or compliments follow',
         html: () => page(`${tripHead()}${collapsed}${who}${stars(5)}<div class="q" style="text-align:center">Ի՞նչը դուր եկավ</div>
+          ${chips(['Մաքուր մեքենա', 'Զգույշ վարում', 'Հաճելի զրույց', 'Ճշտապահ', 'Լավ երաժշտություն'], [])}`,
+          `<div class="undo" role="status"><span class="un">${R.i('circle-check')}5 աստղը ուղարկվում է</span><button class="btn-text">Հետարկել</button><span class="cd" aria-hidden="true"></span></div>`) },
+      { id: 'rated-4', label: 'Four stars', note: '4 ★ is not sent on the tap: compliments follow, so «Ուղարկել» stays (as at 5 ★ before the audit); two picked',
+        html: () => page(`${tripHead()}${collapsed}${who}${stars(4)}<div class="q" style="text-align:center">Ի՞նչը դուր եկավ</div>
           ${chips(['Մաքուր մեքենա', 'Զգույշ վարում', 'Հաճելի զրույց', 'Ճշտապահ', 'Լավ երաժշտություն'], [0, 1])}`,
           '<button class="btn btn-brand">Ուղարկել</button><button class="btn-text">Բաց թողնել</button>') },
       { id: 'low', label: 'Low rating', note: 'Owner #15: 1–3 ★ is low (ECO.DISPATCH.lowRating.max, console Settings → Dispatch); drawn at 3 ★. What went wrong, one tap each; it reaches the dispatcher for a follow-up within 24 h, not only a score. 4 ★ gets the compliments row, as 5 ★',
@@ -229,9 +260,12 @@
             <div class="wait" role="status">${R.i('clock')}<div><b>Կտրոնը պատրաստ կլինի մինչև վաղը, 9:51</b><span>Կանխիկ վճարումները ՊԵԿ են ուղարկվում 24 ժամվա ընթացքում · կծանուցենք</span></div></div>
           </div>${fisNote}</div>
           <div class="foot"><button class="btn btn-brand">Լավ</button><button class="btn btn-quiet">${R.i('download')}Պահել ստացականը</button></div></div>` },
-      { id: 'thanks', label: 'Thanks', note: 'Calm close; the next ride is one tap',
+      { id: 'thanks', label: 'Thanks', note: 'Calm close; the next ride is one tap. UX audit 2026-10-16: the block is lifted to the optical centre and carries a small card (route trace, the two addresses, fare · method · driver), so the close does not read as an empty screen',
         html: () => page(`<div class="thanks"><span class="ok">${R.i('check')}</span><h1 class="large">Շնորհակալություն</h1>
-          <span class="sum">${R.amd(RD.fare)} · ${ECO.PAY.cash.label} · ${DV.first}</span></div>`,
+          <div class="recap"><div class="trip">${R.trace('pickupToDrop', 64, 64, { pad: 10, sw: 3, r: 4, grid: false })}
+            <div class="stops"><div class="st"><span class="m"><span class="dot"></span></span><span class="tx"><span class="t1">${RD.pickup}</span></span></div>
+              <div class="st"><span class="m"><span class="sq"></span></span><span class="tx"><span class="t1">${RD.drop}</span></span></div></div></div>
+            <div class="rsum"><span>${ECO.PAY.cash.label} · ${DV.first}</span><b>${R.amd(RD.fare)}</b></div></div></div>`,
           `<button class="btn btn-brand">Պատվիրել մեքենա</button><button class="btn btn-quiet">${R.i('receipt')}Ստացական</button>`) },
     ],
   })

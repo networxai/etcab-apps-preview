@@ -41,11 +41,13 @@
     },
 
     /* iOS Armenian phonetic keyboard (ք ո ե ռ տ … = q w e r t …). */
-    keyboard() {
+    /* layout: 'hy' (default), 'en' or 'ru' — a rider may type an address in any of the three scripts (2GIS suggest is hy/ru/en). */
+    keyboard(layout = 'hy') {
+      const L = { hy: ['քոեռտըւիօպ', 'ասդֆգհյկլ', 'զղցվբնմ', 'բացատ'], en: ['qwertyuiop', 'asdfghjkl', 'zxcvbnm', 'space'], ru: ['йцукенгшщзх', 'фывапролджэ', 'ячсмитьбю', 'пробел'] }[layout]
       const row = (ks, cls = '') => `<div class="kr ${cls}">${[...ks].filter((c) => c !== ' ').map((c) => `<span class="kk">${c}</span>`).join('')}</div>`
-      return `<div class="keyboard" data-overlay aria-hidden="true" translate="no">${row('քոեռտըւիօպ')}${row('ասդֆգհյկլ', 'in')}
-        <div class="kr"><span class="kk fn">${R.i('arrow-big-up')}</span>${[...'զղցվբնմ'].map((c) => `<span class="kk">${c}</span>`).join('')}<span class="kk fn">${R.i('delete')}</span></div>
-        <div class="kr"><span class="kk fn w">123</span><span class="kk sp">բացատ</span><span class="kk fn w">${R.i('corner-down-left')}</span></div></div>`
+      return `<div class="keyboard" data-overlay aria-hidden="true" translate="no">${row(L[0])}${row(L[1], 'in')}
+        <div class="kr"><span class="kk fn">${R.i('arrow-big-up')}</span>${[...L[2]].map((c) => `<span class="kk">${c}</span>`).join('')}<span class="kk fn">${R.i('delete')}</span></div>
+        <div class="kr"><span class="kk fn w">123</span><span class="kk sp">${L[3]}</span><span class="kk fn w">${R.i('corner-down-left')}</span></div></div>`
     },
 
     banner({ icon = 'wifi-off', t1, t2, action, kind = '', top }) {
@@ -64,17 +66,19 @@
     },
     bbox(pt, dLat, dLng) { return [[pt[0] - dLat, pt[1] - dLng], [pt[0] + dLat, pt[1] + dLng]] },
   }
-  /* Payment methods (owner 2026-10-15). Apple Pay shows on iPhone, Google Pay on Android — the mock lists both. */
+  /* Payment methods (owner 2026-10-15). Apple Pay shows on iPhone, Google Pay on Android — never both on one phone (UX audit
+     2026-10-15, Hick's law: five rows, not six; a wallet the phone cannot use is a row that can only fail). The mock is an iPhone;
+     o.os = 'android' draws the Google Pay row instead. */
   R.payList = (sel, o = {}) => {
+    const os = o.os || (sel === 'googlepay' ? 'android' : 'ios')
     const P = ECO.PAY, row = (id, ic, t, t2, cls) => `<button class="choice" role="radio" aria-checked="${sel === id}"><span class="ico ${cls || ''}">${R.i(ic)}</span><span class="t">${t}<span class="t2">${t2}</span></span><span class="radio"></span></button>`
     const div = '<div class="divider" style="margin-left:48px"></div>'
     return `<div class="paylist" role="radiogroup" aria-label="Վճարման եղանակ">${[
       row('cash', 'banknote', P.cash.label, o.ride ? 'վարորդին՝ ավարտին' : 'վարորդին', 'cashc'),
       row('card', 'credit-card', `${P.card.label} ·· ${P.card.last4}`, 'կգանձվի ավարտին'),
-      row('applepay', 'smartphone', P.applepay.label, 'iPhone-ում'),
-      row('googlepay', 'smartphone', P.googlepay.label, 'Android-ում'),
-      row('nfc', 'smartphone-nfc', 'NFC', 'մոտեցնել վարորդի հեռախոսին'),
-    ].join(div)}${div}<button class="choice"><span class="ico">${R.i('plus')}</span><span class="t">Ավելացնել քարտ</span></button></div>`
+      os === 'ios' ? row('applepay', 'smartphone', P.applepay.label, 'iPhone-ում') : row('googlepay', 'smartphone', P.googlepay.label, 'Android-ում'),
+      row('nfc', 'smartphone-nfc', P.nfc.label, 'վարորդի հեռախոսով, ավարտին · +2 %'),
+    ].join(div)}${div}<button class="choice"><span class="ico">${R.i('plus')}</span><span class="t">Ավելացնել քարտ</span></button></div><div class="paynote">${R.i('smartphone-nfc')}<span>NFC-ը վճարվում է վարորդի հեռախոսով՝ ավարտին։ Միայն Eco Taxi-ի մեքենաներով</span></div>`
   }
   window.R = R
 

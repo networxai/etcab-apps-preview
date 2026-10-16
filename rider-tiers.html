@@ -55,9 +55,13 @@
   .tier .art .seat { position: absolute; right: 2px; top: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--surface); box-shadow: var(--e1);
     display: grid; place-items: center; color: var(--ink); z-index: 1; }
   .tier .art .seat svg { width: 14px; height: 14px; }
+  /* Reviewer annotation, outside the phone (UX audit 2026-10-16, Jakob): not app copy, not audited. */
+  .refnote { position: absolute; left: 414px; top: 24px; width: 240px; padding: 12px 14px; border-radius: 12px; background: var(--surface-2); color: var(--ink-2); font: 400 13px/18px var(--font, inherit); }
+  .refnote b { display: block; margin-bottom: 4px; color: var(--ink); font-weight: 600; }
 </style>
 </head>
 <body>
+<aside class="refnote" lang="en" translate="no"><b>Tier-row reference only</b>The tier row (cards, ETA, seats, price, ringed selection) is the approved base. The step under it is drawn in <code>rider-book</code> (when · note · payment chips + promo), which is canonical for the details sheet. This page's payment row and note icon are not the spec.</aside>
 <main class="screen" id="s">
   <div class="map" id="map" aria-label="Քարտեզ"></div>
   <button class="fab" style="top:62px;left:16px" aria-label="Հետ"><i data-lucide="arrow-left"></i></button>

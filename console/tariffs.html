@@ -68,7 +68,7 @@
   @media (max-height: 860px) { .where, .pvl { display: none; } }
   .where div { display: flex; align-items: center; gap: 10px; font: var(--c-body); color: var(--ink-muted); }
   .where .car { width: 56px; height: 30px; }
-  /* ── Change list 2026-10-15: the tariff is the main configuration layer. ?t=<tier>&sec=price|preorder|commission|other
+  /* ── Change list 2026-10-15: the tariff is the main configuration layer. ?t=<tier>&sec=price|preorder|time|commission|other
      opens one tariff's editor; zones (zones.html) only add exceptions on top: Սակագին → Գոտու կանոն → Գոտուց գոտի.
      Partner fee + balance rules moved here from the retired Fee plans page (owner: partners only; fleet has no balance). ── */
   .content[hidden] { display: none; }
@@ -95,6 +95,19 @@
   .frow .c { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
   .frow .s { display: flex; justify-content: flex-end; }
   .frow.off .l b, .frow.off .c { opacity: .5; }
+  .tw { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; align-items: center; padding: 10px var(--inset); border-bottom: 1px solid var(--line-soft); }
+  .tw .l { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+  .tw .l b { font: var(--c-strong); white-space: nowrap; }
+  .tw .l span { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .tw .s { display: flex; justify-content: flex-end; }
+  .tw .ctl { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .tw .dys { display: flex; gap: 2px; }
+  .tw .dy { display: inline-grid; place-items: center; min-width: 31px; height: 28px; padding: 0 4px; border-radius: var(--r-ctl); font: var(--c-small); color: var(--ink-faint); box-shadow: inset 0 0 0 1px var(--line-control); cursor: pointer; }
+  .tw .dy.on { color: var(--ink); background: var(--surface-3); box-shadow: inset 0 0 0 1.5px var(--ink); font-weight: 600; }
+  .tw .dy:focus-visible { outline: 2px solid var(--brand-vivid); outline-offset: 1px; }
+  .tw .rg, .tw .vl { display: flex; align-items: center; gap: 6px; } .tw .rg .num-in { min-width: 68px; }
+  
+  .tw.off .l b, .tw.off .ctl { opacity: .55; }
   .num-in { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; height: 30px; padding: 0 8px; border-radius: var(--r-ctl); box-shadow: inset 0 0 0 1px var(--line-control); background: var(--surface); font: 500 13px/18px var(--mono); white-space: nowrap; min-width: 84px; }
   .num-in span { color: var(--ink-faint); font-family: var(--font); }
   .num-in.p { min-width: 64px; } .num-in.dis { background: var(--surface-alt); color: var(--ink-faint); box-shadow: inset 0 0 0 1px var(--line-soft); }
@@ -227,7 +240,7 @@
     const svcOf = (x) => Math.round(x * SVC[1] / 100) /* card payments only */
     const comOf = (x) => Math.min(COMM[4], Math.max(COMM[3], Math.round(x * COMM[1] / 100) + COMM[2]))
     const comTxt = (c) => (c[0] === 1 ? amd(c[2]) : c[0] === 2 ? `${c[1]} % + ${amd(c[2])}` : `${c[1]} %`)
-    const tabs = [['price', 'Գին', 'banknote'], ['preorder', 'Նախնական պատվեր', 'calendar-clock'], ['commission', 'Միջնորդավճար', 'percent'], ['other', 'Այլ', 'sliders-horizontal']]
+    const tabs = [['price', 'Գին', 'banknote'], ['preorder', 'Նախնական պատվեր', 'calendar-clock'], ['time', 'Ժամային գներ', 'moon-star'], ['commission', 'Միջնորդավճար', 'percent'], ['other', 'Այլ', 'sliders-horizontal']]
     let body = ''
     if (sec === 'price') {
       body = sh('Գնի բաղադրիչներ', 'ամեն մեկն առանձին է միանում · կլորացում 100 ֏')
@@ -261,8 +274,19 @@
         + sh('Չեղարկում', 'ուղևորը հավելվածում չի չեղարկում՝ զանգում է դիսպետչերին')
         + row('Անվճար չեղարկում', 'մինչև նստելու ժամը', n(60, 'ր'))
         + row('Չեղարկման վճար', 'դրանից հետո', n(500, '֏'), true)
-        + row('Վարորդի հրաժարում', 'նշանակված վարորդը կարող է հրաժարվել մինչև', n(120, 'ր'))
         + `</div><div style="padding:12px var(--inset)"><div class="notice neutral"><i data-lucide="bell"></i><span>Հիշեցման ծանուցման ժամանակը՝ <a href="settings.html?theme=${THEME}" style="color:var(--brand-text)">Կարգավորումներում</a> · գոտիները կարող են արգելել կամ սահմանափակել՝ <a href="zones.html?theme=${THEME}" style="color:var(--brand-text)">Գոտիներ</a></span></div></div>`
+    } else if (sec === 'time') {
+      const D = ['Երկ', 'Երք', 'Չրք', 'Հնգ', 'Ուրբ', 'Շբթ', 'Կիր']
+      const days = (on) => `<span class="dys" role="group" aria-label="Շաբաթվա օրեր">${D.map((d, i) => `<span class="dy${on.includes(i) ? ' on' : ''}" role="checkbox" tabindex="0" aria-checked="${on.includes(i)}">${d}</span>`).join('')}</span>`
+      const win = (nm, hint, d, a, b, kind, v, on) => `<div class="tw${on ? '' : ' off'}"><span class="l"><b>${nm}</b><span>${hint}</span></span><span class="s">${sw(on, nm)}</span><span class="ctl">${days(d)}<span class="rg">${n(a, '')}<span class="x">–</span>${n(b, '')}</span><span class="vl">${seg(['%', '֏'], kind, 'Հավելավճարի տեսակ ' + nm)}${kind === 0 ? n('+' + v, '%', 'p') : n('+' + nf(v), '֏')}</span></span></div>`
+      body = sh('Ժամային գներ', 'ըստ ժամի և շաբաթվա օրվա · Երևանի ժամանակով', '<button class="btn ghost s"><i data-lucide="plus"></i>Ժամանակահատված</button>')
+        + win('Գիշերային', 'ամեն օր', [0, 1, 2, 3, 4, 5, 6], '23:00', '06:00', 0, 15, true)
+        + win('Սրընթաց ժամ', 'աշխատանքային օրեր, առավոտյան', [0, 1, 2, 3, 4], '08:00', '10:00', 0, 10, true)
+        + win('Սրընթաց ժամ', 'աշխատանքային օրեր, երեկոյան', [0, 1, 2, 3, 4], '17:30', '19:30', 1, 300, true)
+        + win('Շաբաթ-կիրակի գիշեր', 'կիրակի առավոտ ներառյալ', [5, 6], '00:00', '04:00', 0, 20, false)
+        + sh('Տոնական օրեր', '31.12, 01.01, 06.01, 08.03, 28.05')
+        + row('Տոնական հավելավճար', 'ամբողջ օրը՝ ժամային գների փոխարեն', `${n('+20', '%', 'p')}<button class="btn ghost s">Օրեր</button>`, true)
+        + `<div style="padding:8px var(--inset) 12px"><div class="notice neutral"><i data-lucide="layers"></i><span>Եթե մի քանի ժամանակահատված համընկնում է, գործում է ամենաբարձրը, չեն գումարվում։ Գոտու կանոնը (օր. օդանավակայան) գումարվում է սակագնին առանձին։</span></div></div>`
     } else if (sec === 'commission') {
       body = sh('Գործընկերոջ միջնորդավճար', 'միայն գործընկերներ · ավտոպարկի վարորդները հաշվեկշիռ չունեն')
         + row('Տեսակ', 'տոկոս, ֆիքսված գումար կամ երկուսը միասին', seg(['Տոկոս', 'Ֆիքսված', 'Խառը'], COMM[0], 'Միջնորդավճարի տեսակ'))
@@ -277,9 +301,9 @@
         + row('Տեսակ', 'տոկոս կամ ֆիքսված', seg(['Տոկոս', 'Ֆիքսված'], 0, 'Սպասարկման վճարի տեսակ'))
         + row('Տոկոս', 'վերջնական գնից', n(SVC[1], '%', 'p'))
         + row('Նվազագույն / առավելագույն', 'ոչ պարտադիր', `${n('—', '֏', 'dis')}<span class="x">–</span>${n('—', '֏', 'dis')}`)
-        + `<div style="padding:8px var(--inset) 12px" class="chips">${chk('Քարտ', true)}${chk('Apple Pay', true)}${chk('Google Pay', true)}${chk('Կանխիկ', false)}${chk('NFC / POS', false)}${chk('Ընկերության հաշիվ', false)}<span class="faint" style="font:var(--c-small);align-self:center">միայն բանկային քարտով</span></div>`
+        + `<div style="padding:8px var(--inset) 12px" class="chips">${chk('Քարտ', true)}${chk('Apple Pay', true)}${chk('Google Pay', true)}${chk('NFC · POS', true)}${chk('Կանխիկ', false)}${chk('Ընկերության հաշիվ', false)}<span class="faint" style="font:var(--c-small);align-self:center">միայն բանկային քարտով · NFC՝ միայն ավտոպարկի մեքենաներով</span></div>`
         + sh('Բոլոր սակագները', 'մի հայացքով') + `<table class="tbl ovt"><colgroup><col><col style="width:160px"><col style="width:160px"></colgroup><thead><tr><th>Սակագին</th><th class="r">Գործընկերոջ միջնորդավճար</th><th class="r">Սպասարկման վճար</th></tr></thead><tbody>
-          ${TIERS.map((t) => { const k = kidOf(t), c = { city: [0, 15, 0], comfort: [0, R.fee || 15, 0], kids: [0, 15, 0], business: [2, 10, 100], van: [0, 15, 0], vip: [1, 0, 600] }[k], s2 = '2 % · քարտով'
+          ${TIERS.map((t) => { const k = kidOf(t), c = { city: [0, 15, 0], comfort: [0, R.fee || 15, 0], kids: [0, 15, 0], business: [2, 10, 100], van: [0, 15, 0], vip: [1, 0, 600] }[k], s2 = '2 % · քարտ, NFC/POS'
             return `<tr${t === T ? ' class="on"' : ''}><td><a href="tariffs.html?theme=${THEME}&t=${kidOf(t)}&sec=commission" style="color:inherit;text-decoration:none">${t.name}</a></td><td class="r">${comTxt(c)}</td><td class="r">${s2}</td></tr>` }).join('')}</tbody></table>`
     } else {
       body = sh('Վճարման եղանակներ')
@@ -292,9 +316,6 @@
         + row('Առաջարկի ժամկետ', 'վարորդը պատասխանում է', n(15, 'վ'))
         + row('Ալիքներ', 'հետո՝ «Վարորդ չկա» դիսպետչերին', n(3, ''))
         + row('Մոտեցման սահման', 'ավելի հեռու վարորդին չառաջարկել', n(12, 'ր'))
-        + sh('Հավելավճարներ ըստ ժամի')
-        + row('Գիշերային', 'ամեն օր', `${n('23:00', '')}<span class="x">–</span>${n('06:00', '')}${n('+15', '%', 'p')}`, true)
-        + row('Տոնական օրեր', '31.12, 01.01, 06.01, 08.03, 28.05', `${n('+20', '%', 'p')}<button class="btn ghost s">Օրեր</button>`, true)
         + sh('Սահմանափակումներ')
         + row('Ուղևորներ', 'առավելագույնը', n(T.seats, ''))
         + row('Պատվերի աղբյուր', 'որտեղից կարելի է պատվիրել', `${chk('Հավելված', true)}${chk('Դիսպետչեր', true)}${chk('Վարորդ', K !== 'vip')}`)
@@ -324,7 +345,7 @@
             <span>Նստելու գին</span><span>${amd(T.base)}</span>
             <span>2,1 կմ × ${T.km} ֏</span><span>${amd(Math.round(T.km * 2.1))}</span>
             <span>4 ր × ${T.min} ֏</span><span>${amd(T.min * 4)}</span>
-            <span class="faint">${T.base + Math.round(T.km * 2.1) + T.min * 4 < T.floor ? 'նվազագույնը' : 'կլորացում 100 ֏'}</span><span class="faint">${amd(f)}</span>
+            <span class="faint">${T.base + Math.round(T.km * 2.1) + T.min * 4 < T.floor ? 'նվազագույնը' : 'կլորացված՝ ' + (f - (T.base + Math.round(T.km * 2.1) + T.min * 4) < 0 ? '−' : '+') + amd(Math.abs(f - (T.base + Math.round(T.km * 2.1) + T.min * 4)))}</span><span class="faint">${amd(f)}</span>
             <span>Սպասարկման վճար · կանխիկ</span><span>—</span>
             <span>Սպասարկման վճար · քարտով 2 %</span><span>+${amd(svc)}</span>
             <span class="tot">Ուղևորը վճարում է · քարտով</span><span class="tot">${amd(f + svc)}</span>

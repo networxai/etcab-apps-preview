@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Company login</title>
+<link rel="stylesheet" href="../console.css">
+<link rel="stylesheet" href="portal.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../../kit.js"></script>
+<script src="../console.js"></script>
+<script src="../console-audit.js"></script>
+<style>
+  /* The console login's card (../login.html), with the customer-auth flow (corporate ADR-C6): phone, then a six-digit SMS
+     code. No password and no authenticator: the one login per company (owner 2026-10-16) is its manager, an office
+     worker, not a dispatcher on a shared PC; the fleet sets that phone on the console's company page. The phone step never
+     says whether the number has access, and a company whose portal is off gets the same answer as an unknown number. */
+  .screen.login { grid-template-columns: minmax(0, 1fr); place-items: center; overflow: auto; padding: 16px; }
+  .lc { width: 400px; max-width: 100%; background: var(--surface); border-radius: var(--r-card); box-shadow: var(--e2); display: flex; flex-direction: column; }
+  .lh { padding: 24px 24px 8px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+  .chipm { width: 36px; height: 36px; border-radius: 10px; background: var(--brand-fill); color: var(--brand-fill-ink); display: grid; place-items: center; font: 600 18px/1 var(--font); margin-bottom: 8px; }
+  .lh h1 { font: var(--c-title); }
+  .lh p { font: var(--c-body); color: var(--ink-muted); }
+  .lb { padding: 12px 24px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .input.l .val { font: 400 15px/20px var(--mono); }
+  .otp { display: flex; align-items: center; gap: 6px; }
+  .otp .bx { width: 44px; height: 44px; border-radius: var(--r-ctl); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-strong); display: grid; place-items: center; font: 500 18px/1 var(--mono); }
+  .otp .bx.cur { box-shadow: inset 0 0 0 1px var(--focus-ring), 0 0 0 3px var(--brand-soft); }
+  .otp .bx.err { box-shadow: inset 0 0 0 1px var(--danger-c); }
+  .btn.l.full { width: 100%; }
+  .sent { font: var(--c-small); color: var(--ink-muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .lf { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--line-soft); font: var(--c-small); color: var(--ink-faint); }
+  .lf .note { flex: 1; min-width: 0; }
+  .stamp { margin-top: 12px; font: var(--c-small); color: var(--ink-faint); text-align: center; }
+  .stamp a { color: var(--brand-text); }
+  @media (max-width: 440px) { .otp .bx { width: 40px; } .lh, .lb { padding-left: 16px; padding-right: 16px; } }
+</style>
+</head>
+<body>
+<!-- window.STATES (?state=):
+       (none)       the phone typed, ready to send the code
+       code         the code step: four of six digits, resend countdown
+       refused      wrong or expired code (red: it failed), the boxes cleared, focus on the first
+       ratelimited  too many attempts: amber, paused, not refused -->
+<div class="screen login" id="screen">
+  <div style="width:400px;max-width:100%">
+    <form class="lc" id="card" aria-labelledby="h"></form>
+    <p class="stamp"><a href="../index.html" id="idx">Ինդեքս</a></p>
+  </div>
+</div>
+<script>
+  window.STATES = ['', 'code', 'refused', 'ratelimited']
+  const st = new URLSearchParams(location.search).get('state') || ''
+  document.getElementById('idx').href = '../index.html?theme=' + THEME
+  const dark = THEME === 'dark', PHONE = '091 40-22-18'
+  const foot = `<div class="lf"><a class="btn ghost icon s" href="?theme=${dark ? 'light' : 'dark'}${st ? '&state=' + st : ''}" aria-label="Թեմա"><i data-lucide="${dark ? 'sun' : 'moon'}"></i></a>
+    <span class="note">Տեսքը հիշվում է այս դիտարկիչում</span><button type="button" class="btn ghost s" aria-label="Լեզու">Հայ</button></div>`
+  const otp = (d, cur, err) => `<div class="otp" role="group" aria-label="SMS կոդ">${[0, 1, 2, 3, 4, 5].map((i) => `<span class="bx${i === cur ? ' cur' : ''}${err ? ' err' : ''}">${d[i] || ''}</span>`).join('')}</div>`
+  const head = `<div class="lh"><span class="chipm" aria-hidden="true">E</span><h1 id="h">Մուտք</h1><p>Ընկերության վահանակ</p></div>`
+  const card = document.getElementById('card')
+  if (!st) {
+    card.innerHTML = head + `<div class="lb">
+      <div><span class="label">Հեռախոս</span><div class="input l focus"><i data-lucide="phone"></i><span class="faint" style="font:400 15px/20px var(--mono)">+374</span><span class="val">${PHONE}</span></div></div>
+      <button type="submit" class="btn primary l full">Ստանալ կոդը <span class="kbd">↵</span></button>
+      <p class="hint" style="margin:0">Մուտքը՝ ընկերության մենեջերի համարով, որը նշել է տաքսի ծառայությունը։ Համարը փոխելու համար դիմեք նրան։</p></div>` + foot
+  } else {
+    const msg = {
+      refused: '<div class="notice red" role="alert"><i data-lucide="circle-alert"></i><span>Կոդը սխալ է կամ ժամկետն անցել է</span></div>',
+      ratelimited: '<div class="notice amber" role="status"><i data-lucide="clock"></i><span>Չափազանց շատ փորձեր։ Կրկնեք 4 րոպեից։</span></div>',
+    }[st] || ''
+    card.innerHTML = head + `<div class="lb">
+      <p class="sent"><span>Եթե համարը կապված է ընկերության վահանակին, SMS կոդ կստանաք՝</span><b class="mono" style="color:var(--ink)">${PHONE}</b><a class="btn ghost s" href="?theme=${THEME}" style="margin-left:-6px">Փոխել</a></p>
+      <div><span class="label">SMS կոդ</span>${st === 'code' ? otp('4821', 4) : st === 'refused' ? otp('', 0, true) : otp('', -1)}</div>
+      ${msg}
+      <button type="submit" class="btn primary l full"${st === 'ratelimited' ? ' disabled' : ''}>Մուտք գործել <span class="kbd">↵</span></button>
+      <p class="sent">${st === 'ratelimited' ? 'Նոր կոդ՝ 4 րոպեից' : 'Նոր կոդ՝ <span class="mono">0:42</span>-ից'}</p></div>` + foot
+  }
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>

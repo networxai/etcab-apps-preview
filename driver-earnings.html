@@ -36,7 +36,7 @@
   .legend b { color: var(--ink); font-weight: 600; }
   .legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
   /* Owner 2026-10-15: three ways a ride is paid, so three rows, not one line — Armenian does not fit three on 358 px.
-     Non-cash (in-app card, Apple/Google Pay, POS, NFC) is paid out to the driver via Idram; cash is already in hand. */
+     Non-cash (in-app card, Apple/Google Pay, NFC · POS) is paid out to the driver via Idram; cash is already in hand. */
   .c-noncash { background: var(--ink-3); }
   .legend.rows { flex-direction: column; gap: 0; margin-top: var(--s3); }
   .legend.rows span { justify-content: flex-start; min-height: 28px; }
@@ -229,7 +229,7 @@
         <div class="ride"><span class="tm">13:25</span><span class="txt"><span class="t1">Ամիրյան փ. 4</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 5,8 կմ</span></span><span class="amt">1 200 ֏</span></div>
         <div class="ride"><span class="tm">12:40</span><span class="txt"><span class="t1">Ծիծեռնակաբերդ</span><span class="t2"><i data-lucide="building-2"></i>Ընկերություն · 4,1 կմ</span></span><span class="amt">1 100 ֏</span></div>
         <div class="ride"><span class="tm">11:35</span><span class="txt"><span class="t1">Դավթաշեն, 2-րդ թաղ.</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 8,9 կմ</span></span><span class="amt">1 900 ֏</span></div>
-        <div class="ride"><span class="tm">10:20</span><span class="txt"><span class="t1">Հանրապետության հր.</span><span class="t2"><i data-lucide="smartphone-nfc"></i>NFC · 5,8 կմ</span></span><span class="amt">1 400 ֏</span></div>
+        <div class="ride"><span class="tm">10:20</span><span class="txt"><span class="t1">Հանրապետության հր.</span><span class="t2"><i data-lucide="smartphone-nfc"></i>NFC · POS · 5,8 կմ</span></span><span class="amt">1 400 ֏</span></div>
         <div class="ride"><span class="tm">09:18</span><span class="txt"><span class="t1">Կասկադ</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 4,0 կմ</span></span><span class="amt">1 100 ֏</span></div>
       </div>
       <div class="day"><span>Երեկ, 8 հոկտ.</span><span>9 պատվեր · <b>12 900 ֏</b></span></div>
@@ -249,7 +249,7 @@
       <div class="sect">Idram-ով փոխանցված</div>
       <div class="group">
         <div class="po"><span class="ic" role="img" aria-label="Քարտ"><i data-lucide="credit-card"></i></span><span class="txt"><span class="t1">Զվարթնոց</span><span class="t2"><i data-lucide="clock"></i>Սպասվում է · չեկը տրված</span></span><span class="amt">2 000 ֏</span></div>
-        <div class="po"><span class="ic" role="img" aria-label="NFC"><i data-lucide="smartphone-nfc"></i></span><span class="txt"><span class="t1">Հանրապետության հր.</span><span class="t2 ok"><i data-lucide="circle-check"></i>Ուղարկված · 10:22</span></span><span class="amt">1 400 ֏</span></div>
+        <div class="po"><span class="ic" role="img" aria-label="NFC · POS"><i data-lucide="smartphone-nfc"></i></span><span class="txt"><span class="t1">Հանրապետության հր.</span><span class="t2 ok"><i data-lucide="circle-check"></i>Ուղարկված · 10:22</span></span><span class="amt">1 400 ֏</span></div>
       </div>
       <div class="day"><span>Երեկ, 8 հոկտ.</span><span>Ուղարկված · <b>1 000 ֏</b></span></div>
       <div class="group">
@@ -275,7 +275,7 @@
       <div class="sect">Սպասում են</div>
       <div class="group">
         <div class="po"><span class="ic" role="img" aria-label="Քարտ"><i data-lucide="credit-card"></i></span><span class="txt"><span class="t1">Զվարթնոց</span><span class="t2 warn"><i data-lucide="pause"></i>Կանգնեցված</span></span><span class="amt">2 000 ֏</span></div>
-        <div class="po"><span class="ic" role="img" aria-label="NFC"><i data-lucide="smartphone-nfc"></i></span><span class="txt"><span class="t1">Հանրապետության հր.</span><span class="t2 warn"><i data-lucide="pause"></i>Կանգնեցված</span></span><span class="amt">1 400 ֏</span></div>
+        <div class="po"><span class="ic" role="img" aria-label="NFC · POS"><i data-lucide="smartphone-nfc"></i></span><span class="txt"><span class="t1">Հանրապետության հր.</span><span class="t2 warn"><i data-lucide="pause"></i>Կանգնեցված</span></span><span class="amt">1 400 ֏</span></div>
       </div>
     </section>
 

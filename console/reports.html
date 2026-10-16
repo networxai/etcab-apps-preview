@@ -23,7 +23,7 @@
   .content { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
   .hd { display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap; padding: 10px var(--inset); border-bottom: 1px solid var(--line-soft); }
   .hd label { display: flex; flex-direction: column; }
-  .hd .input { width: 132px; } .hd .input.w { width: 200px; }
+  .hd .input { width: 132px; } .hd .input.w { width: 168px; }
   .hd .input .val { white-space: nowrap; }
   .hd .end { margin-left: auto; display: flex; gap: 6px; align-items: center; }
   .win { padding: 8px var(--inset); display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line-soft); font: var(--c-body); color: var(--ink-muted); }
@@ -39,6 +39,7 @@
   .rt th.vh { background: var(--surface-alt); } .rt td.vc { background: var(--surface-alt); }
   .pm { display: inline-flex; align-items: center; gap: 4px; }
   .pm svg { width: 14px; height: 14px; color: var(--ink-muted); }
+  .pm.sw { color: var(--ink); font-weight: 500; white-space: nowrap; }
   .prob { color: var(--warning); font: var(--c-small); }
   .two { display: flex; flex-direction: column; min-width: 0; } .two b { font: var(--c-strong); overflow: hidden; text-overflow: ellipsis; } .two span { font: 400 12px/16px var(--mono); color: var(--ink-muted); }
   .rt .cut td { height: 40px; color: var(--ink-muted); font: var(--c-small); text-align: center; white-space: normal; }
@@ -58,7 +59,7 @@
         <div class="win" id="win"></div>
         <div class="var" id="var"><i data-lucide="info"></i><span>«Գին / հաշվ.»՝ դեռ չի չափվում․ դատարկ է, ոչ թե զրո</span></div>
         <div class="scroll-y grow" data-truncate id="body">
-          <table class="tbl rt"><colgroup><col style="width:64px"><col style="width:136px"><col style="width:100px"><col style="width:80px"><col style="width:64px"><col style="width:120px"><col style="width:11%"><col style="width:8%"><col style="width:88px"><col><col><col style="width:8%"></colgroup>
+          <table class="tbl rt"><colgroup><col style="width:64px"><col style="width:136px"><col style="width:100px"><col style="width:80px"><col style="width:64px"><col style="width:150px"><col style="width:11%"><col style="width:8%"><col style="width:88px"><col><col><col style="width:8%"></colgroup>
             <thead><tr><th>Ժամ</th><th>Վիճակ</th><th class="n">Գին</th><th class="n">Գանձված</th><th class="n vh"><abbr title="Գինը՝ հաշվարկվածի դիմաց" style="text-decoration:none">Գին / հաշվ.</abbr></th><th>Վճարում</th><th>Ուղևոր</th><th>Վարորդ</th><th>Մեքենա</th><th>Որտեղից</th><th>Ուր</th><th>Խնդիր</th></tr></thead>
             <tbody id="rows"></tbody></table>
         </div>
@@ -84,7 +85,7 @@
     const co = [2, 7, 12, 17, 22, 25].includes(i)
     const fare = [1100, 900, 1300, 2000, 800, 1200, 1500, 1000][i % 8]
     rows.push({ t: String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0'), st, fare: st === 'nocar' ? null : fare, final: st === 'done' ? fare : st === 'noshow' ? 500 : null,
-      pay: co ? 'company' : 'cash', cust: co ? [ECO.CUSTOMER.short, ECO.CUSTOMER.phone] : CUST[i % CUST.length], drv: st === 'nocar' ? null : d.name.split(' ')[0] + ' ' + d.name.split(' ')[1][0] + '.', plate: st === 'nocar' ? null : d.plate,
+      pay: co ? 'company' : [4, 5, 16].includes(i) ? 'nfc' : 'cash', from: i === 5 ? 'cash' : i === 8 ? 'nfc' : '', cust: co ? [ECO.CUSTOMER.short, ECO.CUSTOMER.phone] : CUST[i % CUST.length], drv: st === 'nocar' ? null : d.name.split(' ')[0] + ' ' + d.name.split(' ')[1][0] + '.', plate: st === 'nocar' ? null : d.plate,
       a: co ? ECO.CUSTOMER.places.home : ADDR[i % ADDR.length], b: co ? ECO.CUSTOMER.places.work : ADDR[(i * 7 + 3) % ADDR.length],
       prob: st === 'noshow' ? 'Ուղևորը չեկավ' : st === 'nocar' ? 'Ազատ մեքենա չկար' : i === 6 ? 'Ցածր գնահատական · 2 ★' : '' })
   }
@@ -108,15 +109,15 @@
     const L = rows, total = 186
     document.getElementById('hd').innerHTML = `${KIND}<div class="seg" role="group" aria-label="Օր"><button>Այսօր</button><button class="on">Երեկ</button></div>
       ${F('Սկսած', '08.10.2026', '', 'calendar')}${F('Մինչև', '08.10.2026', '', 'calendar')}
-      ${F('Վարորդ', 'Բոլոր վարորդները', 'w')}${F('Ընկերություն', 'Բոլորը', 'w')}
+      ${F('Վարորդ', 'Բոլոր վարորդները', 'w')}${F('Ընկերություն', 'Բոլորը', 'w')}${F('Վճարում', 'Բոլորը', 'w')}
       <span class="end"><button class="btn primary"><i data-lucide="download"></i>Ներբեռնել CSV</button></span>`
-    document.getElementById('win').innerHTML = `<span><b>Հինգշաբթի, 8 հոկտ. 2026</b> · 00:00–24:00</span><span class="tot">Պատվերներ՝ <b class="mono">${total}</b></span>`
+    document.getElementById('win').innerHTML = `<span><b>Հինգշաբթի, 8 հոկտ. 2026</b> · 00:00–24:00</span><span>Եղանակը փոխված՝ <b class="mono">${L.filter((r) => r.from).length}</b> <span class="faint">· հաշված վերջնական եղանակով</span></span><span class="tot">Պատվերներ՝ <b class="mono">${total}</b></span>`
     const dash = '<span class="faint">—</span>'
     document.getElementById('rows').innerHTML = L.map((r) => {
       const [tone, word] = ST[r.st]
       return `<tr><td class="mono">${r.t}</td><td><span class="pill ${tone}"><i class="d"></i>${word}</span></td>
         <td class="n mono">${r.fare ? ECO.num(r.fare) : dash}</td><td class="n mono">${r.final ? ECO.num(r.final) : dash}</td><td class="n vc mono">—</td>
-        <td><span class="pm"><i data-lucide="${r.pay === 'company' ? 'building-2' : 'banknote'}"></i>${r.pay === 'company' ? ECO.PAY.company.short : ECO.PAY.cash.label}</span></td>
+        <td><span class="pm${r.from ? ' sw' : ''}"${r.from ? ` title="${ECO.PAY[r.from].label.replace(' · POS', '')} → ${ECO.PAY[r.pay].label.replace(' · POS', '')} · վարորդը"` : ''}><i data-lucide="${r.from ? 'repeat' : ECO.PAY[r.pay].icon}"></i>${r.from ? `${ECO.PAY[r.from].label.replace(' · POS', '')} → ${ECO.PAY[r.pay].label.replace(' · POS', '')}` : r.pay === 'company' ? ECO.PAY.company.short : ECO.PAY[r.pay].label}</span></td>
         <td><span class="two"><b>${r.cust[0]}</b><span class="mono">${r.cust[1]}</span></span></td><td>${r.drv || dash}</td><td>${r.plate ? `<span class="plate">${r.plate}</span>` : dash}</td>
         <td>${r.a}</td><td>${r.b}</td><td>${r.prob ? `<span class="prob">${r.prob}</span>` : ''}</td></tr>`
     }).join('') + `<tr class="cut"><td colspan="12">Ցուցադրված է ${L.length}-ը ${total}-ից · CSV-ում բոլորն են</td></tr>`
