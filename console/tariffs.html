@@ -288,6 +288,8 @@
         + row('Առավելագույնն առաջ', 'ամենաուշը', n(7, 'օր'))
         + row('Հավելավճար', 'նախնական պատվերի համար', `${seg(['Ֆիքսված', '%'], 0, 'Հավելավճարի տեսակ')}${n(200, '֏')}`, true)
         + row('Որոնումը սկսվում է', 'նստելու ժամից առաջ', n(15, 'ր'))
+        + row('Պահել նշանակված վարորդին', 'նստելու ժամից առաջ', n(30, 'ր'))
+        + row('Վարորդը կարող է սկսել', 'նստելու ժամից առաջ', n(30, 'ր'))
         + row('Նշանակում', 'ով է ստանում պատվերը', seg(['Նշանակվածը, հետո ավտոմատ', 'Ավտոմատ', 'Դիսպետչեր'], 0, 'Նշանակում'))
         + sh('Վճարում', 'որ եղանակներով կարելի է պատվիրել նախապես')
         + `<div style="padding:4px var(--inset) 12px" class="chips">${chk('Կանխիկ', true)}${chk('Քարտ', true)}${chk('Ընկերության հաշիվ', true)}</div>`
@@ -327,7 +329,7 @@
             return `<tr${t === T ? ' class="on"' : ''}><td><a href="tariffs.html?theme=${THEME}&t=${kidOf(t)}&sec=commission" style="color:inherit;text-decoration:none">${t.name}</a></td><td class="r">${comTxt(c)}</td><td class="r">${s2}</td></tr>` }).join('')}</tbody></table>`
     } else {
       body = sh('Վճարման եղանակներ')
-        + `<div style="padding:4px var(--inset) 12px" class="chips">${chk('Կանխիկ', true)}${chk('Քարտ', true)}${chk('Apple Pay', true)}${chk('Google Pay', true)}${chk('NFC · POS', true)}${chk('Ընկերության հաշիվ', true)}${chk('Պրոմոկոդ', true)}</div>`
+        + `<div style="padding:4px var(--inset) 12px" class="chips">${chk('Կանխիկ', true)}${chk('Քարտ', true)}${chk('Apple Pay', true)}${chk('Google Pay', true)}${chk('NFC · POS', true)}${chk('Ընկերության հաշիվ', true)}</div>`
         + sh('Չեղարկում')
         + row('Ուղևորի չեղարկման վճար', 'վարորդը նշանակվելուց հետո', `${n(2, 'ր')}<span class="x">հետո</span>${n(300, '֏')}`, true)
         + row('Ուղևորը չեկավ', 'անվճար սպասումից հետո', n(500, '֏'), true)

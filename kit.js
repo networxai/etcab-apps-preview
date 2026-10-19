@@ -81,7 +81,7 @@
     TIERS: [
       { id: 'city', name: 'Eco City', preorders: true }, { id: 'comfort', name: 'Eco Comfort', preorders: true },
       { id: 'kids', name: 'Eco Kids', preorders: false }, { id: 'business', name: 'Eco Business', preorders: true },
-      { id: 'van', name: 'Eco Van', preorders: false }, { id: 'vip', name: 'Eco Vip', preorders: true },
+      { id: 'van', name: 'Eco Van', preorders: false }, { id: 'vip', name: 'Eco Vip', preorders: false },
     ],
 
     /* Partner (own car, prepaid wallet). Reference = the API's driver.paymentReference: six digits, zero-padded

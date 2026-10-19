@@ -361,11 +361,11 @@
   if (TAB === 'scheduled' || QS.get('state') === 'problems' || QS.get('panel') === 'pay') document.getElementById('queue').setAttribute('data-peek', '') /* a long list is cut by its own scroll edge, not by an overlap */
 
   /* ── Intake (intake-panel.tsx). Phone and pickup are the only required fields (§9.1). Band 3 is the real sub-tabs
-     (intake-sub-tabs.tsx): Քարտեզ · Նշումներ · Համաձայնեցված գին — each a createRideSchema field; the map tab here
+     (intake-sub-tabs.tsx): Քարտեզ · Նշումներ · Ֆիքսված գին — each a createRideSchema field; the map tab here
      points at the map column. ?intake=company: a caller whose company is on account (customer-card.tsx badge,
      intake-billing.tsx Company / Personal, the reference marked required, the over-limit refusal in amber). ── */
   const CO = INTAKE === 'company', BAND = INTAKE === 'price' ? 'amount' : 'notes'
-  const subTabs = () => `<div><div class="in-tabs" role="tablist" aria-label="Նոր պատվեր">${[['map', 'Քարտեզ'], ['notes', 'Նշումներ'], ['amount', 'Համաձայնեցված գին']].map(([k, l]) =>
+  const subTabs = () => `<div><div class="in-tabs" role="tablist" aria-label="Նոր պատվեր">${[['map', 'Քարտեզ'], ['notes', 'Նշումներ'], ['amount', 'Ֆիքսված գին']].map(([k, l]) =>
       `<button role="tab" aria-selected="${BAND === k}" tabindex="${BAND === k ? 0 : -1}">${l}${k === 'amount' && BAND === 'amount' ? '<span class="dot" aria-hidden="true"></span>' : ''}</button>`).join('')}</div>
       <div role="tabpanel" style="padding-top:8px">${BAND === 'amount'
         ? `<div class="row-flex"><div class="input l focus" style="width:160px"><span class="val mono">2 400<span style="border-left:1.5px solid var(--ink);margin-left:1px"></span></span><span class="faint">֏</span></div><p class="faint" style="font:var(--c-small)">Փոխարինում է սակագնի գինը</p></div>`
@@ -398,7 +398,7 @@
   /* Tier picker: prices for the typed phone order, Կոմիտաս 12 → Հալաբյան 41 (3,6 կմ, 9 ր). The walkthrough trip is in the queue. */
   const IK = CO ? B.co.km : 3.6, IM = CO ? B.co.min : 9
   document.getElementById('sumfare').textContent = INTAKE === 'price' ? amd(2400) : amd(fare(TIERS[0], IK, IM))
-  document.getElementById('sumtxt').textContent = INTAKE === 'price' ? 'Համաձայնեցված գին' : `${TIERS[0].name} · ${ECO.dec(IK)} կմ · ${IM} ր`
+  document.getElementById('sumtxt').textContent = INTAKE === 'price' ? 'Ֆիքսված գին' : `${TIERS[0].name} · ${ECO.dec(IK)} կմ · ${IM} ր`
   let t = `<button class="tierb any"><span class="anyic"><i data-lucide="locate-fixed"></i></span><span class="n">Մոտակա ազատը</span><span class="p"><i class="tk">1</i></span></button>`
   TIERS.forEach((x, i) => { t += `<button class="tierb${i === 0 ? ' on' : ''}" aria-label="${x.name}, ${i + 2}"><span class="car xs">${carImg(x.id)}</span><span class="n">${x.name.replace('Eco ', '')}</span><span class="p"><i class="tk">${i + 2}</i>${amd(fare(x, IK, IM))}</span></button>` })
   /* Owner 2026-10-14: «Transfer» is a tariff (key 8). Choosing it turns the form into the transfer form (?intake=transfer). */
@@ -484,7 +484,7 @@
     </div>
     <div class="billing" role="group" aria-label="Վճարում"><label class="label" id="zpl" style="margin:0">Վճարում</label><div class="seg" role="radiogroup" aria-labelledby="zpl" aria-describedby="zcash"><button role="radio" aria-checked="false">Կանխիկ</button><button class="on" role="radio" aria-checked="true">NFC · +2 %</button><button role="radio" aria-checked="false">Ընկերություն</button></div></div>
     <p class="zline" id="zcash" role="status" style="margin:-4px 0 0"><i data-lucide="info"></i>Զվարթնոց · «կանխիկ՝ ոչ» կանոնը հավելվածի պատվերների համար է · դիսպետչերի պատվերում թույլատրված են երեքն էլ</p>
-    <div><div class="in-tabs" role="tablist" aria-label="Նոր պատվեր"><button role="tab" aria-selected="false" tabindex="-1">Քարտեզ</button><button role="tab" aria-selected="false" tabindex="-1">Նշումներ</button><button role="tab" aria-selected="true">Համաձայնեցված գին<span class="dot" aria-hidden="true"></span></button></div>
+    <div><div class="in-tabs" role="tablist" aria-label="Նոր պատվեր"><button role="tab" aria-selected="false" tabindex="-1">Քարտեզ</button><button role="tab" aria-selected="false" tabindex="-1">Նշումներ</button><button role="tab" aria-selected="true">Ֆիքսված գին<span class="dot" aria-hidden="true"></span></button></div>
       <div role="tabpanel" style="padding-top:8px"><div class="row-flex"><div class="input l" style="width:160px;background:var(--surface-alt);box-shadow:inset 0 0 0 1px var(--line-soft)" aria-readonly="true"><i data-lucide="lock"></i><span class="val mono">${nf(FX)}</span><span class="faint">֏</span></div>
         <p style="font:var(--c-small);color:var(--ink-muted)"><b style="color:var(--ink)">Ֆիքսված · ${amd(FX)}</b><br>Զվարթնոց → Կենտրոն · գոտուց գոտի</p></div></div></div>`
     let t = `<button class="tierb any"><span class="anyic"><i data-lucide="locate-fixed"></i></span><span class="n">Մոտակա ազատը</span><span class="p"><i class="tk">1</i></span></button>`
