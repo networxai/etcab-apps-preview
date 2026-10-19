@@ -169,12 +169,13 @@
   /* ── ?tab=payouts «Վճարումներ» (owner 2026-10-15, drawn ahead: no ETAPI yet). Every completed non-cash, non-company
      ride is filed through ETAPI, which pays the fare to the driver's Idram — fleet drivers too. One row per ride, the
      newest first; cash rides have no payout and company rides are never sent, so neither appears. NFC · POS rides
-     pay out the fare alone (the 2 % fee is the company's) and only once the ride is matched in ACBA's statement (owner 2026-10-16):
-     until then the row waits, with the reason under the method. Fleet drivers only; partners have no NFC. Status is icon + word: paid, sending. ── */
+     pay out the fare alone (the 2 % fee is the company's). The ACBA statement match is back-office: once the driver marks an NFC ride paid it reads
+     «Վճարված» (method line: NFC · POS) like any paid ride, never «waiting for the bank» (owner 2026-10-19). Fleet drivers only; partners have no NFC.
+     Status is icon + word: paid, sending. ── */
   if (TAB === 'payouts') {
     setTab(5); clearBelow(); tabs.scrollLeft = tabs.scrollWidth
     const PO = [['13:12', '#R-20395', 'credit-card', 'Քարտ', 1500, ['', 'loader', 'Ուղարկվում է']], ['12:40', '#R-20388', 'smartphone', 'Apple Pay', 2200, ['ok', 'check', 'Վճարված']],
-      ['11:05', '#R-20354', 'smartphone-nfc', 'NFC · POS', 900, ['ok', 'check', 'Վճարված'], 'Կանխիկ → NFC · 9:51'], ['10:22', '#R-20341', 'smartphone', 'Google Pay', 1300, ['ok', 'check', 'Վճարված']], ['14:08', '#R-20399', 'smartphone-nfc', 'NFC · POS', 1700, ['', 'clock', 'Սպասում է'], 'Կանխիկ → NFC · 14:02</small><small>ACBA քաղվածքում չկա'],
+      ['11:05', '#R-20354', 'smartphone-nfc', 'NFC · POS', 900, ['ok', 'check', 'Վճարված'], 'Կանխիկ → NFC · 9:51'], ['10:22', '#R-20341', 'smartphone', 'Google Pay', 1300, ['ok', 'check', 'Վճարված']], ['14:08', '#R-20399', 'smartphone-nfc', 'NFC · POS', 1700, ['ok', 'check', 'Վճարված'], 'Կանխիկ → NFC · 14:02'],
       ['Հնգ', '#R-20217', 'smartphone-nfc', 'NFC · POS', 2600, ['ok', 'check', 'Վճարված']], ['Հնգ', '#R-20180', 'credit-card', 'Քարտ', 1100, ['ok', 'check', 'Վճարված']]]
     add(`<div class="blk"><h3><i data-lucide="wallet"></i>Idram · այս շաբաթ<span class="end faint mono" style="font-weight:400">0412 5581</span></h3>
       <div class="sum"><b>${amd(PO.filter((r) => r[5][0] === 'ok' || r[5][2] === 'Ուղարկվում է').reduce((a, r) => a + r[4], 0) + 30300)}</b><span class="num">24 անկանխիկ պատվեր</span></div></div>

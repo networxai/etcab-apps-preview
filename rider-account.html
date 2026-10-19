@@ -188,12 +188,12 @@
     ])}
     ${all === 'failed' ? `<div class="toast" role="status">${R.i('circle-alert')}Չհաջողվեց հեռացնել<button class="undo">Կրկնել</button></div>` : all ? '' : `<div class="toast" role="status">${R.i('check')}Հասցեն հեռացվեց<button class="undo">Հետարկել</button></div>`}</div>`
 
-  const wallet = (debt) => `<div class="page">${back()}<h1 class="large">Վճարում</h1>
+  const wallet = (debt, paid) => `<div class="page">${back()}<h1 class="large">Վճարում</h1>
     <div class="bal">${debt
-      ? `<div class="k">${R.i('circle-alert')}Պարտք</div><div class="hero">${A(DEBT)}</div><div class="from">7 հոկտ. ուղևորությունից</div>
+      ? `<div class="k">${R.i('circle-alert')}Պարտք</div><div class="hero">${A(DEBT)}</div><div class="from">Քարտով վճարումը չանցավ · 7 հոկտ.</div><div class="from">Eco Comfort · Մաշտոցի պող. 37 · 18:20</div>
          <div class="note">${R.i('wallet')}<span><span class="n1" style="display:block">Վճարեք հիմա՝ քարտով (+2 %)</span><span class="n2">կամ կանխիկ՝ հաջորդ վարորդին</span></span></div>
          <button class="btn btn-brand" style="margin-top:var(--s3)">${R.i('credit-card')}Վճարել ·· ${ECO.PAY.card.last4} · ${A(DEBT_CARD)}</button>`
-      : `<div class="k ok">${R.i('circle-check')}Պարտք չկա</div><div class="hero">${A(0)}</div><div class="from">Բոլոր ուղևորությունները վճարված են</div>`}</div>
+      : `<div class="k ok">${R.i('circle-check')}Պարտք չկա</div><div class="hero">${A(0)}</div><div class="from">${paid ? 'Վճարված է քարտով · 7 հոկտ.' : 'Բոլոր ուղևորությունները վճարված են'}</div>`}</div>
     <div class="sect">Վճարման եղանակ</div>
     ${grp([
       r('banknote', ECO.PAY.cash.label, `<span class="def">${R.i('check')}Հիմնական</span>`, { chev: false, btn: false, cls: 'cash' }),
@@ -263,7 +263,8 @@
             <div class="field focus"><span class="num"><span class="lbl">Անվանում</span><span class="v">Մարզասրահ<span class="caret"></span></span></span></div>
             <div class="btns"><button class="btn btn-brand">Պահել</button></div></section>${R.keyboard()}` },
       { id: 'place-remove-failed', group: 'Places', label: 'Remove failed', note: 'R64, real string (account.placeDeleteFailed): the row comes back and the toast offers a retry. Neutral, not red: nothing was lost', html: () => places('failed') },
-      { id: 'wallet', group: 'Balance', label: 'Debt', note: 'Owner 2026-10-15: a debt can now be settled by card, at once («Վճարել ·· 4242 · 1 326 ֏»: the 1 300 ֏ debt + the 2 % card service fee, said in the line above; the payment sheet if there is no saved card), or in cash to the next driver as before, with no fee. account.debtNote said plainly; the linked company is listed (AccountSheets.tsx WalletSheet), card, Apple / Google Pay and «Ավելացնել քարտ» below cash', html: () => wallet(true) },
+      { id: 'wallet', group: 'Balance', label: 'Debt', note: 'Owner 2026-10-15: a debt (owner 2026-10-19: from a cancellation fee, or from a card that failed, the rider left and the 1-minute window ran out) shows its reason, «Քարտով վճարումը չանցավ · 7 հոկտ.», and the ride; it can now be settled by card, at once («Վճարել ·· 4242 · 1 326 ֏»: the 1 300 ֏ debt + the 2 % card service fee, said in the line above; the payment sheet if there is no saved card), or in cash to the next driver as before, with no fee. account.debtNote said plainly; the linked company is listed (AccountSheets.tsx WalletSheet), card, Apple / Google Pay and «Ավելացնել քարտ» below cash', html: () => wallet(true) },
+      { id: 'wallet-paid', group: 'Balance', label: 'Debt paid', note: 'Owner 2026-10-19: the debt was paid by card (1 326 ֏ = 1 300 + 2 %). The hero goes to 0 and says which ride it settled; that ride (7 հոկտ., Eco Comfort, Մաշտոցի պող. 37) now reads as card in the driver\'s report. The debt\'s reason is always shown while it lasts: «Քարտով վճարումը չանցավ · 7 հոկտ.» (a failed card whose 1-minute window ran out, ride turned to cash and unpaid); a cancellation fee would read «Չեղարկման վճար · date»', html: () => wallet(false, true) },
       { id: 'wallet-clear', group: 'Balance', label: 'Clear', html: () => wallet(false) },
       { id: 'language', group: 'Settings', label: 'Language', note: 'Each language named, and coded, in its own script (ՀՅ / РУ / EN, as the driver app); applies on tap',
         html: () => over(`${mhead('Լեզու')}${choice('Հայերեն', true, '', 'ՀՅ')}${choice('Русский', false, '', 'РУ')}${choice('English', false, '', 'EN')}`) },
@@ -279,7 +280,7 @@
       { id: 'delete-blocked', group: 'Leave', label: 'Delete blocked', note: 'account.deleteBlocked, with the reason and the way to clear it',
         html: () => over(`<div class="grabber"></div><div class="badge warn">${R.i('triangle-alert')}</div>
           <div class="mhead"><span class="h-title">Հաշիվը հիմա չի ջնջվի</span></div>
-          <div class="reason">${R.i('wallet')}<span class="txt"><span class="t1">Պարտք՝ ${A(DEBT)}</span><span class="t2">7 հոկտ. ուղևորությունից</span></span></div>
+          <div class="reason">${R.i('wallet')}<span class="txt"><span class="t1">Պարտք՝ ${A(DEBT)}</span><span class="t2">Քարտով վճարումը չանցավ · 7 հոկտ.</span></span></div>
           <div class="btns"><button class="btn btn-brand">Դիտել պարտքը</button><button class="btn btn-quiet">Փակել</button></div>`) },
       { id: 'delete-blocked-ride', group: 'Leave', label: 'Delete blocked · ride', note: 'R63, real (account.blockedRide): a ride is still running. The way out is the ride itself',
         html: () => blocked('car-front', 'Նախ ավարտեք ընթացիկ ուղևորությունը', 'Բացել ուղևորությունը') },

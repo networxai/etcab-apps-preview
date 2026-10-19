@@ -228,17 +228,19 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
   /* Owner 2026-10-15, zones (console zones.html): Զվարթնոց adds 500 ֏ «Օդանավակայանի վճար» on pickup and drop-off, has a 3 000 ֏
      minimum on pickup, takes no cash and no Eco Kids on pickup, and pre-orders from it are ≥ 2 h ahead. Zone-to-zone, City / Comfort:
      Կենտրոն → Զվարթնոց fixed 4 500 ֏, Երևան → Զվարթնոց fixed 5 000 ֏; a fixed fare replaces the metered one and includes the zone
-     charges. zone: { fixed: { tierId: fare }, pair, air: 'pickup' | 'drop', min }. */
+     charges. Owner 2026-10-19: a zone sets, PER TARIFF, one rule: a fixed fare, a fixed amount added, or a % added on top of the tariff's own
+     price; no tariff is implicitly cheaper or fixed. zone: { rule: { tierId: { fixed } | { add } | { pct } }, pair, air: 'pickup' | 'drop', min }.
+     Without a rule a tier gets the zone's default (metered + the airport charge). */
   const AIR = 500
   const TRIPS = {
     now: { route: 'republicToCascade', km: 2.1, min: 4, a: 'Հանրապետության հր.', b: 'Կասկադ' },
     /* The walkthrough ride (ECO.RIDE): Mashtots 37 → Komitas 22, 4,3 km, 6 min → 1 100 ֏, the rider pays 1 200 ֏. */
     ride: { route: 'pickupToDrop', km: ECO.RIDE.km, min: ECO.RIDE.min, a: ECO.RIDE.pickup, b: ECO.RIDE.drop },
     /* Komitas 22 is Երևան, not Կենտրոն: «Երևան → Զվարթնոց» fixes City / Comfort at 5 000 ֏ (ECO.BOOKINGS.air.fare / .fixed). */
-    air: { route: 'preAir', km: B.air.km, min: B.air.min, a: B.air.pickup, b: B.air.dropShort, bRight: true, zone: { fixed: { city: B.air.fare, partner: B.air.fare }, pair: B.air.fixed, air: 'drop' } },
+    air: { route: 'preAir', km: B.air.km, min: B.air.min, a: B.air.pickup, b: B.air.dropShort, bRight: true, zone: { rule: { city: { fixed: B.air.fare }, partner: { fixed: B.air.fare }, kids: { fixed: 5300 }, van: { fixed: 5600 }, business: { fixed: 6000 }, vip: { fixed: 7500 } }, pair: B.air.fixed, air: 'drop' } },
     co: { route: 'preCo', km: B.co.km, min: B.co.min, a: B.co.pickup, b: B.co.drop },
     /* Mashtots 37 (Կենտրոն) → Զվարթնոց now: OSRM 13,2 km, 18 min (ROUTES.cenAir). */
-    cenAir: { route: 'cenAir', km: 13.2, min: 18, a: ECO.RIDE.pickup, b: 'Զվարթնոց', bRight: true, zone: { fixed: { city: 4500, partner: 4500 }, pair: 'Կենտրոն → Զվարթնոց', air: 'drop' } },
+    cenAir: { route: 'cenAir', km: 13.2, min: 18, a: ECO.RIDE.pickup, b: 'Զվարթնոց', bRight: true, zone: { rule: { city: { fixed: 4500 }, partner: { fixed: 4500 }, kids: { fixed: 4800 }, van: { pct: 30 }, business: { pct: 60 }, vip: { add: AIR } }, pair: 'Կենտրոն → Զվարթնոց', air: 'drop' } },
     /* From the airport home: Զվարթնոց → Komitas 22 (ECO.BOOKINGS.air reversed), metered, the 3 000 ֏ minimum and the pickup charge. */
     airHome: { route: 'airHome', km: B.air.km, min: B.air.min, a: 'Զվարթնոց', b: B.air.pickup, aRight: true, bLeft: true, zone: { air: 'pickup', min: 3000 } },
   }
@@ -252,8 +254,11 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
   /* The driver's fare after the zone layer: { fare, fixed, metered, base, air, min }. */
   const fareOf = (k, trip) => {
     const z = trip.zone || {}
-    if (z.fixed && z.fixed[k]) return { fare: z.fixed[k], fixed: z.fixed[k] }
-    const metered = price(k, trip.km, trip.min), base = z.min ? Math.max(z.min, metered) : metered
+    const r = z.rule && z.rule[k], metered = price(k, trip.km, trip.min)
+    if (r && r.fixed) return { fare: r.fixed, fixed: r.fixed }
+    if (r && r.pct) { const extra = Math.round(metered * r.pct / 10000) * 100; return { fare: metered + extra, metered, pct: r.pct, extra } }
+    if (r && r.add) return { fare: metered + r.add, metered, air: r.add }
+    const base = z.min ? Math.max(z.min, metered) : metered
     return { fare: base + (z.air ? AIR : 0), metered, base, air: z.air ? AIR : 0, min: z.min && z.min > metered ? z.min : 0 }
   }
   /* What the rider pays: the tier cards and the order button always carry this total. */
@@ -286,6 +291,7 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
     const f = fareOf(k, trip), z = trip.zone || {}
     const ln = (l, v) => `<div class="pl"><span>${l}</span><b>${R.amd(v)}</b></div>`
     return `<div class="pb" aria-label="Գինը">${f.fixed ? ln(`Ֆիքսված գին · ${z.pair}`, f.fixed)
+      : f.pct ? ln('Ուղևորություն', f.metered) + ln(`Օդանավակայանի հավելավճար · +${f.pct} %`, f.extra)
       : (f.min ? ln('Նվազագույն գին՝ օդանավակայանից', f.min) : ln('Ուղևորություն', f.metered)) + (f.air ? ln('Օդանավակայանի վճար', f.air) : '')}
       ${fee(f.fare, pay) ? ln('Սպասարկման վճար · քարտով 2 %', fee(f.fare, pay)) : ''}</div>`
   }
@@ -355,6 +361,7 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
       <section class="sheet r modal" id="sheet" role="dialog" aria-label="${tr[1]}՝ գնի մանրամասներ"><div class="grabber"></div>
       <div class="mhead fdh">${k === 'kids' ? '' : R.car(k, 72, 40, '')}<div class="fd-t"><h2 class="h-title">${tr[1]}</h2><div class="h-sub">Մինչև ${tr[3]} ուղևոր</div></div><button class="xbtn" aria-label="Փակել">${R.i('x')}</button></div>
       <div class="fd-price" role="group" aria-label="Ֆիքսված գին">${R.i('lock')}<span class="l"><b>Ֆիքսված գին</b><span>ֆիքսվում է պատվիրելիս</span></span><span class="amt">${a(amt)}</span></div>
+      ${trip.zone && trip.zone.air === 'drop' ? `<div class="fd-zone" role="note">${R.i('plane')}<span>${f.fixed ? `Զվարթնոց․ ֆիքսված գին ${trip.zone.pair}` : f.pct ? `Զվարթնոց․ +${f.pct} % ձեր սակագնի գնի վրա` : `Զվարթնոց․ ${a(f.air)} օդանավակայանի վճար`}</span></div>` : ''}
       ${o.zone ? `<div class="fd-zone" role="note">${R.i('plane')}<span>Զվարթնոցից․ ${a(AIR)} օդանավակայանի վճար, նվազագույնը ${a(o.zone)}</span></div>` : ''}
       <div class="fd-g">${cell('0–10 կմ', a(km) + '/կմ')}${cell('10–30 կմ', a(band(.86)) + '/կմ')}${cell('30 կմ-ից', a(band(.73)) + '/կմ')}
         ${cell('Նստելու գին', a(bs))}${cell('Րոպե ճանապարհին', a(mn) + '/ր')}${cell('Նվազագույն գին', a(o.zone || fl))}
@@ -463,10 +470,14 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
         html: () => fareSheet(TRIPS.ride, { win: 0 }), map: (s) => drawRide(s, false, TRIPS.ride) },
       { id: 'fare-airport', group: 'Fare', label: 'Fare details · airport', time: '13:20', note: 'Pickup in the Զվարթնոց zone (console Zones): one extra line says what the zone adds, +500 ֏ «Օդանավակայանի վճար», and the minimum fare cell shows the zone\'s 3 000 ֏ instead of the tariff\'s. Fixed fare = 3 000 + 500 = 3 500 ֏',
         html: () => fareSheet(TRIPS.airHome, { zone: 3000 }), map: (s) => drawRide(s, false, TRIPS.airHome) },
-      { id: 'airport', group: 'Airport', label: 'To the airport · fixed', note: 'Owner 2026-10-15, zone-to-zone: Mashtots 37 (Կենտրոն) → Զվարթնոց is a fixed 4 500 ֏ for City / Comfort; the fixed fare replaces the metered one and already includes the zone charges (the 500 ֏ drop-off charge, the Կենտրոն per-minute rule). Paid by the saved card here, so the 2 % service fee goes on top: 4 500 + 90 = 4 590 ֏, its own line (owner 2026-10-15, final). «Ֆիքսված» under the fixed cards; the other tiers are metered + the airport charge, each + 2 %',
+      { id: 'airport', group: 'Airport', label: 'To the airport · fixed', note: 'Owner 2026-10-15, zone-to-zone: Mashtots 37 (Կենտրոն) → Զվարթնոց is a fixed 4 500 ֏ for City / Comfort (owner 2026-10-19: every tier has its own zone rule, so Business and Vip are no longer cheaper, see «% rule»); the fixed fare replaces the metered one and already includes the zone charges (the 500 ֏ drop-off charge, the Կենտրոն per-minute rule). Paid by the saved card here, so the 2 % service fee goes on top: 4 500 + 90 = 4 590 ֏, its own line (owner 2026-10-15, final). «Ֆիքսված» under the fixed cards (City, Comfort, Kids); Van, Business and Vip carry a % or added-amount rule, each + 2 %',
         html: () => details(null, TRIPS.cenAir, { lines: true, pay: 'card' }), map: (s) => drawRide(s, true, TRIPS.cenAir) },
-      { id: 'airport-metered', group: 'Airport', label: 'To the airport · metered', note: 'The same trip in Eco Business, which has no fixed zone fare: the metered fare (3 300 ֏), «Օդանավակայանի վճար» 500 ֏ as its own line (zones.html: a separate line on the receipt); paid in cash, so no service fee → 3 800 ֏',
+      { id: 'airport-percent', group: 'Airport', label: 'To the airport · % rule (Business)', note: 'Owner 2026-10-19: the same trip in Eco Business. Business is no longer cheaper than the fixed City / Comfort fares: the Զվարթնոց zone sets, per tariff, one rule, and Business\'s is «+60 % on the tariff\'s own price»: 3 300 ֏ metered + 2 000 (60 %, rounded to 100) = 5 300 ֏, its own line «Օդանավակայանի հավելավճար · +60 %». Paid in cash, so no service fee. Ladder for this trip: City / Comfort fixed 4 500, Kids fixed 4 800, Van +30 % = 4 900, Business +60 % = 5 300, Vip +500 ֏ = 5 400',
         html: () => details(null, TRIPS.cenAir, { lines: true, sel: 'business' }), after: (s) => { const t = s.querySelector('.tiers'); t.scrollLeft = 2 * 116; t.querySelectorAll('.tier').forEach((c) => { const r = c.getBoundingClientRect(); if (r.left < 0 || r.right > 390) c.dataset.peek = ''; else delete c.dataset.peek }) }, map: (s) => drawRide(s, false, TRIPS.cenAir) },
+      { id: 'fare-airport-to', group: 'Fare', label: 'Fare details · to the airport (fixed)', time: '13:20', note: 'Owner 2026-10-19: tapping the chosen Eco City on the Կենտրոն → Զվարթնոց trip. The zone line says «Զվարթնոց․ ֆիքսված գին Կենտրոն → Զվարթնոց» and the fixed price is 4 500 ֏, the same number as the tier card and the order button (before the 2 % card fee)',
+        html: () => fareSheet(TRIPS.cenAir), map: (s) => drawRide(s, false, TRIPS.cenAir) },
+      { id: 'fare-airport-percent', group: 'Fare', label: 'Fare details · to the airport (% rule)', time: '13:20', note: 'Owner 2026-10-19: Eco Business on the same trip. The zone line reads «Զվարթնոց․ +60 % ձեր սակագնի գնի վրա» and the fixed price is 5 300 ֏, matching the tier card, so Business is dearer than the fixed City / Comfort 4 500 ֏',
+        html: () => fareSheet(TRIPS.cenAir, { k: 'business' }), map: (s) => drawRide(s, false, TRIPS.cenAir) },
       { id: 'airport-pickup', group: 'Airport', label: 'From the airport', note: 'Owner 2026-10-15, zone rules on pickup at Զվարթնոց: no cash, so payment is already the saved card and one neutral line says why (no modal, no red); Eco Kids is not served there, so its card stays in the row dimmed with «—» and «Այստեղից՝ ոչ» rather than vanishing; the metered 1 900 ֏ is raised to the 3 000 ֏ airport minimum, + the 500 ֏ pickup charge = 3 500 ֏, + the 2 % card fee 70 ֏ → 3 570 ֏ (cash being off here, every rider at the airport pays the fee unless they use NFC at the driver). Assumed: the minimum applies before the charge',
         html: () => details(null, TRIPS.airHome, { lines: true, pay: 'card', why: zoneWhy('plane', 'Օդանավակայանից՝ միայն անկանխիկ') }), map: (s) => drawRide(s, true, TRIPS.airHome) },
       { id: 'airport-pay', group: 'Airport', label: 'From the airport · payment', note: 'The payment sheet at the airport: cash is greyed in place (not hidden, so the rider sees the rule rather than a missing option), its second line says why, and the same reason sits once above the list. Card, Apple / Google Pay and NFC stay open',
@@ -525,7 +536,7 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.tier.on')) return
     const q = new URLSearchParams(location.search), st = q.get('state') || ''
-    q.set('state', /air/.test(st) ? 'fare-airport' : 'fare')
+    q.set('state', st === 'airport' ? 'fare-airport-to' : st === 'airport-percent' ? 'fare-airport-percent' : /air/.test(st) ? 'fare-airport' : 'fare')
     location.search = q.toString()
   })
 </script>

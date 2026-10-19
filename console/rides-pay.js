@@ -28,8 +28,9 @@
    ?pay=switched  a Cash order the fleet driver took as NFC: switch line, ACBA match pending, payout waits
    ?pay=switched-back  an NFC order the tap failed on, taken as cash: no fee, no payout
    ?pay=nfc-gap   NFC ride the bank statement does not show (yet) or shows with another amount: amber, payout held
-   ?pay=declined  «Վճարումը չանցավ»: the card was declined at the end and the rider owes. Amber: the bank refused,
-                  nothing in our system failed (a notice's tone is a claim). */
+   ?pay=declined  «Վճարումը չանցավ»: the card was declined at the end, the rider's 1-minute retry ran out, the ride turned to cash
+                  automatically and is unpaid (rider debt). Amber: the bank refused, nothing in our system failed (a notice's tone is a claim).
+   ?pay=declined-retry  the same ride inside the 1-minute window: still card, the rider retrying in the app, a countdown. */
 (function () {
   const QS = new URLSearchParams(location.search)
   const V = QS.get('pay')
@@ -251,26 +252,32 @@
     tl([['13:41', 'l-unassigned', 'Ընդունված', 'ուղևոր · հավելված'], ['13:42', 'l-active', 'Նշանակված', 'Լիլիթ Մ. · ալիք 1'], ['14:04', '', 'Ավարտված · NFC', 'Լիլիթ Մ.'], ['14:04', '', 'Վարորդը հաստատեց՝ վճարվեց', 'Լիլիթ Մ.'], ['14:30', 'l-problems', 'ACBA քաղվածքում չկա', 'համակարգ']])
   }
 
-  /* Card declined at the end: Apple Pay / card refused by the bank, the driver could not collect, the rider owes.
-     Amber, not red: a refusal from outside (the bank), not a fault in the system. ETAPI waits: the ride is pending, so
-     its type may still change to CASH (driver took cash) or CASHLESS_POS (NFC · POS, a fleet car only). */
-  if (V === 'declined') {
+  /* Card declined at the end (owner 2026-10-19, Edgar): the bank refuses, the RIDER retries for up to 1 minute in the app (a timer; not a step
+     for the driver); when it runs out the ride turns into cash automatically. If the rider left without paying it stays unpaid and becomes the
+     rider's debt (customer.html?state=debt). Amber, not red: a refusal from outside, nothing in our system failed.
+     ?pay=declined-retry the 1-minute window is open (the timer runs, the method is still card) · ?pay=declined the window has closed: cash, unpaid, debt. */
+  if (V === 'declined' || V === 'declined-retry') {
+    const retry = V === 'declined-retry'
     const R = { id: '20344', a: 'Պուշկինի 15', b: 'Նալբանդյան 50', t: '10:44', ph: '093 60-12-48', src: 'Հավելվածից', tier: 'partner', tierName: 'Eco Comfort',
-      drv: 'Գագիկ Ավետիսյան', pl: '34 LS 108', dph: '055 20-44-19', partner: 1, fare: 1000, fee: 20, pay: 'card', last4: '0918', payer: 'Ուղևորը պարտք է' }
+      drv: 'Գագիկ Ավետիսյան', pl: '34 LS 108', dph: '055 20-44-19', partner: 1, fare: 1000, fee: retry ? 20 : 0, pay: retry ? 'card' : 'cash', last4: '0918', payer: 'Ուղևորը պարտք է' }
     const r = rowById(R.id)
     r.querySelector('td:nth-child(5)').innerHTML = '<span class="pill warn"><i data-lucide="credit-card"></i>Չվճարված</span>'
-    r.querySelector('.pm').innerHTML = '<i data-lucide="credit-card"></i>Քարտ'
+    r.querySelector('.pm').innerHTML = retry ? '<i data-lucide="credit-card"></i>Քարտ' : '<i data-lucide="banknote"></i>Կանխիկ'
     select(R.id); setHead(R); price(R)
     const p = top.querySelector('.id .pill'); p.className = 'pill warn'; p.innerHTML = '<i data-lucide="credit-card"></i>Չվճարված'
-    top.insertAdjacentHTML('afterend', `<section class="xsec" style="box-shadow:inset 3px 0 0 var(--warn)" aria-label="Վճարումը չանցավ"><h3><i data-lucide="credit-card"></i>Վճարումը չանցավ<span class="end mono">10:58</span></h3>
-      <div class="notice amber" role="status"><i data-lucide="triangle-alert"></i><span class="grow">Բանկը մերժեց քարտը <span class="mono">·· 0918</span> · բավարար միջոց չկա · վարորդը կանխիկ չի վերցրել</span></div>
-      <dl class="kv"><dt>Ուղևորը պարտք է</dt><dd><b>${amd(R.fare + R.fee)}</b></dd></dl>
-      <p class="faint" style="font:var(--c-small);margin-top:-4px">Ուղևորի հավելվածը կխնդրի վճարել պարտքը հաջորդ պատվերից առաջ</p>
-      <div class="btns" style="justify-content:flex-start"><button class="btn secondary s"><i data-lucide="rotate-cw"></i>Կրկին գանձել քարտից</button><button class="btn secondary s"><i data-lucide="banknote"></i>Նշել՝ վճարված կանխիկ</button><button class="btn ghost s icon" aria-label="Զանգել ուղևորին"><i data-lucide="phone"></i></button></div></section>`)
+    top.insertAdjacentHTML('afterend', `<section class="xsec" style="box-shadow:inset 3px 0 0 var(--warning)" aria-label="Վճարումը չանցավ"><h3><i data-lucide="credit-card"></i>${retry ? 'Քարտը մերժվեց' : 'Վճարումը չանցավ'}<span class="end mono">10:58</span></h3>
+      <div class="notice amber" role="status"><i data-lucide="${retry ? 'timer' : 'triangle-alert'}"></i><span class="grow">${retry
+        ? `Բանկը մերժեց քարտը <span class="mono">·· 0918</span> · ուղևորը կրկին փորձում է հավելվածում · <b class="mono">0:41</b> մնաց, հետո՝ կանխիկ`
+        : `Բանկը մերժեց քարտը <span class="mono">·· 0918</span> · 1 րոպեն լրացավ · պատվերը դարձավ կանխիկ և մնաց չվճարված`}</span></div>
+      ${retry ? '' : `<dl class="kv"><dt>Ուղևորի պարտքը</dt><dd><b>${amd(R.fare)}</b></dd><dt>Եղանակը</dt><dd>Քարտ → Կանխիկ · ավտոմատ · <span class="mono">10:59</span></dd></dl>
+      <p class="faint" style="font:var(--c-small);margin-top:-4px">Ուղևորը տեսնում է պարտքը հավելվածում։ Եթե վճարի քարտով՝ պատվերի եղանակը կդառնա «Քարտ» հաշվետվություններում, կտրոնում և վարորդի վճարումներում</p>`}
+      <div class="btns" style="justify-content:flex-start">${retry ? '' : `<button class="btn secondary s"><i data-lucide="banknote"></i>Նշել՝ վճարված կանխիկ</button><a class="btn secondary s" href="customer.html?theme=${THEME}&state=debt" style="text-decoration:none"><i data-lucide="user"></i>Ուղևորի քարտ</a>`}<button class="btn ghost s icon" aria-label="Զանգել ուղևորին"><i data-lucide="phone"></i></button></div></section>`)
     paySec(R, et('scroll-text', 'ՊԵԿ կտրոն', P('', 'pause', 'Պահված'), 'ETAPI-ին չի ուղարկվել · կուղարկվի վճարվելուց հետո՝ այն եղանակով, որով վճարվի')
-      + et('wallet', 'Idram՝ վարորդին', P('', 'pause', 'Պահված'), `${amd(R.fare)} · վճարվելուց հետո`))
+      + et('wallet', 'Idram՝ վարորդին', P('', 'pause', 'Պահված'), retry ? `${amd(R.fare)} · վճարվելուց հետո` : `${amd(R.fare)} · կանխիկ է՝ վճարում չկա · պարտքը քարտով վճարվելու դեպքում կվճարվի`))
     doneActs()
-    tl([['10:44', 'l-unassigned', 'Ընդունված', 'ուղևոր · հավելված'], ['10:58', '', 'Ավարտված', 'Գագիկ Ա.'], ['10:58', 'l-problems', 'Քարտը մերժվեց · բանկ', 'համակարգ'], ['10:59', '', 'Վարորդ՝ «Ուղևորը չվճարեց»', 'Գագիկ Ա.']])
+    tl(retry ? [['10:44', 'l-unassigned', 'Ընդունված', 'ուղևոր · հավելված'], ['10:58', '', 'Ավարտված', 'Գագիկ Ա.'], ['10:58', 'l-problems', 'Քարտը մերժվեց · բանկ', 'համակարգ'], ['10:58', '', 'Ուղևորը կրկին փորձում է · 1 ր', 'ուղևոր']]
+      : [['10:44', 'l-unassigned', 'Ընդունված', 'ուղևոր · հավելված'], ['10:58', '', 'Ավարտված', 'Գագիկ Ա.'], ['10:58', 'l-problems', 'Քարտը մերժվեց · բանկ', 'համակարգ'], ['10:58', '', 'Ուղևորը կրկին փորձում է · 1 ր', 'ուղևոր'],
+        ['10:59', 'l-problems', 'Ժամանակը լրացավ · եղանակը՝ կանխիկ', 'համակարգ'], ['10:59', 'l-problems', 'Պարտք ' + amd(R.fare) + ' ուղևորին', 'համակարգ']])
   }
   if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 1.75 } })
 })()

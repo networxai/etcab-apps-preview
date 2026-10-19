@@ -85,9 +85,13 @@
   document.getElementById('crumb').href = 'search.html?theme=' + THEME + '&scope=customers'
   const CU = ECO.CUSTOMER, BL = ECO.BLACKLIST, CO = ECO.COMPANY, R = ECO.RIDE
   const bl = st === 'blacklisted', anon = st === 'anon'
+  /* Rider debt (owner 2026-10-19, Edgar): from a cancellation fee, or a card that failed when the rider left and the 1-minute retry ran out
+     (the ride turned to cash, unpaid). Same figure and reason as the rider app («Պարտք 1 300 ֏», 7 Oct). ?state=debt owes · ?state=debt-paid
+     paid by card on 9 Oct: the 7 Oct ride's method is now card in reports. ECO.CUSTOMER.debt stays 0 (kit.js untouched). */
+  const owes = st === 'debt', paid = st === 'debt-paid', DEBT = 1300
   const P = bl ? { name: BL.name, ini: 'ԳՍ', phone: BL.phone, rides: 9, rating: '3,1', since: 'հունիս 2026', debt: 0, noshow: 3 }
     : anon ? { name: 'Ջնջված հաշիվ', ini: '—', phone: '', rides: 23, rating: '4,6', since: 'հունվ. 2025', debt: 0, noshow: 0 }
-    : { ...CU, ini: 'ԱՀ', noshow: 0 }
+    : { ...CU, ini: 'ԱՀ', noshow: 0, debt: owes ? DEBT : 0 }
   document.getElementById('title').textContent = P.name
 
   const note = (tx, who, when, ret) => `<li class="note${ret ? ' ret' : ''}"><div><div class="tx">${tx}</div><div class="by">${who} · <span class="mono">${when}</span>${ret ? ` · հետ վերցրեց՝ ${ret}` : ''}</div></div>
@@ -107,8 +111,8 @@
   const RIDES = bl ? [['18:40', '2 հոկտ.', 'Արշակունյաց 34', 'Վահե Ս.', '55 SM 620', 'noshow', null], ['22:15', '27 սեպտ.', 'Թումանյան 21', 'Հայկ Ս.', '61 HS 450', 'noshow', null], ['19:02', '14 սեպտ.', 'Թումանյան 21', 'Գագիկ Ա.', '34 LS 108', 'noshow', null]]
     : anon ? [['20:14', '1 հոկտ.', 'Կասկադ', 'Լիլիթ Մ.', '18 OL 220', 'done', 1000], ['09:05', '28 սեպտ.', 'Աբովյան 12', 'Սուրեն Մ.', '22 OU 447', 'done', 900]]
     : [[R.requested, null, R.pickup, 'Արամ Պ.', R.driver.plate, 'assigned', R.fare], ['18:22', '8 հոկտ.', 'Կոմիտասի պող. 22', 'Լիլիթ Մ.', '18 OL 220', 'done', 1100],
-       ['08:47', '8 հոկտ.', 'Կոմիտասի պող. 22', 'Սուրեն Մ.', '22 OU 447', 'done', 1100], ['19:05', '6 հոկտ.', 'Կասկադ', 'Տիգրան Ա.', '12 TT 304', 'done', 1000], ['08:31', '2 հոկտ.', 'Կոմիտասի պող. 22', 'Գագիկ Ա.', '34 LS 108', 'done', 1100]]
-  const STW = { assigned: ['l-active', 'Նշանակված'], done: ['', 'Ավարտված'], noshow: ['l-problems', 'Ուղևորը չեկավ'] }
+       ['08:47', '8 հոկտ.', 'Կոմիտասի պող. 22', 'Սուրեն Մ.', '22 OU 447', 'done', 1100], ...(owes || paid ? [['18:20', '7 հոկտ.', 'Կոմիտասի պող. 22', 'Գագիկ Ա.', '34 LS 108', owes ? 'unpaid' : 'done', DEBT]] : []), ['19:05', '6 հոկտ.', 'Կասկադ', 'Տիգրան Ա.', '12 TT 304', 'done', 1000], ['08:31', '2 հոկտ.', 'Կոմիտասի պող. 22', 'Գագիկ Ա.', '34 LS 108', 'done', 1100]]
+  const STW = { assigned: ['l-active', 'Նշանակված'], done: ['', 'Ավարտված'], noshow: ['l-problems', 'Ուղևորը չեկավ'], unpaid: ['l-problems', 'Չվճարված'] }
   const rides = `<div class="blkh"><i data-lucide="list"></i>Վերջին պատվերները <span class="n">${P.rides}</span>${anon ? '' : `<span class="end"><a href="search.html?theme=${THEME}${bl ? '&state=blacklist' : ''}">Բոլորը →</a></span>`}</div>
     <table class="tbl"><colgroup><col style="width:128px"><col><col style="width:200px"><col style="width:140px"><col style="width:92px"></colgroup>
       <tbody>${RIDES.map(([t, d, a, drv, pl, s, f]) => { const [lane, w] = STW[s]; return `<tr><td class="when mono">${t}${d ? `<small>${d}</small>` : ''}</td><td>${a}</td>
@@ -118,11 +122,22 @@
   const banner = bl ? `<div class="banner"><div class="notice amber" role="note"><i data-lucide="octagon-alert"></i><div class="t"><b>Սև ցուցակ · պատվերը չի ընդունվի</b><span>${BL.reason}</span>
         <span class="by">${BL.by} · <span class="mono">${BL.since}</span> · հավելվածը մերժեց այսօր՝ <span class="mono">${BL.refusedAt}</span></span></div>
         ${disp ? '<span class="faint" style="font:var(--c-small)">Հանել կարող է ադմինը</span>' : '<button class="btn secondary s">Հանել սև ցուցակից</button>'}</div></div>`
+    : owes ? `<div class="banner"><div class="notice amber" role="note"><i data-lucide="credit-card"></i><div class="t"><b>Պարտք ${amd(DEBT)} · Քարտով վճարումը չանցավ · 7 հոկտ.</b><span>Ուղևորը հեռացավ, 1 րոպեն լրացավ · պատվերը դարձավ կանխիկ և մնաց չվճարված</span>
+        <span class="by">Ուղևորը տեսնում է նույն պարտքը հավելվածում և կարող է վճարել քարտով · պատվերները չեն արգելափակվում</span></div></div></div>`
+    : paid ? `<div class="banner"><div class="notice neutral" role="note"><i data-lucide="check"></i><div class="t"><b>Վճարված է քարտով · 7 հոկտ. · ${amd(1326)}</b><span><span class="mono">9 հոկտ. 18:40</span> · 7 հոկտ. պատվերի եղանակը դարձավ «Քարտ»՝ հաշվետվություններում և վարորդի վճարումներում</span></div></div></div>`
     : anon ? `<div class="banner"><div class="notice neutral" role="note"><i data-lucide="user-x"></i><div class="t"><b>Ուղևորը ջնջել է հաշիվը · 3 հոկտ.</b><span class="by">Անունը, հեռախոսը և հասցեները ջնջված են · պատվերներն ու նշումները մնում են</span></div></div></div>` : ''
 
   const kpi = (k, v, s) => `<div class="kpi"><span class="k">${k}</span><span class="v num">${v}</span>${s ? `<span class="s">${s}</span>` : ''}</div>`
-  const figs = `<div class="figs">${kpi('Պատվերներ', P.rides, 'սկսած ' + P.since)}${kpi('Գնահատական', P.rating, 'վարորդներից')}${kpi('Պարտք', ECO.amd(P.debt), P.debt ? '' : 'պարտք չկա')}${kpi('Ուղևորը չեկավ', P.noshow, '90 օրում')}</div>`
+  const figs = `<div class="figs">${kpi('Պատվերներ', P.rides, 'սկսած ' + P.since)}${kpi('Գնահատական', P.rating, 'վարորդներից')}${kpi('Պարտք', ECO.amd(P.debt), P.debt ? 'Քարտով վճարումը չանցավ · 7 հոկտ.' : paid ? 'վճարված 9 հոկտ.' : 'պարտք չկա')}${kpi('Ուղևորը չեկավ', P.noshow, '90 օրում')}</div>`
 
+  /* Debt history: each line is one event on the 7 Oct ride, newest last; the final line says what paying by card does. */
+  const debtBlock = !(owes || paid) ? '' : `<div class="blkh"><i data-lucide="credit-card"></i>Պարտք</div><div class="pad">
+      <dl class="facts"><dt>Գումար</dt><dd class="mono">${amd(DEBT)}${paid ? ' · վճարված' : ''}</dd><dt>Պատճառ</dt><dd>Քարտով վճարումը չանցավ · 7 հոկտ. (չեղարկման վճարը կլիներ «Չեղարկման վճար · ամսաթիվ»)</dd>
+        <dt>Պատվեր</dt><dd><span class="mono">#R-20118</span> · <span class="mono">7 հոկտ. 18:20</span> · Eco Comfort · Կոմիտաս 22 → Մաշտոցի պող. 37 · 4,3 կմ</dd>
+        <dt>Քարտով</dt><dd class="mono">${amd(1326)} · +2 %</dd></dl>
+      <dl class="facts"><dt class="mono">7.10 18:20</dt><dd>Քարտը մերժվեց · բանկ</dd><dt class="mono">7.10 18:21</dt><dd>Ժամանակը լրացավ · պատվերը՝ կանխիկ</dd><dt class="mono">7.10 18:21</dt><dd>Պարտք ${amd(DEBT)}</dd>
+        ${paid ? `<dt class="mono">9.10 18:40</dt><dd>Վճարված է քարտով · ${amd(1326)}</dd><dt class="mono">9.10 18:40</dt><dd>Պատվերի եղանակը՝ Կանխիկ → Քարտ</dd>` : ''}</dl>
+      <p class="line${owes ? ' warn' : ''}"><i data-lucide="${owes ? 'info' : 'check'}"></i>${owes ? 'Քարտով վճարելու դեպքում պատվերի եղանակը կդառնա «Քարտ»՝ հաշվետվություններում' : 'Հաշվետվություններում պատվերը հիմա «Քարտ» է'}</p></div>`
   const company = anon ? '' : `<div class="blkh"><i data-lucide="building-2"></i>Ընկերություն</div><div class="pad">
       <div class="select" data-truncate role="combobox" aria-label="Ընկերություն" aria-expanded="false"><span class="val${bl ? ' faint' : ''}">${bl ? 'Ընկերություն չկա' : CO.name}</span><i data-lucide="chevrons-up-down"></i></div>
       ${bl ? '' : `<p class="line yes" role="status"><i data-lucide="check"></i>Նոր պատվերը՝ ընկերության հաշվին</p>
@@ -146,7 +161,7 @@
         <div class="blkh"><i data-lucide="sticky-note"></i>Նշումներ <span class="n">${notes.length}</span></div><ul class="notes">${notes.join('')}${retracted}</ul>
         <form class="addn" onsubmit="return false"><div class="input${st ? '' : ' focus'}" role="textbox" aria-label="Նոր նշում"><span class="val${st ? ' ph' : ''}">${st ? 'օր. Սիրում է, որ զանգեն հասնելուց 5 րոպե առաջ' : 'Ուղևորը կրկին խնդրեց մանկական նստոց'}</span></div>
           <button class="btn secondary">Պահել նշումը</button></form></div>
-      <div class="side">${company}${blBlock}</div>
+      <div class="side">${debtBlock}${company}${blBlock}</div>
     </div>`
   icons()
   document.documentElement.dataset.mapReady = 'none'

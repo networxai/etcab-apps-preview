@@ -11,7 +11,7 @@
    Team review 2026-10-16 (C1–C7, D1, D3): ?intake=booking (a pre-order is New order with a future «Երբ»; &picker=1 opens the calendar)
    ?intake=pay (Cash · NFC · Company, no card) · ?intake=airport (Cash · NFC · Company allowed to the dispatcher) · ?intake=driver / driver-set (C4 driver picker)
    ?panel=edit|driver|changed|card|pay (C5 edit side panel over the map column, never a modal; D3 «Կանխիկ → NFC» record) · ?free=search|none (C6) · ?map=hover (C7; real hover / focus on every car)
-   ?intake=blacklist C09 (owner #13/#14: amber, no override) · ?intake=reused C11 · ?intake=refusal C12 · ?intake=phone Postel: a pasted +374 number read back normalised
+   ?intake=debt rider owes a debt: amber line on the customer card, order goes ahead · ?intake=blacklist C09 (owner #13/#14: amber, no override) · ?intake=reused C11 · ?intake=refusal C12 · ?intake=phone Postel: a pasted +374 number read back normalised
    Strings: apps/operator lib/i18n.ts hy (live.*, queue.*, problem.*, intake.*, auth.login.*); new ones in cp-con-ops-copy. */
 (function () {
   const QS = new URLSearchParams(location.search)
@@ -237,6 +237,17 @@
         const bar = q('.actbar'), go = bar.querySelector('.btn.primary')
         go.setAttribute('disabled', ''); go.setAttribute('aria-describedby', 'bl-note'); go.style.opacity = '.55'
         bar.querySelector('.sum').innerHTML = '<b style="color:var(--warning);font:var(--c-strong)">Պատվեր չի ստեղծվի</b><span>Ավարտեք զանգը</span>'
+      }
+      if (IN === 'debt') {
+        /* Owner 2026-10-19: a caller with rider debt (cancellation fee, or a card that failed and the 1-minute retry ran out). Not a refusal: the
+           order goes ahead; the dispatcher sees the figure and the reason on the customer line (amber = a domain fact, nothing failed). */
+        const CU = ECO.CUSTOMER
+        intake.querySelector('.input.l .val.mono').textContent = CU.phone
+        intake.querySelector('.cust').outerHTML = `<div class="cust"><div class="t"><span>${CU.name}</span><span class="faint num">· ${CU.rides} պատվեր · վերջինը՝ այսօր</span></div>
+          <div class="rec"><span class="chip">${CU.places.home}</span><span class="chip">${CU.places.work}</span></div>
+          <div role="status" style="display:grid;grid-template-columns:16px minmax(0,1fr);gap:2px 8px;padding:6px 8px;border-radius:var(--r-ctl);background:var(--warning-surface);box-shadow:inset 3px 0 0 var(--warning);font:var(--c-small);color:var(--ink)">
+            <i data-lucide="credit-card" style="width:16px;height:16px;color:var(--warning)"></i><span><b style="color:var(--warning);font:var(--c-strong)">Պարտք ${ECO.amd(1300)}</b> · Քարտով վճարումը չանցավ · 7 հոկտ.</span>
+            <span style="grid-column:2;color:var(--ink-muted)">Ուղևորը վճարում է հավելվածից · պատվերը կընդունվի · <a href="customer.html?theme=${THEME}&state=debt" style="color:var(--brand-text)">Ուղևորի քարտ</a></span></div></div>`
       }
       if (IN === 'reused') {
         /* C11: Enter pressed again on a call whose order already went out (same idempotency key). Blue, at the head of
