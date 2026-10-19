@@ -16,10 +16,18 @@
      (driver-preorders shows the badge and flight). Layout: the companies list archetype (one card, tabs, a dense
      table), with the detail as a right column beside the list — never a modal (§9.8). */
   .content.det { grid-template-columns: minmax(0, 1fr) 440px; grid-template-rows: minmax(0, 1fr); }
+  /* 1366 with a transfer open: the fixed columns left the route 58px («Ջվա… → Ամ…»). The detail and the fixed
+     columns give way; the route, the one thing read on this row, keeps ~180px (review 16 Oct). */
+  @media (max-width: 1400px) {
+    .content.det { grid-template-columns: minmax(0, 1fr) 400px; } .kv2 { grid-template-columns: 112px minmax(0, 1fr); }
+    .det .tr-t col:nth-child(2) { width: 116px !important; } .det .tr-t col:nth-child(3) { width: 140px !important; }
+    .det .tr-t col:nth-child(5) { width: 92px !important; } .det .tr-t col:nth-child(6) { width: 76px !important; } .det .tr-t col:nth-child(7) { width: 60px !important; }
+  }
   .tr-t td { height: 52px; }
   .two2 { display: flex; flex-direction: column; min-width: 0; line-height: 18px; }
   .two2 b { font: var(--c-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .two2 span { font: var(--c-small); color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .two2 .plate { font: 500 11px/16px var(--mono); color: var(--ink); overflow: visible; text-overflow: clip; }  /* a plate is never cut */
   .fl { display: inline-flex; align-items: center; gap: 6px; font: var(--c-strong); font-family: var(--mono); white-space: nowrap; }
   .fl svg { width: 16px; height: 16px; color: var(--ink-muted); }
   .tm { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 600; }
@@ -38,6 +46,7 @@
   .dt .hd h2 { font: var(--c-head); display: flex; align-items: center; gap: 8px; }
   .dt .hd .meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font: var(--c-small); color: var(--ink-muted); }
   .dt .bd { padding: 12px var(--inset); display: flex; flex-direction: column; gap: 14px; }
+  .dt .bd .blk { margin: 0; }  /* .bd already insets; the block's own margin doubled it */
   .kv2 { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 6px 12px; font: var(--c-body); }
   .kv2 dt { color: var(--ink-muted); white-space: nowrap; }
   .kv2 dd { min-width: 0; }

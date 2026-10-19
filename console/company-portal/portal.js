@@ -108,7 +108,9 @@
     const nav = document.createElement('nav')
     nav.className = 'nav'
     nav.setAttribute('aria-label', 'Բաժիններ')
-    let h = `<div class="brand"><img class="wide" src="${ASSET}logo-wide.png" alt="Eco Taxi"></div>
+    /* On a phone the nav is the fixed bottom tab bar: the list scrolls under it by design (console-audit's data-overlay). */
+    if (matchMedia('(max-width: 600px)').matches) nav.dataset.overlay = ''
+    let h =`<div class="brand"><img class="wide" src="${ASSET}logo-wide.png" alt="Eco Taxi"></div>
       <div class="co"><span class="ic"><i data-lucide="building-2"></i></span><div><b>${C.name}</b><span>Ընկերության վահանակ</span></div></div><div class="scroll">`
     NAV.forEach(([id, file, icon, label, phone, kbd]) => {
       h += `<a href="${u(file + '.html')}" class="${id === active ? 'on' : ''}"${id === active ? ' aria-current="page"' : ''}${kbd ? ` aria-keyshortcuts="${kbd}"` : ''}><i data-lucide="${icon}"></i><span class="lw">${label}</span>${phone && phone !== label ? `<span class="lp">${phone}</span>` : ''}${kbd ? `<span class="kbd">${kbd}</span>` : ''}</a>`

@@ -70,7 +70,7 @@
       <div class="tb two" style="padding:0">
         <div><h4 style="font:var(--c-head);display:flex;gap:8px;align-items:center;margin-bottom:12px"><i data-lucide="gauge"></i>Ամսական սահմանաչափ</h4>
           <div class="seg" role="radiogroup" aria-label="Սահմանաչափ" style="flex-wrap:wrap"><button role="radio" aria-checked="false">Լռելյայն · <span class="mono">${amd(EL.default.amount)}</span></button><button class="on" role="radio" aria-checked="true">Գումար</button><button role="radio" aria-checked="false">Ուղևորություններ</button></div>
-          <div class="fgrid" style="margin-top:12px"><div><label class="label">Գումարը ամսական</label><div class="input focus"><span class="val mono">65 000</span><span class="faint">֏</span></div><p class="hint">Ամեն ամսվա 1-ից՝ զրոյից</p></div>
+          <div class="fgrid" style="margin-top:12px"><div><label class="label">Գումարն ամսական</label><div class="input focus"><span class="val mono">65 000</span><span class="faint">֏</span></div><p class="hint">Ամեն ամսվա 1-ից՝ զրոյից</p></div>
             <div><span class="label">Հոկտեմբեր</span><div class="facts" style="min-height:var(--h-m)"><span>Օգտագործված<b class="mono">${amd(EL.rider.used)}</b></span><span>Մնացել է<b class="mono">${amd(EL.rider.left)}</b></span></div></div></div>
           <p class="hint" style="margin-top:8px">Սահմանաչափից հետո ընկերության հաշվին պատվիրել հնարավոր չէ․ աշխատակիցը կարող է վճարել ինքը</p></div>
         <div><h4 style="font:var(--c-head);display:flex;gap:8px;align-items:center;margin-bottom:12px"><i data-lucide="map-pin"></i>Թույլատրված հասցեներ<span class="faint" style="font:var(--c-small);font-weight:400">շառավիղ ${P.radius} մ</span></h4>
@@ -95,7 +95,7 @@
       <tbody>${L.map((e, i) => `<tr class="${i === OPEN || i === ARM || (st === 'added' && i === 0) ? 'on' : ''}"><td class="trunc">${e.name}</td><td class="mono">${e.phone}</td><td class="c">${e.rides || '<span class="dash">0</span>'}</td><td class="m">${e.amount ? amd(e.amount) : '<span class="dash">0</span>'}</td>
         ${lim(e)}<td class="c">${e.places}</td><td style="text-align:right">${acts(e, i)}</td></tr>
         ${i === OPEN ? `<tr class="under"><td colspan="8">${panel(e)}</td></tr>` : ''}
-        ${i === ARM ? '<tr class="under"><td colspan="8" style="padding-top:6px;padding-bottom:6px"><span class="faint" style="font:var(--c-small)">Էլենը այլևս չի կարող պատվիրել ընկերության հաշվին․ նախկին ուղևորությունները մնում են հաշվետվություններում</span></td></tr>' : ''}`).join('')}</tbody></table>`
+        ${i === ARM ? '<tr class="under"><td colspan="8" style="padding-top:6px;padding-bottom:6px"><span class="faint" style="font:var(--c-small)">Էլենն այլևս չի կարող պատվիրել ընկերության հաշվին․ նախկին ուղևորությունները մնում են հաշվետվություններում</span></td></tr>' : ''}`).join('')}</tbody></table>`
 
   /* Phone: one two-line row per employee; the edit panel stacks under its row. */
   const list = L.map((e, i) => { const x = limOf(e); return `<div class="lr${i === OPEN ? ' on' : ''}" style="grid-template-columns:minmax(0,1fr) auto">

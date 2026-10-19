@@ -83,7 +83,7 @@
 
   /* ── List ── */
   const filters = `<div class="filters">
-      <div class="input" style="width:${wide ? '100%' : '264px'}"><i data-lucide="search"></i><span class="val ph">Անուն, հեռախոս, վճարման կոդ</span><span class="kbd">/</span></div>
+      <div class="input" style="width:${wide ? '100%' : '300px'};flex:none"><i data-lucide="search"></i><span class="val ph">${wide ? 'Անուն, հեռախոս, կոդ' : 'Անուն, հեռախոս, վճարման կոդ'}</span><span class="kbd">/</span></div>
       ${wide ? '' : '<span style="flex:1"></span><button class="btn secondary s"><i data-lucide="plus"></i>Նոր գործընկեր</button>'}</div>
     ${wide ? '' : `<div class="filters" style="padding-top:6px;padding-bottom:6px">
       <span class="chip on">Բոլորը <span class="c num">12</span></span><span class="chip"><i data-lucide="lock"></i>Կանգնած <span class="c num">2</span></span>
@@ -193,7 +193,7 @@
             <thead><tr><th>Օր</th><th>Ինչ</th><th>Ով</th><th class="r">Գումար</th><th class="r">Հաշվեկշիռ</th></tr></thead>
             <tbody>${L.map(([d, k, w, s2, who, v, b, cls]) => `<tr class="${cls || ''}"><td><span class="what"><span class="mono" style="font-size:12px;color:var(--ink)">${d.split(' ')[0]}</span><span class="mono">${d.split(' ')[1] || ''}</span></span></td>
               <td class="desc"><span class="what"><b><i data-lucide="${KIND[k][0]}" style="width:14px;height:14px;vertical-align:-2px;margin-right:6px;color:var(--ink-faint)"></i>${w}</b><span>${s2}</span></span></td><td>${who}</td><td class="r mono ${v > 0 ? 'plus' : ''}">${sgn(v)}</td><td class="r mono ${b < 0 ? 'neg' : ''}">${(b < 0 ? '−' : '') + amd(Math.abs(b))}</td></tr>`).join('')}
-              <tr><td class="mono">01.10</td><td colspan="3" class="faint">Հաշվեկշիռը ամսվա սկզբին</td><td class="r mono">0 ֏</td></tr></tbody></table>
+              <tr><td class="mono">01.10</td><td colspan="3" class="faint">Հաշվեկշիռն ամսվա սկզբին</td><td class="r mono">0 ֏</td></tr></tbody></table>
         </div>
       </section>
     </div>`

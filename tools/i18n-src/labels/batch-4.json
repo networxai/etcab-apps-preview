@@ -1,0 +1,22 @@
+{
+ "NFC · waiting for the driver": {
+  "hy": "NFC · սպասում ենք վարորդին",
+  "ru": "NFC · ждём водителя"
+ },
+ "NFC · driver marked failed": {
+  "hy": "NFC · վարորդը նշեց՝ չստացվեց",
+  "ru": "NFC · водитель отметил «не прошло»"
+ },
+ "Complete · NFC · take it in the ACBA app, wait, driver confirms (1 122 ֏)": {
+  "hy": "Ավարտ · NFC · վերցնել ACBA հավելվածով, սպասել, վարորդը հաստատում է (1 122 ֏)",
+  "ru": "Завершение · NFC · принять в приложении ACBA, ждать, водитель подтверждает (1 122 ֏)"
+ },
+ "NFC · POS · phone has NFC, ACBA app (checklist)": {
+  "hy": "NFC · POS · հեռախոսում NFC, ACBA հավելված (ստուգաթերթ)",
+  "ru": "NFC · POS · NFC на телефоне, приложение ACBA (чек-лист)"
+ },
+ "No NFC on the phone · cash only": {
+  "hy": "Հեռախոսում NFC չկա · միայն կանխիկ",
+  "ru": "Нет NFC на телефоне · только наличные"
+ }
+}

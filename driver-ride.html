@@ -285,7 +285,7 @@
   <!-- ── destchanged (D22): the dispatcher moved the drop mid-ride; the price follows the new route (drawn ahead) ── -->
   <section class="sheet" data-s="destchanged" data-sheet>
     <div class="grabber"></div>
-    <div class="notice info" role="status"><i data-lucide="route"></i><div><b>Դիսպետչերը փոխեց նպատակակետը</b>Ուղևորի խնդրանքով · 9:48</div></div>
+    <div class="notice" role="status"><i data-lucide="route"></i><div><b>Դիսպետչերը փոխեց նպատակակետը</b>Ուղևորի խնդրանքով · 9:48</div></div>
     <div class="head" style="margin-top:var(--s3)">
       <div><div class="eyebrow"><span class="d"></span>1,1 կմ · 9:50 · 1 000 ֏</div><div class="addr">Կոմիտասի պող. 8</div></div>
       <div class="big">2<small>րոպե</small></div>
@@ -352,7 +352,9 @@
   </section>
 
   <!-- ── complete, the rider's in-app card was declined at the end (owner 2026-10-15): the app has already put the switch on
-       Cash, so the collect line is the hero again; the card's 2 % fee falls away with the card, cash is the bare fare. ── -->
+       Cash, so the collect line is the hero again; the card's 2 % fee falls away with the card, cash is the bare fare. Owner rule:
+       the rider retries the same card first (rider-done#card-declined leads with «Կրկնել · ·· 4242»), so the driver is told that,
+       with cash as the fallback, rather than to take cash at once. ── -->
   <section class="sheet" data-s="done-declined" data-sheet>
     <div class="grabber"></div>
     <div class="done-top">
@@ -360,7 +362,7 @@
       <div class="l">Կոմիտասի պող. 22 · 9:51</div>
       <div class="big">1 100<small>֏</small></div>
     </div>
-    <div class="cash warn" role="alert"><i data-lucide="credit-card"></i><div><div class="t1">Քարտը մերժվեց</div><div class="t1">Վերցրեք կանխիկ 1 100 ֏</div><div class="t2">քարտ ·· 4242 · հավելվածով չանցավ</div></div></div>
+    <div class="cash warn" role="alert"><i data-lucide="credit-card"></i><div><div class="t1">Քարտը մերժվեց · ուղևորը կկրկնի</div><div class="t1">Կամ վերցրեք կանխիկ 1 100 ֏</div><div class="t2">քարտ ·· 4242 · հավելվածով չանցավ</div></div></div>
     <div class="done-pay"><button class="swbtn" aria-label="Վերցնում եմ NFC-ով · 1 122 ֏"><i data-lucide="smartphone-nfc"></i>Վերցնում եմ NFC-ով<span class="fg">1 122 ֏</span></button><div class="paylbl rec">Փոփոխությունը գրանցվում է պատվերում</div></div>
     <div class="tripln">4,3 կմ · 6 րոպե · սպասում 1:20</div>
     <div class="today"><span class="tl">Այսօր</span><b>2 պատվեր</b><b>2 300 ֏</b></div>

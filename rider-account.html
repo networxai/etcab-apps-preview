@@ -34,6 +34,8 @@
   .row .t2.warn { color: var(--warn); }
   .count { min-width: 24px; height: 24px; padding: 0 7px; border-radius: var(--r-pill); background: var(--ink); color: var(--surface); font: 600 13px/24px var(--font); text-align: center; font-variant-numeric: tabular-nums; flex: none; }
   .group .row.btnrow { width: 100%; text-align: left; }
+  /* Armenian row titles run long («Գաղտնիության քաղաքականություն» pushed its chevron off the card): they wrap, never cut. */
+  .group .row.btnrow .txt { min-width: 0; } .group .row.btnrow .t1 { white-space: normal; overflow-wrap: anywhere; }
 
   /* Field (same as login) */
   .form { padding: 0 var(--margin); }
@@ -157,7 +159,7 @@
     <div class="gap"></div>
     ${grp([
       r('history', 'Ուղևորություններ'),
-      r('calendar-clock', 'Նախնական պատվերներ', `<span class="count">${Object.keys(ECO.BOOKINGS).length}</span>`),
+      r('calendar-clock', 'Նախնական պատվերներ', `<span class="count">${Object.values(ECO.BOOKINGS).filter((b) => b.who === 'rider').length}</span>`),
       r('map-pin', 'Հասցեներ', '<span class="val">3</span>'),
       r('wallet', 'Վճարում', `<span class="val">${debt ? A(DEBT) : ''}</span>`, debt ? { t2: 'Պարտք', t2c: 'warn' } : { t2: ECO.COMPANY.name }),
     ])}

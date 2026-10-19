@@ -101,15 +101,15 @@
   :root[data-theme="dark"] .ios-as button { color: #4DA3FF; }
   :root[data-theme="dark"] .ios-as .x { background: #2C2C2E; }
 
-  /* Lock screen: system chrome on a wallpaper; white clock, notification cards in the system material (opaque enough to read). */
-  .lock { position: absolute; inset: 0; background: radial-gradient(120% 70% at 20% 10%, #6E8C6A 0%, transparent 60%), radial-gradient(90% 60% at 90% 80%, #2F4F57 0%, transparent 70%), linear-gradient(170deg, #3E5B4C, #18252A 70%, #0D1417); }
+  /* Lock screen: system chrome on a wallpaper; white clock, notification cards in the system material (opaque enough to read). The light wallpaper's brightest point under the date measured 5,21:1 against white (it was 3,79:1 at #6E8C6A); data-bg declares that worst case. */
+  .lock { position: absolute; inset: 0; background: radial-gradient(120% 70% at 20% 10%, #577553 0%, transparent 60%), radial-gradient(90% 60% at 90% 80%, #2F4F57 0%, transparent 70%), linear-gradient(170deg, #3E5B4C, #18252A 70%, #0D1417); }
   :root[data-theme="dark"] .lock { background: radial-gradient(120% 70% at 20% 10%, #33452F 0%, transparent 60%), radial-gradient(90% 60% at 90% 80%, #1B2E33 0%, transparent 70%), linear-gradient(170deg, #1E2C25, #0B1013 70%, #050708); }
   .screen:has(.lock) .statusbar { color: #fff; }
   .screen:has(.lock) .homebar { background: #fff; }
   .lock .lk { position: absolute; top: 58px; left: 0; right: 0; display: flex; justify-content: center; color: #fff; }
   .lock .lk svg { width: 18px; height: 18px; }
   .lock .date { position: absolute; top: 92px; left: 0; right: 0; text-align: center; font: 500 20px/26px var(--font); color: #fff; }
-  .lock .big { position: absolute; top: 124px; left: 0; right: 0; text-align: center; font: 600 96px/104px var(--font); color: #fff; letter-spacing: -2px; font-variant-numeric: tabular-nums; }
+  .lock .big { position: absolute; top: 124px; left: 0; right: 0; text-align: center; font: 600 96px/120px var(--font); color: #fff; letter-spacing: -2px; font-variant-numeric: tabular-nums; }
   .lock .stack { position: absolute; left: 8px; right: 8px; top: 304px; display: flex; flex-direction: column; gap: 8px; }
   .nt { border-radius: 22px; padding: 12px 14px; background: rgb(246 246 246 / .94); color: #111113; display: flex; gap: 10px; align-items: flex-start; box-shadow: 0 6px 24px rgb(0 0 0 / .18); }
   :root[data-theme="dark"] .nt { background: rgb(36 36 38 / .95); color: #F2F2F3; }
@@ -188,14 +188,14 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
     htmlMarker(m, pts[pts.length - 1], '<div class="pin-b"></div>', [18, 18])
   }
   /* A modal over the dimmed booking sheet. */
-  const overDetail = (b, top) => detailSheet(b).replace('<section class="sheet" id="sheet">', '<div class="scrim" aria-hidden="true"></div><section class="sheet" id="sheet" aria-hidden="true" inert>') + top
+  const overDetail = (b, top) => detailSheet(b).replace('<section class="sheet" id="sheet">', '<div class="scrim" aria-hidden="true"></div><section class="sheet" id="sheet" aria-hidden="true" inert data-overlay>') + top
 
   /* Lock screen. reminder: ECO.DISPATCH.reminderMin before the booking (console Settings → Dispatch). */
   const minus = (t, m) => { const [h, mm] = t.split(':').map(Number), x = h * 60 + mm - m; return `${String(Math.floor(x / 60)).padStart(2, '0')}:${String(x % 60).padStart(2, '0')}` }
   const B = BK.air, D = B.driver
   const remindAt = minus(B.time, DP.reminderMin)
   const nt = (t, r2, r3, cls = '') => `<div class="nt ${cls}"><img class="mk" src="assets/eco/mark.png" alt=""><span class="txt"><span class="r1"><span>Eco Taxi</span><small>${t}</small></span><span class="r2">${r2}</span><span class="r3">${r3}</span></span></div>`
-  const lock = (clock, cards) => `<div class="lock" aria-label="Կողպված էկրան"><div class="lk" aria-hidden="true">${R.i('lock')}</div>
+  const lock = (clock, cards) => `<div class="lock" data-bg="#577453" aria-label="Կողպված էկրան"><div class="lk" aria-hidden="true">${R.i('lock')}</div>
       <div class="date">${B.day.replace(' հոկտ.', ' հոկտեմբերի')}</div><div class="big">${clock.replace(/^0/, '')}</div>
       <div class="stack">${cards}</div>
       <div class="ctl" aria-hidden="true" style="left:46px">${R.i('flashlight')}</div><div class="ctl" aria-hidden="true" style="right:46px">${R.i('camera')}</div></div>`
@@ -226,7 +226,7 @@ ROUTES.preCo = { m: 5168, s: 485, pts: [[40.206708,44.503782],[40.206482,44.5040
     states: [
       { id: 'list', group: 'Bookings', label: 'List', note: 'Reached from History («Նախնական պատվերներ» leads it) and the home card. Soonest first; a neutral tag «Մեքենան՝ ավտոմատ որոնմամբ» when no driver is pre-assigned (owner Q1: the system searches that tariff automatically, so it is not a problem); the company marker on an on-account booking. No inline cancel: a card opens the booking, and the one way to change or cancel is the dispatcher',
         html: () => list() },
-      { id: 'detail', group: 'Bookings', label: 'Booking', note: 'Drawn ahead (R35): the time is the hero; route, tier and fixed price, payment, the pre-assigned driver and plate. «Սկսել հիմա» is the one primary; «Զանգել դիսպետչերին» for any change. Needs tier, fare, payment and driver on the customer booking wire',
+      { id: 'detail', group: 'Bookings', label: 'Booking', note: 'Drawn ahead (R35): the time is the hero; route, tier and fixed fare, payment, the pre-assigned driver and plate. «Սկսել հիմա» is the one primary; «Զանգել դիսպետչերին» for any change. Needs tier, fare, payment and driver on the customer booking wire',
         html: () => detailSheet(BK.air), map: mapFor(BK.air) },
       { id: 'detail-nodriver', group: 'Bookings', label: 'No car yet', note: 'problemReason set (the pre-assigned driver was blocked). Owner Q1: at the time the system searches automatically and any driver of the booking\'s tariff can take it, so the notice is neutral and says exactly that; no person has to assign a car',
         html: () => detailSheet(BK.sun), map: mapFor(BK.sun) },

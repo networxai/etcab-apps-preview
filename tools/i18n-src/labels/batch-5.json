@@ -1,0 +1,14 @@
+{
+ "Complete · card declined → collect cash (NFC switch offered)": {
+  "hy": "Ավարտ · քարտը մերժվեց → վերցնել կանխիկ (NFC-ի փոխարկում)",
+  "ru": "Завершение · карта отклонена → взять наличные (можно NFC)"
+ },
+ "Edit e-mail": {
+  "hy": "Փոխել էլ. հասցեն",
+  "ru": "Изменить e-mail"
+ },
+ "Ride complete · cash only, no NFC switch · fee from the wallet": {
+  "hy": "Ավարտ · միայն կանխիկ, NFC չկա · վճարը՝ հաշվեկշռից",
+  "ru": "Поездка завершена · только наличные, без NFC · сбор с баланса"
+ }
+}

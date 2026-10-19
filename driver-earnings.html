@@ -119,8 +119,9 @@
   .cal .grid span.in { background: var(--brand-soft); }
   .cal .grid span.a, .cal .grid span.b { background: var(--brand-soft); }
   .cal .grid span.a { border-radius: 24px 0 0 24px; } .cal .grid span.b { border-radius: 0 24px 24px 0; }
-  .cal .grid span.a i, .cal .grid span.b i { position: absolute; inset: 2px; border-radius: 50%; background: var(--brand); }
-  .cal .grid span.a em, .cal .grid span.b em { position: relative; font-style: normal; color: var(--on-brand); font-weight: 600; }
+  /* The endpoint disc is the number's own background, so its contrast is measured against the brand, not the soft band. */
+  .cal .grid span.a em, .cal .grid span.b em { position: absolute; inset: 2px; border-radius: 50%; background: var(--brand); display: grid; place-items: center;
+    font-style: normal; color: var(--on-brand); font-weight: 600; }
   .cal .grid span.today { font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
   .calsum { display: flex; justify-content: space-between; align-items: center; margin: var(--s3) 0 var(--s3); font: var(--t-secondary-strong); color: var(--ink); }
 </style>
@@ -152,20 +153,20 @@
       <div class="lbl">Ուրբաթ, 9 հոկտեմբերի</div>
       <div class="hero">9 800<small>֏</small></div>
       <div class="kpis"><span class="kpi"><i data-lucide="car-front"></i><b>7</b>պատվեր</span><span class="kpi"><i data-lucide="clock"></i><b>5 ժ 58 ր</b>առցանց</span></div>
-      <div class="split" role="img" aria-label="Կանխիկ 4 200 ֏, անկանխիկ 3 400 ֏, ընկերության հաշվին 2 200 ֏">
-        <div class="bar"><i class="c-cash" style="width:42.9%"></i><i class="c-noncash" style="width:34.7%"></i><i class="c-company" style="width:22.4%"></i></div>
+      <div class="split" role="img" aria-label="Կանխիկ 3 500 ֏, անկանխիկ 4 100 ֏, ընկերության հաշվին 2 200 ֏">
+        <div class="bar"><i class="c-cash" style="width:35.7%"></i><i class="c-noncash" style="width:41.9%"></i><i class="c-company" style="width:22.4%"></i></div>
         <div class="legend rows">
-          <span><i class="c-cash"></i>Կանխիկ <em>· ձեր մոտ</em><b>4 200 ֏</b></span>
-          <span><i class="c-noncash"></i>Անկանխիկ <em>· Idram-ով</em><b>3 400 ֏</b></span>
+          <span><i class="c-cash"></i>Կանխիկ <em>· ձեր մոտ</em><b>3 500 ֏</b></span>
+          <span><i class="c-noncash"></i>Անկանխիկ <em>· Idram-ով</em><b>4 100 ֏</b></span>
           <span><i class="c-company"></i>Ընկերություն<b>2 200 ֏</b></span>
         </div>
       </div>
       <div class="sect">Վերջին պատվերներ</div>
       <div class="group">
         <div class="ride"><span class="tm">14:52</span><span class="txt"><span class="t1">Կոմիտասի պող. 49</span><span class="t2"><i data-lucide="building-2"></i>Ընկերություն · 4,3 կմ</span></span><span class="amt">1 100 ֏</span></div>
-        <div class="ride"><span class="tm">14:10</span><span class="txt"><span class="t1">Զվարթնոց</span><span class="t2"><i data-lucide="credit-card"></i>Քարտ · 13,1 կմ</span></span><span class="amt">2 000 ֏</span></div>
-        <div class="ride"><span class="tm">13:25</span><span class="txt"><span class="t1">Ամիրյան փ. 4</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 5,8 կմ</span></span><span class="amt">1 200 ֏</span></div>
+        <div class="ride"><span class="tm">14:10</span><span class="txt"><span class="t1">Նուբարաշեն</span><span class="t2"><i data-lucide="credit-card"></i>Քարտ · 13,1 կմ</span></span><span class="amt">2 200 ֏</span></div>
         <div class="ride"><span class="tm">12:40</span><span class="txt"><span class="t1">Ծիծեռնակաբերդ</span><span class="t2"><i data-lucide="building-2"></i>Ընկերություն · 4,1 կմ</span></span><span class="amt">1 100 ֏</span></div>
+        <div class="ride"><span class="tm">11:35</span><span class="txt"><span class="t1">Դավթաշեն, 2-րդ թաղ.</span><span class="t2"><i data-lucide="smartphone-nfc"></i>NFC · POS · 8,9 կմ</span></span><span class="amt">1 900 ֏</span></div>
       </div>
       <div class="group more">
         <a class="row" href="?state=rides" style="text-decoration:none"><span class="ic"><i data-lucide="list"></i></span><span class="txt"><span class="t1">Բոլոր պատվերները</span></span><i class="chev" data-lucide="chevron-right"></i></a>
@@ -225,31 +226,34 @@
       <div class="day"><span>Այսօր, 9 հոկտ.</span><span>7 պատվեր · <b>9 800 ֏</b></span></div>
       <div class="group">
         <div class="ride"><span class="tm">14:52</span><span class="txt"><span class="t1">Կոմիտասի պող. 49</span><span class="t2"><i data-lucide="building-2"></i>Ընկերություն · 4,3 կմ</span></span><span class="amt">1 100 ֏</span></div>
-        <div class="ride"><span class="tm">14:10</span><span class="txt"><span class="t1">Զվարթնոց</span><span class="t2"><i data-lucide="credit-card"></i>Քարտ · 13,1 կմ</span></span><span class="amt">2 000 ֏</span></div>
-        <div class="ride"><span class="tm">13:25</span><span class="txt"><span class="t1">Ամիրյան փ. 4</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 5,8 կմ</span></span><span class="amt">1 200 ֏</span></div>
+        <div class="ride"><span class="tm">14:10</span><span class="txt"><span class="t1">Նուբարաշեն</span><span class="t2"><i data-lucide="credit-card"></i>Քարտ · 13,1 կմ</span></span><span class="amt">2 200 ֏</span></div>
         <div class="ride"><span class="tm">12:40</span><span class="txt"><span class="t1">Ծիծեռնակաբերդ</span><span class="t2"><i data-lucide="building-2"></i>Ընկերություն · 4,1 կմ</span></span><span class="amt">1 100 ֏</span></div>
-        <div class="ride"><span class="tm">11:35</span><span class="txt"><span class="t1">Դավթաշեն, 2-րդ թաղ.</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 8,9 կմ</span></span><span class="amt">1 900 ֏</span></div>
-        <div class="ride"><span class="tm">10:20</span><span class="txt"><span class="t1">Հանրապետության հր.</span><span class="t2"><i data-lucide="smartphone-nfc"></i>NFC · POS · 5,8 կմ</span></span><span class="amt">1 400 ֏</span></div>
-        <div class="ride"><span class="tm">09:18</span><span class="txt"><span class="t1">Կասկադ</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 4,0 կմ</span></span><span class="amt">1 100 ֏</span></div>
+        <div class="ride"><span class="tm">11:35</span><span class="txt"><span class="t1">Դավթաշեն, 2-րդ թաղ.</span><span class="t2"><i data-lucide="smartphone-nfc"></i>NFC · POS · 8,9 կմ</span></span><span class="amt">1 900 ֏</span></div>
+        <div class="ride"><span class="tm">10:35</span><span class="txt"><span class="t1">Հանրապետության հր.</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 5,8 կմ</span></span><span class="amt">1 200 ֏</span></div>
+        <div class="ride"><span class="tm">09:45</span><span class="txt"><span class="t1">Կոմիտասի պող. 22</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 4,3 կմ</span></span><span class="amt">1 100 ֏</span></div>
+        <div class="ride"><span class="tm">09:18</span><span class="txt"><span class="t1">Կասկադ</span><span class="t2"><i data-lucide="banknote"></i>Կանխիկ · 4,0 կմ</span></span><span class="amt">1 200 ֏</span></div>
       </div>
-      <div class="day"><span>Երեկ, 8 հոկտ.</span><span>9 պատվեր · <b>12 900 ֏</b></span></div>
+      <div class="day"><span>Երեկ, 8 հոկտ.</span><span>9 պատվեր · <b>13 500 ֏</b></span></div>
       <div class="group">
         <div class="ride"><span class="tm">19:12</span><span class="txt"><span class="t1">Ծիծեռնակաբերդ</span><span class="t2"><i data-lucide="smartphone"></i>Apple Pay · 3,8 կմ</span></span><span class="amt">1 000 ֏</span></div>
-        <div class="ride"><span class="tm">17:40</span><span class="txt"><span class="t1">Բաղրամյան պող. 24</span><span class="t2"><i data-lucide="building-2"></i>Ընկերություն · 13,1 կմ</span></span><span class="amt">2 000 ֏</span></div>
+        <div class="ride"><span class="tm">17:40</span><span class="txt"><span class="t1">Բաղրամյան պող. 24</span><span class="t2"><i data-lucide="building-2"></i>Ընկերություն · 12,4 կմ</span></span><span class="amt">2 000 ֏</span></div>
       </div>
     </section>
 
     <!-- ── payouts (owner 2026-10-15): non-cash income, paid to the driver's Idram per ride once ETAPI files the Tax Service
-         receipt. Pending is neutral (it is on its way), sent is green. Cash: receipt after 24 h, no payout (the cash is his). ── -->
+         receipt. Pending is neutral (it is on its way), sent is green. An NFC · POS ride waits for the ACBA statement to match it before
+         its payout (owner 2026-10-16), so it stays pending after a card ride of the same day has gone. Cash: receipt after 24 h, no payout
+         (the cash is the driver's). Aram's day (7 rides, 9 800 ֏) is the same everywhere: home at 9:41 (1 ride, 1 200), driver-ride#done
+         (2 rides, 2 300, the walkthrough R-2417 at 09:45), the B-0898 pre-order at 10:35, shift end (cash 3 500 · non-cash 4 100 · company 2 200). ── -->
     <section data-s="payouts">
       <div class="lbl">Այսօր, 9 հոկտ. · անկանխիկ</div>
-      <div class="hero">3 400<small>֏</small></div>
-      <div class="kpis"><span class="kpi"><i data-lucide="check"></i><b>1 400 ֏</b>ուղարկված</span><span class="kpi"><i data-lucide="clock"></i><b>2 000 ֏</b>սպասվում է</span></div>
+      <div class="hero">4 100<small>֏</small></div>
+      <div class="kpis"><span class="kpi"><i data-lucide="check"></i><b>2 200 ֏</b>ուղարկված</span><span class="kpi"><i data-lucide="clock"></i><b>1 900 ֏</b>սպասվում է</span></div>
       <div class="card idram"><span class="ic"><i data-lucide="send"></i></span><span class="txt"><span class="t1">Idram ID · 0012 3456 78</span><span class="t2">ՀՎՀՀ · <span data-eco="FISCAL.driverTin">23457812</span></span></span></div>
       <div class="sect">Idram-ով փոխանցված</div>
       <div class="group">
-        <div class="po"><span class="ic" role="img" aria-label="Քարտ"><i data-lucide="credit-card"></i></span><span class="txt"><span class="t1">Զվարթնոց</span><span class="t2"><i data-lucide="clock"></i>Սպասվում է · չեկը տրված</span></span><span class="amt">2 000 ֏</span></div>
-        <div class="po"><span class="ic" role="img" aria-label="NFC · POS"><i data-lucide="smartphone-nfc"></i></span><span class="txt"><span class="t1">Հանրապետության հր.</span><span class="t2 ok"><i data-lucide="circle-check"></i>Ուղարկված · 10:22</span></span><span class="amt">1 400 ֏</span></div>
+        <div class="po"><span class="ic" role="img" aria-label="Քարտ"><i data-lucide="credit-card"></i></span><span class="txt"><span class="t1">Նուբարաշեն</span><span class="t2 ok"><i data-lucide="circle-check"></i>Ուղարկված · 14:36</span></span><span class="amt">2 200 ֏</span></div>
+        <div class="po"><span class="ic" role="img" aria-label="NFC · POS"><i data-lucide="smartphone-nfc"></i></span><span class="txt"><span class="t1">Դավթաշեն, 2-րդ թաղ.</span><span class="t2"><i data-lucide="clock"></i>Սպասում ենք բանկին</span></span><span class="amt">1 900 ֏</span></div>
       </div>
       <div class="day"><span>Երեկ, 8 հոկտ.</span><span>Ուղարկված · <b>1 000 ֏</b></span></div>
       <div class="group">
@@ -274,8 +278,8 @@
       </div>
       <div class="sect">Սպասում են</div>
       <div class="group">
-        <div class="po"><span class="ic" role="img" aria-label="Քարտ"><i data-lucide="credit-card"></i></span><span class="txt"><span class="t1">Զվարթնոց</span><span class="t2 warn"><i data-lucide="pause"></i>Կանգնեցված</span></span><span class="amt">2 000 ֏</span></div>
-        <div class="po"><span class="ic" role="img" aria-label="NFC · POS"><i data-lucide="smartphone-nfc"></i></span><span class="txt"><span class="t1">Հանրապետության հր.</span><span class="t2 warn"><i data-lucide="pause"></i>Կանգնեցված</span></span><span class="amt">1 400 ֏</span></div>
+        <div class="po"><span class="ic" role="img" aria-label="Քարտ"><i data-lucide="credit-card"></i></span><span class="txt"><span class="t1">Նուբարաշեն</span><span class="t2 warn"><i data-lucide="pause"></i>Կանգնեցված</span></span><span class="amt">2 000 ֏</span></div>
+        <div class="po"><span class="ic" role="img" aria-label="Apple Pay"><i data-lucide="smartphone"></i></span><span class="txt"><span class="t1">Հանրապետության հր.</span><span class="t2 warn"><i data-lucide="pause"></i>Կանգնեցված</span></span><span class="amt">1 400 ֏</span></div>
       </div>
     </section>
 
@@ -307,8 +311,10 @@
   ])
   /* October 2026 starts on a Thursday; the range 1–7, today the 9th. picker shows the range page under the sheet. */
   if (st === 'picker') document.querySelectorAll('[data-s~="range"]').forEach((el) => { el.hidden = false })
+  /* Under the modal sheet on purpose: the page behind it is out of reach until the sheet closes. */
+  if (st === 'picker') document.querySelectorAll('.content, .appbar').forEach((el) => { el.inert = true; el.setAttribute('data-overlay', '') })
   document.getElementById('calgrid').innerHTML = [28, 29, 30].map((d) => `<span class="mute">${d}</span>`).join('') +
-    Array.from({ length: 31 }, (_, i) => i + 1).map((d) => d === 1 ? '<span class="a"><i></i><em>1</em></span>' : d === 7 ? '<span class="b"><i></i><em>7</em></span>' : `<span class="${d < 7 ? 'in' : d === 9 ? 'today' : d > 9 ? 'mute' : ''}">${d}</span>`).join('') + '<span class="mute">1</span>'
+    Array.from({ length: 31 }, (_, i) => i + 1).map((d) => d === 1 ? '<span class="a"><em>1</em></span>' : d === 7 ? '<span class="b"><em>7</em></span>' : `<span class="${d < 7 ? 'in' : d === 9 ? 'today' : d > 9 ? 'mute' : ''}">${d}</span>`).join('') + '<span class="mute">1</span>'
   document.querySelectorAll('[data-ps]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.ps.split(' ').includes(st === 'picker' ? 'range' : st))))
   icons()
   D.noMap()

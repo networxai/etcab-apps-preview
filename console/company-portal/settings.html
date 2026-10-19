@@ -60,7 +60,7 @@
   const saved = st === 'account-saved'
   const emails = sec('Հաշվետվության էլ. հասցեներ', `<div class="pad">
       <div class="input${saved ? '' : ' focus'}"><i data-lucide="at-sign"></i><span class="val mono">${CO.EMAIL}, l.avetisyan@araratsoft.am</span></div><p class="hint">Մինչև 5՝ ստորակետով</p>
-      <div style="margin-top:12px"><span class="switch on"><i class="t"></i>Ամսվա հաշվետվությունը ուղարկել ինքնաշխատ՝ ամսի 1-ին</span></div>
+      <div style="margin-top:12px"><span class="switch on"><i class="t"></i>Ամսվա հաշվետվությունն ուղարկել ինքնաշխատ՝ ամսի 1-ին</span></div>
       <div class="formfoot">${saved ? '<span class="pill ok" role="status"><i data-lucide="check"></i>Պահված է</span>' : '<span class="faint" style="font:var(--c-small)">Փոխվել է 1 դաշտ</span>'}<span class="sp"></span><button class="btn primary"${saved ? ' disabled' : ''}>Պահել</button></div></div>`)
   const notif = sec('Ծանուցումներ', `<div class="pad" style="display:flex;flex-direction:column;gap:12px">
       <span class="switch on"><i class="t"></i>SMS աշխատակցին, երբ մեքենան նշանակվի</span>

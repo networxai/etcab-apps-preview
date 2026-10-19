@@ -96,7 +96,7 @@
       <h1 class="large">Մուտք</h1><p class="lead">Կոդը կուղարկենք SMS-ով</p>
       ${field({ v, ph, cls: fcls, clear })}${note}${agree === null ? '' : agreeRow(agree)}${btn}</div>${R.keypad()}</div>${extra}`
 
-  const boxes = (ds, cls = '', focusAt = -1) => `<div class="otp ${cls}" role="group" aria-label="Վեցանիշ կոդ">${[0, 1, 2, 3, 4, 5].map((i) =>
+  const boxes = (ds, cls = '', focusAt = -1) => `<div class="otp ${cls}" role="group" aria-label="Վեցանիշ կոդ"${cls === 'off' ? ' aria-disabled="true"' : ''}>${[0, 1, 2, 3, 4, 5].map((i) =>
     `${i === 3 ? '<span class="gap"></span>' : ''}<span class="d ${i === focusAt ? 'focus' : ''}">${ds[i] || (i === focusAt ? '<span class="caret"></span>' : '')}</span>`).join('')}</div>`
   const codePage = (body, extra = '') => `<div class="page on-surface">
       <nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl"></span><span class="navend"></span></nav>

@@ -156,7 +156,7 @@
         const r = [...document.querySelectorAll('#queue .r')].find((x) => x.textContent.includes('Կոմիտաս 12'))
         if (r) { r.classList.add('lost'); r.querySelector('.claimed').classList.add('info') }
         legend.classList.add('msg'); legend.setAttribute('role', 'status')
-        legend.innerHTML = '<i data-lucide="refresh-cw"></i><span class="grow">Սոնա Ա.-ն արդեն վերցրել է այս պատվերը</span><span class="kbd">Esc</span>'
+        legend.innerHTML = '<i data-lucide="refresh-cw"></i><span class="grow" data-truncate>Սոնա Ա.-ն արդեն վերցրել է այս պատվերը</span><span class="kbd">Esc</span>'
       }
       if (ST === 'claiming') {
         const r = [...document.querySelectorAll('#queue .r')].find((x) => x.textContent.includes('Կոմիտաս 12'))
@@ -224,8 +224,8 @@
            row), amber octagon (owner #13), dismissible; the same item stays in Requests → «Տեղեկություն». */
         const B = ECO.BLACKLIST
         legend.classList.add('note'); legend.setAttribute('role', 'status')
-        legend.innerHTML = `<i data-lucide="octagon-alert"></i><span class="grow">Սև ցուցակ · <b>${B.name}</b> <span class="mono">${B.phone}</span> · հավելվածը մերժեց <span class="mono">${B.refusedAt}</span></span>
-          <a href="customer.html?theme=${THEME}&state=blacklisted">Քարտ</a><button class="btn ghost icon s" aria-label="Փակել"><i data-lucide="x"></i></button>`
+        legend.innerHTML = `<i data-lucide="octagon-alert"></i><span class="grow" data-truncate>Սև ցուցակ · <span class="mono">${B.phone}</span> · մերժվեց <span class="mono">${B.refusedAt}</span></span>
+          <a href="customer.html?theme=${THEME}&state=blacklisted" aria-label="${B.name}-ի քարտը">Քարտ</a><button class="btn ghost icon s" aria-label="Փակել"><i data-lucide="x"></i></button>`
       }
       if (IN === 'blacklist') {
         /* C09 (owner #13/#14): customer-card.tsx flags it first, before any field (§9.1: the operator is already speaking).
@@ -236,7 +236,7 @@
           <span>${B.reason}</span><small>${B.name} · ավելացրել է ${B.by}, ${B.since} · <a href="customer.html?theme=${THEME}&state=blacklisted">Ուղևորի քարտ</a></small></div>`
         const bar = q('.actbar'), go = bar.querySelector('.btn.primary')
         go.setAttribute('disabled', ''); go.setAttribute('aria-describedby', 'bl-note'); go.style.opacity = '.55'
-        bar.querySelector('.sum').innerHTML = '<b style="color:var(--warning)">Պատվեր չի ստեղծվի</b><span>Ավարտեք զանգը</span>'
+        bar.querySelector('.sum').innerHTML = '<b style="color:var(--warning);font:var(--c-strong)">Պատվեր չի ստեղծվի</b><span>Ավարտեք զանգը</span>'
       }
       if (IN === 'reused') {
         /* C11: Enter pressed again on a call whose order already went out (same idempotency key). Blue, at the head of

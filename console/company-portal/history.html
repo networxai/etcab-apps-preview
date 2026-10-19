@@ -110,7 +110,7 @@
       <thead><tr><th>Աշխատակից</th>${dk('<th>Հեռախոս</th>')}<th class="c">${PH ? 'Քանակ' : 'Ուղևորություններ'}</th><th class="m">Գումար</th>${dk('<th>Մասնաբաժին</th>')}</tr></thead>
       <tbody>${E.map((e) => `<tr><td class="trunc">${e.name}</td>${dk(`<td class="mono">${e.phone}</td>`)}<td class="c">${e.m.rides}</td><td class="m">${amd(e.m.amount)}</td>
         ${dk(`<td><span class="lim"><span class="bar3" style="width:120px" aria-hidden="true"><i style="width:${Math.round(e.m.amount / max * 100)}%"></i></span><span class="mono">${Math.round(e.m.amount / P.amount * 100)} %</span></span></td>`)}</tr>`).join('')}</tbody></table>`
-  const empTotal = `<div class="totrow"><table class="tbl rep">${cg}<tfoot><tr><td>Ընդամենը${PH ? "" : ` · ${E.length} աշխատակից`}</td>${dk('<td></td>')}<td class="c">${P.rides}</td><td class="m">${amd(P.amount)}</td>${dk('<td></td>')}</tr></tfoot></table></div>`
+  const empTotal = `<div class="totrow"><table class="tbl rep">${cg}<tfoot data-overlay><tr><td>Ընդամենը${PH ? "" : ` · ${E.length} աշխատակից`}</td>${dk('<td></td>')}<td class="c">${P.rides}</td><td class="m">${amd(P.amount)}</td>${dk('<td></td>')}</tr></tfoot></table></div>`
 
   /* ── The ride panel (read only) ── */
   const DRV = { 'Eco City': ['city', 'Տիգրան Ա.', '12 TT 304', 'Volkswagen ID.3 · սպիտակ'], 'Eco Comfort': ['partner', 'Գագիկ Ա.', '34 LS 108', 'Tesla Model 3 · սպիտակ'],
@@ -123,7 +123,7 @@
       <div class="bd">
         <div class="row-flex" style="gap:10px">${stPill(r.st)}<span style="font:var(--c-strong)">${can ? `Չեղարկեց աշխատակիցը՝ <span class="mono">${addMin(t0, 3)}</span>` : `Ավարտվեց՝ <span class="mono">${addMin(t0, 16)}</span>`}</span></div>
         <div class="route2"><span class="pin">Ա</span><span>${r.a}</span><span class="pin b">Բ</span><span>${r.b}</span></div>
-        ${can ? '<div class="notice neutral"><i data-lucide="info"></i><span>Չեղարկված ուղևորությունը ընկերությանը չի հաշվարկվում</span></div>'
+        ${can ? '<div class="notice neutral"><i data-lucide="info"></i><span>Չեղարկված ուղևորությունն ընկերությանը չի հաշվարկվում</span></div>'
           : (([id, nm, pl, car]) => `<div class="drvc"><span class="car s">${carImg(id)}</span><div><b>${nm}</b><span><span class="plate">${pl}</span>${car}</span></div></div>`)(DRV[r.tier] || DRV['Eco City'])}
         <dl>
           <dt>Գին</dt><dd>${r.price ? `<span class="mono">${amd(r.price)}</span> · ընկերության հաշվին` : '<span class="dash">—</span>'}</dd>

@@ -94,6 +94,6 @@
       <thead><tr><th>Ամսաթիվ</th><th>Աշխատակից</th><th>Երթուղի</th><th>Սակագին</th><th class="m">Գին</th></tr></thead>
       <tbody>${L.map((r) => `<tr><td class="mono">${r.at}</td><td class="trunc">${r.who}</td><td class="trunc">${r.a} → ${r.b}</td><td>${r.tier}</td><td class="m">${amd(r.price)}</td></tr>`).join('')}
         <tr class="cut"><td colspan="5">Ցուցադրված է ${drawn}-ը ${month.rides}-ից · ֆայլերում բոլորն են</td></tr></tbody>
-      <tfoot><tr><td colspan="2">Ընդամենը</td><td class="c">${month.rides} ուղևորություն</td><td></td><td class="m">${amd(month.amount)}</td></tr></tfoot></table>`
+      <tfoot data-overlay><tr><td colspan="2">Ընդամենը</td><td class="c">${month.rides} ուղևորություն</td><td></td><td class="m">${amd(month.amount)}</td></tr></tfoot></table>`
   }
 })()

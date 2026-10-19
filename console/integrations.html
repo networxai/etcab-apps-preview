@@ -31,6 +31,9 @@
   .pay .fl { gap: 8px; padding-bottom: 8px; }
   .pay .fd .hint { margin-top: 2px; }
   .pay .ft { padding: 8px var(--inset); }
+  /* On a 768px-tall panel three rows of cards left each one a 150px window onto its own fields (review 16 Oct):
+     the page scrolls instead, and every card shows all of its fields. */
+  @media (max-height: 820px) { .pay .content { grid-template-rows: auto; grid-auto-rows: max-content; overflow-y: auto; } .pay .content .card .scroll-y { overflow: visible; flex: none; } }
   .head2 .seg { align-self: flex-start; }
   .seg a { height: 26px; padding: 0 10px; border-radius: 6px; font: var(--c-strong); color: var(--ink-muted); white-space: nowrap; display: flex; align-items: center; gap: 6px; text-decoration: none; }
   .seg a.on { background: var(--surface); color: var(--ink); box-shadow: var(--e1); }

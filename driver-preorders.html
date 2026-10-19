@@ -347,7 +347,7 @@
     el.outerHTML = D.ring(big ? 52 : 48, 4, +f, `<span class="v">${v}</span><span class="u">${u}</span>`, c === 'brand' ? 'var(--brand-vivid)' : null)
   })
   icons()
-  if (st === 'list-end') { const c = document.querySelector('section.content'); requestAnimationFrame(() => { c.scrollTop = c.scrollHeight }) }
+  if (st === 'list-end') { const c = document.querySelector('section.content'); requestAnimationFrame(() => { c.scrollTop = c.scrollHeight }); c.querySelectorAll('.ptitle, .psub').forEach((el) => { el.setAttribute('data-overlay', ''); el.setAttribute('data-peek', '') }) } /* scrolled: the title has gone under the bar on purpose */
 
   /* Static route thumbnail (review: three live WebGL maps per list were noise). The real OSRM polyline projected into
      the box over a faint street grid; one live map is kept for the details sheet. Offline draws it dotted and grey. */

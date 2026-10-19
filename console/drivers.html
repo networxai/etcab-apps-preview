@@ -11,7 +11,8 @@
 <script src="console-audit.js"></script>
 <style>
   .content { grid-template-columns: minmax(0, 1fr) 420px; }
-  @media (max-width: 1400px) { .content { grid-template-columns: minmax(0, 1fr) 384px; } .carcell .car { display: none; } col.c-car { width: 100px !important; } col.c-doc { width: 132px !important; } col.c-typ { width: 160px !important; } .tabsl { gap: 10px; } .shift { grid-template-columns: 128px minmax(0, 1fr) !important; } }
+  @media (max-width: 1400px) { .content { grid-template-columns: minmax(0, 1fr) 384px; } .carcell .car { display: none; } col.c-car { width: 100px !important; } col.c-doc { width: 132px !important; } col.c-typ { width: 160px !important; } .tabsl { gap: 10px; } .shift { grid-template-columns: 128px minmax(0, 1fr) !important; }
+    /* the «/» hint gives way so the placeholder is read whole (review 16 Oct) */ .filters .input .kbd { display: none; } }
   .dt td { height: 52px; }
   /* ETAPI block (owner 2026-10-15): the two ids ETAPI needs per driver. Mono, fixed label column. */
   .etp dl { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 6px 12px; font: var(--c-body); margin-top: 8px; align-items: center; }
@@ -32,7 +33,7 @@
       <section class="card" aria-label="Վարորդների ցանկ">
         <div class="filters">
           <div class="seg" role="tablist" aria-label="Հերթափոխ"><button class="on">Բոլորը <span class="c num">30</span></button><button>Հերթափոխում <span class="c num">7</span></button><button>Անջատված <span class="c num">23</span></button></div>
-          <div class="input" style="width:264px"><i data-lucide="search"></i><span class="val ph">Անուն, հեռախոս, համարանիշ</span><span class="kbd">/</span></div>
+          <div class="input" style="width:272px"><i data-lucide="search"></i><span class="val ph">Անուն, հեռախոս, համարանիշ</span><span class="kbd">/</span></div>
           <span style="flex:1"></span>
           <button class="btn secondary s"><i data-lucide="plus"></i>Նոր վարորդ</button>
         </div>

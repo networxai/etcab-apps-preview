@@ -88,13 +88,22 @@
   .sh h3 { font: var(--c-head); white-space: nowrap; }
   .sh .sub { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
   .sh .end { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+  .cmt { padding: 4px var(--inset) 14px; display: flex; flex-direction: column; gap: 6px; }
+  .cmt textarea { all: unset; box-sizing: border-box; width: 100%; min-height: 64px; padding: 8px 10px; border-radius: var(--r-ctl); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-control); font: var(--c-body); color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .cmt textarea:focus, .cmt textarea.focus { box-shadow: inset 0 0 0 1px var(--focus-ring), 0 0 0 3px var(--brand-soft); }
+  .cmt textarea::placeholder { color: var(--ink-faint); }
+  .cmt .cnt { display: flex; gap: 10px; font: var(--c-small); color: var(--ink-faint); } .cmt .cnt .num { margin-left: auto; color: var(--ink-muted); } .cmt .cnt .num.max { color: var(--warning); }
+  .cmt .pv { display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border-radius: var(--r-ctl); background: var(--surface-alt); font: var(--c-body); color: var(--ink); }
+  .cmt .pv svg { width: 16px; height: 16px; flex: none; margin-top: 2px; color: var(--ink-faint); } .cmt .pv.none { color: var(--ink-faint); }
+  .cmt .pv small { display: block; font: var(--c-label); color: var(--ink-faint); margin-bottom: 2px; }
   .frow { display: grid; grid-template-columns: minmax(0, 1fr) auto 112px; gap: 12px; align-items: center; min-height: 50px; padding: 6px var(--inset); border-bottom: 1px solid var(--line-soft); }
   .frow .l { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
   .frow .l b { font: var(--c-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .frow .l span { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .frow .c { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
   .frow .s { display: flex; justify-content: flex-end; }
-  .frow.off .l b, .frow.off .c { opacity: .5; }
+  /* Off: the value dims, the setting's name stays readable — it is what the admin reads to switch it back on (review 16 Oct). */
+  .frow.off .l b { color: var(--ink-muted); } .frow.off .c { opacity: .5; }
   .tw { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; align-items: center; padding: 10px var(--inset); border-bottom: 1px solid var(--line-soft); }
   .tw .l { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
   .tw .l b { font: var(--c-strong); white-space: nowrap; }
@@ -107,7 +116,7 @@
   .tw .dy:focus-visible { outline: 2px solid var(--brand-vivid); outline-offset: 1px; }
   .tw .rg, .tw .vl { display: flex; align-items: center; gap: 6px; } .tw .rg .num-in { min-width: 68px; }
   
-  .tw.off .l b, .tw.off .ctl { opacity: .55; }
+  .tw.off .l b { color: var(--ink-muted); } .tw.off .ctl { opacity: .55; }
   .num-in { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; height: 30px; padding: 0 8px; border-radius: var(--r-ctl); box-shadow: inset 0 0 0 1px var(--line-control); background: var(--surface); font: 500 13px/18px var(--mono); white-space: nowrap; min-width: 84px; }
   .num-in span { color: var(--ink-faint); font-family: var(--font); }
   .num-in.p { min-width: 64px; } .num-in.dis { background: var(--surface-alt); color: var(--ink-faint); box-shadow: inset 0 0 0 1px var(--line-soft); }
@@ -175,7 +184,7 @@
           <div><span class="car s" id="w2"></span>Վարորդի հավելված՝ մեքենա</div>
           <div><span class="car s" id="w3"></span>Պատվերի և վարորդի քարտեր</div>
         </div>
-        <div style="margin:auto var(--inset) var(--inset)"><div class="notice neutral"><i data-lucide="info"></i><span>Նոր նկարը ուղևորը կտեսնի հավելվածը նորից բացելիս</span></div></div>
+        <div style="margin:auto var(--inset) var(--inset)"><div class="notice neutral"><i data-lucide="info"></i><span>Նոր նկարն ուղևորը կտեսնի հավելվածը նորից բացելիս</span></div></div>
       </aside>
     </div>
     <div class="content ed" id="ed" hidden></div>
@@ -225,8 +234,8 @@
     const T = TIERS.find((t) => kidOf(t) === (TID || 'comfort') || t.id === TID) || TIERS[1]
     const K = kidOf(T), sec = SEC || 'price', R = tierRules(T.id)
     const sw = (on, label) => `<span class="switch${on ? ' on' : ''}" role="switch" aria-checked="${on}" aria-label="${label}"><i class="t"></i>${on ? 'Միաց.' : 'Անջ.'}</span>`
-    const n = (v, u, cls) => `<span class="num-in${cls ? ' ' + cls : ''}">${v}${u ? `<span>${u}</span>` : ''}</span>`
-    const row = (b, hint, ctl, on, label) => `<div class="frow${on === false ? ' off' : ''}"><span class="l"><b>${b}</b>${hint ? `<span>${hint}</span>` : ''}</span><span class="c">${ctl}</span><span class="s">${on === undefined ? '' : sw(on, label || b)}</span></div>`
+    const n = (v, u, cls) => `<span class="num-in${cls ? ' ' + cls : ''}"${cls === 'dis' ? ' aria-disabled="true"' : ''}>${v}${u ? `<span>${u}</span>` : ''}</span>`
+    const row = (b, hint, ctl, on, label) => `<div class="frow${on === false ? ' off' : ''}"><span class="l"><b>${b}</b>${hint ? `<span>${hint}</span>` : ''}</span><span class="c"${on === false ? ' aria-disabled="true"' : ''}>${ctl}</span><span class="s">${on === undefined ? '' : sw(on, label || b)}</span></div>`
     const seg = (opts, on, label) => `<div class="seg sm" role="radiogroup" aria-label="${label}">${opts.map((o, i) => `<button role="radio" aria-checked="${i === on}" class="${i === on ? 'on' : ''}">${o}</button>`).join('')}</div>`
     const chk = (label, on) => `<span class="check${on ? ' on' : ''}" role="checkbox" aria-checked="${on}"><i class="b"></i>${label}</span>`
     const sh = (h, sub, end) => `<div class="sh"><h3>${h}</h3>${sub ? `<span class="sub">${sub}</span>` : ''}${end ? `<span class="end">${end}</span>` : ''}</div>`
@@ -241,21 +250,32 @@
     const comOf = (x) => Math.min(COMM[4], Math.max(COMM[3], Math.round(x * COMM[1] / 100) + COMM[2]))
     const comTxt = (c) => (c[0] === 1 ? amd(c[2]) : c[0] === 2 ? `${c[1]} % + ${amd(c[2])}` : `${c[1]} %`)
     const tabs = [['price', 'Գին', 'banknote'], ['preorder', 'Նախնական պատվեր', 'calendar-clock'], ['time', 'Ժամային գներ', 'moon-star'], ['commission', 'Միջնորդավճար', 'percent'], ['other', 'Այլ', 'sliders-horizontal']]
+    /* Company commentary shown to riders in the rider app's fare details (owner 2026-10-16). Per tariff, plain text, 200 characters.
+       The Eco City text is the same string rider-book's fare sheet draws. ?cm=empty (nothing written) | max (at the limit). */
+    const CM = { city: 'Հիբրիդ մեքենաներ՝ մինչև 4 ուղևոր։ Առաջին 3 րոպե սպասումն անվճար է։', comfort: 'Հարմարավետ սեդաններ՝ մինչև 4 ուղևոր։ Մեքենայում կարելի է լիցքավորել հեռախոսը։', kids: 'Մանկական նստոցը ներառված է գնում։ Վարորդը սպասում է, մինչև երեխան ամրակապվի։', business: 'Բիզնես դասի մեքենա և ներկայացուցչական վարորդ։ Ջուր՝ ճանապարհին։', van: 'Մինչև 7 ուղևոր՝ ընտանիքի կամ խմբի համար։ Մեծ ուղեբեռի համար գինը ավելանում է։', vip: 'Գերազանց դասի մեքենա։ Վարորդը դիմավորում է դռան մոտ։' }
+    const CMX = QS.get('cm'), MAXTXT = 'Հիբրիդ մեքենաներ՝ մինչև 4 ուղևոր։ Առաջին 3 րոպե սպասումն անվճար է։ Մեծ ուղեբեռ՝ 300 ֏, կենդանի՝ 500 ֏, լրացուցիչ կանգառ՝ 200 ֏։ Եթե վարորդը ուշանում է 5 րոպեից ավելի, գինը չի փոխվում, դուք կարող եք չեղարկել անվճար։ Շնորհակալ ենք, որ ընտրում եք մեզ։'.slice(0, 200)
+    const cmv = CMX === 'empty' ? '' : CMX === 'max' ? MAXTXT : CM[K]
+    const cmtBlock = `<div class="cmt"><label for="cmtx" class="visually-hidden" style="position:absolute;left:-9999px">Մեկնաբանություն ուղևորների համար</label>
+        <textarea id="cmtx" maxlength="200" rows="3" placeholder="օր. Հիբրիդ մեքենաներ՝ մինչև 4 ուղևոր։ Առաջին 3 րոպե սպասումն անվճար է։" aria-describedby="cmtc"${CMX ? ' class="focus"' : ''}>${cmv}</textarea>
+        <div class="cnt" id="cmtc"><span>${cmv ? 'Երևում է բոլոր ուղևորներին' : 'Դատարկ է՝ հավելվածում բաժին չի երևա'}</span><span class="num${cmv.length >= 200 ? ' max' : ''}">${cmv.length} / 200</span></div>
+        <div class="pv${cmv ? '' : ' none'}" aria-live="polite"><i data-lucide="info"></i><span><small>Ուղևորը կտեսնի</small>${cmv || 'Մեկնաբանություն չկա'}</span></div></div>`
     let body = ''
     if (sec === 'price') {
       body = sh('Գնի բաղադրիչներ', 'ամեն մեկն առանձին է միանում · կլորացում 100 ֏')
         + row('Նստելու գին', 'պատվերի սկզբում', n(nf(T.base), '֏'), true)
-        + row('Նվազագույն գին', 'եթե հաշվարկը ավելի քիչ է', n(nf(T.floor), '֏'), true)
+        + row('Նվազագույն գին', 'եթե հաշվարկն ավելի քիչ է', n(nf(T.floor), '֏'), true)
         + row('Կիլոմետր', 'ըստ միջակայքերի՝ ներքևում', n(T.km, '֏/կմ'), true)
         + row('Րոպե ճանապարհին', 'երթևեկության ժամանակ', n(T.min, '֏/ր'), true)
         + row('Անվճար սպասում', 'վարորդի տեղ հասնելուց', n(3, 'ր'), true)
         + row('Վճարովի սպասում', 'անվճարից հետո', n(50, '֏/ր'), true)
         + row('Ֆիքսված վճար', 'ամեն պատվերին, օր. ամրագրում', n('—', '֏', 'dis'), false)
+        + sh('Մեկնաբանություն ուղևորների համար', 'երևում է հավելվածում՝ «Գնի մանրամասներ»-ում')
+        + cmtBlock
         + sh('Հեռավորության միջակայքեր', 'երկար ճանապարհին՝ էժան', `${sw(true, 'Միջակայքեր')}<button class="btn ghost s"><i data-lucide="plus"></i>Միջակայք</button>`)
         + `<table class="tbl br"><colgroup><col><col style="width:120px"><col style="width:120px"><col style="width:140px"><col style="width:56px"></colgroup>
             <thead><tr><th>Միջակայք</th><th class="r">Սկսած</th><th class="r">Մինչև</th><th class="r">Կմ գին</th><th></th></tr></thead><tbody>
             ${[['Քաղաքային', 0, 10, T.km], ['Միջին', 10, 30, Math.round(T.km * .86)], ['Հեռու', 30, null, Math.round(T.km * .73)]].map(([nm, a, b, k]) => `<tr><td class="t">${nm}</td><td class="r">${a} կմ</td><td class="r">${b === null ? '∞' : b + ' կմ'}</td><td class="r">${n(k, '֏/կմ')}</td><td class="r"><button class="btn ghost icon s" aria-label="Հեռացնել միջակայքը ${nm}"><i data-lucide="x"></i></button></td></tr>`).join('')}</tbody></table>`
-        + sh('Լրացուցիչ վճարներ', 'ուղևորը կամ դիսպետչերը ավելացնում է', '<button class="btn ghost s"><i data-lucide="plus"></i>Վճար</button>')
+        + sh('Լրացուցիչ վճարներ', 'ուղևորը կամ դիսպետչերն ավելացնում է', '<button class="btn ghost s"><i data-lucide="plus"></i>Վճար</button>')
         + row('Մեծ ուղեբեռ', 'ուղևորն ընտրում է', n(300, '֏'), true)
         + row('Կենդանի', 'ուղևորն ընտրում է', n(500, '֏'), true)
         + row('Լրացուցիչ կանգառ', 'յուրաքանչյուրի համար', n(200, '֏'), true)
@@ -264,8 +284,8 @@
       const on = tierPre(T.id)
       body = sh('Նախնական պատվեր', on ? 'ժամին ավտոմատ որոնում այս սակագնի վարորդների մեջ' : 'այս սակագինը միայն «Հիմա»', sw(on, 'Նախնական պատվեր'))
         + `<div${on ? '' : ' style="opacity:.5"'}>`
-        + row('Նվազագույնը առաջ', 'ամենաշուտը՝ հիմիկվանից', n(30, 'ր'))
-        + row('Առավելագույնը առաջ', 'ամենաուշը', n(7, 'օր'))
+        + row('Նվազագույնն առաջ', 'ամենաշուտը՝ այս պահից', n(30, 'ր'))
+        + row('Առավելագույնն առաջ', 'ամենաուշը', n(7, 'օր'))
         + row('Հավելավճար', 'նախնական պատվերի համար', `${seg(['Ֆիքսված', '%'], 0, 'Հավելավճարի տեսակ')}${n(200, '֏')}`, true)
         + row('Որոնումը սկսվում է', 'նստելու ժամից առաջ', n(15, 'ր'))
         + row('Նշանակում', 'ով է ստանում պատվերը', seg(['Նշանակվածը, հետո ավտոմատ', 'Ավտոմատ', 'Դիսպետչեր'], 0, 'Նշանակում'))
@@ -278,7 +298,7 @@
     } else if (sec === 'time') {
       const D = ['Երկ', 'Երք', 'Չրք', 'Հնգ', 'Ուրբ', 'Շբթ', 'Կիր']
       const days = (on) => `<span class="dys" role="group" aria-label="Շաբաթվա օրեր">${D.map((d, i) => `<span class="dy${on.includes(i) ? ' on' : ''}" role="checkbox" tabindex="0" aria-checked="${on.includes(i)}">${d}</span>`).join('')}</span>`
-      const win = (nm, hint, d, a, b, kind, v, on) => `<div class="tw${on ? '' : ' off'}"><span class="l"><b>${nm}</b><span>${hint}</span></span><span class="s">${sw(on, nm)}</span><span class="ctl">${days(d)}<span class="rg">${n(a, '')}<span class="x">–</span>${n(b, '')}</span><span class="vl">${seg(['%', '֏'], kind, 'Հավելավճարի տեսակ ' + nm)}${kind === 0 ? n('+' + v, '%', 'p') : n('+' + nf(v), '֏')}</span></span></div>`
+      const win = (nm, hint, d, a, b, kind, v, on) => `<div class="tw${on ? '' : ' off'}"><span class="l"><b>${nm}</b><span>${hint}</span></span><span class="s">${sw(on, nm)}</span><span class="ctl"${on ? '' : ' aria-disabled="true"'}>${days(d)}<span class="rg">${n(a, '')}<span class="x">–</span>${n(b, '')}</span><span class="vl">${seg(['%', '֏'], kind, 'Հավելավճարի տեսակ ' + nm)}${kind === 0 ? n('+' + v, '%', 'p') : n('+' + nf(v), '֏')}</span></span></div>`
       body = sh('Ժամային գներ', 'ըստ ժամի և շաբաթվա օրվա · Երևանի ժամանակով', '<button class="btn ghost s"><i data-lucide="plus"></i>Ժամանակահատված</button>')
         + win('Գիշերային', 'ամեն օր', [0, 1, 2, 3, 4, 5, 6], '23:00', '06:00', 0, 15, true)
         + win('Սրընթաց ժամ', 'աշխատանքային օրեր, առավոտյան', [0, 1, 2, 3, 4], '08:00', '10:00', 0, 10, true)
@@ -307,7 +327,7 @@
             return `<tr${t === T ? ' class="on"' : ''}><td><a href="tariffs.html?theme=${THEME}&t=${kidOf(t)}&sec=commission" style="color:inherit;text-decoration:none">${t.name}</a></td><td class="r">${comTxt(c)}</td><td class="r">${s2}</td></tr>` }).join('')}</tbody></table>`
     } else {
       body = sh('Վճարման եղանակներ')
-        + `<div style="padding:4px var(--inset) 12px" class="chips">${chk('Կանխիկ', true)}${chk('Քարտ', true)}${chk('Ընկերության հաշիվ', true)}${chk('Պրոմոկոդ', true)}</div>`
+        + `<div style="padding:4px var(--inset) 12px" class="chips">${chk('Կանխիկ', true)}${chk('Քարտ', true)}${chk('Apple Pay', true)}${chk('Google Pay', true)}${chk('NFC · POS', true)}${chk('Ընկերության հաշիվ', true)}${chk('Պրոմոկոդ', true)}</div>`
         + sh('Չեղարկում')
         + row('Ուղևորի չեղարկման վճար', 'վարորդը նշանակվելուց հետո', `${n(2, 'ր')}<span class="x">հետո</span>${n(300, '֏')}`, true)
         + row('Ուղևորը չեկավ', 'անվճար սպասումից հետո', n(500, '֏'), true)
@@ -329,17 +349,17 @@
       ['ctr', 'Կենտրոն · րոպե', '18 ֏/ր', 'ժ. 17:00–20:00 · նստեցում'],
       ['ctr', 'Կենտրոն → Զվարթնոց', K === 'comfort' ? '4 500 ֏' : 'ֆիքսված', 'գոտուց գոտի · ֆիքսված գին']]
     ed.innerHTML = `
-      <section class="card tl" aria-label="Սակագներ"><div class="card-h"><h2>Սակագներ</h2><span class="end"><a class="btn ghost s" href="tariffs.html?theme=${THEME}">Բոլորը</a></span></div>
+      <section class="card tl" aria-label="Սակագներ" data-truncate><div class="card-h"><h2>Սակագներ</h2><span class="end"><a class="btn ghost s" href="tariffs.html?theme=${THEME}">Բոլորը</a></span></div>
         ${TIERS.map((t) => `<a class="ti${t === T ? ' on' : ''}" href="tariffs.html?theme=${THEME}&t=${kidOf(t)}&sec=${sec}"><span class="car">${carImg(t.id)}</span><b>${t.name}</b><span class="faint mono">${nf(t.base)}</span></a>`).join('')}</section>
       <section class="card edc" aria-label="${T.name} կարգավորումներ">
         <div class="card-h"><span class="car">${carImg(T.id)}</span><h2>${T.name}</h2><span class="sub">գործում է <span class="num">09.10.2026</span>-ից</span>
           <button class="btn secondary s tpick" aria-label="Ընտրել սակագին">${T.name}<i data-lucide="chevrons-up-down"></i></button>
-          <span class="end">${sec === 'commission' ? '<span class="pill warn"><i data-lucide="pencil"></i>Չպահված</span>' : ''}<button class="btn ghost s">Չեղարկել</button><button class="btn primary s">Պահել՝ 16.10-ից</button></span></div>
+          <span class="end">${sec === 'commission' || (sec === 'price' && CMX) ? '<span class="pill warn"><i data-lucide="pencil"></i>Չպահված</span>' : ''}<button class="btn ghost s">Չեղարկել</button><button class="btn primary s">Պահել՝ 16.10-ից</button></span></div>
         <nav class="tabsl" aria-label="Բաժիններ">${tabs.map(([id, l, ic]) => `<a class="${id === sec ? 'on' : ''}" href="tariffs.html?theme=${THEME}&t=${K}&sec=${id}"><i data-lucide="${ic}"></i>${l}</a>`).join('')}</nav>
-        <div class="scroll-y grow">${body}<div style="height:16px"></div></div>
+        <div class="scroll-y grow" data-truncate>${body}<div style="height:16px"></div></div>
         <div class="edf2"><i data-lucide="info"></i>Նոր գինը գործում է նշված օրվանից · ընթացիկ և նախնական պատվերները պահում են իրենց գինը</div>
       </section>
-      <aside class="col">
+      <aside class="col" data-truncate>
         <section class="card"><div class="card-h"><h2>Գնի օրինակ</h2><span class="sub">2,1 կմ · 4 ր</span></div>
           <div class="split" style="padding-top:10px;padding-bottom:12px">
             <span>Նստելու գին</span><span>${amd(T.base)}</span>

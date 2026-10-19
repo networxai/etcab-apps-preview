@@ -50,7 +50,7 @@
       <div class="dropz"><i data-lucide="upload"></i>Քաշեք ֆայլն այստեղ կամ <u>ընտրեք</u></div></div>`)
   }
   if (tab === 'rides') {
-    add(`${blockedNote}<div class="blk" style="margin-bottom:12px"><h3><i data-lucide="list"></i>Պատվերներ<span class="end faint num" style="font-weight:400">10.10 · 3 պատվեր · միջնորդավճար 1 110 ֏</span></h3>
+    add(`${blockedNote}<div class="blk" style="margin-bottom:12px"><h3 style="flex-wrap:wrap"><i data-lucide="list"></i>Պատվերներ<span class="end faint num" style="font-weight:400">10.10 · 3 պատվեր · միջնորդավճար 1 110 ֏</span></h3>
       <table class="lt"><colgroup><col class="w"><col><col class="a"><col class="f"></colgroup><thead><tr><th>Ժամը</th><th>Երթուղի</th><th class="n">Գին</th><th class="n">Միջնորդավճար</th></tr></thead><tbody>
       ${[['19:02', 'Աբովյան 12 → Երևան Մոլ', '#R-20288 · Կանխիկ', 2400, -360], ['18:40', 'Պուշկինի 15 → Նալբանդյան 50', '#R-20281 · Կանխիկ · հաշվեկշիռը 0-ից ցածր', 1900, -285], ['17:55', 'Կոմիտաս 49 → Զվարթնոց', '#R-20270 · ' + ECO.COMPANY.short, 3100, -465], ['13:58', 'Աբովյան 12 → Երևան Մոլ', '#R-20409 · Կանխիկ', 1900, -285]]
         .map(([t, r, s, f, fee]) => `<tr><td class="mono">${t}</td><td>${r}<small class="mono">${s}</small></td><td class="n mono">${amd(f)}</td><td class="n mono">${amd(fee)}</td></tr>`).join('')}

@@ -129,11 +129,11 @@
       /* Owner #5: an expired document blocks orders until a new one is uploaded AND approved. The dispatcher reads the
          new date off the photo, types it, and approves; «Մերժել» asks for a reason the driver sees in the app. */
       detail.innerHTML = `<div class="hd"><span class="k"><i data-lucide="shield-alert"></i>Ապահովագրություն · նոր լուսանկար · ${V.uploaded}</span><h2>${V.name}</h2><div class="meta"><span class="mono">091 77-31-08</span>·<span>Ավտոպարկի վարորդ</span>·<span class="plate">55 SM 620</span></div></div>
-        <div class="blk"><h3>Ապահովագրություն (ԱՊՊԱ)<span class="end pill warn" style="height:20px"><i data-lucide="lock"></i>Պատվերները դադարեցված են</span></h3>
+        <div class="blk"><h3>Ապահովագրություն (ԱՊՊԱ)<span class="end pill warn" style="height:20px"><i data-lucide="lock"></i>Պատվերները կանգնած են</span></h3>
           <div class="docpair"><figure class="old"><div class="ph"><i data-lucide="file-x"></i></div><figcaption><b>Հինը</b>Ժամկետանց՝ ${V.expired}</figcaption></figure>
             <figure><div class="ph"><i data-lucide="file-image"></i></div><figcaption><b>Նոր լուսանկար</b>Ուղարկվեց այսօր՝ ${V.uploaded}</figcaption></figure></div>
           <div style="margin-top:12px"><label class="label">Վավեր է մինչև</label><div class="input focus" style="width:180px"><i data-lucide="calendar"></i><span class="val mono">05.10.2027</span></div></div></div>
-        <div class="blk"><h3>Պատմություն</h3><ul class="tl2"><li><span class="mono">05.10</span><span>Ժամկետը լրացավ · պատվերները դադարեցվեցին</span></li><li><span class="mono">${V.uploaded}</span><span>Վարորդը ուղարկեց նոր լուսանկար</span></li></ul></div>
+        <div class="blk"><h3>Պատմություն</h3><ul class="tl2"><li><span class="mono">05.10</span><span>Ժամկետը լրացավ · պատվերները դադարեցվեցին</span></li><li><span class="mono">${V.uploaded}</span><span>Վարորդն ուղարկեց նոր լուսանկար</span></li></ul></div>
         <div class="acts2"><div class="notice amber"><i data-lucide="lock"></i><span>Պատվերներ չի ստանա, մինչև չհաստատեք</span></div>
           <button class="btn primary"><i data-lucide="check"></i>Հաստատել</button><button class="btn secondary">Մերժել</button><a class="btn ghost" href="drivers.html?theme=${THEME}">Վարորդի քարտը<i data-lucide="arrow-right"></i></a></div>`
     } else if (ITEM === 'bl') {

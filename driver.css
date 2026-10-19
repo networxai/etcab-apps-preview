@@ -263,8 +263,8 @@
 /* Countdown: seconds, unit inline («9 վրկ»), drains the accept window. Warn tone from 5 s (real app: Ring tone='warn'). */
 .oring { position: relative; width: 96px; height: 96px; flex: none; }
 .oring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
-.oring .in { position: absolute; inset: 0; display: flex; align-items: baseline; justify-content: center; gap: 3px; padding-top: 30px; white-space: nowrap; }
-.oring .sec { font: 600 30px/34px var(--font); color: var(--ink); font-variant-numeric: tabular-nums; }
+.oring .in { position: absolute; inset: 0; display: flex; align-items: baseline; justify-content: center; gap: 3px; padding-top: 29px; white-space: nowrap; }
+.oring .sec { font: 600 30px/36px var(--font); color: var(--ink); font-variant-numeric: tabular-nums; }
 .oring .u { font: var(--t-secondary-strong); color: var(--ink-2); }
 .oring .gl { padding-top: 0; align-items: center; }
 .oring .gl svg { position: static; transform: none; width: 32px; height: 32px; color: var(--ink-2); }

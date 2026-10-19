@@ -43,7 +43,7 @@
   .ios { position: absolute; inset: 0; background: radial-gradient(120% 80% at 30% 10%, #2c3a2a 0%, #141816 55%, #0b0c0b 100%); color: #fff; }
   .ios .clk { position: absolute; top: 96px; left: 0; right: 0; text-align: center; }
   .ios .clk .d { font: 600 17px/22px var(--font); color: rgb(255 255 255 / .86); }
-  .ios .clk .t { font: 300 92px/1 var(--font); letter-spacing: -2px; font-variant-numeric: tabular-nums; margin-top: 14px; }
+  .ios .clk .t { font: 300 92px/112px var(--font); letter-spacing: -2px; font-variant-numeric: tabular-nums; margin-top: 4px; }
   .ios .ntf { position: absolute; top: 300px; left: 12px; right: 12px; border-radius: 22px; padding: 12px 14px 14px; background: rgb(245 245 245 / .9); color: #111113; box-shadow: 0 8px 24px rgb(0 0 0 / .3); }
   .ios .ntf .h { display: flex; align-items: center; gap: 8px; font: 500 13px/18px var(--font); color: #3c3c43; }
   .ios .ntf .h img { width: 20px; height: 20px; border-radius: 5px; }
@@ -81,7 +81,7 @@
      are charged by the app («Անկանխիկ», nothing to collect); NFC · POS is taken at the end in the ACBA app on the driver's phone, the driver confirms (+2 % fee; fleet cars only, owner 2026-10-16). D.offer draws ECO.PAY's
      plain label, so the chip is rewritten here after render. */
   const PAYCHIP = {
-    card: { icon: 'credit-card', text: 'Քարտ · վճարված հավելվածով' },
+    card: { icon: 'credit-card', text: 'Քարտ · հավելվածով, ավարտին' }, /* the card is charged when the ride ends, not before: never «վճարված» on an offer */
     nfc: { icon: 'smartphone-nfc', text: 'NFC · POS · ավարտին' },
   }
   /* fixed: a zone-to-zone price (ECO.BOOKINGS.bag, Կենտրոն → Զվարթնոց, 4 500 ֏). The fare is set, not estimated, and the
@@ -89,7 +89,7 @@
   const BG = ECO.BOOKINGS.bag
   const fixed = { no: '2431', tier: BG.tier, pickup: BG.pickup, pickupNote: 'Կենտրոն', drop: 'Զվարթնոց օդանավակայան', dropNote: 'Օդանավակայանի գոտի',
     approachMin: 3, approachKm: 0.9, km: BG.km, min: 19, fare: BG.fare, pay: BG.pay }
-  const ios = `<div class="ios" role="img" aria-label="Կողպված էկրան, ժամանակազգայուն ծանուցում">
+  const ios = `<div class="ios" data-bg="#2C392A" role="img" aria-label="Կողպված էկրան, ժամանակազգայուն ծանուցում">
       <div class="clk"><div class="d">Ուրբաթ, 9 հոկտեմբերի</div><div class="t">9:41</div></div>
       <div class="ntf" role="alert"><div class="h"><img src="assets/eco/mark.png" alt="">Eco Taxi<span class="ts"><i data-lucide="clock-alert"></i>Ժամանակազգայուն</span></div>
         <div class="t1">Նոր պատվեր · ${ECO.amd(R.fare)}</div><div class="t2">${R.pickup} · ${R.approachMin} րոպե · ${ECO.km(R.approachKm)}</div></div>
@@ -125,7 +125,7 @@
   /* ECO.BOOKINGS.air is a fixed zone-to-zone fare (B.fixed): the pre-order offers say «Ֆիքսված» beside the tier. */
   if ((st === 'preorder-now' || st === 'preorder-any') && B.fixed) s.querySelector('.offer .tags .chip').innerHTML = '<i data-lucide="lock"></i>' + B.tier + ' · ֆիքսված', icons()
   if (PAYCHIP[st]) { const c = s.querySelector('.offer .tags .chip:last-child'); c.innerHTML = `<i data-lucide="${PAYCHIP[st].icon}"></i>${PAYCHIP[st].text}`; if (st === 'card') c.classList.add('co'); icons() }
-  if (st === 'lock-ios') D.noMap()
+  if (st === 'lock-ios') { D.noMap(); const sb = document.querySelector('.statusbar'); if (sb) sb.dataset.bg = '#2C392A' } /* white system bar on the dark wallpaper, not on the map */
   else if (st === 'preorder-now' || st === 'preorder-any' || st === 'fixed') {
     /* Trip geometry: DROUTES.air (Բաղրամյան 24 → Զվարթնոց) stands in for Կոմիտասի 22 → Զվարթնոց; the approach is a short
        dashed run into its start. */

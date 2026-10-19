@@ -228,7 +228,7 @@
     const R = { id: '20361', a: 'Հալաբյան 41', b: 'Ամիրյան 9', t: '11:30', ph: '041 33-21-90', src: 'Հավելվածից', tier: 'business', tierName: 'Eco Business',
       drv: 'Նարեկ Հովհաննիսյան', pl: '07 AB 913', dph: '094 22-10-35', fare: 2400, fee: 0, pay: 'cash', from: 'nfc', swAt: '11:52' }
     select(R.id); setHead(R); price(R)
-    paySec(R, `<dl class="kv" style="margin-bottom:8px"><dt>Պատճառ</dt><dd>NFC-ը չստացվեց · վարորդը վերցրեց կանխիկ</dd></dl>`
+    paySec(R, `<dl class="kv" style="margin-bottom:8px"><dt>Պատճառ</dt><dd>NFC-ն չստացվեց · վարորդը վերցրեց կանխիկ</dd></dl>`
       + et('scroll-text', 'ՊԵԿ կտրոն', P('', 'clock', 'Սպասում է'), 'ETAPI-ի 24 ժ պահում · կանխիկի պես')
       + et('wallet', 'Idram՝ վարորդին', '<span class="faint" style="font:var(--c-small)">—</span>', 'Կանխիկ · վարորդը գումարը ստացել է ուղևորից'))
     doneActs()

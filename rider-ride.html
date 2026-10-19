@@ -367,20 +367,23 @@
           htmlMarker(m, PICK, '<div class="pin-a"></div>', [18, 18])
           htmlMarker(m, k.ll, `<div style="filter:grayscale(1);opacity:.55">${carTop(k.deg)}</div>`, [18, 34])
         } },
-      { id: 'destchanged', group: 'Interrupted and variants', label: 'Destination changed', note: 'R55, drawn ahead (the rider gets no event for an operator edit today): the dispatcher moved the drop-off at the rider\'s request by phone. A neutral Notice says who changed what; the fixed price is re-quoted and the old one is shown struck, so nobody is surprised at the end (new strings)',
+      { id: 'destchanged', group: 'Interrupted and variants', label: 'Destination changed', note: 'R55, drawn ahead (the rider gets no event for an operator edit today): the dispatcher moved the drop-off at the rider\'s request by phone. A neutral Notice says who changed what; the fixed fare is re-quoted and the old one is shown struck, so nobody is surprised at the end (new strings). The same edit as driver-ride#destchanged: Կոմիտասի պող. 8, earlier on the same street, 1 100 → 1 000 ֏, arriving 9:50',
         time: RD.riding.clock, html: () => `<div class="map" id="map" aria-label="Քարտեզ"></div>
           <button class="fab" style="top:62px;left:16px" aria-label="Հետ">${R.i('chevron-down')}</button>
           <button class="fab" style="top:62px;right:16px" aria-label="Անվտանգություն">${R.i('shield')}</button>
           <section class="sheet r" id="sheet"><div class="grabber"></div>
-            <div class="head2"><div><div class="eta">5 րոպե</div><div class="status">Ճանապարհին · ժամանում <b>9:52</b></div></div></div>
+            <div class="head2"><div><div class="eta">3 րոպե</div><div class="status">Ճանապարհին · ժամանում <b>9:50</b></div></div></div>
             ${notice('<b>Դիսպետչերը փոխեց նպատակակետը</b>Ձեր խնդրանքով', 'route')}
-            <div class="trip"><span class="sq"></span><span class="to"><span class="t1">Կոմիտասի պող. 28</span><span class="requote"><s>${R.amd(RD.fare)}</s><b>${R.amd(1200)}</b><span class="t2">· նոր գին</span></span></span></div>
+            <div class="trip"><span class="sq"></span><span class="to"><span class="t1">Կոմիտասի պող. 8</span><span class="requote"><s>${R.amd(RD.fare)}</s><b>${R.amd(1000)}</b><span class="t2">· նոր գին</span></span></span></div>
             <div class="mini">${R.car('city', 64, 32, '')}${R.plate(DV.plate)}<span class="nm">${DV.first}</span></div></section>`,
         map: (s) => {
-          const k = at(T, .35), rest = T.slice(k.i)
-          const m = R.map(s, { fit: rest, padTL: [56, 156], padBR: [56, s.querySelector('#sheet').offsetHeight + 56] })
+          /* The new drop is earlier on the same street (driver-ride#destchanged): the old end greys out behind a faded pin. */
+          const k = at(T, .35), e = at(T, .75), rest = T.slice(k.i, e.i + 1)
+          const m = R.map(s, { fit: T.slice(k.i), padTL: [56, 156], padBR: [56, s.querySelector('#sheet').offsetHeight + 56] })
+          drawRoute(m, T.slice(e.i), { dash: true, color: cssVar('--ink-3'), weight: 4 })
           drawRoute(m, rest, { weight: 5 })
-          htmlMarker(m, DROP, '<div class="pin-b"></div>', [18, 18])
+          htmlMarker(m, DROP, '<div class="pin-b" style="opacity:.45"></div>', [18, 18])
+          htmlMarker(m, e.ll, '<div class="pin-b"></div>', [18, 18])
           htmlMarker(m, k.ll, carTop(k.deg), [18, 34])
         } },
       { id: 'sos', group: 'In the ride', label: 'Safety (SOS)', note: 'R56, drawn ahead (no API): the riding screen\'s shield opens it. 112 is the one red action (tel:112); the alert lands at the top of console Dispatch at once (owner #2: ride, driver, live position; the dispatcher presses «Լուծված է»), and the row says so; share is the same live link as #share. Where you are and which car is said first, so it can be read out on the phone (new strings)',

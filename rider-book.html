@@ -168,6 +168,39 @@
   .tier.off .art, .tier.off .name, .tier.off .meta { opacity: .4; }
   .paylist .choice[aria-disabled="true"] .radio { opacity: .4; }
   .days .chip[aria-disabled="true"] { color: var(--ink-3); background: var(--surface-2); box-shadow: none; text-decoration: line-through; text-decoration-color: var(--ink-3); }
+  /* Fare details (owner 2026-10-16): tap the chosen tier (or its «i») → a bottom sheet with the tariff exactly as the console defines it. */
+  .tier .info { position: absolute; right: 6px; bottom: 8px; width: 22px; height: 22px; display: grid; place-items: center; color: var(--ink-2); }
+  .tier .info svg { width: 16px; height: 16px; }
+  .fdh { align-items: center; }
+  .fdh .carart { flex: none; margin-right: var(--s1); }
+  .fdh .fd-t { flex: 1; min-width: 0; }
+  .fd-price { display: flex; align-items: center; gap: var(--s3); padding: var(--s3) var(--s4); border-radius: var(--r-card); background: var(--surface-2); }
+  .fd-price > svg { width: 20px; height: 20px; flex: none; color: var(--ink); }
+  .fd-price .l { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .fd-price .l b { font: var(--t-secondary-strong); color: var(--ink); white-space: nowrap; }
+  .fd-price .l span { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; }
+  .fd-price .amt { font: var(--t-title); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .fd-g { display: grid; grid-template-columns: 1fr 1.25fr 1fr; gap: var(--s2) var(--s2); margin: var(--s3) 0 var(--s2); }
+  .fd-g div { display: flex; flex-direction: column; min-width: 0; }
+  .fd-g .k { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; }
+  .fd-g b { font: 600 15px/20px var(--font); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .fd-h { font: var(--t-secondary-strong); color: var(--ink-2); margin: var(--s3) 0 var(--s1); }
+  .fd-x { display: grid; grid-template-columns: 1fr 1fr; gap: 2px var(--s4); }
+  .fd-x div, .fd-w { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); min-height: 28px; font: var(--t-secondary); color: var(--ink); white-space: nowrap; }
+  .fd-x b, .fd-w b { font: var(--t-secondary-strong); font-variant-numeric: tabular-nums; }
+  .fd-w { min-height: 34px; padding: 0 var(--s2); margin: 0 calc(-1 * var(--s2)); border-radius: 10px; }
+  .fd-w svg { width: 16px; height: 16px; flex: none; color: var(--ink-2); }
+  .fd-w .n { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: var(--s2); }
+  .fd-w .n span { font: var(--t-caption); color: var(--ink-2); }
+  .fd-w.now { background: var(--brand-soft); color: var(--brand-ink); }
+  .fd-w.now svg, .fd-w.now .n span { color: var(--brand-ink); }
+  .fd-w .tag-now { font: var(--t-caption); height: 20px; line-height: 20px; padding: 0 var(--s2); border-radius: var(--r-pill); background: var(--brand); color: #fff; }
+  .fd-n { display: flex; align-items: flex-start; gap: var(--s2); margin-top: var(--s3); font: var(--t-secondary); color: var(--ink-2); }
+  .fd-n svg { width: 16px; height: 16px; flex: none; margin-top: 1px; }
+  .fd-cm { display: flex; align-items: flex-start; gap: var(--s2); margin-top: var(--s3); padding: var(--s3); border-radius: var(--r-card); background: var(--surface-2); font: var(--t-secondary); color: var(--ink); }
+  .fd-cm svg { width: 16px; height: 16px; flex: none; margin-top: 1px; color: var(--ink-2); }
+  .fd-zone { display: flex; align-items: flex-start; gap: var(--s2); margin-top: var(--s2); font: var(--t-secondary); color: var(--ink); }
+  .fd-zone svg { width: 16px; height: 16px; flex: none; margin-top: 1px; color: var(--ink-2); }
 </style>
 </head>
 <body>
@@ -238,13 +271,13 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
   /* sel: the chosen tier (default the first). promo: { fare, off, pay } on the chosen tier (cash). pay: the method, for the card fee. */
   const tiers = (trip, mode, later, promo, sel, pay) => `<div class="tiers" role="radiogroup" aria-label="Սակագին">${TIERS.filter(([, n]) => !later || preOk(n)).map(([k, n, eta, seats], i) => {
     const on = sel ? k === sel : !i, off = offTier(k, trip)
-    return `<button class="tier ${on ? 'on' : ''}${off ? ' off' : ''}" role="radio" aria-checked="${on}"${off ? ` aria-disabled="true" aria-label="${n}, օդանավակայանից չի սպասարկվում"` : ''} ${i >= 3 ? 'data-peek' : ''}>
-      ${on ? `<span class="tick" aria-hidden="true">${R.i('check')}</span>` : ''}
+    return `<button class="tier ${on ? 'on' : ''}${off ? ' off' : ''}" role="radio" aria-checked="${on}"${on ? ' aria-haspopup="dialog"' : ''}${off ? ` aria-disabled="true" aria-label="${n}, օդանավակայանից չի սպասարկվում"` : ''} ${i >= 3 ? 'data-peek' : ''}>
+      ${on ? `<span class="tick" aria-hidden="true">${R.i('check')}</span><span class="info" aria-hidden="true">${R.i('info')}</span>` : ''}
       <span class="art">${k === 'kids' ? carImg('city') + `<span class="seat" role="img" aria-label="Մանկական նստոցով">${R.i('baby')}</span>` : carImg(k)}</span><span class="name">${n}</span>
       <span class="meta"><span aria-label="Մեքենան՝ ${eta} րոպեում">${R.i('car-front')}${eta} ր</span><span>${R.i('user-round')}${seats}</span></span>
       ${promo && on ? `<span class="was">${R.amd(promo.fare)}</span><span class="price">${R.amd(promo.pay)}</span>` : tierPrice(k, trip, mode, pay)}</button>` }).join('')}</div>`
   /* R31: for a later ride the order button carries the time instead of the tier (the tier is the ringed card above it):
-     «Պատվիրել · Վաղը, 08:30 · 5 000 ֏» (book.scheduleOrder + the useWhenLabel string + the fixed price; + the fee when paid by card). */
+     «Պատվիրել · Վաղը, 08:30 · 5 000 ֏» (book.scheduleOrder + the useWhenLabel string + the fixed fare; + the fee when paid by card). */
   const TN = Object.fromEntries(TIERS.map(([k, n]) => [k, n]))
   const cta = (trip, label = 'Պատվիրել', when = null, k = 'city', pay) => `${label} · ${when || TN[k]} · ${R.amd(total(k, trip, pay))}`
   /* The price, broken down under the options (owner 2026-10-15: the service fee is its own line, before the rider orders).
@@ -294,7 +327,7 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
       ${o.why || ''}${o.lines ? fareLines(trip, o.sel, o.pay) : ''}${when || o.why ? '' : promoRow(false)}
       <button class="btn btn-brand">${cta(trip, 'Պատվիրել', when, o.sel, o.pay)}</button></section>`)
   /* The payment sheet with a quiet «+2 %» on the bank-card methods (owner 2026-10-15; page-local; NFC · POS carries it in rider.js). */
-  const payL = (sel) => R.payList(sel).replace('կգանձվի ավարտին', 'կգանձվի ավարտին · +2 %').replace('iPhone-ում', 'iPhone-ում · +2 %').replace('Android-ում', 'Android-ում · +2 %')
+  const payL = (sel) => R.payList(sel) /* the «+2 %» is in rider.js payList itself */
   /* A zone rule said once, in a neutral line with its own icon: never red, never a modal (owner 2026-10-15). */
   const zoneWhy = (icon, text) => `<div class="whennote" role="note">${R.i(icon)}${text}</div>`
   /* The order sheet with a neutral Notice above Order (book.tsx: orderError → <Notice tone="neutral">, from orderRefusalKey). */
@@ -304,6 +337,35 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
   const modal = (title, body, cls = '') => base(`<div class="scrim" aria-hidden="true"></div>
       <section class="sheet r modal ${cls}" id="sheet" role="dialog" aria-label="${title}"><div class="grabber"></div>
       <div class="mhead"><h2 class="h-title">${title}</h2><button class="xbtn" aria-label="Փակել">${R.i('x')}</button></div>${body}</section>`, false)
+
+  /* Fare details (owner 2026-10-16): the console tariff for the chosen tier, as the rider sees it before ordering. Numbers: TARIFF here
+     = console.js TIERS (base, per km, per min, floor); the rest = console Tariffs › Գին / Ժամային գներ / Սպասարկման վճար. The price is
+     the quote the rider will be held to (fixed_upfront), so the sheet says it once: «Ֆիքսված գին». */
+  const WAIT = { free: 3, paid: 50 }, EXTRAS = [['Մեծ ուղեբեռ', 300], ['Կենդանի', 500], ['Լրացուցիչ կանգառ', 200], ['Մանկական նստոց', 500]]
+  const WINDOWS = [['Գիշերային', '23:00–06:00 · ամեն օր', 'moon-star', '+15 %', 15], ['Սրընթաց ժամ', '08:00–10:00 · Երկ–Ուրբ', 'sunrise', '+10 %', 10], ['Սրընթաց ժամ', '17:30–19:30 · Երկ–Ուրբ', 'sunset', '+300 ֏', 0]]
+  /* The company's note for riders, per tariff (console Tariffs › Գին › «Մեկնաբանություն ուղևորների համար»; ≤ 200 characters). */
+  const COMMENT = { city: 'Հիբրիդ մեքենաներ՝ մինչև 4 ուղևոր։ Առաջին 3 րոպե սպասումն անվճար է։' }
+  /* o: { k: tier, win: index of the window in force (-1 none), zone: the airport pickup rule } */
+  const fareSheet = (trip, o = {}) => {
+    const k = o.k || 'city', [bs, km, mn, fl] = TARIFF[k], f = fareOf(k, trip), tr = TIERS.find((t) => t[0] === k)
+    const w = o.win == null ? -1 : o.win, amt = w >= 0 && WINDOWS[w][4] ? Math.round(f.fare * (100 + WINDOWS[w][4]) / 10000) * 100 : f.fare
+    const cell = (l, v) => `<div><span class="k">${l}</span><b>${v}</b></div>`, a = R.amd
+    const band = (n) => Math.round(km * n)
+    return base(`<div class="scrim" aria-hidden="true"></div>
+      <section class="sheet r modal" id="sheet" role="dialog" aria-label="${tr[1]}՝ գնի մանրամասներ"><div class="grabber"></div>
+      <div class="mhead fdh">${k === 'kids' ? '' : R.car(k, 72, 40, '')}<div class="fd-t"><h2 class="h-title">${tr[1]}</h2><div class="h-sub">Մինչև ${tr[3]} ուղևոր</div></div><button class="xbtn" aria-label="Փակել">${R.i('x')}</button></div>
+      <div class="fd-price" role="group" aria-label="Ֆիքսված գին">${R.i('lock')}<span class="l"><b>Ֆիքսված գին</b><span>ֆիքսվում է պատվիրելիս</span></span><span class="amt">${a(amt)}</span></div>
+      ${o.zone ? `<div class="fd-zone" role="note">${R.i('plane')}<span>Զվարթնոցից․ ${a(AIR)} օդանավակայանի վճար, նվազագույնը ${a(o.zone)}</span></div>` : ''}
+      <div class="fd-g">${cell('0–10 կմ', a(km) + '/կմ')}${cell('10–30 կմ', a(band(.86)) + '/կմ')}${cell('30 կմ-ից', a(band(.73)) + '/կմ')}
+        ${cell('Նստելու գին', a(bs))}${cell('Րոպե ճանապարհին', a(mn) + '/ր')}${cell('Նվազագույն գին', a(o.zone || fl))}
+        ${cell('Անվճար սպասում', WAIT.free + ' ր')}${cell('Վճարովի սպասում', a(WAIT.paid) + '/ր')}</div>
+      <div class="fd-h">Լրացուցիչ վճարներ</div>
+      <div class="fd-x">${EXTRAS.map(([n, v]) => `<div><span>${n}</span><b>${k === 'kids' && n === 'Մանկական նստոց' ? 'ներառված է' : '+' + a(v)}</b></div>`).join('')}</div>
+      <div class="fd-h">Ժամային գներ</div>
+      ${WINDOWS.map(([n, h, ic, v], i) => `<div class="fd-w${i === w ? ' now' : ''}">${R.i(ic)}<span class="n">${n}<span>${h}</span></span>${i === w ? '<span class="tag-now">Հիմա</span>' : ''}<b>${v}</b></div>`).join('')}
+      <div class="fd-n">${R.i('credit-card')}<span>Քարտով, Apple Pay, Google Pay, NFC՝ +2 % սպասարկման վճար։ Կանխիկ և ընկերություն՝ առանց վճարի։</span></div>
+      ${COMMENT[k] ? `<div class="fd-cm">${R.i('message-circle')}<span>${COMMENT[k]}</span></div>` : ''}</section>`, false)
+  }
 
   const drawRide = (s, tags = true, trip = TRIPS.now, o = {}) => {
     const RT = ROUTES[trip.route].pts
@@ -395,6 +457,12 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
       { id: 'pay', group: 'Sheets', label: 'Payment', note: 'Owner 2026-10-15: cash, a saved card, Apple Pay (iPhone) / Google Pay (Android), or NFC · POS (owner 2026-10-16: tap a card or phone on the driver\'s phone at the end, taken in the bank\'s ACBA app and confirmed by the driver; fleet cars only, so a quiet line under the list says it); «Ավելացնել քարտ» at the foot. Owner 2026-10-15 (final): the card, Apple Pay, Google Pay and NFC · POS rows carry a quiet «+2 %», the service fee on bank-card payments (1 100 → 1 122 ֏); cash and company have none. Drawn ahead of card processing. A company rider chooses Company / Personal on the sheet itself',
         html: () => modal('Վճարում', payL('cash')), map: (s) => drawRide(s, false) },
 
+      { id: 'fare', group: 'Fare', label: 'Fare details', note: 'Owner 2026-10-16: tapping the chosen tier again, or its «i», opens the tariff as the console defines it (Tariffs › Price, Time-based prices, Service fee): the km bands, base, per-minute, minimum, free and paid waiting, the extras, the time windows, the +2 % card fee, and the company\'s own note for riders (here Eco City\'s). It is a bottom sheet over the same dimmed map as the other sheets, closed by the X or a tap outside. Midday, so no window is in force. The price is the quote the rider is held to: «Ֆիքսված գին»',
+        time: '13:20', html: () => fareSheet(TRIPS.ride), map: (s) => drawRide(s, false, TRIPS.ride) },
+      { id: 'fare-night', group: 'Fare', label: 'Fare details · night', time: '23:41', note: 'The night window is in force: its row is tinted brand-soft with «Հիմա», and the fixed fare already carries it (1 100 ֏ + 15 % = 1 265, rounded to 100: 1 300 ֏). The other windows stay listed so the rider sees what changes at 06:00',
+        html: () => fareSheet(TRIPS.ride, { win: 0 }), map: (s) => drawRide(s, false, TRIPS.ride) },
+      { id: 'fare-airport', group: 'Fare', label: 'Fare details · airport', time: '13:20', note: 'Pickup in the Զվարթնոց zone (console Zones): one extra line says what the zone adds, +500 ֏ «Օդանավակայանի վճար», and the minimum fare cell shows the zone\'s 3 000 ֏ instead of the tariff\'s. Fixed fare = 3 000 + 500 = 3 500 ֏',
+        html: () => fareSheet(TRIPS.airHome, { zone: 3000 }), map: (s) => drawRide(s, false, TRIPS.airHome) },
       { id: 'airport', group: 'Airport', label: 'To the airport · fixed', note: 'Owner 2026-10-15, zone-to-zone: Mashtots 37 (Կենտրոն) → Զվարթնոց is a fixed 4 500 ֏ for City / Comfort; the fixed fare replaces the metered one and already includes the zone charges (the 500 ֏ drop-off charge, the Կենտրոն per-minute rule). Paid by the saved card here, so the 2 % service fee goes on top: 4 500 + 90 = 4 590 ֏, its own line (owner 2026-10-15, final). «Ֆիքսված» under the fixed cards; the other tiers are metered + the airport charge, each + 2 %',
         html: () => details(null, TRIPS.cenAir, { lines: true, pay: 'card' }), map: (s) => drawRide(s, true, TRIPS.cenAir) },
       { id: 'airport-metered', group: 'Airport', label: 'To the airport · metered', note: 'The same trip in Eco Business, which has no fixed zone fare: the metered fare (3 300 ֏), «Օդանավակայանի վճար» 500 ֏ as its own line (zones.html: a separate line on the receipt); paid in cash, so no service fee → 3 800 ֏',
@@ -452,6 +520,13 @@ ROUTES.airHome = { m: ROUTES.preAir.m, s: ROUTES.preAir.s, pts: ROUTES.preAir.pt
             <div class="meta"><span>${B.air.tier}</span>·<b>${R.amd(total('city', TRIPS.air, B.air.pay))}</b>·<span>${ECO.PAY.cash.label}</span></div></div>
           <button class="btn btn-brand">Պատրաստ է</button></section>`), map: (s) => drawRide(s, true, TRIPS.air) },
     ],
+  })
+  /* Tapping the chosen tier (or its «i») opens its fare sheet, as the app will: the airport trip opens the airport variant. */
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.tier.on')) return
+    const q = new URLSearchParams(location.search), st = q.get('state') || ''
+    q.set('state', /air/.test(st) ? 'fare-airport' : 'fare')
+    location.search = q.toString()
   })
 </script>
 </body>

@@ -68,15 +68,17 @@
   }
   /* Payment methods (owner 2026-10-15). Apple Pay shows on iPhone, Google Pay on Android — never both on one phone (UX audit
      2026-10-15, Hick's law: five rows, not six; a wallet the phone cannot use is a row that can only fail). The mock is an iPhone;
-     o.os = 'android' draws the Google Pay row instead. */
+     o.os = 'android' draws the Google Pay row instead.
+     Every method but cash carries the 2 % service fee, so the «+2 %» is on each of those rows wherever the list is drawn
+     (it was added by rider-book only, and the mid-ride sheet showed card and Apple Pay without it). */
   R.payList = (sel, o = {}) => {
     const os = o.os || (sel === 'googlepay' ? 'android' : 'ios')
     const P = ECO.PAY, row = (id, ic, t, t2, cls) => `<button class="choice" role="radio" aria-checked="${sel === id}"><span class="ico ${cls || ''}">${R.i(ic)}</span><span class="t">${t}<span class="t2">${t2}</span></span><span class="radio"></span></button>`
     const div = '<div class="divider" style="margin-left:48px"></div>'
     return `<div class="paylist" role="radiogroup" aria-label="Վճարման եղանակ">${[
       row('cash', 'banknote', P.cash.label, o.ride ? 'վարորդին՝ ավարտին' : 'վարորդին', 'cashc'),
-      row('card', 'credit-card', `${P.card.label} ·· ${P.card.last4}`, 'կգանձվի ավարտին'),
-      os === 'ios' ? row('applepay', 'smartphone', P.applepay.label, 'iPhone-ում') : row('googlepay', 'smartphone', P.googlepay.label, 'Android-ում'),
+      row('card', 'credit-card', `${P.card.label} ·· ${P.card.last4}`, 'կգանձվի ավարտին · +2 %'),
+      os === 'ios' ? row('applepay', 'smartphone', P.applepay.label, 'iPhone-ում · +2 %') : row('googlepay', 'smartphone', P.googlepay.label, 'Android-ում · +2 %'),
       row('nfc', 'smartphone-nfc', P.nfc.label, 'վարորդի հեռախոսով, ավարտին · +2 %'),
     ].join(div)}${div}<button class="choice"><span class="ico">${R.i('plus')}</span><span class="t">Ավելացնել քարտ</span></button></div><div class="paynote">${R.i('smartphone-nfc')}<span>NFC-ը վճարվում է վարորդի հեռախոսով՝ ավարտին։ Միայն Eco Taxi-ի մեքենաներով</span></div>`
   }

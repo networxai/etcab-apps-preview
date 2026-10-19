@@ -13,7 +13,7 @@
 <style>
   /* Notifications inbox (owner #4, 2026-10-14; drawn ahead: no push-history API). Parked tier: read when stopped.
      Entry: the bell on home (unread dot) and Account → Ծանուցումներ (count). Not the rider chat («Հաղորդագրություններ»).
-     One line per notification: who/what (title), one fact (body, ellipsised), time. Unread = 600 title + brand dot. */
+     One notification per row: who/what (title), one fact (body, wraps to a second line rather than being cut: the driver reads this parked, and a cut road closure is no notice at all), time. Unread = 600 title + brand dot. */
   .on-ground { background: var(--surface) !important; box-shadow: var(--e1); }
   .sect { margin: var(--s5) 0 var(--s2); justify-content: space-between; }
   .sect:first-of-type { margin-top: var(--s4); }
@@ -25,10 +25,10 @@
   .nt .ic.brand { background: var(--brand-soft); color: var(--brand-ink); }
   .nt .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
   .nt .hd { display: flex; align-items: center; gap: var(--s2); }
-  .nt .t1 { flex: 1; min-width: 0; font: var(--t-body); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nt .t1 { flex: 1; min-width: 0; font: var(--t-body); color: var(--ink); overflow-wrap: anywhere; }
   .nt.new .t1 { font-weight: 600; }
   .nt .tm { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; flex: none; }
-  .nt .t2 { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+  .nt .t2 { font: var(--t-secondary); color: var(--ink-2); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
   .nt .ud { width: 8px; height: 8px; border-radius: 50%; background: var(--brand); flex: none; }
   .readall { height: 48px; padding: 0 var(--s3); font: var(--t-body-strong); color: var(--ink); white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
   .readall svg { width: 18px; height: 18px; }
@@ -73,7 +73,7 @@
           <div class="nt new" aria-label="Նոր · Դիսպետչեր Անի, 9:30">
             <span class="ic"><i data-lucide="headset"></i></span>
             <span class="txt"><span class="hd"><span class="t1">Դիսպետչեր · Անի</span><span class="tm">9:30</span><span class="ud" aria-hidden="true"></span></span>
-              <span class="t2" data-truncate>Մաշտոցի պող. փակ է մինչև 12:00 · շրջանցեք Սայաթ-Նովայով</span></span></div>
+              <span class="t2">Մաշտոցի պող. փակ է մինչև 12:00 · շրջանցեք Սայաթ-Նովայով</span></span></div>
           <div class="nt new" aria-label="Նոր · նախնական պատվեր 10:35">
             <span class="ic brand"><i data-lucide="calendar-clock"></i></span>
             <span class="txt"><span class="hd"><span class="t1">Նախնական պատվեր · 10:35</span><span class="tm">8:52</span><span class="ud" aria-hidden="true"></span></span>
@@ -89,7 +89,7 @@
           <div class="nt">
             <span class="ic"><i data-lucide="megaphone"></i></span>
             <span class="txt"><span class="hd"><span class="t1">Նոր կանոն · 1 նոյեմբերից</span><span class="tm">18:40</span></span>
-              <span class="t2" data-truncate>Օդանավակայանում սպասումը՝ 15 րոպե անվճար</span></span></div>
+              <span class="t2">Օդանավակայանում սպասումը՝ 15 րոպե անվճար</span></span></div>
           <div class="nt">
             <span class="ic"><i data-lucide="building-2"></i></span>
             <span class="txt"><span class="hd"><span class="t1">Գրասենյակի նոր ժամեր</span><span class="tm">11:05</span></span>

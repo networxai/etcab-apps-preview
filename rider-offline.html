@@ -136,7 +136,7 @@
         html: () => `${MAP}${fabs()}${homeSheet(`<div class="locoff"><span class="ic">${R.i('map-pin-off')}</span><span class="tx"><span class="t1">Տեղորոշումն անջատված է</span><span class="t2">Նշեք հասցեն ձեռքով</span></span><button class="go">Միացնել</button></div>`, false)}`,
         map: homeMap({ noPuck: true }) },
       { id: 'notif-ask', group: 'Notifications', label: 'Ask for notifications', note: 'R09 (drawn ahead: the app calls the system prompt cold). Before the first order, one sheet says why: every ride status reaches the rider by push, and there is no SMS (§10.12). «Միացնել» then shows the system dialog; «Հետո» is honest, not hidden',
-        html: () => `${MAP}<div inert aria-hidden="true" style="display:contents">${fabs()}${homeSheet()}</div><div class="scrim" aria-hidden="true"></div>
+        html: () => `${MAP}<div inert aria-hidden="true" data-overlay style="display:contents">${fabs()}${homeSheet()}</div><div class="scrim" aria-hidden="true"></div>
           <section class="sheet r modal ask" role="dialog" aria-label="Միացրեք ծանուցումները"><div class="grabber"></div>
           <span class="art">${R.i('bell-ring')}</span><h2 class="h-title">Միացրեք ծանուցումները</h2>
           <p class="lead2">Ուղևորության մասին կիմանաք միայն ծանուցումով</p>

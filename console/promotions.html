@@ -60,7 +60,7 @@
   .ad .copy { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; color: #fff; padding: 56px 16px 14px; background: linear-gradient(180deg, rgb(0 0 0 / .02) 0%, rgb(0 0 0 / .6) 45%, rgb(0 0 0 / .82) 100%); }
   .ad .who { font: 500 13px/18px var(--font); color: rgb(255 255 255 / .86); white-space: nowrap; }
   .ad .offer { font: 600 22px/28px var(--font); color: #fff; white-space: nowrap; letter-spacing: -.1px; }
-  .ad .tag2 { position: absolute; top: 10px; left: 10px; z-index: 1; height: 22px; padding: 0 8px; border-radius: 999px; background: rgb(0 0 0 / .62); color: #fff; font: 400 12px/22px var(--font); }
+  .ad .tag2 { position: absolute; top: 10px; left: 10px; z-index: 1; height: 22px; padding: 0 8px; border-radius: 999px; background: rgb(0 0 0 / .7); color: #fff; font: 400 12px/22px var(--font); }
   .dots { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
   .dots i { width: 6px; height: 6px; border-radius: 3px; background: var(--surface-3); }
   .dots i.on { width: 18px; background: var(--ink); }
@@ -196,7 +196,7 @@
           <thead><tr><th>Կոդ</th><th>Զեղչ</th><th>Օգտագործված</th><th>Ժամկետ</th><th>Ում</th><th>Վիճակ</th></tr></thead>
           <tbody>${PR.codes.map((c) => { const pct = c.total ? Math.round(c.used / c.total * 100) : null
             return `<tr class="${c.code === SELC ? 'on' : ''} ${c.on ? '' : 'paused'}"><td><a class="nm mono" href="?theme=${THEME}&tab=codes&code=${c.code}" style="color:inherit;text-decoration:none;font-weight:600">${c.code}</a></td><td>${disc(c)}</td>
-              <td><span class="lim${pct >= 90 ? ' near' : ''}" style="display:flex;align-items:center;gap:8px"><span class="mono" style="width:96px">${ECO.num(c.used)}${c.total ? ' / ' + ECO.num(c.total) : ''}</span>${pct !== null ? `<span class="bar3 grow" role="img" aria-label="${pct} %"><i style="width:${pct}%"></i></span>` : '<span class="faint">առանց սահմանի</span>'}</span></td>
+              <td><span class="lim${pct >= 90 ? ' near' : ''}" style="display:flex;align-items:center;gap:8px"><span class="mono" style="${pct !== null ? 'width:96px' : ''}">${ECO.num(c.used)}${c.total ? ' / ' + ECO.num(c.total) : ''}</span>${pct !== null ? `<span class="bar3 grow" role="img" aria-label="${pct} %"><i style="width:${pct}%"></i></span>` : '<span class="faint">անսահման</span>'}</span></td>
               <td>${c.to ? `մինչև <span class="mono">${c.to}</span>` : '<span class="faint">անժամկետ</span>'}</td>
               <td><span class="two2" style="display:flex;flex-direction:column"><span>${c.newOnly ? 'Նոր ուղևորներ' : 'Բոլորը'}</span><span class="faint" style="font:var(--c-small)">${c.tiers ? c.tiers.map(tierName).map((n) => n.replace('Eco ', '')).join(', ') : 'Բոլոր սակագները'}</span></span></td>
               <td><span class="pill ${c.on ? 'ok' : ''}"><i class="d"></i>${c.on ? 'Միացված' : c.used >= (c.total || Infinity) ? 'Սպառված' : 'Անջատված'}</span></td></tr>` }).join('')}</tbody></table></div></section>
@@ -220,7 +220,7 @@
         <div class="scroll-y grow"><div class="tbx">
           <div class="figs"><div class="kpi"><span class="k">Հրավիրված</span><span class="v mono">${RF.total.invited}</span></div><div class="kpi"><span class="k">Գրանցվել են</span><span class="v mono">${RF.total.joined}</span></div>
             <div class="kpi"><span class="k">Ուղևորվել են</span><span class="v mono">${RF.total.rewarded}</span></div><div class="kpi"><span class="k">Զեղչ՝ ընդամենը</span><span class="v mono">${amd(RF.total.spent)}</span></div></div>
-          <section class="sec"><h3>Պայմաններ<span class="sub">գործում է նոր հրավերների համար</span></h3><div class="pad"><div class="fgrid" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+          <section class="sec"><h3>Պայմաններ<span class="sub">գործում է նոր հրավերների համար</span></h3><div class="pad"><div class="fgrid" style="grid-template-columns:repeat(4,minmax(0,1fr))" data-truncate>
             <div><label class="label">Հրավիրողը ստանում է</label><div class="input"><span class="val mono">700</span><span class="faint">֏ զեղչ</span></div><p class="hint">Հաջորդ ուղևորությանը</p></div>
             <div><label class="label">Հրավիրվածը ստանում է</label><div class="input"><span class="val mono">700</span><span class="faint">֏ զեղչ</span></div><p class="hint">Առաջին ուղևորությանը</p></div>
             <div><label class="label">Երբ</label><div class="input" style="min-width:0"><span class="val trunc">Առաջին ուղևորությունից</span><i data-lucide="chevron-down"></i></div><p class="hint">Հրավիրվածի առաջինից հետո</p></div>
@@ -238,7 +238,7 @@
           <div style="font:400 15px/22px var(--font);color:var(--ink-muted);margin-top:6px">Դուք և ընկերը՝ ${amd(RF.inviter)} զեղչ</div>
           <div style="margin-top:20px;height:56px;border-radius:14px;background:var(--surface-alt);display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:600 20px/24px var(--mono);letter-spacing:1px;color:var(--ink)">${RF.code}<i data-lucide="copy"></i></div>
           <div style="margin-top:12px;height:52px;border-radius:14px;background:var(--brand-fill);color:var(--brand-fill-ink);display:flex;align-items:center;justify-content:center;gap:8px;font:600 17px/22px var(--font)"><i data-lucide="share"></i>Կիսվել հղումով</div>
-        </div></div><span class="cap">Նույնը՝ rider-account · Հրավիրեք ընկերոջը</span></div></aside>`
+        </div></div><span class="cap">Նույնը հավելվածում՝ Հաշիվ → Հրավիրեք ընկերոջը</span></div></aside>`
   } else document.getElementById('t1').textContent = 'Գովազդներ'
   icons()
   document.documentElement.dataset.mapReady = 'none'

@@ -158,7 +158,7 @@
       <div class="dest"><i data-lucide="map-pin"></i>${promo.addr}, Երևան</div>
       <div class="pb"><button class="go"><i data-lucide="car"></i>Պատվիրել մեքենա · ≈ 7 րոպե</button><button class="q">Բացել էջը</button></div></section>`)
     /* A modal sheet: home behind it is out of reach for touch and VoiceOver/TalkBack until the sheet closes. */
-    ;[...document.getElementById('s').children].forEach((c) => { if (!c.matches('.pscrim, .psheet, .statusbar, .homebar')) c.inert = true })
+    ;[...document.getElementById('s').children].forEach((c) => { if (!c.matches('.pscrim, .psheet, .statusbar, .homebar')) { c.inert = true; c.setAttribute('data-overlay', '') } })
   }
   const plate = (no) => `<span class="plate" role="img" aria-label="Համարանիշ ${no}"><span class="eu" aria-hidden="true"><i></i><b>AM</b></span><span class="no">${no}</span></span>`
   const live = active === 'preorder'

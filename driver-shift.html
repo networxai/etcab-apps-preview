@@ -11,10 +11,10 @@
 <script src="kit.js"></script>
 <script src="driver.js"></script>
 <style>
-  /* Cash / company-account split (launch roster, ECO.PAY; no card at launch): validated with the dataviz validator (light #2F7D0A/#4F8FD8, dark #4E9A12/#4A86D0 — all checks pass;
-     dark tritan ΔE 5.0, so both segments are also direct-labelled and separated by a 2px gap). */
-  :root { --c-cash: #2F7D0A; --c-company: #4F8FD8; }
-  :root[data-theme="dark"] { --c-cash: #4E9A12; --c-company: #4A86D0; }
+  /* Cash / non-cash / company split: the same three series and colours as driver-earnings#today (owner 2026-10-15: card,
+     Apple/Google Pay and NFC · POS are live, so a two-way cash/company bar under-reported the day). One stacked bar, 2px gaps,
+     every segment direct-labelled in a row legend (three labels do not fit one Armenian line on 358 px). */
+  :root { --c-cash: var(--ink); --c-noncash: var(--ink-3); --c-company: var(--brand-vivid); }
 
   .cars { display: flex; flex-direction: column; gap: var(--s2); margin-top: var(--s5); }
   .car { display: flex; align-items: center; gap: var(--s3); height: 92px; padding: 0 var(--s4) 0 var(--s2); width: 100%; text-align: left;
@@ -58,8 +58,9 @@
   .sum { margin-top: var(--s4); padding: var(--s4); }
   .sum .lbl { font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; }
   .sum .hero { font: var(--t-hero); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -.5px; }
-  /* Peak-End (UX audit): one comparison makes the day feel finished. */
-  .sum .cmp { display: flex; align-items: center; gap: 6px; margin-top: 2px; font: var(--t-secondary-strong); color: var(--ok); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  /* Peak-End (UX audit): one comparison makes the day feel finished. It must be true: «+1 400 ֏ երեկվանից» was not (yesterday
+     was 13 500 ֏ in driver-earnings), so the line is the week so far, in neutral ink, not a green «up». */
+  .sum .cmp { display: flex; align-items: center; gap: 6px; margin-top: 2px; font: var(--t-secondary-strong); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .sum .cmp svg { width: 16px; height: 16px; }
   .sum .hero small { font: 600 22px/1 var(--font); color: var(--ink-2); margin-left: 4px; letter-spacing: 0; }
   .stats { display: flex; margin-top: var(--s3); padding-top: var(--s3); border-top: 1px solid var(--hairline); }
@@ -69,7 +70,9 @@
   .stats span { font: var(--t-caption); color: var(--ink-2); white-space: nowrap; }
   .split { display: flex; gap: 2px; height: 10px; margin-top: var(--s4); }
   .split i { display: block; border-radius: 4px; }
-  .split .cash { background: var(--c-cash); flex: 76; } .split .company { background: var(--c-company); flex: 22; }
+  .split .cash { background: var(--c-cash); flex: 35.7; } .split .noncash { background: var(--c-noncash); flex: 41.9; } .split .company { background: var(--c-company); flex: 22.4; }
+  .legend.rows { flex-direction: column; gap: 0; } .legend.rows span { min-height: 28px; } .legend.rows span b { margin-left: auto; }
+  .legend.rows em { font-style: normal; color: var(--ink-3); }
   .legend { display: flex; justify-content: space-between; margin-top: var(--s2); }
   .legend span { display: inline-flex; align-items: center; gap: 6px; font: var(--t-secondary); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .legend b { font-weight: 600; color: var(--ink); }
@@ -147,14 +150,14 @@
     <div class="card sum">
       <div class="lbl">Պատվերների գումարը</div>
       <div class="hero">9 800<small>֏</small></div>
-      <div class="cmp"><i data-lucide="trending-up"></i>+1 400 ֏ երեկվանից</div>
-      <div class="split" role="img" aria-label="Կանխիկ 7 600 ֏, ընկերության հաշվին 2 200 ֏"><i class="cash"></i><i class="company"></i></div>
-      <div class="legend"><span><i class="sw" style="background:var(--c-cash)"></i>Կանխիկ <b>7 600 ֏</b></span><span><i class="sw" style="background:var(--c-company)"></i>Ընկերություն <b>2 200 ֏</b></span></div>
+      <div class="cmp"><i data-lucide="calendar"></i>Այս շաբաթ՝ 61 400 ֏</div>
+      <div class="split" role="img" aria-label="Կանխիկ 3 500 ֏, անկանխիկ 4 100 ֏, ընկերության հաշվին 2 200 ֏"><i class="cash"></i><i class="noncash"></i><i class="company"></i></div>
+      <div class="legend rows"><span><i class="sw" style="background:var(--c-cash)"></i>Կանխիկ <em>· ձեր մոտ</em><b>3 500 ֏</b></span><span><i class="sw" style="background:var(--c-noncash)"></i>Անկանխիկ <em>· Idram-ով</em><b>4 100 ֏</b></span><span><i class="sw" style="background:var(--c-company)"></i>Ընկերություն <b>2 200 ֏</b></span></div>
       <div class="stats"><div><b>7</b><span>պատվեր</span></div><div><b>6 ժ 08 ր</b><span>առցանց</span></div><div><b>58 կմ</b><span>ճանապարհ</span></div></div>
     </div>
     <div class="card chart">
       <div class="hd"><span>֏ ըստ ժամի</span><span>լավագույնը՝ 14:00</span></div>
-      <div class="bars" id="bars" role="img" aria-label="Գումարն ըստ ժամի, լավագույնը 14:00՝ 3 100 ֏"></div>
+      <div class="bars" id="bars" role="img" aria-label="Գումարն ըստ ժամի, լավագույնը 14:00՝ 3 300 ֏"></div>
       <div class="hrs" id="hrs" aria-hidden="true"></div>
     </div>
     <div class="ret"><img src="assets/eco/cars/city.webp" alt=""><span class="plate">01 ET 001</span><span class="t2">Մեքենան կազատվի</span></div>
@@ -173,8 +176,8 @@
   else document.getElementById('car1').classList.add('sel')
   /* Earnings per hour, 09–15: seven rides, 9 800 ֏ (the same rides as driver-earnings). One series, neutral; only the
      best hour is labelled, in ink — the unit lives in the title, not in a corner. */
-  const hrs = [['09', 1100], ['10', 1400], ['11', 1900], ['12', 1100], ['13', 1200], ['14', 3100], ['15', 0]]
-  const max = 3100
+  const hrs = [['09', 2300], ['10', 1200], ['11', 1900], ['12', 1100], ['13', 0], ['14', 3300], ['15', 0]]
+  const max = 3300
   document.getElementById('bars').innerHTML = hrs.map(([h, v]) => `<span class="b${v === max ? ' top' : ''}">${v === max ? '<em>' + ECO.num(v) + '</em>' : ''}<i style="height:${Math.max(2, v / max * 68)}px"></i></span>`).join('')
   document.getElementById('hrs').innerHTML = hrs.map(([h]) => `<span>${h}</span>`).join('')
   icons()

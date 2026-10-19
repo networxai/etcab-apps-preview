@@ -1,0 +1,252 @@
+[
+  {
+    "law": "Von Restorff Effect",
+    "screen": "dispatch.html",
+    "state": "state=sos",
+    "issue": "The SOS ride's own queue row was the least legible row on screen: the strip's `.sos` rule also matched `.r.sos`, so its address and age rendered in the strip's white (light) / near-black (dark) ink on a pale ground, inside a card-shaped box.",
+    "fix": "Scoped the strip rule to `section.sos`; the row keeps its red spine, SOS tag and selection ring with normal ink.",
+    "severity": "high",
+    "fixed": true
+  },
+  {
+    "law": "Serial Position Effect",
+    "screen": "dispatch.html",
+    "state": "tab=scheduled",
+    "issue": "The driver's «Չեմ հասցնի» request, the only pre-order needing a human, sat fifth in the hour-ordered lane, under the fold at 1366×768.",
+    "fix": "Rows that need a human now lead the Scheduled lane (as Problems leads the Now tab), the rest stay by promised hour; the lane head says so.",
+    "severity": "high",
+    "fixed": true
+  },
+  {
+    "law": "Mental Model",
+    "screen": "dispatch.html",
+    "state": "intake=airport",
+    "issue": "With Զվարթնոց → Կենտրոն fixed at 5 000 ֏ for City/Comfort only, Business (4 100 ֏) and Vip (5 800 ֏) read cheaper than or barely above City, inverting the tier ladder the dispatcher quotes from.",
+    "fix": "Business and Vip take the pair's per-tier fixed fares (7 000 / 8 500 ֏, matching zones?pair=1's per-tier list); only Van stays metered + 500 ֏.",
+    "severity": "high",
+    "fixed": true
+  },
+  {
+    "law": "Common Region",
+    "screen": "dispatch.html",
+    "state": "intake=company",
+    "issue": "The company badge «Արարատ Սոֆթ · ընկերության հաշվին», the fact that decides who pays, ran out of the customer card and was cut at its edge.",
+    "fix": "The card's title line wraps (badge under the name, inside the card); the form scrolls to its foot so no label straddles the action bar.",
+    "severity": "high",
+    "fixed": true
+  },
+  {
+    "law": "Hick's Law",
+    "screen": "dispatch.html",
+    "state": "all intake views",
+    "issue": "Key 1 of the tier grid, «Մոտակա ազատը», was ellipsised in every intake state at both sizes, so the first of eight choices could not be read.",
+    "fix": "The icon-only 'any' cell takes a 20px icon column instead of the car's 40px; the label fits at 1366.",
+    "severity": "medium",
+    "fixed": true
+  },
+  {
+    "law": "Occam's Razor",
+    "screen": "dispatch.html",
+    "state": "state=problems",
+    "issue": "The low-rating reason repeated the threshold «(1–3 ★)» beside the row's own «★ 2» tag and lost the driver's name to the ellipsis.",
+    "fix": "Dropped the redundant threshold; the reason reads «Ցածր գնահատական · «Կոպիտ էր» · Տիգրան Ա.» in full.",
+    "severity": "medium",
+    "fixed": true
+  },
+  {
+    "law": "Occam's Razor",
+    "screen": "dispatch.html",
+    "state": "intake=pay",
+    "issue": "The card option's fee claim «պահված քարտը · +2 % վճար» was cut to «+2 % վճ…», hiding the one thing that differs from cash.",
+    "fix": "Shortened to «+2 % վճար»; «·· 3318» already says it is the saved card.",
+    "severity": "medium",
+    "fixed": true
+  },
+  {
+    "law": "Chunking",
+    "screen": "partners.html",
+    "state": "tab=wallet",
+    "issue": "Ledger titles «Միջնորդավճար · #R-20288» truncated to «#R-2…», so the ride number (the key an operator searches by) was lost in every fee row.",
+    "fix": "Title is the kind («Միջնորդավճար»); the ride number or ride count leads the wrapping detail line.",
+    "severity": "medium",
+    "fixed": true
+  },
+  {
+    "law": "Fitts's Law",
+    "screen": "rides.html",
+    "state": "panel=force / panel=force-nodriver / panel=noshow",
+    "issue": "The red-outlined «Ուղևորը չեկավ» sat flush against the red-filled «Կիրառել», two adjacent dangerous targets of similar weight one mis-click apart.",
+    "fix": "The two are pushed to opposite ends of the row (still one click deep, §9.4).",
+    "severity": "medium",
+    "fixed": true
+  },
+  {
+    "law": "Aesthetic-Usability Effect",
+    "screen": "dispatch.html",
+    "state": "state=sos",
+    "issue": "The SOS strip's «ձայնը կրկնվում է» note at 12px with opacity .85 measured 6.73:1 in dark, under the console's 7:1 small-text floor; the map pin's pulse ring was counted as a clip.",
+    "fix": "Note at full ink; the pulse ring drawn inside the pin's box.",
+    "severity": "low",
+    "fixed": true
+  },
+  {
+    "law": "Common Region",
+    "screen": "rides.html",
+    "state": "panel=billing",
+    "issue": "The payer block («Ընկերություն · Արարատ Սոֆթ») sits under the head while the fare it pays («Ընդամենը · Ընկերության հաշվին») is three sections down, below the map and driver, past the fold.",
+    "fix": "Put Payer directly under the price breakdown (one money region) and move rating after it.",
+    "severity": "medium",
+    "fixed": true,
+    "note": "Payer row now sits in the price breakdown directly above the total; the old payer block became «Ընկերության ամիս» (month + rider)."
+  },
+  {
+    "law": "Von Restorff Effect",
+    "screen": "rides.html",
+    "state": "pay=failed",
+    "issue": "A ride whose ETAPI receipt failed three times reads «Ավարտված» in the list like every other finished ride; the failure is only visible after opening it.",
+    "fix": "Add an amber receipt icon/tag in the price cell of rows with an unsent or failed fiscal receipt (the same item is in Requests → fiscal).",
+    "severity": "medium",
+    "fixed": true,
+    "note": "Ride 20409 shows a red «Կտրոն չկա» pill (circle-alert) in the fixed status column of the list; red because the ETAPI filing actually failed."
+  },
+  {
+    "law": "Mental Model",
+    "screen": "vehicles.html",
+    "state": "default",
+    "issue": "Pending partner cars carry «Հաստատել» right in the list, a second approval path that skips Approvals' six-document check and class choice.",
+    "fix": "Replace it with «Ստուգել →» linking to approvals.html for that car; keep Reject in place.",
+    "severity": "medium",
+    "fixed": true,
+    "note": "«Հաստատել» removed for pending partner cars; «Ստուգել →» links to approvals.html, «Մերժել» stays. Suspended-car «Հաստատել» (reinstate) left as is."
+  },
+  {
+    "law": "Cognitive Load",
+    "screen": "rides.html",
+    "state": "pay=card",
+    "issue": "The money section mixes the rider's side (fare, +2 % fee, method, ETAPI receipt) with the driver's payout (Idram to driver) under one «Վճարում» head.",
+    "fix": "Split into «Ուղևորը» and «Վարորդին» sub-heads with the payout last.",
+    "severity": "low",
+    "fixed": true,
+    "note": "Payment section split into «Ուղևորը» (method, ETAPI type, receipt) and «Վարորդին» (Idram payout) sub-heads, payout last."
+  },
+  {
+    "law": "Hick's Law",
+    "screen": "dispatch.html",
+    "state": "default",
+    "issue": "The tier label says «1–8» but no tile shows its digit, so a dispatcher counts positions to find Van's key.",
+    "fix": "Show the key as a faint 11px mono digit in each tile's corner (the price column has the room).",
+    "severity": "low",
+    "fixed": true,
+    "note": "Each tier tile (and the any/transfer tiles) shows its key as a faint 11px mono digit above the price."
+  },
+  {
+    "law": "Postel's Law",
+    "screen": "dispatch.html",
+    "state": "intake=refusal",
+    "issue": "No state shows the phone field accepting +374 / 374 / 8-digit / spaced input and normalising it; only the refusal's single example format is drawn.",
+    "fix": "Draw a pasted «+374 93 15 62 40» normalising to «093 15-62-40» in the read-back, and keep the refusal for genuinely short numbers.",
+    "severity": "low",
+    "fixed": true,
+    "note": "New state ?intake=phone: pasted «+374 93 15 62 40» with a read-back «Ընդունվեց՝ 093 15-62-40»; the refusal stays for short numbers."
+  },
+  {
+    "law": "Postel's Law",
+    "screen": "dispatch.html",
+    "state": "intake=company",
+    "issue": "With the payer chosen in «Վճարող», the Payment select below repeats «Ընկերություն» as a second control for the same decision.",
+    "fix": "Collapse Payment into a read-only line when the payer is the company (one choice, one place).",
+    "severity": "low",
+    "fixed": true,
+    "note": "With the company as payer, Payment is a read-only locked line (building icon + lock) instead of a second select."
+  },
+  {
+    "law": "Serial Position Effect",
+    "screen": "dispatch.html",
+    "state": "state=sos",
+    "issue": "At 1366×768 the SOS ride's row (Active lane, last) is below the fold; the strip carries the calls, but «open the ride» needs a scroll.",
+    "fix": "Make the strip's ride number a link that selects and scrolls to the row.",
+    "severity": "low",
+    "fixed": true,
+    "note": "SOS strip ride number is a link that scrolls to and focuses the ride's row."
+  },
+  {
+    "law": "Doherty Threshold",
+    "screen": "dispatch.html",
+    "state": "state=conflict",
+    "issue": "The lost-claim state is drawn, but no state shows the instant own-claim feedback between pressing T and the server's answer.",
+    "fix": "Draw the row with «Դուք» and a pending dot for the round-trip, replaced by «Իմը» on 200 or by the blue conflict line on 409.",
+    "severity": "low",
+    "fixed": true,
+    "note": "New state ?state=claiming: row reads «Դուք» with a pending dot (aria-busy) until 200 or 409."
+  },
+  {
+    "law": "Selective Attention",
+    "screen": "requests.html",
+    "state": "default",
+    "issue": "In the selected deletion row the day «երեկ» is cut to «եր…» by the «Բաց հերթափոխ» tag.",
+    "fix": "Give the time column a fixed min width like the other rows and let the tag sit after it.",
+    "severity": "low",
+    "fixed": true,
+    "note": "Status column widened 112 to 132px so the day «երեկ» and the «Բաց հերթափոխ» tag both fit."
+  },
+  {
+    "law": "Miller's Law",
+    "screen": "search.html",
+    "state": "default",
+    "issue": "The date column truncates «29 սեպ…», so the oldest match's date is the one row an operator cannot read.",
+    "fix": "Widen the time column to fit «21:40 29 սեպտ.» or use the numeric «29.09».",
+    "severity": "low",
+    "fixed": true,
+    "note": "Time column widened 132 to 160px; «29 սեպտ.» reads in full."
+  },
+  {
+    "law": "Tesler's Law",
+    "screen": "tariffs.html",
+    "state": "t=comfort&sec=price",
+    "issue": "The worked-example rail lists «Կլորացում 100 ֏ · 1 000 ֏», which reads as a 1 000 ֏ rounding charge rather than the rounded subtotal.",
+    "fix": "Label the line «Կլորացված՝ 1 000 ֏» and show the rounding delta (e.g. «−13 ֏») separately, as the ride panel does.",
+    "severity": "low",
+    "fixed": true,
+    "note": "Rail line now «կլորացված՝ ±N ֏» with the rounded subtotal as its value, delta shown in the label."
+  },
+  {
+    "law": "Prägnanz",
+    "screen": "zones.html",
+    "state": "pair=1",
+    "issue": "The fare-explanation steps are numbered 1, 2, 2, 3, so two different rules share a step number.",
+    "fix": "Number them 1–4 or mark the two zone lines as 2a/2b under one 'zone rules' step.",
+    "severity": "low",
+    "fixed": true,
+    "note": "Steps numbered 1-4."
+  },
+  {
+    "law": "Chunking",
+    "screen": "drivers.html",
+    "state": "default",
+    "issue": "The «Այսօր» column joins count and earnings as «9 · 14 820 ֏» with no unit on the count.",
+    "fix": "Split into two right-aligned mono sub-columns (rides, ֏) or write «9 պ.».",
+    "severity": "low",
+    "fixed": true,
+    "note": "«Այսօր» reads «9 պ. · 14 820 ֏»; column widened (168px, 160px at 1366) so the fare is not truncated."
+  },
+  {
+    "law": "Fitts's Law",
+    "screen": "dispatch.html",
+    "state": "state=problems",
+    "issue": "Problem-row actions (Assign, Send to search, Force state) are 24px-high buttons, the smallest targets on the screen for the rows that most need a click.",
+    "fix": "Keep the keys (A) as the primary path; raise problem-row buttons to 28px (S), the row already has a third line for them.",
+    "severity": "low",
+    "fixed": true,
+    "note": "Problem-row buttons are 28px high (icon 28x28) via .r.p .btn.xs; the row's acts line already was 28px."
+  },
+  {
+    "law": "Goal-Gradient Effect",
+    "screen": "approvals.html",
+    "state": "default",
+    "issue": "«Հաստատել՝ Eco Comfort» is fully armed while the checklist reads 5/6 with the right-side photo missing, so the button gives no sense of how close the car is to ready.",
+    "fix": "Carry the count in the button («Հաստատել՝ Eco Comfort · 5/6») or arm it only when every required slot is ticked.",
+    "severity": "low",
+    "fixed": true,
+    "note": "Button carries the count: «Հաստատել՝ Eco Comfort · 5/6». It stays armed (operator may approve with a missing slot)."
+  }
+]

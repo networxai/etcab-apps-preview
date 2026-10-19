@@ -44,6 +44,26 @@
     .bars { display: grid; grid-template-columns: 24px minmax(0, 1fr) 32px; gap: 4px 8px; align-items: center; font: var(--c-small); color: var(--ink-muted); margin-top: 8px; }
     .bars i { display: block; height: 6px; border-radius: 3px; background: var(--ink); }
     .bars span:last-child { text-align: right; }
+    .rf { display: flex; gap: 4px; flex-wrap: wrap; margin: 12px var(--inset) 0; }
+    .rf .chip { text-decoration: none; padding: 0 9px; } .rf .chip svg { width: 14px; height: 14px; color: inherit; }
+    .rcu { display: grid; grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1fr) auto; gap: 6px; align-items: end; margin: 8px var(--inset) 0; padding: 8px; border-radius: var(--r-card); background: var(--surface-alt); }
+    .rcu label { display: flex; flex-direction: column; gap: 3px; font: var(--c-label); color: var(--ink-muted); min-width: 0; }
+    .rcu .dash { text-align: center; color: var(--ink-faint); height: var(--h-m); line-height: var(--h-m); }
+    .rcu .input input { all: unset; width: 100%; min-width: 0; font: 400 13px/18px var(--mono); color: var(--ink); }
+    .rcu .input:focus-within { box-shadow: inset 0 0 0 1px var(--focus-ring), 0 0 0 3px var(--brand-soft); }
+    .rcu .ferr { grid-column: 1 / -1; display: flex; gap: 6px; align-items: center; font: var(--c-small); color: var(--danger-c); } .rcu .ferr svg { width: 14px; height: 14px; }
+    .rcu .btn:disabled { opacity: .5; }
+    .tot4 { display: grid; grid-template-columns: repeat(4, auto); justify-content: space-between; gap: 6px; margin-top: 8px; }
+    .tot4 > div { display: flex; flex-direction: column; min-width: 0; }
+    .tot4 b { font: 600 16px/24px var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .tot4 span { font: var(--c-small); color: var(--ink-muted); white-space: nowrap; } .tot4 small { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; }
+    .sk { display: block; height: 14px; width: 56px; margin: 5px 0; border-radius: 4px; background: var(--surface-3); animation: skp 1.4s ease-in-out infinite; }
+    @keyframes skp { 50% { opacity: .5; } } @media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
+    .skrow { display: grid; grid-template-columns: 52px minmax(0, 1fr) 80px; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line-soft); } .skrow .sk { width: 100%; margin: 3px 0; }
+    .lt tr.dh th { padding-top: 12px; font: var(--c-label); color: var(--ink-muted); } .lt tr.dh th span { float: right; color: var(--ink-faint); }
+    .more { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 8px; font: var(--c-small); }
+    .blk.empty { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; padding: 20px 12px; } .blk.empty svg { width: 24px; height: 24px; color: var(--ink-faint); }
+    .blk.empty b { font: var(--c-head); } .blk.empty span { font: var(--c-small); color: var(--ink-muted); margin-bottom: 6px; }
     .newrow { display: grid; grid-template-columns: 150px minmax(0, 1fr) 112px 120px auto; gap: 8px; align-items: end; padding: 10px var(--inset); border-bottom: 1px solid var(--line-soft); background: var(--surface-alt); }
     .newrow .lbl { font: var(--c-label); color: var(--ink-muted); margin-bottom: 4px; display: block; }
   </style>`)
@@ -56,10 +76,44 @@
   const afterActs = (html) => dp.querySelector('.acts').insertAdjacentHTML('afterend', html)
   const arm = (label, armed, note) => `<button class="btn danger s armed" aria-label="${label}">${armed}</button>${note ? `<span class="faint" style="font:var(--c-small)">${note}</span>` : ''}`
 
-  /* ── C29 Rides: commitments first (bookings this driver holds, Release one press from the row), then today's rides. ── */
+  /* ── Period filter (owner 2026-10-16): the Rides and Shifts tabs share one bar — quick chips and, for «Ընտրել օրերը»,
+     a from–to row inline (never a modal) — and the totals above the list follow the chosen period. ?r= today | yest | 7 | 30 |
+     custom (12.10–14.10) | empty (a period with nothing in it) | bad (from after to) | load | err. Rides default to today,
+     Shifts to 7 days. Totals of the two tabs agree for the same period (35 rides · 51 600 ֏ for 12.10–14.10). ── */
+  const R = QS.get('r') || (TAB === 'shifts' ? '7' : 'today')
+  const RNG = { today: ['Այսօր', '16.10'], yest: ['Երեկ', '15.10'], 7: ['Վերջին 7 օր', '10.10–16.10'], 30: ['Վերջին 30 օր', '17.09–16.10'], custom: ['Ընտրված օրեր', '12.10–14.10'], empty: ['Ընտրված օրեր', '02.10–04.10'], bad: ['Վերջին 7 օր', '10.10–16.10'], load: ['Ընտրված օրեր', '12.10–14.10'], err: ['Ընտրված օրեր', '12.10–14.10'] }
+  const isCustom = ['custom', 'empty', 'bad', 'load', 'err'].includes(R)
+  const rhref = (v) => { const u = new URLSearchParams(location.search); if (v) u.set('r', v); else u.delete('r'); return '?' + u }
+  const filterBar = () => {
+    const chip = (v, l) => `<a class="chip${R === v || (v === 'custom' && isCustom) ? ' on' : ''}" href="${rhref(v)}"${R === v || (v === 'custom' && isCustom) ? ' aria-current="true"' : ''}>${v === 'custom' ? '<i data-lucide="calendar-range"></i>' : ''}${l}</a>`
+    const [a, b] = R === 'empty' ? ['02.10.2026', '04.10.2026'] : R === 'bad' ? ['14.10.2026', '12.10.2026'] : ['12.10.2026', '14.10.2026']
+    return `<nav class="rf" aria-label="Ժամանակահատված">${chip('today', 'Այսօր')}${chip('yest', 'Երեկ')}${chip('7', '7 օր')}${chip('30', '30 օր')}${chip('custom', 'Ընտրել օրերը')}</nav>
+      ${isCustom ? `<form class="rcu" onsubmit="return false" aria-label="Օրերի միջակայք">
+        <label>Սկսած<span class="input${R === 'bad' ? ' err' : ''}"><input class="mono" inputmode="numeric" value="${a}" aria-invalid="${R === 'bad'}" aria-describedby="${R === 'bad' ? 'rerr' : ''}"></span></label><span class="dash" aria-hidden="true">–</span>
+        <label>Մինչև<span class="input"><input class="mono" inputmode="numeric" value="${b}"></span></label><button class="btn primary s"${R === 'bad' ? ' disabled' : ''}>Կիրառել</button>
+        ${R === 'bad' ? '<span id="rerr" class="ferr" role="status"><i data-lucide="circle-alert"></i>Սկիզբը չի կարող լինել ավարտից հետո</span>' : ''}</form>` : ''}`
+  }
+  /* totals: rides [count, amount, cash, cancelled]; shifts [count, hours, rides, amount, cash] */
+  const TR = { today: [9, 14820, 6200, 0], yest: [14, 21300, 9800, 1], 7: [58, 87720, 39700, 3], 30: [241, 362400, 158900, 11], custom: [35, 51600, 23700, 2], empty: [0, 0, 0, 0] }
+  const TS = { today: [1, '6 ժ 14 ր', 9, 14820, 6200], yest: [1, '9 ժ 45 ր', 14, 21300, 9800], 7: [5, '40 ժ 54 ր', 58, 87720, 39700], 30: [21, '168 ժ 30 ր', 241, 362400, 158900], custom: [3, '24 ժ 55 ր', 35, 51600, 23700], empty: [0, '—', 0, 0, 0] }
+  const dataKey = ['load', 'err'].includes(R) ? null : R === 'bad' ? '7' : R
+  const stat = (v, l, sub) => `<div><b class="mono">${v}</b><span>${l}</span>${sub ? `<small class="mono">${sub}</small>` : ''}</div>`
+  const totals = (icon, cells) => `<div class="blk"><h3><i data-lucide="${icon}"></i>${RNG[R][0]}<span class="end faint mono" style="font-weight:400">${RNG[R][1]}</span></h3>
+    <div class="tot4" aria-live="polite" aria-busy="${R === 'load'}">${dataKey === null ? cells.map(([, l]) => `<div><b class="sk" aria-hidden="true"></b><span>${l}</span></div>`).join('') : cells.map(([v, l, s]) => stat(v, l, s)).join('')}</div></div>`
+  const stateBlock = (title) => R === 'load' ? `<div class="blk" style="margin-bottom:12px" role="status" aria-label="Բեռնվում է"><h3><i data-lucide="list"></i>${title}</h3>${[0, 1, 2, 3].map(() => '<div class="skrow"><i class="sk"></i><i class="sk"></i><i class="sk"></i></div>').join('')}</div>`
+    : R === 'err' ? `<div style="margin:12px var(--inset)"><div class="notice red" role="alert"><i data-lucide="circle-alert"></i><span><b>Չհաջողվեց բեռնել</b><br>Կապը կտրվեց։ Ցանկը չի թարմացվել։</span><button class="btn secondary s" style="margin-left:auto">Կրկին փորձել</button></div></div>`
+    : R === 'empty' ? `<div class="blk empty" style="margin-bottom:12px"><i data-lucide="calendar-x"></i><b>Այս օրերին ${TAB === 'shifts' ? 'հերթափոխ' : 'պատվեր'} չկա</b><span>Վարորդը ${TAB === 'shifts' ? 'չի աշխատել' : 'պատվեր չի կատարել'} 02.10–04.10 ընթացքում</span><a class="btn secondary s" href="${rhref('7')}">Ցույց տալ 7 օրը</a></div>` : ''
+  const MORE = (shown, all) => `<div class="more"><span class="faint num">Ցուցադրված է ${shown} / ${all}</span>${all > shown ? `<button class="btn secondary s">Ցուցադրել ևս ${Math.min(all - shown, 20)}</button>` : ''}</div>`
+  const POOL = [['Կոմիտասի պող. 22 → Մաշտոցի պող. 37', 1200], ['Արաբկիր 14 → Սասունցի Դավիթ հ.', 1600], ['Հանրապետության հրապ. → Զվարթնոց', 4500], ['Նալբանդյան 51 → Կասկադ', 900], ['Աբովյան 8 → Ավան, Բաբաջանյան 12', 1900], ['Գ. Նժդեհ 33 → Երևան Մոլ', 1400]]
+  const rideRows = (n, id0, t0, cx) => Array.from({ length: n }, (_, i) => { const [r, f] = POOL[(i + id0) % 6], m = t0 - i * 47, t = `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
+    return `<tr><td class="mono">${t}</td><td>${r}<small class="mono">#R-${20400 - id0 - i}${cx === i ? ' · չեղարկված' : ''}</small></td><td class="n mono">${cx === i ? '<span class="pill" style="height:20px">Չեղարկված</span>' : amd(f)}</td></tr>` }).join('')
+  const dayHead = (l, c) => `<tr class="dh"><th colspan="3">${l}<span class="mono">${c}</span></th></tr>`
+  const ridesTbl = (inner) => `<table class="lt"><colgroup><col class="w"><col><col class="a"></colgroup><tbody>${inner}</tbody></table>`
+
+  /* ── C29 Rides: commitments first (today only — they are not history), then the period's totals and rides. ── */
   if (TAB === 'rides') {
     setTab(1); clearBelow()
-    add(`<div class="blk"><h3><i data-lucide="calendar-clock"></i>Նախնական պատվերներ<span class="end faint" style="font-weight:400">նշանակված են իրեն</span></h3>
+    const pre = R !== 'today' ? '' : `<div class="blk"><h3><i data-lucide="calendar-clock"></i>Նախնական պատվերներ<span class="end faint" style="font-weight:400">նշանակված են իրեն</span></h3>
       <div class="cm"><time><small>Այսօր</small>${B.kom.time}</time><span class="a">${B.kom.pickup} → ${B.kom.drop}</span>
         <span class="m"><span class="mono">${B.kom.phone}</span>·<span class="mono">#${B.kom.id}</span>·<span>նոր պատվերներ չեն գա ${B.kom.held}-ից</span></span>
         <span class="b"><button class="btn secondary s">Ազատել</button></span></div>
@@ -68,12 +122,14 @@
         <span class="b"><button class="btn secondary s">Ազատել</button><button class="btn secondary s">Վերանշանակել <span class="kbd">A</span></button></span></div>
       <div class="cm"><time><small>Կիր</small>11:30</time><span class="a">Կոմիտասի պող. 49 → Էրեբունի օդանավակայան</span>
         <span class="m"><span class="mono">091 44-02-17</span>·<span class="mono">#B-0930</span>·<span>նոր պատվերներ չեն գա 11:00-ից</span></span>
-        <span class="b"><button class="btn secondary s">Ազատել</button></span></div></div>
-    <div class="blk" style="margin-bottom:12px"><h3><i data-lucide="list"></i>Այսօր<span class="end faint num" style="font-weight:400">1 պատվեր · 1 200 ֏ · 1 ընթացքում</span></h3>
-      <table class="lt"><colgroup><col class="w"><col><col class="a"></colgroup><tbody>
-      ${[[ECO.RIDE.assigned, ECO.RIDE.pickup + ' → ' + ECO.RIDE.drop, '#R-' + ECO.RIDE.no + ' · ընթացքում', ECO.RIDE.fare, 1], ['08:47', 'Կոմիտասի պող. 22 → Մաշտոցի պող. 37', '#R-2398', 1200]]
-        .map(([t, r, id, f, live]) => `<tr><td class="mono">${t}</td><td>${r}<small class="mono">${id}</small></td><td class="n mono">${live ? '<span class="pill l-active" style="color:var(--lane);height:20px"><i class="d"></i>' + amd(f) + '</span>' : amd(f)}</td></tr>`).join('')}
-      </tbody></table></div>`)
+        <span class="b"><button class="btn secondary s">Ազատել</button></span></div></div>`
+    const t = TR[dataKey] || TR[7]
+    const live = `<tr><td class="mono">${ECO.RIDE.assigned}</td><td>${ECO.RIDE.pickup + ' → ' + ECO.RIDE.drop}<small class="mono">#R-${ECO.RIDE.no} · ընթացքում</small></td><td class="n mono"><span class="pill l-active" style="color:var(--lane);height:20px"><i class="d"></i>${amd(ECO.RIDE.fare)}</span></td></tr>`
+    const list = R === 'today' ? ridesTbl(live + rideRows(5, 0, 525)) + MORE(6, 9)
+      : R === 'yest' ? ridesTbl(rideRows(6, 2, 1005, 3)) + MORE(6, 14)
+      : ridesTbl(dayHead('Երեկ · 15.10', '14') + rideRows(3, 1, 1005) + dayHead('Չրք · 14.10', '12') + rideRows(3, 4, 995, 1) + dayHead('Երք · 13.10', '13') + rideRows(2, 0, 1090)) + MORE(8, t[0])
+    add(`${filterBar()}${pre}${totals('list-checks', [[t[0], 'Պատվեր'], [amd(t[1]), 'Գին'], [amd(t[2]), 'Կանխիկ'], [t[3], 'Չեղարկված']])}
+      ${stateBlock('Պատվերներ') || `<div class="blk" style="margin-bottom:12px"><h3><i data-lucide="list"></i>Պատվերներ<span class="end faint num" style="font-weight:400">նորագույնը վերևում</span></h3>${list}</div>`}`)
   }
 
   /* ── C29 Shifts (owner #3: no balance for a fleet driver). What the driver did, per shift: car, hours, rides, fares and
@@ -82,14 +138,17 @@
     setTab(2); clearBelow()
     const S = [['Այսօր', '01 ET 001', '08:12–', '6 ժ 14 ր', 9, 14820, 6200, 1], ['Հնգ', '01 ET 001', '07:55–17:40', '9 ժ 45 ր', 14, 21300, 9800], ['Չրք', '01 ET 002', '08:05–16:30', '8 ժ 25 ր', 12, 17900, 7400],
       ['Երք', '01 ET 001', '12:00–21:10', '9 ժ 10 ր', 13, 19600, 11200], ['Երկ', '01 ET 001', '08:00–15:20', '7 ժ 20 ր', 10, 14100, 5100]]
-    add(`<div class="blk"><h3><i data-lucide="calendar-range"></i>Այս շաբաթ<span class="end faint" style="font-weight:400">5 հերթափոխ · 41 ժ</span></h3>
-      <div class="sum"><b>${amd(87720)}</b><span class="num">58 պատվեր · կանխիկ ${amd(39700)}</span></div></div>
-    <div class="blk" style="margin-bottom:12px"><h3><i data-lucide="list"></i>Հերթափոխեր<span class="end faint" style="font-weight:400">Ավտոպարկի վարորդը հաշվեկշիռ չունի</span></h3>
-      <table class="lt"><colgroup><col class="w"><col><col class="r"><col class="a"><col class="c"></colgroup>
+    const dated = (r, d) => [d, ...r.slice(1, 7)]
+    const more = Array.from({ length: 4 }, (_, i) => dated(['', i % 2 ? '01 ET 002' : '01 ET 001', '08:30–16:40', '8 ժ 10 ր', 11 - i, 15800 - i * 900, 6400 - i * 300], `${String(10 - i * 1).padStart(2, '0')}.10`)).map((r, i) => (i === 0 ? r : r))
+    const rows = { today: [S[0]], yest: [S[1]], 7: S, custom: [S[4], S[3], S[2]].map((r, i) => dated(r, ['12.10', '13.10', '14.10'][i])).reverse(), 30: S.map((r, i) => dated(r, ['16.10', '15.10', '14.10', '13.10', '12.10'][i])).concat(more) }[dataKey] || []
+    const t = TS[dataKey] || TS[7]
+    const table = `<table class="lt"><colgroup><col class="w"><col><col class="r"><col class="a"><col class="c"></colgroup>
       <thead><tr><th>Օր</th><th>Մեքենա · ժամեր</th><th class="n">Պատվեր</th><th class="n">Գին</th><th class="n">Կանխիկ</th></tr></thead><tbody>
-      ${S.map(([d, pl, t, h, r, f, c, live]) => `<tr><td>${d}</td><td><span class="plate" style="height:20px">${pl}</span><small class="mono" title="${t}">${h}${live ? ' · հիմա' : ''}</small></td>
+      ${rows.map(([d, pl, tm, h, r, f, c, live]) => `<tr><td${/\d/.test(d) ? ' class="mono"' : ''}>${d}</td><td><span class="plate" style="height:20px">${pl}</span><small class="mono" title="${tm}">${h}${live ? ' · հիմա' : ''}</small></td>
         <td class="n mono">${r}</td><td class="n mono">${amd(f)}</td><td class="n mono">${amd(c)}</td></tr>`).join('')}
-      </tbody></table></div>`)
+      </tbody></table>${dataKey === '30' ? MORE(rows.length, t[0]) : ''}`
+    add(`${filterBar()}${totals('calendar-range', [[t[0], 'Հերթափոխ'], [t[1], 'Ժամ'], [t[2], 'Պատվեր'], [amd(t[3]), 'Գին', 'կանխիկ ' + amd(t[4]).replace(/\s*֏/, '')]])}
+      ${stateBlock('Հերթափոխեր') || `<div class="blk" style="margin-bottom:12px"><h3><i data-lucide="list"></i>Հերթափոխեր<span class="end faint" style="font-weight:400">հաշվեկշիռ չկա</span></h3>${table}</div>`}`)
   }
 
   /* ── C29 Documents (driver-documents.tsx): the list with expiry, the expired one flagged, and the add form open. ── */

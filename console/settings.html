@@ -26,7 +26,7 @@
   .set .l { font: var(--c-body); color: var(--ink); }
   .set .l small { display: block; font: var(--c-small); color: var(--ink-muted); margin-top: 2px; }
   .set .v { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
-  .set .v .input { width: 120px; }
+  .set .v .input { width: 128px; }
   .set .v .input .val { text-align: right; }
   .set .u { font: var(--c-small); color: var(--ink-muted); width: 48px; white-space: nowrap; }
   .set.new { box-shadow: inset 3px 0 0 var(--brand-vivid); }
@@ -78,7 +78,7 @@
       '«1, 1, 1»՝ երեքին հերթով · «3»՝ երեքին միասին')}
     ${G('Նախնական պատվերներ', [N('Սկսել որոնումը', '15', 'րոպե', 'նստեցումից առաջ'), N('Պահել նշանակված վարորդին', '30', 'րոպե', 'նստեցումից առաջ'), N('Վարորդը կարող է սկսել', '', 'րոպե', 'նստեցումից առաջ', 'ինչպես վերևում'),
       NEW('Հիշեցում ուղևորին', R, 'րոպե', 'ժամը, հասցեն և մեքենան · 0՝ անջատված')])}
-    ${G('Ցածր գնահատական', [NEW('Ցածր է՝ 1-ից մինչև', LR.max, '★', 'այս ուղևորությունները գալիս են Հարցումներ'), NEW('Պատասխանել', LR.followUpH, 'ժամում', 'դիսպետչերը զանգում է ուղևորին')])}
+    ${G('Ցածր գնահատական', [NEW('Ցածր է՝ 1-ից մինչև', LR.max, '★', 'այս ուղևորությունները հայտնվում են Հարցումներում'), NEW('Պատասխանել', LR.followUpH, 'ժամում', 'դիսպետչերը զանգում է ուղևորին')])}
     <div class="foot"><button class="btn primary">Պահել</button><button class="btn secondary">Վերականգնել լռելյայնը</button><span class="pill warn">Չպահված</span><span class="rev">Տարբերակ 14</span></div>`
   if (TAB !== 'dispatch') window.drawMoneyTab(TAB)
   icons()

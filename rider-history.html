@@ -149,7 +149,7 @@
      Komitas 22 → Mashtots 37  Partner 4.3 km 7 min: 700 + 473 + 98 = 1 271 → 1 300
      Tumanyan → Opera          City    1.4 km 3 min: 600 + 126 + 36 =   762 →   800
      Komitas 22 → Zvartnots    City   12.6 km 17 min: 600 + 1 134 + 204 = 1 938 → ≈ 1 900 (estimate, scheduled) */
-  /* Owner 2026-10-15 (final): the service fee is the fleet's, +2 % on bank-card payments only (card, Apple Pay, Google Pay); cash and
+  /* Owner 2026-10-15 (final): the service fee is the fleet's, +2 % on card, Apple Pay, Google Pay and NFC · POS (owner 2026-10-16); cash and
      company rides carry none. These rides were cash or company, so their amounts are the fares. */
   const FEE = (f) => Math.round(f * 2 / 100)
   const rides = [
@@ -162,10 +162,11 @@
   /* co: billed to the rider's company — said in words on the row, the receipt names the company.
      Change list 2026-10-14: every charged ride carries its own receipt button at the row's end (a sibling of the row's
      main tap target, never nested); a cancelled ride has nothing to receipt, so the slot stays empty for column alignment. */
-  const row = ([k, to, when, tier, fare, co]) => `<div class="hrow"><button class="hmain">${R.trace(k, 48, 48, { pad: 8, r: 3, sw: 2.5, grid: false })}
+  const row = ([k, to, when, tier, fare, co], peek) => `<div class="hrow"${peek ? ' data-peek' : ''}><button class="hmain">${R.trace(k, 48, 48, { pad: 8, r: 3, sw: 2.5, grid: false })}
       <span class="txt"><span class="l1"><span class="t1">${to}</span>${fare ? `<span class="fare">${fare}</span>` : `<span class="st">${R.i('circle-slash')}Չեղարկված</span>`}</span><span class="t2">${when} · ${co ? `<span class="co">${R.i('building-2')}${ECO.PAY.company.short}</span>` : tier}</span></span></button>
       ${fare ? `<button class="rcpt" aria-label="Ստացական · ${to}, ${when}">${R.i('receipt-text')}</button>` : '<span class="rcpt none" aria-hidden="true"></span>'}</div>`
-  const group = (list) => `<div class="group">${list.map((r, i) => (i ? '<div class="divider h"></div>' : '') + row(r)).join('')}</div>`
+  /* Rows from the fourth on run under the fold of the scrolling list on purpose (data-peek). */
+  const group = (list) => `<div class="group">${list.map((r, i) => (i ? '<div class="divider h"></div>' : '') + row(r, i >= 3)).join('')}</div>`
   const head = () => `<nav class="nav"><button class="navbtn" aria-label="Հետ">${R.i('arrow-left')}</button><span class="navttl"></span><span class="navend"></span></nav><h1 class="large">Ուղևորություններ</h1>`
   /* ECO.BOOKINGS: Աննա's three pre-orders, soonest first (upcomingBooking order). sun has problemReason → history.pending (warn);
      co is billed to the company («Ընկերություն» marker: drawn ahead — customerScheduledRideSchema carries no billing yet). */

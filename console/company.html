@@ -95,7 +95,7 @@
         <div><label class="label">Զեղչ</label><div class="input"><span class="val mono">5</span><span class="faint">%</span></div></div>
         <div><label class="label">Սահմանաչափ</label><div class="input focus"><span class="val mono">400 000</span><span class="faint">֏</span></div><p class="hint">Դատարկ՝ առանց սահմանաչափի</p></div>
         <div><label class="label">Աշխատակցի ամսական սահմանաչափ</label><div class="seg" role="radiogroup" aria-label="Ըստ ինչի"><button class="on" role="radio" aria-checked="true">Գումար</button><button role="radio" aria-checked="false">Ուղևորություններ</button><button role="radio" aria-checked="false">Առանց</button></div></div>
-        <div><label class="label">Գումարը ամսական</label><div class="input"><span class="val mono">50 000</span><span class="faint">֏</span></div><p class="hint">Աշխատակցի էջում կարելի է փոխել</p></div>
+        <div><label class="label">Գումարն ամսական</label><div class="input"><span class="val mono">50 000</span><span class="faint">֏</span></div><p class="hint">Աշխատակցի էջում կարելի է փոխել</p></div>
         <div class="full" style="grid-column:span 2"><label class="label">Նշում</label><div class="input"><span class="val">2027-ի բյուջե</span></div></div>
       </div>
       <div class="notice neutral" style="margin-top:12px"><i data-lucide="calendar-clock"></i><span>Գործում է միայն սկսած նշված օրից․ անցյալը չի փոխվում</span></div>
@@ -128,9 +128,9 @@
       <div class="tb two" style="padding:0">
         <div><h4><i data-lucide="gauge"></i>Ամսական սահմանաչափ<span class="faint" style="font:var(--c-small);font-weight:400">${C.rider}</span></h4>
           <div class="seg" role="radiogroup" aria-label="Սահմանաչափ"><button role="radio" aria-checked="false">Լռելյայն · ${amd(EL.default.amount)}</button><button class="on" role="radio" aria-checked="true">Գումար</button><button role="radio" aria-checked="false">Ուղևորություններ</button></div>
-          <div class="fgrid" style="margin-top:12px"><div><label class="label">Գումարը ամսական</label><div class="input focus"><span class="val mono">65 000</span><span class="faint">֏</span></div><p class="hint">Նոր ամսից՝ զրոյից</p></div>
+          <div class="fgrid" style="margin-top:12px"><div><label class="label">Գումարն ամսական</label><div class="input focus"><span class="val mono">65 000</span><span class="faint">֏</span></div><p class="hint">Նոր ամսից՝ զրոյից</p></div>
             <div><span class="label">Այս ամիս</span><div class="facts" style="height:var(--h-m)"><span>Օգտագործված<b class="mono">${amd(EL.rider.used)}</b></span><span>Մնացել է<b class="mono">${amd(EL.rider.left)}</b></span></div></div></div>
-          <p class="hint" style="margin-top:8px">Սահմանաչափից հետո ուղևորությունը անձնական է՝ կանխիկ</p></div>
+          <p class="hint" style="margin-top:8px">Սահմանաչափից հետո ուղևորությունն անձնական է՝ ուղևորն ինքն է վճարում</p></div>
         <div><h4><i data-lucide="map-pin"></i>Թույլատրված հասցեներ<span class="faint" style="font:var(--c-small);font-weight:400">շառավիղ ${P.radius} մ</span></h4>
           ${P.rider.map((x) => placeRow(x.kind === 'home' ? 'house' : x.kind === 'office' ? 'building-2' : 'map-pin', x.label, x.addr, x.kind === 'office')).join('')}
           <div class="row-flex" style="gap:8px;margin-top:8px"><div class="input" style="width:150px"><span class="val ph">Անվանում</span></div><div class="input l grow"><i data-lucide="search"></i><span class="val ph">Հասցե՝ 2GIS-ից</span></div><button class="btn secondary"><i data-lucide="plus"></i>Ավելացնել</button></div>
@@ -146,7 +146,7 @@
       <section class="sec"><h3>Աշխատակիցներ<span class="sub num">${EMP.length}</span><span class="end faint" style="font:var(--c-small)">Լռելյայն՝ ${amd(EL.default.amount)} ամսական · Անջատելիս նախկին ուղևորությունները չեն փոխվում</span></h3>
         <table class="tbl"><colgroup><col style="width:140px"><col><col style="width:150px"><col style="width:110px"><col style="width:200px"><col style="width:140px"><col style="width:90px"><col style="width:84px"></colgroup>
           <thead><tr><th>Հեռախոս</th><th>Անուն</th><th class="c">Ուղևորություններ</th><th class="m">Գումար</th><th>Սահմանաչափ</th><th class="m">Մնացել է</th><th class="c">Հասցեներ</th><th aria-label="Գործողություններ"></th></tr></thead>
-          <tbody>${EMP.map(([n, ph, r, s, bl, lim, pl], i) => `<tr class="${EMPQ === String(i) ? 'on' : ''}"><td class="mono">${ph}</td><td><span class="row-flex">${n}${bl ? '<span class="pill warn"><i data-lucide="octagon-alert"></i>Սև ցուցակում</span>' : ''}</span></td><td class="c">${r || '<span class="dash">0</span>'}</td><td class="m">${s ? amd(s) : '<span class="dash">0</span>'}</td>
+          <tbody>${EMP.map(([n, ph, r, s, bl, lim, pl], i) => `<tr class="${EMPQ === String(i) ? 'on' : ''}"><td class="mono">${ph}</td><td><span class="row-flex" style="gap:8px"><span class="trunc">${n}</span>${bl ? '<span class="pill warn" style="flex:none"><i data-lucide="octagon-alert"></i>Սև ցուցակում</span>' : ''}</span></td><td class="c">${r || '<span class="dash">0</span>'}</td><td class="m">${s ? amd(s) : '<span class="dash">0</span>'}</td>
             ${limCell(lim, r, s)}<td class="c">${pl}</td>
             <td style="text-align:right;white-space:nowrap"><button class="btn ghost s icon rev-act" aria-label="Անջատել — ${n}" title="Անջատել"><i data-lucide="unlink"></i></button><a class="btn ${EMPQ === String(i) ? 'secondary' : 'ghost'} s icon" href="${T('employees')}&emp=${i}" aria-expanded="${EMPQ === String(i)}" aria-label="Սահմանաչափ և հասցեներ — ${n}" title="Սահմանաչափ և հասցեներ"><i data-lucide="sliders-horizontal"></i></a></td></tr>${EMPQ === String(i) && i === 0 ? empPanel : ''}`).join('')}</tbody></table></section></div>`
 

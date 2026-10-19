@@ -30,7 +30,8 @@ window.audit = function () {
   const truncOK = (el) => !!el.closest('[data-truncate], .trunc, td') && !el.closest('.pill, .typ, .chip, .plate, .tag, .btn, th')
   const all = [...screen.querySelectorAll('*')].filter((el) => !el.closest('svg') && !vendor(el) && vis(el))
   const texts = all.filter(hasText)
-  const inter = all.filter((el) => el.matches('button,a,input,[role=button],[role=slider]'))
+  /* textarea/select: their text is the control's value; a Range over it measures nothing on screen. */
+  const inter = all.filter((el) => el.matches('button,a,input,textarea,select,[role=button],[role=slider]'))
   const items = [...new Set([...texts, ...inter])]
   const name = (el) => (el.getAttribute('aria-label') || el.textContent || el.className || el.tagName).toString().trim().replace(/\s+/g, ' ').slice(0, 40)
   const textRect = (el) => {
@@ -63,6 +64,10 @@ window.audit = function () {
   for (const el of texts) {
     if (el.closest('[data-peek]') || getComputedStyle(el).pointerEvents === 'none') continue
     const r = textRect(el), x = (r.left + r.right) / 2, y = (r.top + r.bottom) / 2
+    /* A text whose centre is past its own scroll box's edge is cut by that edge (listed under `scrolled`), not covered:
+       the probe would land on whatever sits beyond the box (a card footer, the next panel). */
+    const cr = clipR(el, r)
+    if (x < cr.left + 1 || x > cr.right - 1 || y < cr.top + 1 || y > cr.bottom - 1) continue
     const top = document.elementFromPoint(x, y)
     if (top && !el.contains(top) && !top.contains(el) && !el.closest('[data-overlay]')) {
       const e2 = top.closest('svg') ? top.closest('svg').parentElement : top
@@ -80,7 +85,7 @@ window.audit = function () {
     if (el.scrollHeight > el.clientHeight + 1 && cs.display !== 'inline' && !ell) clips.push(`scrollHeight ${el.scrollHeight}>${el.clientHeight}: ${name(el)}`)
     if (ell && !overX && !truncOK(el)) clips.push(`ellipsis without data-truncate: ${name(el)}`)
     const r = textRect(el)
-    let inScroller = false
+    let inScroller = false, ellCut = false
     for (let p = el.parentElement; p && p !== screen; p = p.parentElement) {
       const pc = getComputedStyle(p)
       if (pc.overflow !== 'visible' && !el.closest('[data-peek]')) {
@@ -93,12 +98,13 @@ window.audit = function () {
           let inlineChain = true
           for (let e = el; e && e !== p; e = e.parentElement) if (e !== el && getComputedStyle(e).display !== 'inline') inlineChain = false
           if (getComputedStyle(el).display !== 'inline' && el !== p) inlineChain = inlineChain && false
-          if ((ell || (pc.textOverflow === 'ellipsis' && inlineChain)) && truncOK(el)) break
+          /* cut by an ancestor's own ellipsis: deliberate truncation, so not also «off-screen» */
+          if ((ell || (pc.textOverflow === 'ellipsis' && inlineChain)) && truncOK(el)) { ellCut = true; break }
           clips.push(`cut by ${p.className}: ${name(el)}`)
         }
       }
     }
-    if (!inScroller && !el.closest('[data-peek]') && (r.left < S.left || r.right > S.right || r.top < S.top || r.bottom > S.bottom)) clips.push(`off-screen: ${name(el)}`)
+    if (!inScroller && !ellCut && !el.closest('[data-peek]') && (r.left < S.left || r.right > S.right || r.top < S.top || r.bottom > S.bottom)) clips.push(`off-screen: ${name(el)}`)
   }
 
   /* 3. Contrast */

@@ -38,8 +38,8 @@
       rider: { name: 'Աննա', phone: '091 23-45-67', rating: '4,8' },
     },
 
-    /* Payment roster at launch: cash and company account are live; card, Idram and Telcell are «Շուտով» everywhere.
-       Driver earnings and the console's mix therefore split cash / company only. Strings from apps/rider i18n. */
+    /* Payment roster: cash, company account, card, Apple Pay / Google Pay (rider app only) and NFC · POS (fleet cars only) are
+       live; Idram and Telcell are «Շուտով». Driver earnings split cash / non-cash (paid out via Idram) / company. */
     PAY: {
       cash: { label: 'Կանխիկ', icon: 'banknote', live: true },
       company: { label: 'Ընկերության հաշվին', short: 'Ընկերություն', icon: 'building-2', live: true },
