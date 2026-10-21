@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tariffs v3</title>
+<link rel="stylesheet" href="console.css">
+<script src="https://unpkg.com/lucide@1.54.0/dist/umd/lucide.min.js"></script>
+<script src="../kit.js"></script>
+<script src="console.js"></script>
+<script src="console-audit.js"></script>
+<style>
+  /* ── Tariffs v3 (owner review 2026-10-21; spec docs/superpowers/specs/2026-10-21-tariff-zone-rules-design.md).
+     1. No standalone «Editor / new tariff» section: «Նոր սակագին» (N) in the list head is the only way in, and it opens the
+        step-by-step wizard (a modal is allowed here: admin, never dispatch, CLAUDE.md §9.8).
+     2. «Որտեղից → Որտեղ» is set ONCE per tariff, with several zones per end (tier_zone_scope), not per price component.
+     3. «Ուղևոր»: max passengers and max luggage per tariff; the rider app hides a tariff the party does not fit.
+     4. Pre-order is visible without opening a tab: a column in the list, a tile in the tariff's passport, and its own tab.
+     ?state= ''|detail|preorder|preorder-off|w1..w6|w1-err ── */
+  .content.ls { grid-template-columns: minmax(0, 1fr) 348px; }
+  .col { display: flex; flex-direction: column; gap: var(--gap); min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+  .col > .card { flex: none; overflow: visible; }
+  /* List row: grip · picture · name · where · party · pre-order · example price · go. Two-line content, ~64px. */
+  .tr { display: grid; grid-template-columns: 16px 88px minmax(0, 1fr) 200px 96px 150px 88px 16px; gap: 12px; align-items: center; min-height: 64px; padding: 6px var(--inset) 6px 10px; border-bottom: 1px solid var(--line-soft); color: var(--ink); text-decoration: none; }
+  .tr:hover, .tr.on { background: var(--surface-alt); }
+  .tr.h { min-height: 36px; font: var(--c-label); color: var(--ink-faint); }
+  .tr .grip { color: var(--ink-faint); }
+  .tr .ph { width: 88px; height: 48px; border-radius: var(--r-ctl); background: var(--surface-alt); display: grid; place-items: center; }
+  .tr .ph .car { width: 80px; height: 42px; }
+  .nm2 { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .nm2 b { font: var(--c-head); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* 1366 and below: the rider preview keeps 300px, the row gives up picture width and the where column first;
+     the name column never drops under 120px (Eco Business must read whole). */
+  @media (max-width: 1400px) {
+    .content.ls { grid-template-columns: minmax(0, 1fr) 300px; }
+    .tr { grid-template-columns: 56px minmax(120px, 1fr) 150px 76px 128px 72px 16px; gap: 10px; padding-left: var(--inset); }
+    .tr .grip { display: none; } .tr.h > span:first-child { display: none; }
+    .tr .ph { width: 56px; height: 36px; } .tr .ph .car { width: 52px; height: 28px; }
+  }
+  .nm2 span { font: var(--c-small); color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .wh { display: flex; flex-direction: column; gap: 2px; font: var(--c-small); color: var(--ink-muted); min-width: 0; }
+  .wh span { display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .wh svg { width: 14px; height: 14px; flex: none; color: var(--ink-faint); }
+  .wh b { font-weight: 500; color: var(--ink); }
+  .party { display: flex; gap: 10px; font: 500 13px/18px var(--mono); white-space: nowrap; }
+  .party span { display: inline-flex; align-items: center; gap: 4px; } .party svg { width: 14px; height: 14px; color: var(--ink-faint); }
+  .tr .px { font: 500 13px/18px var(--mono); text-align: right; white-space: nowrap; }
+  .tr .go { color: var(--ink-faint); width: 16px; height: 16px; }
+  .zs { display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: var(--zc); flex: none; }
+  /* Rider preview: what the app lists for a given pickup and party. */
+  .rp { padding: 10px var(--inset); display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid var(--line-soft); }
+  .rp .row-flex { gap: 6px; flex-wrap: wrap; }
+  .ri { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; padding: 6px var(--inset); }
+  .ri .car { width: 56px; height: 30px; }
+  .ri b { font: var(--c-strong); white-space: nowrap; }
+  .ri .v { font: 500 13px/18px var(--mono); white-space: nowrap; }
+  .ri.off { opacity: 1; } .ri.off b, .ri.off .v { color: var(--ink-faint); } .ri.off .car { opacity: .35; }
+  .ri .why { grid-column: 2 / 4; font: var(--c-small); color: var(--ink-faint); display: flex; align-items: center; gap: 4px; }
+  .ri .why svg { width: 14px; height: 14px; }
+  .grp { font: var(--c-label); color: var(--ink-faint); padding: 10px var(--inset) 2px; }
+  /* ── Detail ── */
+  .content.ed { grid-template-columns: 220px minmax(0, 1fr) 316px; }
+  @media (max-width: 1400px) { .content.ed { grid-template-columns: minmax(0, 1fr) 292px; } .content.ed .tl { display: none; } }
+  .tl .ti { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 var(--inset) 0 10px; border-bottom: 1px solid var(--line-soft); text-decoration: none; color: var(--ink); }
+  .tl .ti .car { width: 40px; height: 22px; flex: none; }
+  .tl .ti b { font: var(--c-strong); white-space: nowrap; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .tl .ti.on { background: var(--surface-alt); box-shadow: inset 3px 0 0 var(--brand-vivid); }
+  .edc { display: flex; flex-direction: column; min-height: 0; }
+  .edc .card-h .car { width: 56px; height: 30px; }
+  /* The passport: three tiles, always above the tabs. Pre-order is one of them, with its switch. */
+  .pass { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.3fr); gap: 8px; padding: 12px var(--inset) 0; flex: none; }
+  .tile { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: var(--r-ctl); background: var(--surface-alt); min-width: 0; }
+  .tile .k { display: flex; align-items: center; gap: 6px; font: var(--c-label); color: var(--ink-muted); }
+  .tile .k svg { width: 16px; height: 16px; }
+  .tile .k .switch { margin-left: auto; }
+  .tile .v { font: var(--c-strong); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tile .s { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tile.pre.on { box-shadow: inset 0 0 0 1px var(--line-control); background: var(--surface); }
+  .sh { display: flex; align-items: center; gap: 10px; padding: 18px var(--inset) 6px; }
+  .sh h3 { font: var(--c-head); white-space: nowrap; }
+  .sh .sub { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .sh .end { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+  .frow { display: grid; grid-template-columns: minmax(0, 1fr) auto 76px; gap: 12px; align-items: center; min-height: 50px; padding: 6px var(--inset); border-bottom: 1px solid var(--line-soft); }
+  .frow .l { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .frow .l b { font: var(--c-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .frow .l span { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .frow .c { display: flex; align-items: center; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+  .frow .s { display: flex; justify-content: flex-end; }
+  .frow.off .l b { color: var(--ink-muted); } .frow.off .c { opacity: .5; }
+  .num-in { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; height: 30px; padding: 0 8px; border-radius: var(--r-ctl); box-shadow: inset 0 0 0 1px var(--line-control); background: var(--surface); font: 500 13px/18px var(--mono); white-space: nowrap; min-width: 84px; }
+  .num-in span { color: var(--ink-faint); font-family: var(--font); }
+  .num-in.dflt { color: var(--ink-faint); }                 /* blank = the fleet's own value, shown as a placeholder */
+  .num-in.p { min-width: 64px; }
+  .x { font: var(--c-small); color: var(--ink-faint); }
+  .seg.sm button { height: 24px; padding: 0 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  /* Multi-zone picker: chosen zones as removable chips + a combobox to add. «Ամենուր» is the empty set. */
+  .zp { display: flex; flex-direction: column; gap: 8px; padding: 10px var(--inset); border-bottom: 1px solid var(--line-soft); }
+  .zp .hd { display: flex; align-items: center; gap: 10px; }
+  .zp .hd b { font: var(--c-strong); width: 92px; flex: none; }
+  .zchip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 4px 0 10px; border-radius: var(--r-pill); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-control); font: var(--c-strong); white-space: nowrap; }
+  .zchip button { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-faint); }
+  .zchip button svg { width: 14px; height: 14px; }
+  .addz { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: var(--r-pill); box-shadow: inset 0 0 0 1px var(--line-soft); font: var(--c-small); color: var(--ink-muted); }
+  .addz svg { width: 14px; height: 14px; }
+  .zp .say { font: var(--c-small); color: var(--ink-muted); padding-left: 102px; }
+  .step { display: inline-flex; align-items: center; height: 30px; border-radius: var(--r-ctl); box-shadow: inset 0 0 0 1px var(--line-control); background: var(--surface); }
+  .step button { width: 30px; height: 30px; display: grid; place-items: center; color: var(--ink-muted); } .step button svg { width: 14px; height: 14px; }
+  .step b { min-width: 28px; text-align: center; font: 500 13px/18px var(--mono); }
+  .split { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 10px var(--inset) 12px; font: var(--c-body); }
+  .split span:nth-child(even) { text-align: right; font: 500 13px/20px var(--mono); white-space: nowrap; }
+  .split .tot { font-weight: 600; border-top: 1px solid var(--line-soft); padding-top: 6px; margin-top: 2px; }
+  .split .faint { color: var(--ink-faint); }
+  .zr { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; padding: 8px var(--inset); border-bottom: 1px solid var(--line-soft); }
+  .zr .sw { width: 10px; height: 10px; border-radius: 3px; background: var(--zc); }
+  .zr b { font: var(--c-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .zr .v { font: 500 13px/18px var(--mono); white-space: nowrap; }
+  .zr .d { grid-column: 2 / 4; font: var(--c-small); color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .edf2 { display: flex; align-items: center; gap: 8px; padding: 10px var(--inset); border-top: 1px solid var(--line-soft); flex: none; font: var(--c-small); color: var(--ink-faint); }
+  .hero { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 2px 12px; align-items: center; margin: 12px var(--inset) 4px; padding: 12px; border-radius: var(--r-ctl); background: var(--surface-alt); }
+  .hero .ic { grid-row: 1 / 3; width: 40px; height: 40px; border-radius: 10px; background: var(--surface); display: grid; place-items: center; }
+  .hero b { font: var(--c-head); } .hero span { font: var(--c-small); color: var(--ink-muted); }
+  .hero .switch { grid-row: 1 / 3; grid-column: 3; font: var(--c-strong); }
+  /* ── Wizard (admin-only modal). Scrim is dark in both themes, by design; the token is per theme, never a bare literal. ── */
+  :root { --scrim: rgba(20, 20, 22, .42); } :root[data-theme="dark"] { --scrim: rgba(0, 0, 0, .62); }
+  .scrim { position: fixed; inset: 0; z-index: 100; background: var(--scrim); display: grid; place-items: center; padding: 24px; }
+  .wiz { width: min(960px, 100%); height: min(680px, calc(100vh - 48px)); display: grid; grid-template-columns: 232px minmax(0, 1fr); grid-template-rows: 56px minmax(0, 1fr) 60px; border-radius: 16px; background: var(--surface); box-shadow: var(--e2); overflow: hidden; }
+  .wiz .wh2 { grid-column: 1 / 3; display: flex; align-items: center; gap: 12px; padding: 0 12px 0 20px; border-bottom: 1px solid var(--line-soft); }
+  .wiz .wh2 h2 { font: var(--c-title); white-space: nowrap; }
+  .wiz .wh2 .end { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .stp { list-style: none; padding: 12px 8px; background: var(--surface-alt); display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+  .stp li a { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 0 10px; align-items: center; padding: 8px 10px; border-radius: var(--r-ctl); text-decoration: none; color: var(--ink-muted); min-height: 48px; }
+  .stp li a .n { grid-row: 1 / 3; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font: 600 12px/1 var(--mono); box-shadow: inset 0 0 0 1px var(--line-control); background: var(--surface); }
+  .stp li a .n svg { width: 14px; height: 14px; }
+  .stp li a b { font: var(--c-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stp li a small { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stp li.done a .n { background: var(--brand-fill); color: var(--brand-fill-ink); box-shadow: none; }
+  .stp li.cur a { background: var(--surface); box-shadow: var(--e1); color: var(--ink); }
+  .stp li.cur a .n { background: var(--ink); color: var(--surface); box-shadow: none; }
+  .stp li.todo a { pointer-events: none; } .stp li.todo a b { color: var(--ink-faint); }
+  .wb { overflow-y: auto; padding: 4px 0 16px; }
+  .wb .lead { padding: 16px var(--inset) 4px; font: var(--c-body); color: var(--ink-muted); }
+  .wb .lead b { display: block; font: var(--c-head); color: var(--ink); margin-bottom: 2px; }
+  .wf { grid-column: 1 / 3; display: flex; align-items: center; gap: 8px; padding: 0 16px 0 20px; border-top: 1px solid var(--line-soft); font: var(--c-small); color: var(--ink-faint); }
+  .wf .sp { flex: 1; }
+  .fld { display: flex; flex-direction: column; gap: 6px; padding: 10px var(--inset); }
+  .fld .err { font: var(--c-small); color: var(--danger-c); display: flex; gap: 4px; align-items: center; } .fld .err svg { width: 14px; height: 14px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; }
+  .zl2 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 0 var(--inset) 8px; }
+  .zl2 .check { min-height: 32px; padding: 0 10px; border-radius: var(--r-ctl); box-shadow: inset 0 0 0 1px var(--line-soft); }
+  .zl2 .check.on { box-shadow: inset 0 0 0 1px var(--line-control); background: var(--surface-alt); }
+  .rv { display: grid; grid-template-columns: 140px minmax(0, 1fr) auto; gap: 4px 12px; align-items: baseline; padding: 10px var(--inset); border-bottom: 1px solid var(--line-soft); font: var(--c-body); }
+  .rv .k { font: var(--c-label); color: var(--ink-faint); } .rv .v { color: var(--ink); } .rv .v .mono { font-size: 13px; }
+  .card2 { margin: 8px var(--inset); padding: 12px; border-radius: var(--r-card); background: var(--surface-alt); display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 2px 12px; align-items: center; }
+  .card2 .car { width: 96px; height: 50px; grid-row: 1 / 3; }
+  .card2 b { font: 600 17px/24px var(--font); } .card2 span { font: var(--c-small); color: var(--ink-muted); }
+  .card2 .p { grid-row: 1 / 3; grid-column: 3; font: 600 17px/24px var(--font); font-variant-numeric: tabular-nums; }
+  .select { display: flex; align-items: center; gap: 8px; height: var(--h-m); padding: 0 10px; border-radius: var(--r-ctl); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-control); min-width: 0; font: var(--c-body); }
+  .select .val { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .select svg { width: 16px; height: 16px; color: var(--ink-faint); flex: none; }
+</style>
+</head>
+<body>
+<div class="screen" id="screen">
+  <div class="main">
+    <header class="bar">
+      <span class="crumb">Ավտոպարկ <i data-lucide="chevron-right"></i></span><h1>Սակագներ</h1>
+      <div class="live"></div>
+    </header>
+    <div class="content ls" id="ov">
+      <div class="col">
+        <section class="card" aria-label="Սակագներ">
+          <div class="card-h"><h2>Սակագներ</h2><span class="sub">Հերթականությունը՝ ինչպես հավելվածում · Alt+↑ / Alt+↓</span>
+            <span class="end"><a class="btn primary s" id="newb" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր սակագին<span class="kbd">N</span></a></span></div>
+          <div class="tr h" aria-hidden="true"><span></span><span></span><span>Սակագին</span><span>Որտեղից → Որտեղ</span><span>Ուղևոր</span><span>Նախնական պատվեր</span><span style="text-align:right">2,1 կմ · 4 ր</span><span></span></div>
+          <div id="rows" data-truncate></div>
+          <div class="edf2"><i data-lucide="info"></i>Գին, նախնական պատվեր, միջնորդավճար, գոտիներ՝ սակագնի մեջ · գոտիների բացառությունները՝ <a href="zones-v3.html" id="zl" style="color:var(--brand-text)">Գոտիներ › Կանոններ</a></div>
+        </section>
+      </div>
+      <aside class="card" aria-label="Ինչ է տեսնում ուղևորը" id="rider" data-truncate></aside>
+    </div>
+    <div class="content ed" id="ed" hidden></div>
+  </div>
+</div>
+<div id="wiz"></div>
+<script>
+  shell('tariffs')
+  const ST = mockStates([['', 'Ցանկ'], ['air', 'Ցանկ · Զվարթնոցում'], ['detail', 'Eco Aero · ընդհանուր'], ['preorder', 'Նախնական պատվեր · միաց.'], ['preorder-off', 'Նախնական պատվեր · անջ.'],
+    ['w1', 'Նոր · 1 Անուն'], ['w1-err', 'Նոր · 1 անունը զբաղված'], ['w2', 'Նոր · 2 Գոտիներ'], ['w3', 'Նոր · 3 Գին'], ['w4', 'Նոր · 4 Նախնական'], ['w5', 'Նոր · 5 Վճարում'], ['w6', 'Նոր · 6 Ստուգել']])
+  const href = (s) => `tariffs-v3.html?theme=${THEME}${s ? '&state=' + s : ''}`
+  document.getElementById('newb').href = href('w1')
+  document.getElementById('zl').href = `zones-v3.html?theme=${THEME}&state=rules`
+  const DARK = THEME === 'dark'
+  const ZC = DARK ? { city: '#6B9BFF', air: '#F2C464', ctr: '#3DD68C', arb: '#C79BFF', ejm: '#F472B6' } : { city: '#2563EB', air: '#B45309', ctr: '#15803D', arb: '#7C3AED', ejm: '#BE185D' }
+  const ZN = { city: 'Երևան', ctr: 'Կենտրոն', arb: 'Արաբկիր', air: 'Զվարթնոց', ejm: 'Էջմիածին' }
+  /* v3 tariff facts. from/to: [] = «Ամենուր» (no restriction). pax/bags: the party the tariff takes. pre: [on, min lead, max lead, surcharge]. */
+  const AERO = { id: 'aero', img: 'business', name: 'Eco Aero', blurb: 'Օդանավակայանից՝ ֆիքսված գնով', base: 1500, km: 150, min: 20, floor: 4500, seats: 4 }
+  const V = {
+    city: { pax: 4, bags: 2, from: [], to: [], pre: [true, 30, 7, 200] },
+    partner: { pax: 4, bags: 2, from: [], to: [], pre: [true, 30, 7, 200] },
+    kids: { pax: 3, bags: 2, from: ['city'], to: ['city'], pre: [false] },
+    business: { pax: 4, bags: 3, from: [], to: [], pre: [true, 60, 14, 300] },
+    van: { pax: 7, bags: 6, from: [], to: [], pre: [false] },
+    vip: { pax: 4, bags: 3, from: [], to: [], pre: [true, 60, 30, 500] },
+    aero: { pax: 4, bags: 4, from: ['air'], to: [], pre: [true, 30, 30, 0] },
+  }
+  const ALL = [...TIERS.map((t) => ({ ...t, img: t.id })), AERO]
+  const zs = (ids) => ids.length ? ids.map((z) => `<span class="zs" style="--zc:${ZC[z]}"></span><b>${ZN[z]}</b>`).join(', ') : 'Ամենուր'
+  const prePill = (p) => p[0] ? `<span class="pill ok"><i data-lucide="calendar-check"></i>Միացված</span>` : `<span class="pill"><i data-lucide="calendar-x"></i>Միայն «Հիմա»</span>`
+  const go = (t) => href(t.id === 'aero' ? 'detail' : 'detail')
+  document.getElementById('rows').innerHTML = ALL.map((t) => { const v = V[t.id]
+    return `<a class="tr${t.id === 'aero' && ST === 'air' ? ' on' : ''}" href="${go(t)}"><i data-lucide="grip-vertical" class="grip"></i><span class="ph"><span class="car">${carImg(t.img, t.name)}</span></span>
+      <span class="nm2"><b>${t.name}</b><span>${t.blurb}</span></span>
+      <span class="wh"><span><i data-lucide="map-pin"></i>${zs(v.from)}</span><span><i data-lucide="flag"></i>${zs(v.to)}</span></span>
+      <span class="party"><span title="Ուղևորներ"><i data-lucide="users"></i>${v.pax}</span><span title="Ուղեբեռ"><i data-lucide="luggage"></i>${v.bags}</span></span>
+      <span>${prePill(v.pre)}</span><span class="px">${t.id === 'aero' ? '—' : amd(fare(t, 2.1, 4))}</span><i data-lucide="chevron-right" class="go"></i></a>` }).join('')
+    + `<a class="tr" href="${href('w3')}"><i data-lucide="grip-vertical" class="grip" style="opacity:.3"></i><span class="ph"><i data-lucide="image" style="color:var(--ink-faint)"></i></span>
+      <span class="nm2"><b>Eco Pet</b><span>Սևագիր · երեկ 18:40, Մ. Հովսեփյան</span></span>
+      <span class="wh"><span><i data-lucide="map-pin"></i>Ամենուր</span><span><i data-lucide="flag"></i>Ամենուր</span></span>
+      <span class="party"><span><i data-lucide="users"></i>3</span><span><i data-lucide="luggage"></i>1</span></span><span><span class="pill warn"><i data-lucide="pencil"></i>Սևագիր · <span class="mono">3/6</span></span></span>
+      <span class="px faint">—</span><i data-lucide="chevron-right" class="go"></i></a>`
+  /* Rider preview: GET /customer/tiers?pickup=…&pax=…&bags=… — the server's offered list, with the reasons only the console sees. */
+  const AT = ST === 'air' ? 'air' : 'city'
+  const offer = (t) => { const v = V[t.id]
+    if (v.from.length && !v.from.includes(AT) && !(AT === 'air' && v.from.includes('city') && false)) return ['map-pin-off', `միայն «${v.from.map((z) => ZN[z]).join('», «')}» գոտուց`]
+    if (AT === 'air' && ['city', 'partner', 'kids'].includes(t.id)) return ['shield', 'Զվարթնոց · «Միայն այս սակագները» կանոն']
+    if (v.bags < 3) return ['luggage', `ուղեբեռ՝ առավելագույնը ${v.bags}`]
+    return null }
+  const on = ALL.filter((t) => !offer(t)), off = ALL.filter((t) => offer(t))
+  const px = (t) => AT === 'air' ? { aero: '4 500 ֏', business: '7 000 ֏', van: '7 800 ֏', vip: '8 500 ֏' }[t.id] || '—' : amd(fare(t, 2.1, 4))
+  document.getElementById('rider').innerHTML = `<div class="card-h"><h2>Ինչ է տեսնում ուղևորը</h2></div>
+    <div class="rp"><span class="label">Նստեցում</span><div class="row-flex" role="radiogroup" aria-label="Նստեցման գոտի"><a role="radio" aria-checked="${AT === 'city'}" class="chip${AT === 'city' ? ' on' : ''}" href="${href('')}" style="text-decoration:none">Երևան · Աբովյան 10</a><a role="radio" aria-checked="${AT === 'air'}" class="chip${AT === 'air' ? ' on' : ''}" href="${href('air')}" style="text-decoration:none">Զվարթնոց</a></div>
+      <span class="label">Ուղևոր</span><div class="row-flex"><span class="step" aria-label="Ուղևորներ"><button aria-label="Պակասեցնել"><i data-lucide="minus"></i></button><b>2</b><button aria-label="Ավելացնել"><i data-lucide="plus"></i></button></span><span class="x">ուղևոր</span>
+        <span class="step" aria-label="Ուղեբեռ"><button aria-label="Պակասեցնել"><i data-lucide="minus"></i></button><b>3</b><button aria-label="Ավելացնել"><i data-lucide="plus"></i></button></span><span class="x">ուղեբեռ</span></div></div>
+    <div class="grp">Ցուցադրվում է · <span class="mono">${on.length}</span></div>
+    ${on.map((t) => `<div class="ri"><span class="car">${carImg(t.img)}</span><b>${t.name}</b><span class="v">${px(t)}</span></div>`).join('')}
+    <div class="grp">Թաքցված է · <span class="mono">${off.length}</span></div>
+    ${off.map((t) => { const [ic, w] = offer(t); return `<div class="ri off"><span class="car">${carImg(t.img)}</span><b>${t.name}</b><span class="v">—</span><span class="why"><i data-lucide="${ic}"></i>${w}</span></div>` }).join('')}
+    <div style="padding:12px var(--inset)"><div class="notice neutral"><i data-lucide="eye-off"></i><span>Ուղևորը թաքցվածները չի տեսնում և պատճառը չի կարդում · դիսպետչերը տեսնում է «ոչ այստեղ»</span></div></div>`
+
+  /* ── Shared atoms ── */
+  const sw = (on, label, txt) => `<span class="switch${on ? ' on' : ''}" role="switch" aria-checked="${on}" aria-label="${label}"><i class="t"></i>${txt || (on ? 'Միաց.' : 'Անջ.')}</span>`
+  const n = (v, u, cls) => `<span class="num-in${cls ? ' ' + cls : ''}">${v}${u ? `<span>${u}</span>` : ''}</span>`
+  const row = (b, hint, ctl, on, label) => `<div class="frow${on === false ? ' off' : ''}"><span class="l"><b>${b}</b>${hint ? `<span>${hint}</span>` : ''}</span><span class="c">${ctl}</span><span class="s">${on === undefined ? '' : sw(on, label || b)}</span></div>`
+  const seg = (opts, on, label) => `<div class="seg sm" role="radiogroup" aria-label="${label}">${opts.map((o, i) => `<button role="radio" aria-checked="${i === on}" class="${i === on ? 'on' : ''}">${o}</button>`).join('')}</div>`
+  const chk = (label, on) => `<span class="check${on ? ' on' : ''}" role="checkbox" aria-checked="${on}"><i class="b">${on ? '<i data-lucide="check" style="width:12px;height:12px;color:var(--brand-fill-ink)"></i>' : ''}</i>${label}</span>`
+  const sh = (h, sub, end) => `<div class="sh"><h3>${h}</h3>${sub ? `<span class="sub">${sub}</span>` : ''}${end ? `<span class="end">${end}</span>` : ''}</div>`
+  const stepper = (v, label) => `<span class="step" role="spinbutton" aria-valuenow="${v}" aria-label="${label}"><button aria-label="Պակասեցնել"><i data-lucide="minus"></i></button><b>${v}</b><button aria-label="Ավելացնել"><i data-lucide="plus"></i></button></span>`
+  const zchips = (ids, end) => ids.length ? ids.map((z) => `<span class="zchip"><span class="zs" style="--zc:${ZC[z]}"></span>${ZN[z]}<button aria-label="Հանել ${ZN[z]}"><i data-lucide="x"></i></button></span>`).join('') + `<span class="addz" role="combobox" aria-expanded="false" aria-label="Ավելացնել գոտի · ${end}"><i data-lucide="plus"></i>գոտի</span>`
+    : `<span class="chip on"><i data-lucide="globe"></i>Ամենուր</span><span class="addz" role="combobox" aria-expanded="false" aria-label="Սահմանափակել գոտիներով · ${end}"><i data-lucide="plus"></i>սահմանափակել գոտիներով</span>`
+  const zonePick = (from, to) => `<div class="zp"><div class="hd"><b>Նստեցում</b><div class="chips">${zchips(from, 'նստեցում')}</div></div>
+      <div class="hd"><b>Իջեցում</b><div class="chips">${zchips(to, 'իջեցում')}</div></div>
+      <span class="say"><i data-lucide="message-square-text" style="width:14px;height:14px;vertical-align:-2px"></i> ${from.length ? `Ուղևորը սակագինը կտեսնի միայն «${from.map((z) => ZN[z]).join('» կամ «')}» գոտում նստելիս` : 'Սակագինը երևում է ամենուր'}${to.length ? `, իսկ իջեցումը՝ միայն «${to.map((z) => ZN[z]).join('» կամ «')}» գոտում` : ', իջեցումը՝ ցանկացած տեղ'}</span></div>`
+  const party = (pax, bags) => row('Ուղևորներ', 'առավելագույնը մեկ պատվերում', stepper(pax, 'Ուղևորներ'))
+    + row('Ուղեբեռ', 'մեծ պայուսակ կամ ճամպրուկ, հատ', stepper(bags, 'Ուղեբեռ'))
+    + row('Հարցնել պատվիրելիս', 'հավելվածը և դիսպետչերը նշում են թիվը', chk('Ուղևորներ', true) + chk('Ուղեբեռ', true))
+  const preFields = (p, def) => row('Ամենաշուտը', 'պատվիրելու պահից առաջ', n(p[1], 'ր'))
+    + row('Ամենաուշը', 'քանի օր առաջ', n(p[2], 'օր'))
+    + row('Հավելավճար', 'նախնական պատվերի համար', `${seg(['֏', '%'], 0, 'Հավելավճարի տեսակ')}${n(p[3] ? nf(p[3]) : '0', '֏')}`, p[3] > 0)
+    + (def ? row('Որոնումը սկսվում է', 'նստելու ժամից առաջ · դատարկ՝ ավտոպարկինը', n('15', 'ր', 'dflt'))
+      + row('Պահել նշանակված վարորդին', 'նստելու ժամից առաջ · դատարկ՝ ավտոպարկինը', n('30', 'ր', 'dflt'))
+      + row('Վարորդը կարող է մեկնել', 'նստելու ժամից առաջ · դատարկ՝ ավտոպարկինը', n('45', 'ր', 'dflt'))
+      + row('Նշանակում', 'ով է ստանում պատվերը', seg(['Նշանակվածը, հետո ավտոմատ', 'Ավտոմատ', 'Դիսպետչեր'], 0, 'Նշանակում')) : '')
+
+  /* ── Detail: Eco Aero (?state=detail | preorder | preorder-off) ── */
+  if (['detail', 'preorder', 'preorder-off'].includes(ST)) {
+    document.getElementById('ov').style.display = 'none'
+    const ed = document.getElementById('ed'); ed.hidden = false
+    const T = ST === 'preorder-off' ? { ...TIERS[2], img: 'kids' } : AERO, v = ST === 'preorder-off' ? V.kids : V.aero
+    const sec = ST === 'detail' ? 'gen' : 'pre'
+    const tabs = [['gen', 'Ընդհանուր', 'info'], ['price', 'Գին', 'banknote'], ['pre', 'Նախնական պատվեր', 'calendar-clock'], ['time', 'Ժամային գներ', 'moon-star'], ['commission', 'Միջնորդավճար', 'percent'], ['other', 'Այլ', 'sliders-horizontal']]
+    let body = ''
+    if (sec === 'gen') {
+      body = sh('Անուն և նկար')
+        + row('Անուն', 'ուղևորը տեսնում է հավելվածում', `<span class="input" style="width:240px"><span class="val">${T.name}</span></span>`)
+        + row('Կարճ նկարագրություն', 'քարտի տակ', `<span class="input" style="width:240px"><span class="val">${T.blurb}</span></span>`)
+        + row('Մեքենայի դաս', 'ով կարող է կատարել', `<span class="select" style="width:240px" role="combobox" aria-expanded="false"><span class="val">Business · ID.4, Enyaq</span><i data-lucide="chevrons-up-down"></i></span>`)
+        + sh('Որտեղից → Որտեղ', 'մեկ անգամ ամբողջ սակագնի համար · մի քանի գոտի')
+        + zonePick(v.from, v.to)
+        + sh('Ուղևոր', 'հավելվածը թաքցնում է սակագինը, եթե խումբը չի տեղավորվում')
+        + party(v.pax, v.bags)
+        + `<div style="padding:12px var(--inset)"><div class="notice neutral"><i data-lucide="layers"></i><span>Գների տարբերությունը գոտիներում (օր. Կենտրոն → Զվարթնոց 4 500 ֏ նոյեմբերին)՝ <a href="zones-v3.html?theme=${THEME}&state=rules" style="color:var(--brand-text)">Գոտիներ › Կանոններ</a></span></div></div>`
+    } else {
+      const p = v.pre, isOn = p[0]
+      body = `<div class="hero"><span class="ic"><i data-lucide="${isOn ? 'calendar-check' : 'calendar-x'}"></i></span><b>Նախնական պատվեր</b>${sw(isOn, 'Նախնական պատվեր', isOn ? 'Միացված' : 'Անջատված')}<span>${isOn ? 'Ուղևորը և դիսպետչերը կարող են պատվիրել այլ ժամի · ժամին որոնումն սկսվում է ինքնաշխատ' : `${T.name}-ը միայն «Հիմա» · հավելվածի «Նախապես» ցանկում չի երևում`}</span></div>`
+        + (isOn ? sh('Ժամկետ') + preFields(p, true)
+          + sh('Վճարում', 'որ եղանակներով կարելի է պատվիրել նախապես') + `<div style="padding:4px var(--inset) 12px" class="chips">${chk('Կանխիկ', true)}${chk('Քարտ', true)}${chk('Ընկերության հաշիվ', true)}</div>`
+          + sh('Չեղարկում') + row('Անվճար չեղարկում', 'մինչև նստելու ժամը', n(60, 'ր')) + row('Չեղարկման վճար', 'դրանից հետո', n(500, '֏'), true)
+          + `<div style="padding:12px var(--inset)"><div class="notice neutral"><i data-lucide="settings-2"></i><span>Մոխրագույն թվերը ավտոպարկի ընդհանուր արժեքներն են (<a href="settings.html?theme=${THEME}" style="color:var(--brand-text)">Կարգավորումներ › Դիսպետչերացում</a>) · գրեք թիվ՝ այս սակագնի համար փոխելու։ Այլ ընդհանուր կարգավորում պետք չէ։</span></div></div>`
+          : `<div style="padding:12px var(--inset)"><div class="notice neutral"><i data-lucide="info"></i><span>Միացնելիս կբացվեն ժամկետը, հավելավճարը, վճարումը և չեղարկումը · արժեքները պահված են՝ 30 ր – 7 օր</span></div></div>`)
+    }
+    ed.innerHTML = `
+      <section class="card tl" aria-label="Սակագներ" data-truncate><div class="card-h"><h2>Սակագներ</h2><span class="end"><a class="btn ghost s" href="${href('')}">Բոլորը</a></span></div>
+        ${ALL.map((t) => `<a class="ti${t.id === T.id ? ' on' : ''}" href="${href(t.id === 'kids' ? 'preorder-off' : 'detail')}"><span class="car">${carImg(t.img)}</span><b>${t.name}</b>${V[t.id].pre[0] ? '<i data-lucide="calendar-check" style="width:14px;height:14px;color:var(--ok-text)" aria-label="Նախնական պատվեր՝ միացված"></i>' : '<i data-lucide="calendar-x" style="width:14px;height:14px;color:var(--ink-faint)" aria-label="Միայն հիմա"></i>'}</a>`).join('')}</section>
+      <section class="card edc" aria-label="${T.name} կարգավորումներ">
+        <div class="card-h"><span class="car">${carImg(T.img)}</span><h2>${T.name}</h2><span class="pill ok"><i data-lucide="circle-check"></i>Գործում է</span><span class="sub">գինը՝ <span class="num">${T.id === 'aero' ? '22.10.2026' : '09.10.2026'}</span>-ից</span>
+          <span class="end">${ST === 'preorder-off' ? '' : '<span class="pill warn"><i data-lucide="pencil"></i>Չպահված</span>'}<button class="btn ghost s">Չեղարկել</button><button class="btn primary s">Պահել</button></span></div>
+        <div class="pass">
+          <a class="tile" href="${href('detail')}" style="text-decoration:none"><span class="k"><i data-lucide="map-pin"></i>Որտեղից → Որտեղ</span><span class="v">${v.from.length ? v.from.map((z) => ZN[z]).join(', ') : 'Ամենուր'} → ${v.to.length ? v.to.map((z) => ZN[z]).join(', ') : 'ամենուր'}</span><span class="s">${v.from.length ? 'այլ տեղ չի երևում' : 'առանց սահմանափակման'}</span></a>
+          <a class="tile" href="${href('detail')}" style="text-decoration:none"><span class="k"><i data-lucide="users"></i>Ուղևոր</span><span class="v"><span class="mono">${v.pax}</span> ուղևոր · <span class="mono">${v.bags}</span> ուղեբեռ</span><span class="s">հարցնում ենք պատվիրելիս</span></a>
+          <div class="tile pre${v.pre[0] ? ' on' : ''}"><span class="k"><i data-lucide="calendar-clock"></i>Նախնական պատվեր${sw(v.pre[0], 'Նախնական պատվեր · ' + T.name)}</span><span class="v">${v.pre[0] ? `<span class="mono">${v.pre[1]} ր – ${v.pre[2]} օր</span>${v.pre[3] ? ` · +${amd(v.pre[3])}` : ''}` : 'Միայն «Հիմա»'}</span><a class="s" href="${href(v.pre[0] ? 'preorder' : 'preorder-off')}" style="color:var(--brand-text);text-decoration:none">Կարգավորումներ →</a></div>
+        </div>
+        <nav class="tabsl" aria-label="Բաժիններ">${tabs.map(([id, l, ic]) => `<a class="${id === sec ? 'on' : ''}" href="${href(id === 'pre' ? (v.pre[0] ? 'preorder' : 'preorder-off') : 'detail')}"${id === sec ? ' aria-current="page"' : ''}><i data-lucide="${ic}"></i>${l}</a>`).join('')}</nav>
+        <div class="scroll-y grow" data-truncate>${body}<div style="height:16px"></div></div>
+        <div class="edf2"><i data-lucide="info"></i>Նոր գինը գործում է նշված օրվանից · ընթացիկ և նախնական պատվերները պահում են իրենց գինը</div>
+      </section>
+      <aside class="col" data-truncate>
+        <section class="card"><div class="card-h"><h2>Գնի օրինակ</h2><span class="sub">${T.id === 'aero' ? '14,2 կմ · 22 ր' : '2,1 կմ · 4 ր'}</span></div>
+          ${T.id === 'aero' ? `<div class="split"><span>Նստելու գին</span><span>1 500 ֏</span><span>14,2 կմ × 150 ֏</span><span>2 130 ֏</span><span>22 ր × 20 ֏</span><span>440 ֏</span>
+            <span class="faint">Հաշվարկով</span><span class="faint">4 070 ֏</span><span>Նվազագույնը</span><span>4 500 ֏</span>
+            <span class="tot">Ուղևորը վճարում է</span><span class="tot">4 500 ֏</span></div>`
+          : `<div class="split"><span>Նստելու գին</span><span>${amd(T.base)}</span><span>Ընդամենը</span><span>${amd(fare(T, 2.1, 4))}</span></div>`}</section>
+        <section class="card"><div class="card-h"><h2>Գոտիների կանոններ</h2><span class="end"><a class="btn ghost icon s" href="zones-v3.html?theme=${THEME}&state=rules" aria-label="Գոտիների կանոններ"><i data-lucide="arrow-right"></i></a></span></div>
+          ${[['air', 'Զվարթնոց · միայն այս սակագները', 'հասան.', 'նստեցում · Aero, Business, Van, Vip'], ['ctr', 'Կենտրոն, Արաբկիր → Զվարթնոց', '4 500 ֏', '01.11–30.11 · փոխարինում · ֆիքսված'], ['ctr', 'Կենտրոն՝ տոնական սեզոն', '+10 %', 'նստեցում · 01.11–31.12']].map(([z, b, val, d]) => `<div class="zr" style="--zc:${ZC[z]}"><span class="sw"></span><b>${b}</b><span class="v">${val}</span><span class="d">${d}</span></div>`).join('')}
+          <div class="edf2" style="border-top:0">Սակագին → Գոտու կանոն → Գոտուց գոտի</div></section>
+      </aside>`
+  }
+
+  /* ── Create wizard (?state=w1..w6). Opened by «Նոր սակագին» (N). Each step saves a draft; Esc closes and keeps it. ── */
+  const W = /^w(\d)/.exec(ST)
+  if (W) {
+    const k = +W[1], ERR = ST === 'w1-err'
+    const S = [['Անուն', 'անուն, մեքենա, ուղևոր'], ['Գոտիներ', 'որտեղից → որտեղ'], ['Գին', 'գնի կառուցվածք'], ['Նախնական պատվեր', 'միացնել կամ ոչ'], ['Վճարում', 'եղանակներ, միջնորդավճար'], ['Ստուգել', 'և միացնել']]
+    const body = {
+      1: `<div class="lead"><b>Ինչպես է կոչվում սակագինը</b>Սա հավելվածում ուղևորի տեսած քարտն է։ Կարող եք սկսել այլ սակագնի պատճենից։</div>
+        <div class="fld"><span class="label">Սկսել</span>${seg(['Դատարկից', 'Պատճենել՝ Eco Business'], 1, 'Սկսել')}</div>
+        <div class="two"><div class="fld"><label class="label" for="wn">Անուն</label><span class="input l ${ERR ? 'err' : 'focus'}" id="wn" aria-invalid="${ERR}" ${ERR ? 'aria-describedby="wne"' : ''}><span class="val">${ERR ? 'Eco Business' : 'Eco Aero'}</span></span>${ERR ? '<span class="err" id="wne"><i data-lucide="circle-alert"></i>Այդ անունով սակագին արդեն կա</span>' : ''}</div>
+          <div class="fld"><label class="label">Կարճ նկարագրություն</label><span class="input l"><span class="val">Օդանավակայանից՝ ֆիքսված գնով</span></span></div></div>
+        <div class="two"><div class="fld"><span class="label">Մեքենայի դաս</span><span class="select" role="combobox" aria-expanded="false"><span class="val">Business · ID.4, Enyaq</span><i data-lucide="chevrons-up-down"></i></span></div>
+          <div class="fld"><span class="label">Նկար</span><span class="row-flex" style="gap:8px"><span class="car" style="width:72px;height:38px">${carImg('business')}</span><button class="btn secondary s"><i data-lucide="upload"></i>Վերբեռնել</button><span class="x">կամ դասի նկարը</span></span></div></div>
+        ${sh('Ուղևոր', 'փոքր մաս · ինչ խումբ է տեղավորվում')}${row('Ուղևորներ', 'առավելագույնը', stepper(4, 'Ուղևորներ'))}${row('Ուղեբեռ', 'ճամպրուկ, հատ', stepper(4, 'Ուղեբեռ'))}`,
+      2: `<div class="lead"><b>Որտեղ է գործում</b>Մեկ անգամ ամբողջ սակագնի համար։ Ընտրեք մի քանի գոտի կամ թողեք «Ամենուր»։</div>
+        <div class="fld"><span class="label">Նստեցում</span>${seg(['Ամենուր', 'Միայն ընտրված գոտիներում'], 1, 'Նստեցում')}</div>
+        <div class="zl2">${['city', 'ctr', 'arb', 'air', 'ejm'].map((z) => `<span class="check${z === 'air' ? ' on' : ''}" role="checkbox" aria-checked="${z === 'air'}"><i class="b">${z === 'air' ? '<i data-lucide="check" style="width:12px;height:12px;color:var(--brand-fill-ink)"></i>' : ''}</i><span class="zs" style="--zc:${ZC[z]}"></span>${ZN[z]}</span>`).join('')}</div>
+        <div class="fld"><span class="label">Իջեցում</span>${seg(['Ամենուր', 'Միայն ընտրված գոտիներում'], 0, 'Իջեցում')}</div>
+        <div style="padding:8px var(--inset)"><div class="notice neutral"><i data-lucide="message-square-text"></i><span>Ուղևորը Eco Aero-ն կտեսնի միայն «Զվարթնոց» գոտում նստելիս · իջեցումը՝ ցանկացած տեղ</span></div></div>
+        <div style="padding:0 var(--inset)"><div class="notice neutral"><i data-lucide="layers"></i><span>Գների բացառությունները (ֆիքսված գին Կենտրոն → Զվարթնոց, + %) ավելացվում են հետո՝ Գոտիներ › Կանոններ</span></div></div>`,
+      3: `<div class="lead"><b>Ինչպես է հաշվվում գինը</b>Հիմնական գինն ամենուր։ Գոտիների բացառությունները գալիս են սրա վրա։</div>
+        <div class="fld"><span class="label">Գինը</span>${seg(['Հայտնի է նախապես', 'Հաշվիչով'], 0, 'Գնի տեսակ')}</div>
+        ${row('Նստելու գին', 'պատվերի սկզբում', n('1 500', '֏'))}${row('Կիլոմետր', '', n(150, '֏/կմ'))}${row('Րոպե ճանապարհին', '', n(20, '֏/ր'))}${row('Նվազագույն գին', 'եթե հաշվարկն ավելի քիչ է', n('4 500', '֏'))}
+        ${row('Անվճար սպասում', 'վարորդի տեղ հասնելուց', n(15, 'ր'))}${row('Վճարովի սպասում', 'անվճարից հետո', n(50, '֏/ր'))}${row('Կլորացում', '', seg(['10 ֏', '50 ֏', '100 ֏'], 2, 'Կլորացում'))}
+        <div class="split" style="margin:8px var(--inset);border-radius:var(--r-ctl);background:var(--surface-alt)"><span>Օրինակ՝ 14,2 կմ · 22 ր</span><span>1 500 + 2 130 + 440 = 4 070 ֏</span><span class="tot">Նվազագույնով</span><span class="tot">4 500 ֏</span></div>`,
+      4: `<div class="lead"><b>Նախնական պատվեր</b>Կարելի՞ է այս սակագինը պատվիրել այլ ժամի։ Դատարկ դաշտերը վերցնում են ավտոպարկի արժեքը։</div>
+        <div class="hero"><span class="ic"><i data-lucide="calendar-check"></i></span><b>Նախնական պատվեր</b>${sw(true, 'Նախնական պատվեր', 'Միացված')}<span>Թռիչքից առաջ պատվիրում են օրեր առաջ</span></div>
+        ${preFields([true, 30, 30, 0], false)}${row('Որոնումը սկսվում է', 'դատարկ՝ ավտոպարկինը (15 ր)', n('15', 'ր', 'dflt'))}`,
+      5: `<div class="lead"><b>Վճարում և միջնորդավճար</b>Ինչով է վճարում ուղևորը և որքան է պահում ավտոպարկը գործընկերոջից։</div>
+        ${sh('Վճարման եղանակներ')}<div style="padding:4px var(--inset) 8px" class="chips">${chk('Կանխիկ', true)}${chk('Քարտ', true)}${chk('Apple Pay', true)}${chk('Google Pay', true)}${chk('NFC · POS', true)}${chk('Ընկերության հաշիվ', true)}</div>
+        ${sh('Գործընկերոջ միջնորդավճար', 'միայն գործընկերներ')}${row('Տեսակ', '', seg(['Տոկոս', 'Ֆիքսված', 'Խառը'], 0, 'Միջնորդավճարի տեսակ'))}${row('Տոկոս', 'ավարտված պատվերի գնից', n(15, '%', 'p'))}
+        ${sh('Ուղևորի սպասարկման վճար', 'քարտով · 2 %', sw(true, 'Սպասարկման վճար'))}
+        ${sh('Չեղարկում')}${row('Ուղևորի չեղարկման վճար', 'վարորդը նշանակվելուց 2 ր հետո', n(500, '֏'), true)}${row('Ուղևորը չեկավ', 'անվճար սպասումից հետո', n(1000, '֏'), true)}`,
+      6: `<div class="lead"><b>Ստուգեք և միացրեք</b>Ամեն տող կարելի է փոխել առանց սկզբից սկսելու։</div>
+        ${[['Անուն', 'Eco Aero · Business · ID.4, Enyaq', 1], ['Ուղևոր', '<span class="mono">4</span> ուղևոր · <span class="mono">4</span> ուղեբեռ', 1], ['Որտեղից → Որտեղ', 'Զվարթնոց → ամենուր', 2], ['Գին', 'Նախապես · 1 500 + 150/կմ + 20/ր · նվազ. 4 500 ֏ · կլոր. 100', 3], ['Նախնական պատվեր', 'Միացված · 30 ր – 30 օր · առանց հավելավճարի', 4], ['Վճարում', 'Բոլոր եղանակները · 15 % · քարտով 2 %', 5]].map(([kk, vv, s]) => `<div class="rv"><span class="k">${kk}</span><span class="v">${vv}</span><a class="btn ghost s" href="${href('w' + s)}">Փոխել</a></div>`).join('')}
+        <div class="card2"><span class="car">${carImg('business')}</span><b>Eco Aero</b><span class="p">4 500 ֏</span><span>Զվարթնոց → Աբովյան 10 · 4 ուղևոր</span></div>
+        <div class="fld"><span class="label">Գործում է</span><div class="row-flex" style="gap:8px">${seg(['Հիմա', 'Ժամից'], 1, 'Երբ')}<span class="input" style="width:140px"><span class="val mono">22.10.2026</span><i data-lucide="calendar"></i></span><span class="input" style="width:88px"><span class="val mono">00:00</span></span></div></div>
+        <div style="padding:4px var(--inset)"><div class="notice amber"><i data-lucide="triangle-alert"></i><span>Business դասի մեքենա ունի 3 վարորդ, հերթափոխում՝ 1 · պատվերները կարող են սպասել</span></div></div>`,
+    }[k]
+    document.getElementById('wiz').innerHTML = `<div class="scrim"><section class="wiz" role="dialog" aria-modal="true" aria-labelledby="wt">
+      <div class="wh2"><h2 id="wt">Նոր սակագին</h2><span class="pill"><span class="mono">${k}</span>&nbsp;/&nbsp;<span class="mono">6</span></span><span class="end"><span class="x"><i data-lucide="cloud" style="width:14px;height:14px;vertical-align:-2px"></i> Սևագիրը պահված է</span><a class="btn ghost icon" href="${href('')}" aria-label="Փակել (Esc)" aria-keyshortcuts="Escape"><i data-lucide="x"></i></a></span></div>
+      <ol class="stp" aria-label="Քայլեր">${S.map(([b, s], i) => `<li class="${i + 1 < k ? 'done' : i + 1 === k ? 'cur' : 'todo'}"><a href="${href('w' + (i + 1))}"${i + 1 === k ? ' aria-current="step"' : ''}><span class="n">${i + 1 < k ? '<i data-lucide="check"></i>' : i + 1}</span><b>${b}</b><small>${s}</small></a></li>`).join('')}</ol>
+      <div class="wb" data-truncate>${body}</div>
+      <div class="wf">${k > 1 ? `<a class="btn secondary" href="${href('w' + (k - 1))}"><i data-lucide="arrow-left"></i>Հետ</a>` : ''}<span class="sp"></span>Ctrl+Enter՝ հաջորդը
+        ${k < 6 ? `<a class="btn primary" href="${href('w' + (k + 1))}"${ERR ? ' aria-disabled="true" style="opacity:.5"' : ''}>Հաջորդը<i data-lucide="arrow-right"></i></a>` : `<a class="btn secondary" href="${href('')}">Պահել որպես սևագիր</a><a class="btn primary" href="${href('detail')}"><i data-lucide="check"></i>Միացնել սակագինը</a>`}</div>
+    </section></div>`
+  }
+  icons()
+  document.documentElement.dataset.mapReady = 'none'
+</script>
+</body>
+</html>
