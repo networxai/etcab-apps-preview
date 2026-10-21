@@ -13,8 +13,11 @@
   /* ── Tariffs v3 (owner review 2026-10-21; spec docs/superpowers/specs/2026-10-21-tariff-zone-rules-design.md).
      1. No standalone «Editor / new tariff» section: «Նոր սակագին» (N) in the list head is the only way in, and it opens the
         step-by-step wizard (a modal is allowed here: admin, never dispatch, CLAUDE.md §9.8).
-     2. «Որտեղից → Որտեղ» is set ONCE per tariff, with several zones per end (tier_zone_scope), not per price component.
-     3. «Ուղևոր»: max passengers and max luggage per tariff; the rider app hides a tariff the party does not fit.
+     2. «Գինը գոտիներում» (owner Q1, 21 Oct): From–To is set ONCE per tariff, several zones per end, and means "this tariff's
+        fare in these zones" — it never hides the tariff. Outside those zones the general fare applies. Saved as a zone rule
+        that targets this tariff only, so the overlap check covers it (spec §5).
+     3. «Տարողություն» (owner Q9): max passengers and luggage are capacity INFO shown on the rider's card; they filter nothing.
+     5. «Որտեղ է երևում»: everywhere, or only where a zone's availability rule offers it (Eco Aero).
      4. Pre-order is visible without opening a tab: a column in the list, a tile in the tariff's passport, and its own tab.
      ?state= ''|detail|preorder|preorder-off|w1..w6|w1-err ── */
   .content.ls { grid-template-columns: minmax(0, 1fr) 348px; }
@@ -33,7 +36,7 @@
      the name column never drops under 120px (Eco Business must read whole). */
   @media (max-width: 1400px) {
     .content.ls { grid-template-columns: minmax(0, 1fr) 300px; }
-    .tr { grid-template-columns: 56px minmax(120px, 1fr) 150px 76px 128px 72px 16px; gap: 10px; padding-left: var(--inset); }
+    .tr { grid-template-columns: 56px minmax(120px, 1fr) 184px 84px 116px 68px 16px; gap: 8px; padding-left: var(--inset); }
     .tr .grip { display: none; } .tr.h > span:first-child { display: none; }
     .tr .ph { width: 56px; height: 36px; } .tr .ph .car { width: 52px; height: 28px; }
   }
@@ -171,7 +174,7 @@
         <section class="card" aria-label="Սակագներ">
           <div class="card-h"><h2>Սակագներ</h2><span class="sub">Հերթականությունը՝ ինչպես հավելվածում · Alt+↑ / Alt+↓</span>
             <span class="end"><a class="btn primary s" id="newb" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր սակագին<span class="kbd">N</span></a></span></div>
-          <div class="tr h" aria-hidden="true"><span></span><span></span><span>Սակագին</span><span>Որտեղից → Որտեղ</span><span>Ուղևոր</span><span>Նախնական պատվեր</span><span style="text-align:right">2,1 կմ · 4 ր</span><span></span></div>
+          <div class="tr h" aria-hidden="true"><span></span><span></span><span>Սակագին</span><span>Գինը գոտիներում</span><span>Տարողություն</span><span>Նախնական պատվեր</span><span style="text-align:right">2,1 կմ · 4 ր</span><span></span></div>
           <div id="rows" data-truncate></div>
           <div class="edf2"><i data-lucide="info"></i>Գին, նախնական պատվեր, միջնորդավճար, գոտիներ՝ սակագնի մեջ · գոտիների բացառությունները՝ <a href="zones-v3.html" id="zl" style="color:var(--brand-text)">Գոտիներ › Կանոններ</a></div>
         </section>
@@ -184,7 +187,7 @@
 <div id="wiz"></div>
 <script>
   shell('tariffs')
-  const ST = mockStates([['', 'Ցանկ'], ['air', 'Ցանկ · Զվարթնոցում'], ['detail', 'Eco Aero · ընդհանուր'], ['preorder', 'Նախնական պատվեր · միաց.'], ['preorder-off', 'Նախնական պատվեր · անջ.'],
+  const ST = mockStates([['', 'Ցանկ'], ['air', 'Ցանկ · Զվարթնոցում'], ['detail', 'Eco Aero · գոտիներ, տարողություն'], ['preorder', 'Նախնական պատվեր · միաց.'], ['preorder-off', 'Նախնական պատվեր · անջ.'],
     ['w1', 'Նոր · 1 Անուն'], ['w1-err', 'Նոր · 1 անունը զբաղված'], ['w2', 'Նոր · 2 Գոտիներ'], ['w3', 'Նոր · 3 Գին'], ['w4', 'Նոր · 4 Նախնական'], ['w5', 'Նոր · 5 Վճարում'], ['w6', 'Նոր · 6 Ստուգել']])
   const href = (s) => `tariffs-v3.html?theme=${THEME}${s ? '&state=' + s : ''}`
   document.getElementById('newb').href = href('w1')
@@ -192,16 +195,17 @@
   const DARK = THEME === 'dark'
   const ZC = DARK ? { city: '#6B9BFF', air: '#F2C464', ctr: '#3DD68C', arb: '#C79BFF', ejm: '#F472B6' } : { city: '#2563EB', air: '#B45309', ctr: '#15803D', arb: '#7C3AED', ejm: '#BE185D' }
   const ZN = { city: 'Երևան', ctr: 'Կենտրոն', arb: 'Արաբկիր', air: 'Զվարթնոց', ejm: 'Էջմիածին' }
-  /* v3 tariff facts. from/to: [] = «Ամենուր» (no restriction). pax/bags: the party the tariff takes. pre: [on, min lead, max lead, surcharge]. */
+  /* v3 tariff facts. fz: this tariff's fare in zones [from[], to[], value] or null (general fare everywhere). zo: shown only where a
+     zone offers it. pax/bags: capacity shown to the rider. pre: [on, min lead, max lead, surcharge]. */
   const AERO = { id: 'aero', img: 'business', name: 'Eco Aero', blurb: 'Օդանավակայանից՝ ֆիքսված գնով', base: 1500, km: 150, min: 20, floor: 4500, seats: 4 }
   const V = {
-    city: { pax: 4, bags: 2, from: [], to: [], pre: [true, 30, 7, 200] },
-    partner: { pax: 4, bags: 2, from: [], to: [], pre: [true, 30, 7, 200] },
-    kids: { pax: 3, bags: 2, from: ['city'], to: ['city'], pre: [false] },
-    business: { pax: 4, bags: 3, from: [], to: [], pre: [true, 60, 14, 300] },
-    van: { pax: 7, bags: 6, from: [], to: [], pre: [false] },
-    vip: { pax: 4, bags: 3, from: [], to: [], pre: [true, 60, 30, 500] },
-    aero: { pax: 4, bags: 4, from: ['air'], to: [], pre: [true, 30, 30, 0] },
+    city: { pax: 4, bags: 2, fz: [['ejm'], ['city'], '600 + 120/կմ'], pre: [true, 30, 7, 200] },
+    partner: { pax: 4, bags: 2, fz: [['ejm'], ['city'], '600 + 120/կմ'], pre: [true, 30, 7, 200] },
+    kids: { pax: 3, bags: 2, fz: null, pre: [false] },
+    business: { pax: 4, bags: 3, fz: null, pre: [true, 60, 14, 300] },
+    van: { pax: 7, bags: 6, fz: null, pre: [false] },
+    vip: { pax: 4, bags: 3, fz: null, pre: [true, 60, 30, 500] },
+    aero: { pax: 4, bags: 4, fz: [['air'], [], '4 500 ֏'], zo: true, pre: [true, 30, 30, 0] },
   }
   const ALL = [...TIERS.map((t) => ({ ...t, img: t.id })), AERO]
   const zs = (ids) => ids.length ? ids.map((z) => `<span class="zs" style="--zc:${ZC[z]}"></span><b>${ZN[z]}</b>`).join(', ') : 'Ամենուր'
@@ -210,29 +214,28 @@
   document.getElementById('rows').innerHTML = ALL.map((t) => { const v = V[t.id]
     return `<a class="tr${t.id === 'aero' && ST === 'air' ? ' on' : ''}" href="${go(t)}"><i data-lucide="grip-vertical" class="grip"></i><span class="ph"><span class="car">${carImg(t.img, t.name)}</span></span>
       <span class="nm2"><b>${t.name}</b><span>${t.blurb}</span></span>
-      <span class="wh"><span><i data-lucide="map-pin"></i>${zs(v.from)}</span><span><i data-lucide="flag"></i>${zs(v.to)}</span></span>
+      <span class="wh">${v.fz ? `<span><i data-lucide="map-pin"></i>${zs(v.fz[0])}<i data-lucide="arrow-right"></i>${v.fz[1].length ? zs(v.fz[1]) : 'ամենուր'}</span><span class="mono" style="color:var(--ink)">${v.fz[2]}</span>` : '<span class="faint">ընդհանուր գինն ամենուր</span>'}${v.zo ? '<span><i data-lucide="eye"></i>միայն առաջարկող գոտում</span>' : ''}</span>
       <span class="party"><span title="Ուղևորներ"><i data-lucide="users"></i>${v.pax}</span><span title="Ուղեբեռ"><i data-lucide="luggage"></i>${v.bags}</span></span>
       <span>${prePill(v.pre)}</span><span class="px">${t.id === 'aero' ? '—' : amd(fare(t, 2.1, 4))}</span><i data-lucide="chevron-right" class="go"></i></a>` }).join('')
     + `<a class="tr" href="${href('w3')}"><i data-lucide="grip-vertical" class="grip" style="opacity:.3"></i><span class="ph"><i data-lucide="image" style="color:var(--ink-faint)"></i></span>
       <span class="nm2"><b>Eco Pet</b><span>Սևագիր · երեկ 18:40, Մ. Հովսեփյան</span></span>
-      <span class="wh"><span><i data-lucide="map-pin"></i>Ամենուր</span><span><i data-lucide="flag"></i>Ամենուր</span></span>
+      <span class="wh"><span class="faint">ընդհանուր գինն ամենուր</span></span>
       <span class="party"><span><i data-lucide="users"></i>3</span><span><i data-lucide="luggage"></i>1</span></span><span><span class="pill warn"><i data-lucide="pencil"></i>Սևագիր · <span class="mono">3/6</span></span></span>
       <span class="px faint">—</span><i data-lucide="chevron-right" class="go"></i></a>`
-  /* Rider preview: GET /customer/tiers?pickup=…&pax=…&bags=… — the server's offered list, with the reasons only the console sees. */
+  /* Rider preview: GET /customer/tiers?pickup=… — the server's offered list (offeredTiers), with the reasons only the console sees.
+     Party size filters nothing (owner Q9); capacity is shown on each card. */
   const AT = ST === 'air' ? 'air' : 'city'
   const offer = (t) => { const v = V[t.id]
-    if (v.from.length && !v.from.includes(AT) && !(AT === 'air' && v.from.includes('city') && false)) return ['map-pin-off', `միայն «${v.from.map((z) => ZN[z]).join('», «')}» գոտուց`]
-    if (AT === 'air' && ['city', 'partner', 'kids'].includes(t.id)) return ['shield', 'Զվարթնոց · «Միայն այս սակագները» կանոն']
-    if (v.bags < 3) return ['luggage', `ուղեբեռ՝ առավելագույնը ${v.bags}`]
+    if (AT === 'air' && ['city', 'partner', 'kids'].includes(t.id)) return ['list-checks', '«Զվարթնոց» գոտին առաջարկում է միայն ընտրվածները']
+    if (v.zo && AT !== 'air') return ['map-pin-off', 'երևում է միայն այն գոտում, որն այն առաջարկում է']
     return null }
   const on = ALL.filter((t) => !offer(t)), off = ALL.filter((t) => offer(t))
-  const px = (t) => AT === 'air' ? { aero: '4 500 ֏', business: '7 000 ֏', van: '7 800 ֏', vip: '8 500 ֏' }[t.id] || '—' : amd(fare(t, 2.1, 4))
+  const px = (t) => AT === 'air' ? { aero: '4 500 ֏', business: '3 400 ֏', van: '3 800 ֏', vip: '4 900 ֏' }[t.id] || '—' : amd(fare(t, 2.1, 4))
   document.getElementById('rider').innerHTML = `<div class="card-h"><h2>Ինչ է տեսնում ուղևորը</h2></div>
     <div class="rp"><span class="label">Նստեցում</span><div class="row-flex" role="radiogroup" aria-label="Նստեցման գոտի"><a role="radio" aria-checked="${AT === 'city'}" class="chip${AT === 'city' ? ' on' : ''}" href="${href('')}" style="text-decoration:none">Երևան · Աբովյան 10</a><a role="radio" aria-checked="${AT === 'air'}" class="chip${AT === 'air' ? ' on' : ''}" href="${href('air')}" style="text-decoration:none">Զվարթնոց</a></div>
-      <span class="label">Ուղևոր</span><div class="row-flex"><span class="step" aria-label="Ուղևորներ"><button aria-label="Պակասեցնել"><i data-lucide="minus"></i></button><b>2</b><button aria-label="Ավելացնել"><i data-lucide="plus"></i></button></span><span class="x">ուղևոր</span>
-        <span class="step" aria-label="Ուղեբեռ"><button aria-label="Պակասեցնել"><i data-lucide="minus"></i></button><b>3</b><button aria-label="Ավելացնել"><i data-lucide="plus"></i></button></span><span class="x">ուղեբեռ</span></div></div>
+      </div>
     <div class="grp">Ցուցադրվում է · <span class="mono">${on.length}</span></div>
-    ${on.map((t) => `<div class="ri"><span class="car">${carImg(t.img)}</span><b>${t.name}</b><span class="v">${px(t)}</span></div>`).join('')}
+    ${on.map((t) => `<div class="ri"><span class="car">${carImg(t.img)}</span><b>${t.name}</b><span class="v">${px(t)}</span><span class="why"><i data-lucide="users"></i>${V[t.id].pax} · <i data-lucide="luggage"></i>${V[t.id].bags}</span></div>`).join('')}
     <div class="grp">Թաքցված է · <span class="mono">${off.length}</span></div>
     ${off.map((t) => { const [ic, w] = offer(t); return `<div class="ri off"><span class="car">${carImg(t.img)}</span><b>${t.name}</b><span class="v">—</span><span class="why"><i data-lucide="${ic}"></i>${w}</span></div>` }).join('')}
     <div style="padding:12px var(--inset)"><div class="notice neutral"><i data-lucide="eye-off"></i><span>Ուղևորը թաքցվածները չի տեսնում և պատճառը չի կարդում · դիսպետչերը տեսնում է «ոչ այստեղ»</span></div></div>`
@@ -249,10 +252,11 @@
     : `<span class="chip on"><i data-lucide="globe"></i>Ամենուր</span><span class="addz" role="combobox" aria-expanded="false" aria-label="Սահմանափակել գոտիներով · ${end}"><i data-lucide="plus"></i>սահմանափակել գոտիներով</span>`
   const zonePick = (from, to) => `<div class="zp"><div class="hd"><b>Նստեցում</b><div class="chips">${zchips(from, 'նստեցում')}</div></div>
       <div class="hd"><b>Իջեցում</b><div class="chips">${zchips(to, 'իջեցում')}</div></div>
-      <span class="say"><i data-lucide="message-square-text" style="width:14px;height:14px;vertical-align:-2px"></i> ${from.length ? `Ուղևորը սակագինը կտեսնի միայն «${from.map((z) => ZN[z]).join('» կամ «')}» գոտում նստելիս` : 'Սակագինը երևում է ամենուր'}${to.length ? `, իսկ իջեցումը՝ միայն «${to.map((z) => ZN[z]).join('» կամ «')}» գոտում` : ', իջեցումը՝ ցանկացած տեղ'}</span></div>`
-  const party = (pax, bags) => row('Ուղևորներ', 'առավելագույնը մեկ պատվերում', stepper(pax, 'Ուղևորներ'))
-    + row('Ուղեբեռ', 'մեծ պայուսակ կամ ճամպրուկ, հատ', stepper(bags, 'Ուղեբեռ'))
-    + row('Հարցնել պատվիրելիս', 'հավելվածը և դիսպետչերը նշում են թիվը', chk('Ուղևորներ', true) + chk('Ուղեբեռ', true))
+      <div class="hd"><b>Գինը</b><div class="chips">${seg(['Ֆիքսված', 'Այլ կառուցվածք', '+ գումար', '+ %'], 0, 'Գոտու գնի տեսակ')}${n('4 500', '֏')}${seg(['Միշտ', 'Ժամկետով'], 0, 'Ժամկետ')}</div></div>
+      <span class="say"><i data-lucide="message-square-text" style="width:14px;height:14px;vertical-align:-2px"></i> «${from.map((z) => ZN[z]).join('» կամ «')}» գոտում նստելիս Eco Aero-ի ամբողջ գինը 4 500 ֏ է${to.length ? '' : ', իջեցումը՝ ցանկացած տեղ'} · մնացած տեղերում՝ սակագնի ընդհանուր գինը</span>
+      <span class="say"><i data-lucide="link" style="width:14px;height:14px;vertical-align:-2px"></i> Պահվում է որպես գոտու կանոն՝ միայն այս սակագնի համար (Գոտիներ › Կանոններ) · համընկնող կանոնի դեպքում չի պահվի</span></div>`
+  const party = (pax, bags) => row('Ուղևորներ', 'առավելագույնը · երևում է քարտում', stepper(pax, 'Ուղևորներ'))
+    + row('Ուղեբեռ', 'ճամպրուկ, հատ · երևում է քարտում', stepper(bags, 'Ուղեբեռ'))
   const preFields = (p, def) => row('Ամենաշուտը', 'պատվիրելու պահից առաջ', n(p[1], 'ր'))
     + row('Ամենաուշը', 'քանի օր առաջ', n(p[2], 'օր'))
     + row('Հավելավճար', 'նախնական պատվերի համար', `${seg(['֏', '%'], 0, 'Հավելավճարի տեսակ')}${n(p[3] ? nf(p[3]) : '0', '֏')}`, p[3] > 0)
@@ -274,11 +278,12 @@
         + row('Անուն', 'ուղևորը տեսնում է հավելվածում', `<span class="input" style="width:240px"><span class="val">${T.name}</span></span>`)
         + row('Կարճ նկարագրություն', 'քարտի տակ', `<span class="input" style="width:240px"><span class="val">${T.blurb}</span></span>`)
         + row('Մեքենայի դաս', 'ով կարող է կատարել', `<span class="select" style="width:240px" role="combobox" aria-expanded="false"><span class="val">Business · ID.4, Enyaq</span><i data-lucide="chevrons-up-down"></i></span>`)
-        + sh('Որտեղից → Որտեղ', 'մեկ անգամ ամբողջ սակագնի համար · մի քանի գոտի')
-        + zonePick(v.from, v.to)
-        + sh('Ուղևոր', 'հավելվածը թաքցնում է սակագինը, եթե խումբը չի տեղավորվում')
+        + sh('Գինը գոտիներում', 'այս սակագնի այլ գինը նշված գոտիներում · մի քանի գոտի')
+        + zonePick(v.fz[0], v.fz[1])
+        + sh('Որտեղ է երևում ուղևորին')
+        + row('Ցուցադրել', 'գոտու «Միայն այս սակագները» կանոնը կարող է թաքցնել ցանկացածը', seg(['Ամենուր', 'Միայն առաջարկող գոտում'], 1, 'Որտեղ է երևում'))
+        + sh('Տարողություն', 'ուղևորը տեսնում է սակագնի քարտում · ցանկը չի զտվում')
         + party(v.pax, v.bags)
-        + `<div style="padding:12px var(--inset)"><div class="notice neutral"><i data-lucide="layers"></i><span>Գների տարբերությունը գոտիներում (օր. Կենտրոն → Զվարթնոց 4 500 ֏ նոյեմբերին)՝ <a href="zones-v3.html?theme=${THEME}&state=rules" style="color:var(--brand-text)">Գոտիներ › Կանոններ</a></span></div></div>`
     } else {
       const p = v.pre, isOn = p[0]
       body = `<div class="hero"><span class="ic"><i data-lucide="${isOn ? 'calendar-check' : 'calendar-x'}"></i></span><b>Նախնական պատվեր</b>${sw(isOn, 'Նախնական պատվեր', isOn ? 'Միացված' : 'Անջատված')}<span>${isOn ? 'Ուղևորը և դիսպետչերը կարող են պատվիրել այլ ժամի · ժամին որոնումն սկսվում է ինքնաշխատ' : `${T.name}-ը միայն «Հիմա» · հավելվածի «Նախապես» ցանկում չի երևում`}</span></div>`
@@ -286,6 +291,7 @@
           + sh('Վճարում', 'որ եղանակներով կարելի է պատվիրել նախապես') + `<div style="padding:4px var(--inset) 12px" class="chips">${chk('Կանխիկ', true)}${chk('Քարտ', true)}${chk('Ընկերության հաշիվ', true)}</div>`
           + sh('Չեղարկում') + row('Անվճար չեղարկում', 'մինչև նստելու ժամը', n(60, 'ր')) + row('Չեղարկման վճար', 'դրանից հետո', n(500, '֏'), true)
           + `<div style="padding:12px var(--inset)"><div class="notice neutral"><i data-lucide="settings-2"></i><span>Մոխրագույն թվերը ավտոպարկի ընդհանուր արժեքներն են (<a href="settings.html?theme=${THEME}" style="color:var(--brand-text)">Կարգավորումներ › Դիսպետչերացում</a>) · գրեք թիվ՝ այս սակագնի համար փոխելու։ Այլ ընդհանուր կարգավորում պետք չէ։</span></div></div>`
+          + `<div style="padding:0 var(--inset) 12px"><div class="notice neutral"><i data-lucide="calendar-x"></i><span>«Կենտրոն» գոտում նստելու համար նախնական պատվերն անջատված է գոտու կանոնով՝ <a href="zones-v3.html?theme=${THEME}&state=preoff" style="color:var(--brand-text)">«Կենտրոն՝ առանց նախնական պատվերի»</a> · մնացած տեղերում գործում են այս կարգավորումները</span></div></div>`
           : `<div style="padding:12px var(--inset)"><div class="notice neutral"><i data-lucide="info"></i><span>Միացնելիս կբացվեն ժամկետը, հավելավճարը, վճարումը և չեղարկումը · արժեքները պահված են՝ 30 ր – 7 օր</span></div></div>`)
     }
     ed.innerHTML = `
@@ -295,8 +301,8 @@
         <div class="card-h"><span class="car">${carImg(T.img)}</span><h2>${T.name}</h2><span class="pill ok"><i data-lucide="circle-check"></i>Գործում է</span><span class="sub">գինը՝ <span class="num">${T.id === 'aero' ? '22.10.2026' : '09.10.2026'}</span>-ից</span>
           <span class="end">${ST === 'preorder-off' ? '' : '<span class="pill warn"><i data-lucide="pencil"></i>Չպահված</span>'}<button class="btn ghost s">Չեղարկել</button><button class="btn primary s">Պահել</button></span></div>
         <div class="pass">
-          <a class="tile" href="${href('detail')}" style="text-decoration:none"><span class="k"><i data-lucide="map-pin"></i>Որտեղից → Որտեղ</span><span class="v">${v.from.length ? v.from.map((z) => ZN[z]).join(', ') : 'Ամենուր'} → ${v.to.length ? v.to.map((z) => ZN[z]).join(', ') : 'ամենուր'}</span><span class="s">${v.from.length ? 'այլ տեղ չի երևում' : 'առանց սահմանափակման'}</span></a>
-          <a class="tile" href="${href('detail')}" style="text-decoration:none"><span class="k"><i data-lucide="users"></i>Ուղևոր</span><span class="v"><span class="mono">${v.pax}</span> ուղևոր · <span class="mono">${v.bags}</span> ուղեբեռ</span><span class="s">հարցնում ենք պատվիրելիս</span></a>
+          <a class="tile" href="${href('detail')}" style="text-decoration:none"><span class="k"><i data-lucide="map-pin"></i>Գինը գոտիներում</span><span class="v">${v.fz ? `${v.fz[0].map((z) => ZN[z]).join(', ')} → ${v.fz[1].length ? v.fz[1].map((z) => ZN[z]).join(', ') : 'ամենուր'} · <span class="mono">${v.fz[2]}</span>` : 'Ընդհանուր գինն ամենուր'}</span><span class="s">${v.zo ? 'երևում է միայն առաջարկող գոտում' : 'երևում է ամենուր'}</span></a>
+          <a class="tile" href="${href('detail')}" style="text-decoration:none"><span class="k"><i data-lucide="users"></i>Տարողություն</span><span class="v"><span class="mono">${v.pax}</span> ուղևոր · <span class="mono">${v.bags}</span> ուղեբեռ</span><span class="s">ցույց է տրվում ուղևորին</span></a>
           <div class="tile pre${v.pre[0] ? ' on' : ''}"><span class="k"><i data-lucide="calendar-clock"></i>Նախնական պատվեր${sw(v.pre[0], 'Նախնական պատվեր · ' + T.name)}</span><span class="v">${v.pre[0] ? `<span class="mono">${v.pre[1]} ր – ${v.pre[2]} օր</span>${v.pre[3] ? ` · +${amd(v.pre[3])}` : ''}` : 'Միայն «Հիմա»'}</span><a class="s" href="${href(v.pre[0] ? 'preorder' : 'preorder-off')}" style="color:var(--brand-text);text-decoration:none">Կարգավորումներ →</a></div>
         </div>
         <nav class="tabsl" aria-label="Բաժիններ">${tabs.map(([id, l, ic]) => `<a class="${id === sec ? 'on' : ''}" href="${href(id === 'pre' ? (v.pre[0] ? 'preorder' : 'preorder-off') : 'detail')}"${id === sec ? ' aria-current="page"' : ''}><i data-lucide="${ic}"></i>${l}</a>`).join('')}</nav>
@@ -306,12 +312,13 @@
       <aside class="col" data-truncate>
         <section class="card"><div class="card-h"><h2>Գնի օրինակ</h2><span class="sub">${T.id === 'aero' ? '14,2 կմ · 22 ր' : '2,1 կմ · 4 ր'}</span></div>
           ${T.id === 'aero' ? `<div class="split"><span>Նստելու գին</span><span>1 500 ֏</span><span>14,2 կմ × 150 ֏</span><span>2 130 ֏</span><span>22 ր × 20 ֏</span><span>440 ֏</span>
-            <span class="faint">Հաշվարկով</span><span class="faint">4 070 ֏</span><span>Նվազագույնը</span><span>4 500 ֏</span>
+            <span class="faint">Ընդհանուր գինը</span><span class="faint">4 500 ֏</span><span>«Զվարթնոց» գոտում՝ ամբողջ գինը</span><span>4 500 ֏</span>
+            <span class="faint">Նախնական պատվեր · հավելավճար</span><span class="faint">0 ֏</span>
             <span class="tot">Ուղևորը վճարում է</span><span class="tot">4 500 ֏</span></div>`
           : `<div class="split"><span>Նստելու գին</span><span>${amd(T.base)}</span><span>Ընդամենը</span><span>${amd(fare(T, 2.1, 4))}</span></div>`}</section>
         <section class="card"><div class="card-h"><h2>Գոտիների կանոններ</h2><span class="end"><a class="btn ghost icon s" href="zones-v3.html?theme=${THEME}&state=rules" aria-label="Գոտիների կանոններ"><i data-lucide="arrow-right"></i></a></span></div>
-          ${[['air', 'Զվարթնոց · միայն այս սակագները', 'հասան.', 'նստեցում · Aero, Business, Van, Vip'], ['ctr', 'Կենտրոն, Արաբկիր → Զվարթնոց', '4 500 ֏', '01.11–30.11 · փոխարինում · ֆիքսված'], ['ctr', 'Կենտրոն՝ տոնական սեզոն', '+10 %', 'նստեցում · 01.11–31.12']].map(([z, b, val, d]) => `<div class="zr" style="--zc:${ZC[z]}"><span class="sw"></span><b>${b}</b><span class="v">${val}</span><span class="d">${d}</span></div>`).join('')}
-          <div class="edf2" style="border-top:0">Սակագին → Գոտու կանոն → Գոտուց գոտի</div></section>
+          ${[['air', 'Զվարթնոց · միայն այս սակագները', 'հասան.', 'նստեցում · Aero, Business, Van, Vip'], ['air', 'Eco Aero · Զվարթնոցից', '4 500 ֏', 'նստեցում · ֆիքսված · ամբողջ գինը'], ['ctr', 'Կենտրոն՝ առանց նախնական պատվերի', 'անջ.', 'նստեցում · բոլոր սակագները']].map(([z, b, val, d]) => `<div class="zr" style="--zc:${ZC[z]}"><span class="sw"></span><b>${b}</b><span class="v">${val}</span><span class="d">${d}</span></div>`).join('')}
+          <div class="edf2" style="border-top:0">Մեկ ուղևորությանը՝ առավելագույնը մեկ գնային կանոն</div></section>
       </aside>`
   }
 
@@ -319,7 +326,7 @@
   const W = /^w(\d)/.exec(ST)
   if (W) {
     const k = +W[1], ERR = ST === 'w1-err'
-    const S = [['Անուն', 'անուն, մեքենա, ուղևոր'], ['Գոտիներ', 'որտեղից → որտեղ'], ['Գին', 'գնի կառուցվածք'], ['Նախնական պատվեր', 'միացնել կամ ոչ'], ['Վճարում', 'եղանակներ, միջնորդավճար'], ['Ստուգել', 'և միացնել']]
+    const S = [['Անուն', 'անուն, մեքենա, տարողություն'], ['Գոտիներ', 'որտեղ երևա, գինը գոտում'], ['Գին', 'գնի կառուցվածք'], ['Նախնական պատվեր', 'միացնել կամ ոչ'], ['Վճարում', 'եղանակներ, միջնորդավճար'], ['Ստուգել', 'և միացնել']]
     const body = {
       1: `<div class="lead"><b>Ինչպես է կոչվում սակագինը</b>Սա հավելվածում ուղևորի տեսած քարտն է։ Կարող եք սկսել այլ սակագնի պատճենից։</div>
         <div class="fld"><span class="label">Սկսել</span>${seg(['Դատարկից', 'Պատճենել՝ Eco Business'], 1, 'Սկսել')}</div>
@@ -327,13 +334,14 @@
           <div class="fld"><label class="label">Կարճ նկարագրություն</label><span class="input l"><span class="val">Օդանավակայանից՝ ֆիքսված գնով</span></span></div></div>
         <div class="two"><div class="fld"><span class="label">Մեքենայի դաս</span><span class="select" role="combobox" aria-expanded="false"><span class="val">Business · ID.4, Enyaq</span><i data-lucide="chevrons-up-down"></i></span></div>
           <div class="fld"><span class="label">Նկար</span><span class="row-flex" style="gap:8px"><span class="car" style="width:72px;height:38px">${carImg('business')}</span><button class="btn secondary s"><i data-lucide="upload"></i>Վերբեռնել</button><span class="x">կամ դասի նկարը</span></span></div></div>
-        ${sh('Ուղևոր', 'փոքր մաս · ինչ խումբ է տեղավորվում')}${row('Ուղևորներ', 'առավելագույնը', stepper(4, 'Ուղևորներ'))}${row('Ուղեբեռ', 'ճամպրուկ, հատ', stepper(4, 'Ուղեբեռ'))}`,
-      2: `<div class="lead"><b>Որտեղ է գործում</b>Մեկ անգամ ամբողջ սակագնի համար։ Ընտրեք մի քանի գոտի կամ թողեք «Ամենուր»։</div>
-        <div class="fld"><span class="label">Նստեցում</span>${seg(['Ամենուր', 'Միայն ընտրված գոտիներում'], 1, 'Նստեցում')}</div>
+        ${sh('Տարողություն', 'փոքր մաս · երևում է ուղևորի քարտում')}${row('Ուղևորներ', 'առավելագույնը', stepper(4, 'Ուղևորներ'))}${row('Ուղեբեռ', 'ճամպրուկ, հատ', stepper(4, 'Ուղեբեռ'))}`,
+      2: `<div class="lead"><b>Որտեղ է երևում և ինչ գին ունի գոտիներում</b>Գոտիական գինը ոչինչ չի թաքցնում․ նշված գոտիներից դուրս գործում է ընդհանուր գինը։</div>
+        <div class="fld"><span class="label">Որտեղ է երևում ուղևորին</span>${seg(['Ամենուր', 'Միայն առաջարկող գոտում'], 1, 'Որտեղ է երևում')}</div>
+        <div class="fld"><span class="label">Այլ գին · նստեցում</span>${seg(['Չկա', 'Ընտրված գոտիներում'], 1, 'Նստեցում')}</div>
         <div class="zl2">${['city', 'ctr', 'arb', 'air', 'ejm'].map((z) => `<span class="check${z === 'air' ? ' on' : ''}" role="checkbox" aria-checked="${z === 'air'}"><i class="b">${z === 'air' ? '<i data-lucide="check" style="width:12px;height:12px;color:var(--brand-fill-ink)"></i>' : ''}</i><span class="zs" style="--zc:${ZC[z]}"></span>${ZN[z]}</span>`).join('')}</div>
-        <div class="fld"><span class="label">Իջեցում</span>${seg(['Ամենուր', 'Միայն ընտրված գոտիներում'], 0, 'Իջեցում')}</div>
-        <div style="padding:8px var(--inset)"><div class="notice neutral"><i data-lucide="message-square-text"></i><span>Ուղևորը Eco Aero-ն կտեսնի միայն «Զվարթնոց» գոտում նստելիս · իջեցումը՝ ցանկացած տեղ</span></div></div>
-        <div style="padding:0 var(--inset)"><div class="notice neutral"><i data-lucide="layers"></i><span>Գների բացառությունները (ֆիքսված գին Կենտրոն → Զվարթնոց, + %) ավելացվում են հետո՝ Գոտիներ › Կանոններ</span></div></div>`,
+        <div class="fld"><span class="label">Իջեցում</span>${seg(['Ամենուր', 'Ընտրված գոտիներում'], 0, 'Իջեցում')}</div>
+        <div class="fld"><span class="label">Գինը այնտեղ</span><div class="row-flex" style="gap:8px">${seg(['Ֆիքսված', 'Այլ կառուցվածք', '+ գումար', '+ %'], 0, 'Գնի տեսակ')}${n('4 500', '֏')}</div></div>
+        <div style="padding:8px var(--inset)"><div class="notice neutral"><i data-lucide="message-square-text"></i><span>«Զվարթնոց» գոտում նստելիս Eco Aero-ի ամբողջ գինը 4 500 ֏ է · մնացած տեղերում՝ ընդհանուր գինը (քայլ 3) · սակագինը երևում է միայն այն գոտում, որը կառաջարկի այն</span></div></div>`,
       3: `<div class="lead"><b>Ինչպես է հաշվվում գինը</b>Հիմնական գինն ամենուր։ Գոտիների բացառությունները գալիս են սրա վրա։</div>
         <div class="fld"><span class="label">Գինը</span>${seg(['Հայտնի է նախապես', 'Հաշվիչով'], 0, 'Գնի տեսակ')}</div>
         ${row('Նստելու գին', 'պատվերի սկզբում', n('1 500', '֏'))}${row('Կիլոմետր', '', n(150, '֏/կմ'))}${row('Րոպե ճանապարհին', '', n(20, '֏/ր'))}${row('Նվազագույն գին', 'եթե հաշվարկն ավելի քիչ է', n('4 500', '֏'))}
@@ -348,8 +356,8 @@
         ${sh('Ուղևորի սպասարկման վճար', 'քարտով · 2 %', sw(true, 'Սպասարկման վճար'))}
         ${sh('Չեղարկում')}${row('Ուղևորի չեղարկման վճար', 'վարորդը նշանակվելուց 2 ր հետո', n(500, '֏'), true)}${row('Ուղևորը չեկավ', 'անվճար սպասումից հետո', n(1000, '֏'), true)}`,
       6: `<div class="lead"><b>Ստուգեք և միացրեք</b>Ամեն տող կարելի է փոխել առանց սկզբից սկսելու։</div>
-        ${[['Անուն', 'Eco Aero · Business · ID.4, Enyaq', 1], ['Ուղևոր', '<span class="mono">4</span> ուղևոր · <span class="mono">4</span> ուղեբեռ', 1], ['Որտեղից → Որտեղ', 'Զվարթնոց → ամենուր', 2], ['Գին', 'Նախապես · 1 500 + 150/կմ + 20/ր · նվազ. 4 500 ֏ · կլոր. 100', 3], ['Նախնական պատվեր', 'Միացված · 30 ր – 30 օր · առանց հավելավճարի', 4], ['Վճարում', 'Բոլոր եղանակները · 15 % · քարտով 2 %', 5]].map(([kk, vv, s]) => `<div class="rv"><span class="k">${kk}</span><span class="v">${vv}</span><a class="btn ghost s" href="${href('w' + s)}">Փոխել</a></div>`).join('')}
-        <div class="card2"><span class="car">${carImg('business')}</span><b>Eco Aero</b><span class="p">4 500 ֏</span><span>Զվարթնոց → Աբովյան 10 · 4 ուղևոր</span></div>
+        ${[['Անուն', 'Eco Aero · Business · ID.4, Enyaq', 1], ['Տարողություն', '<span class="mono">4</span> ուղևոր · <span class="mono">4</span> ուղեբեռ', 1], ['Գոտիներ', 'Երևում է առաջարկող գոտում · «Զվարթնոց» → ամենուր՝ 4 500 ֏', 2], ['Գին', 'Նախապես · 1 500 + 150/կմ + 20/ր · նվազ. 4 500 ֏ · կլոր. 100', 3], ['Նախնական պատվեր', 'Միացված · 30 ր – 30 օր · առանց հավելավճարի', 4], ['Վճարում', 'Բոլոր եղանակները · 15 % · քարտով 2 %', 5]].map(([kk, vv, s]) => `<div class="rv"><span class="k">${kk}</span><span class="v">${vv}</span><a class="btn ghost s" href="${href('w' + s)}">Փոխել</a></div>`).join('')}
+        <div class="card2"><span class="car">${carImg('business')}</span><b>Eco Aero</b><span class="p">4 500 ֏</span><span>Զվարթնոց → Աբովյան 10 · մինչև 4 ուղևոր, 4 ուղեբեռ</span></div>
         <div class="fld"><span class="label">Գործում է</span><div class="row-flex" style="gap:8px">${seg(['Հիմա', 'Ժամից'], 1, 'Երբ')}<span class="input" style="width:140px"><span class="val mono">22.10.2026</span><i data-lucide="calendar"></i></span><span class="input" style="width:88px"><span class="val mono">00:00</span></span></div></div>
         <div style="padding:4px var(--inset)"><div class="notice amber"><i data-lucide="triangle-alert"></i><span>Business դասի մեքենա ունի 3 վարորդ, հերթափոխում՝ 1 · պատվերները կարող են սպասել</span></div></div>`,
     }[k]

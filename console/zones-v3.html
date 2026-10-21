@@ -16,10 +16,12 @@
   /* ── Zones v3 (owner review 2026-10-21: "the zone is the tool to play with the general tariffs").
      A zone is a polygon. A ZONE RULE is the exception: it names 1..n zones (side Ա, and side Բ for Ա → Բ), a condition
      (pickup · drop-off · either end · both ends inside · Ա → Բ), the tariffs it touches, and EITHER an availability
-     list (a) OR a price modifier (c: replace with a fixed fare / with another fare structure, + amount, + %), inside an
-     optional validity window (b). Order stays Սակագին → Գոտու կանոն → Գոտուց գոտի. Every rule says in plain Armenian what
+     list (a, pickup only: shows ONLY the chosen tariffs), OR a price modifier (c: replace with a fixed fare = the whole fare /
+     with another fare structure, + amount, + %, negative allowed), OR «no pre-order» for pickups there; inside an optional
+     validity window (b). Owner 21 Oct: two price rules never match one ride — an overlapping rule is REFUSED at save and
+     names the rule it collides with (?state=pct); there is no precedence ladder. Every rule says in plain Armenian what
      it does (the preview line). Spec: docs/superpowers/specs/2026-10-21-tariff-zone-rules-design.md.
-     ?state= ''|rules|avail|fixed|structure|pct ── */
+     ?state= ''|rules|avail|fixed|structure|preoff|pct ── */
   .content { grid-template-columns: minmax(0, 1fr) 380px; grid-template-rows: auto minmax(0, 1fr); }
   .content.wide { grid-template-columns: minmax(0, 1fr) 580px; }
   @media (max-width: 1400px) { .content { grid-template-columns: minmax(0, 1fr) 340px; } .content.wide { grid-template-columns: minmax(0, 1fr) 520px; } }
@@ -67,13 +69,14 @@
   .bs > h4 { font: var(--c-strong); align-self: center; display: flex; align-items: center; gap: 8px; }
   .bs > h4 small { font: var(--c-small); color: var(--ink-faint); font-weight: 400; }
   .bs > .b { grid-column: 2; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-  .kinds { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .kinds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
   .kinds button, .conds button { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 0 8px; align-items: center; text-align: left; padding: 8px 10px; border-radius: var(--r-ctl); box-shadow: inset 0 0 0 1px var(--line-control); background: var(--surface); color: var(--ink); min-height: 44px; }
   .kinds button svg, .conds button svg { width: 18px; height: 18px; color: var(--ink-muted); grid-row: 1 / 3; }
   .kinds button b, .conds button b { font: var(--c-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .kinds button small, .conds button small { font: var(--c-small); color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .kinds button.on, .conds button.on { box-shadow: inset 0 0 0 2px var(--ink); background: var(--surface-alt); }
   .kinds button.on svg, .conds button.on svg { color: var(--ink); }
+  .kinds button b, .kinds button small { white-space: normal; overflow: visible; }
   .conds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
   .side { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 8px; align-items: start; }
   .side .tagab { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font: 600 13px/1 var(--font); background: var(--ink); color: var(--surface); margin-top: 1px; }
@@ -136,7 +139,7 @@
 <script>
   shell('zones')
   const ST = mockStates([['', 'Գոտիներ · Զվարթնոց'], ['rules', 'Կանոններ · ցանկ'], ['avail', 'Կանոն · (ա) միայն այս սակագները'], ['fixed', 'Կանոն · Ա → Բ ֆիքսված, ժամկետով'],
-    ['structure', 'Կանոն · այլ գնային կառուցվածք'], ['pct', 'Կանոն · + %, համընկնում']])
+    ['structure', 'Կանոն · այլ գնային կառուցվածք'], ['preoff', 'Կանոն · առանց նախնական պատվերի'], ['pct', 'Կանոն · համընկնում, մերժված']])
   const href = (s) => `zones-v3.html?theme=${THEME}${s ? '&state=' + s : ''}`
   const DARK = THEME === 'dark'
   const COL = DARK ? { city: '#6B9BFF', air: '#F2C464', ctr: '#3DD68C', arb: '#C79BFF', ejm: '#F472B6' } : { city: '#2563EB', air: '#B45309', ctr: '#15803D', arb: '#7C3AED', ejm: '#BE185D' }
@@ -153,17 +156,18 @@
   const RULES = [
     ['avail', 'list-checks', 'Օդանավակայանում՝ միայն այս սակագները', ['air'], [], 'pickup', 'հասան.', 'միշտ', 'ok', 'Aero, Business, Van, Vip'],
     ['fixed', 'replace', 'Նոյեմբեր՝ Կենտրոն, Արաբկիր → Զվարթնոց', ['ctr', 'arb'], ['air'], 'from_to', '4 500 ֏', '01.11 – 30.11.2026', 'soon', 'բոլորը · Vip՝ 7 000 ֏'],
-    ['air-old', 'replace', 'Զվարթնոց՝ սակագների գներ', ['air'], [], 'either', 'ըստ սակագնի', 'միշտ', 'ok', '6 սակագին · փոխադրված 19.10-ի աղյուսակից'],
-    ['structure', 'calculator', 'Էջմիածին ↔ Երևան՝ քաղաքամիջյան', ['ejm'], ['city'], 'from_to2', '600 + 120/կմ', 'միշտ', 'ok', 'City, Comfort'],
-    ['pct', 'percent', 'Կենտրոն՝ տոնական սեզոն', ['ctr'], [], 'pickup', '+10 %', '01.11 – 31.12.2026', 'soon', 'բոլորը'],
-    ['add', 'circle-plus', 'Էջմիածին՝ իջեցում', ['ejm'], [], 'dropoff', '+500 ֏', '01.09 – 30.09.2026', 'done', 'բոլորը'],
+    ['air-old', 'replace', 'Զվարթնոցից՝ սակագների գներ', ['air'], [], 'pickup', 'ըստ սակագնի', 'միշտ', 'ok', '6 սակագին · 19.10-ի աղյուսակից, նեղացված նստեցման'],
+    ['aero', 'replace', 'Eco Aero · Զվարթնոցից', ['air'], [], 'pickup', '4 500 ֏', 'միշտ', 'ok', 'Eco Aero · սակագնի «Գինը գոտիներում»-ից'],
+    ['structure', 'calculator', 'Էջմիածին → Երևան՝ քաղաքամիջյան', ['ejm'], ['city'], 'from_to', '600 + 120/կմ', 'միշտ', 'ok', 'City, Comfort'],
+    ['preoff', 'calendar-x', 'Կենտրոն՝ առանց նախնական պատվերի', ['ctr'], [], 'pickup', 'անջ.', 'միշտ', 'ok', 'բոլոր սակագները'],
+    ['disc', 'percent', 'Արաբկիր՝ աշնանային զեղչ', ['arb'], [], 'pickup', '−10 %', '01.09 – 30.09.2026', 'done', 'բոլորը'],
   ]
   const CONDTX = { pickup: 'նստեցում', dropoff: 'իջեցում', either: 'նստեցում կամ իջեցում', within: 'երկու ծայրն էլ ներսում', from_to: 'Ա → Բ', from_to2: 'Ա ↔ Բ' }
   const STP = { ok: ['ok', 'Գործում է', 'circle-check'], soon: ['', 'Սպասվում է', 'clock'], done: ['', 'Ավարտված', 'circle-slash'], off: ['', 'Անջատված', 'pause'] }
   const pill = (k) => `<span class="pill ${STP[k][0]}"><i data-lucide="${STP[k][2]}"></i>${STP[k][1]}</span>`
   const panel = document.getElementById('panel')
   const ct = document.getElementById('ct')
-  const BUILD = ['avail', 'fixed', 'structure', 'pct'].includes(ST)
+  const BUILD = ['avail', 'fixed', 'structure', 'preoff', 'pct'].includes(ST)
   const LIST = ST === 'rules'
   if (BUILD || LIST) ct.classList.add('wide')
   /* Page head: one tab strip «Գոտիներ · Կանոններ», then the one primary action for the tab. */
@@ -172,7 +176,7 @@
     <span class="end">${BUILD ? '<span class="pill warn"><i data-lucide="pencil"></i>Չպահված</span>' : LIST ? `<a class="btn primary" href="${href('fixed')}" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր կանոն<span class="kbd">N</span></a>` : `<a class="btn secondary" href="${href('fixed')}"><i data-lucide="plus"></i>Կանոն</a><button class="btn primary" aria-keyshortcuts="N"><i data-lucide="plus"></i>Նոր գոտի<span class="kbd">N</span></button>`}</span>`
 
   /* Map highlight per state: side A (solid, heavy), side B (solid, heavy), the rest dashed. */
-  const HL = { avail: [['air'], []], fixed: [['ctr', 'arb'], ['air']], structure: [['ejm'], ['city']], pct: [['ctr'], []], rules: [[], []], '': [['air'], []] }[ST] || [[], []]
+  const HL = { avail: [['air'], []], fixed: [['ctr', 'arb'], ['air']], structure: [['ejm'], ['city']], preoff: [['ctr'], []], pct: [['ctr'], []], rules: [[], []], '': [['air'], []] }[ST] || [[], []]
 
   const sw = (on, label, txt) => `<span class="switch${on ? ' on' : ''}" role="switch" aria-checked="${on}" aria-label="${label}"><i class="t"></i>${txt || (on ? 'Միաց.' : 'Անջ.')}</span>`
   const n = (v, u, cls) => `<span class="num-in${cls ? ' ' + cls : ''}">${v}${u ? `<span>${u}</span>` : ''}</span>`
@@ -183,41 +187,46 @@
   const TIERS7 = ['Eco City', 'Eco Comfort', 'Eco Kids', 'Eco Business', 'Eco Van', 'Eco Vip', 'Eco Aero']
 
   if (BUILD) {
-    const R = RULES.find((r) => r[0] === ST)
-    const kind = ST === 'avail' ? 0 : 1
-    const cond = { avail: 0, fixed: 4, structure: 4, pct: 0 }[ST]
+    const R = RULES.find((r) => r[0] === ST) || ['pct', 'percent', 'Կենտրոն՝ տոնական սեզոն']
+    const kind = ST === 'avail' ? 0 : ST === 'preoff' ? 2 : 1
+    const cond = { avail: 0, fixed: 4, structure: 4, preoff: 0, pct: 0 }[ST]
     const C = [['map-pin', 'Նստեցում', 'գոտում նստելիս'], ['flag', 'Իջեցում', 'գոտում իջնելիս'], ['arrow-left-right', 'Որևէ ծայրում', 'նստեցում կամ իջեցում'], ['circle-dot', 'Նույն գոտում', 'երկու ծայրն էլ ներսում'], ['move-right', 'Ա-ից Բ', 'գոտուց գոտի']]
-    const s1 = `<div class="kinds" role="radiogroup" aria-label="Ինչ է անում կանոնը">${[['list-checks', 'Սակագների հասանելիություն', 'որ սակագներն են երևում'], ['banknote', 'Գնի փոփոխություն', 'փոխարինել, + գումար, + %']].map(([ic, b, s], i) => `<button role="radio" aria-checked="${i === kind}" class="${i === kind ? 'on' : ''}"><i data-lucide="${ic}"></i><b>${b}</b><small>${s}</small></button>`).join('')}</div>`
-    const s2 = `<div class="conds" role="radiogroup" aria-label="Երբ է կիրառվում">${C.map(([ic, b, s], i) => `<button role="radio" aria-checked="${i === cond}" class="${i === cond ? 'on' : ''}"${kind === 0 && i > 2 ? ' aria-disabled="true" style="opacity:.45" title="Հասանելիությունը որոշվում է նստեցման կամ իջեցման կետով"' : ''}><i data-lucide="${ic}"></i><b>${b}</b><small>${s}</small></button>`).join('')}</div>`
+    const s1 = `<div class="kinds" role="radiogroup" aria-label="Ինչ է անում կանոնը">${[['list-checks', 'Միայն այս սակագները', 'մնացածը թաքցվում են'], ['banknote', 'Գնի փոփոխություն', 'փոխարինել, + գումար, + %'], ['calendar-x', 'Առանց նախնական պատվերի', 'այստեղ նստելու համար']].map(([ic, b, s], i) => `<button role="radio" aria-checked="${i === kind}" class="${i === kind ? 'on' : ''}"><i data-lucide="${ic}"></i><b>${b}</b><small>${s}</small></button>`).join('')}</div>`
+    const s2 = `<div class="conds" role="radiogroup" aria-label="Երբ է կիրառվում">${C.map(([ic, b, s], i) => `<button role="radio" aria-checked="${i === cond}" class="${i === cond ? 'on' : ''}"${kind !== 1 && i > 0 ? ' aria-disabled="true" style="opacity:.45" title="Որոշվում է նստեցման կետով"' : ''}><i data-lucide="${ic}"></i><b>${b}</b><small>${s}</small></button>`).join('')}</div>`
     const A = HL[0], B = HL[1]
     const s3 = `<div class="side"><span class="tagab" aria-label="Ա">Ա</span><div class="chips">${zchips(A, 'Ա')}</div></div>`
       + (cond === 4 ? `<div class="side"><span class="tagab b" aria-label="Բ">Բ</span><div class="chips">${zchips(B, 'Բ')}</div></div>
-        <div class="fl">${seg(['Միայն Ա → Բ', 'Երկու ուղղությամբ'], ST === 'structure' ? 1 : 0, 'Ուղղություն')}<span class="x">${ST === 'structure' ? 'Բ → Ա՝ նույն կանոնով' : 'Բ → Ա՝ առանձին կանոն'}</span></div>` : '')
+        <div class="fl">${seg(['Միայն Ա → Բ', 'Երկու ուղղությամբ'], 0, 'Ուղղություն')}<span class="x">Բ → Ա՝ առանձին կանոն</span></div>` : '')
       + `<span class="x">Մեկ, երկու կամ շատ գոտի․ բավական է՝ կետը լինի դրանցից որևէ մեկում</span>`
     let s4 = '', s5 = '', say = '', ex = ''
     if (ST === 'avail') {
       s4 = `<span class="x">Այստեղ նստողը կտեսնի միայն նշվածները</span><div class="chips">${TIERS7.map((t) => chk(t, ['Eco Business', 'Eco Van', 'Eco Vip', 'Eco Aero'].includes(t))).join('')}</div>
-        <div class="notice neutral"><i data-lucide="info"></i><span>Eco Aero-ն ինքը սահմանափակված է Զվարթնոցով՝ <a href="tariffs-v3.html?theme=${THEME}&state=detail" style="color:var(--brand-text)">սակագնի «Որտեղից → Որտեղ»</a>-ում · այստեղ որոշում ենք, թե ուրիշ ինչ է երևում օդանավակայանում</span></div>`
-      say = `<p><b>«Զվարթնոց»</b> գոտում նստող ուղևորը կտեսնի միայն <b>Eco Business, Eco Van, Eco Vip, Eco Aero</b>։ Eco City, Comfort, Kids-ը այնտեղ չեն երևա հավելվածում, իսկ դիսպետչերը կտեսնի «ոչ այստեղ»։</p>`
+        <div class="notice neutral"><i data-lucide="info"></i><span>Eco Aero-ն <a href="tariffs-v3.html?theme=${THEME}&state=detail" style="color:var(--brand-text)">սակագնում</a> նշված է «Միայն առաջարկող գոտում»․ այս կանոնն է այն բերում օդանավակայան</span></div>`
+      say = `<p><b>«Զվարթնոց»</b> գոտում նստող ուղևորը կտեսնի միայն <b>Eco Business, Eco Van, Eco Vip, Eco Aero</b>։ Eco City, Comfort, Kids-ը այնտեղ թաքցվում են հավելվածում, իսկ դիսպետչերը դրանցով պատվեր ստեղծել չի կարող («ոչ այստեղ»)։</p>`
       ex = `Գինը չի փոխվում · միշտ · դիսպետչերի պատվերներին ևս`
+    } else if (ST === 'preoff') {
+      s4 = `<div class="fl"><span class="x" style="min-width:120px">Սակագներ</span>${chk('Բոլորը', true)}<span class="x">կամ ընտրել</span></div>
+        <div class="notice neutral"><i data-lucide="info"></i><span>Մնացած տեղերում գործում են սակագնի «Նախնական պատվեր» կարգավորումները · «Հիմա» պատվերները չեն փոխվում</span></div>`
+      say = `<p><b>«Կենտրոն»</b> գոտում նստելու համար նախնական պատվեր չի ընդունվի ոչ մի սակագնով՝ ո՛չ հավելվածում, ո՛չ դիսպետչերից։ Մնացած տեղերում՝ սակագնի կարգավորումները։</p>`
+      ex = `Հավելվածում «Նախապես» կոճակը Կենտրոնում անհասանելի է՝ «Այստեղից նախնական պատվեր չի ընդունվում»`
     } else {
       const mod = { fixed: 0, structure: 0, pct: 2 }[ST]
       s4 = `<div class="fl">${seg(['Փոխարինել գինը', '+ գումար', '+ %'], mod, 'Փոփոխության տեսակ')}${mod === 0 ? seg(['Ֆիքսված գին', 'Այլ գնային կառուցվածք'], ST === 'structure' ? 1 : 0, 'Ինչով փոխարինել') : ''}</div>`
       if (ST === 'fixed') {
-        s4 += `<div class="fl"><span class="x" style="min-width:120px">Բոլոր սակագներին</span>${n('4 500', '֏', 'focus')}<span class="x">ամբողջ գինը՝ սպասումը ներառած</span></div>
+        s4 += `<div class="fl"><span class="x" style="min-width:120px">Բոլոր սակագներին</span>${n('4 500', '֏', 'focus')}<span class="x">ամբողջ գինը · ավելանում է միայն նախնական պատվերի հավելավճարը</span></div>
           <table class="pt"><thead><tr><th>Սակագին</th><th>Արժեք</th><th class="r">Սակագնով</th><th class="r">Կանոնով</th></tr></thead><tbody>
           ${[['Eco City', null, '2 600', '4 500'], ['Eco Comfort', null, '2 800', '4 500'], ['Eco Kids', null, '3 000', '4 500'], ['Eco Business', '5 500', '3 300', '5 500'], ['Eco Van', null, '3 800', '4 500'], ['Eco Vip', '7 000', '4 900', '7 000'], ['Eco Aero', '—', '—', 'չի գործում']].map(([t, o, a, b]) => `<tr class="${o === null ? 'inh' : o === '—' ? 'no' : ''}"><td>${t}</td><td>${o === null ? '<span class="x">բոլորինը</span>' : o === '—' ? '<span class="x">Ա-ում չի երևում</span>' : n(o, '֏')}</td><td class="r m">${a === '—' ? '—' : `<s>${a} ֏</s>`}</td><td class="r m">${b.includes('չի') ? `<span class="x">${b}</span>` : b + ' ֏'}</td></tr>`).join('')}</tbody></table>
-          <span class="x">Կանոնով գինը չի կարող լինել ավելի ցածր նույն ուղու ավելի էժան սակագնից · ստուգվում է պահելիս</span>`
+          <span class="x">Սպասում, լրացուցիչ վճարներ, ժամային գներ՝ չեն ավելանում · նախնական պատվերի հավելավճարը՝ ավելանում է, եթե միացված է</span>`
         say = `<p><b>01.11.2026-ից 30.11.2026</b> ներառյալ <b>«Կենտրոն»</b> կամ <b>«Արաբկիր»</b> գոտում նստած և <b>«Զվարթնոց»</b> գոտում իջած ուղևորը կվճարի <b>4 500 ֏</b> սակագնի գնի փոխարեն (Eco Business՝ 5 500 ֏, Eco Vip՝ 7 000 ֏)։ Հակառակ ուղղությունը չի փոխվում։</p>`
         ex = `Օրինակ՝ Eco City, Աբովյան 10 → Զվարթնոց, 14,2 կմ · 22 ր՝ <span class="mono">2 600 ֏ → 4 500 ֏</span>`
       } else if (ST === 'structure') {
         s4 += `<div class="mini"><label>Նստելու գին${n('600', '֏')}</label><label>Կիլոմետր${n('120', '֏/կմ')}</label><label>Րոպե${n('10', '֏/ր')}</label><label>Նվազագույն${n('3 000', '֏')}</label></div>
           <div class="fl"><span class="x">Սպասումը, կլորացումը, ժամային գները՝</span>${seg(['սակագնից', 'չկան'], 0, 'Մնացածը')}</div>
           <div class="fl"><span class="x" style="min-width:120px">Սակագներ</span><div class="chips">${TIERS7.map((t) => chk(t, ['Eco City', 'Eco Comfort'].includes(t))).join('')}</div></div>`
-        say = `<p>Միշտ, <b>«Էջմիածին»</b> և <b>«Երևան»</b> գոտիների միջև, երկու ուղղությամբ, <b>Eco City</b> և <b>Eco Comfort</b> սակագներով ուղևորությունը կհաշվվի այլ կառուցվածքով՝ <b>600 ֏ + 120 ֏/կմ + 10 ֏/ր</b>, նվազագույնը <b>3 000 ֏</b>, սակագնի գնի փոխարեն։</p>`
+        say = `<p>Միշտ, <b>«Էջմիածին»</b> գոտուց <b>«Երևան»</b> գոտի <b>Eco City</b> և <b>Eco Comfort</b> սակագներով ուղևորությունը կհաշվվի այլ կառուցվածքով՝ <b>600 ֏ + 120 ֏/կմ + 10 ֏/ր</b>, նվազագույնը <b>3 000 ֏</b>, սակագնի գնի փոխարեն։</p>`
         ex = `Օրինակ՝ Eco City, Էջմիածին → Կենտրոն, 21 կմ · 28 ր՝ <span class="mono">3 500 ֏ → 3 400 ֏</span>`
       } else {
-        s4 += `<div class="fl"><span class="x" style="min-width:120px">Բոլոր սակագներին</span>${n('+10', '%', 'focus')}<span class="x">հաշվվում է սակագնի գնից, կլորացումից առաջ</span></div>
+        s4 += `<div class="fl"><span class="x" style="min-width:120px">Բոլոր սակագներին</span>${n('+10', '%', 'focus')}<span class="x">կարող է լինել նաև բացասական՝ զեղչ · գինը 0-ից ցածր չի իջնում</span></div>
           <div class="fl"><span class="x" style="min-width:120px">Սակագներ</span>${chk('Բոլորը', true)}<span class="x">ներառյալ ապագա նոր սակագները</span></div>`
         say = `<p><b>01.11.2026-ից 31.12.2026</b> ներառյալ <b>«Կենտրոն»</b> գոտում նստող ուղևորի գինը կբարձրանա <b>10 %</b>-ով՝ բոլոր սակագներով։</p>`
         ex = `Օրինակ՝ Eco City, Աբովյան 10 → Կոմիտաս 22, 3,6 կմ · 9 ր՝ <span class="mono">1 000 ֏ → 1 100 ֏</span>`
@@ -226,32 +235,32 @@
     const win = ST === 'fixed' ? ['01.11.2026', '30.11.2026'] : ST === 'pct' ? ['01.11.2026', '31.12.2026'] : null
     s5 = `<div class="fl">${seg(['Միշտ', 'Ժամկետով'], win ? 1 : 0, 'Ժամկետ')}${win ? `<span class="dt"><i data-lucide="calendar"></i>${win[0]}</span><span class="x">–</span><span class="dt"><i data-lucide="calendar"></i>${win[1]}</span><span class="x">ներառյալ</span>` : ''}</div>
       <span class="x">${win ? 'Երևանի ժամանակով, 00:00-ից մինչև վերջին օրվա 24:00 · նախնական պատվերը՝ ըստ նստելու ժամի' : 'Մինչև անջատելը'}</span>`
-    const conflict = ST === 'pct' ? `<div style="padding:10px var(--inset) 0"><div class="notice neutral" role="status"><i data-lucide="layers"></i><span>Նոյեմբերին «Կենտրոն» → «Զվարթնոց» ուղևորությանը կիրառվում է «Նոյեմբեր՝ Կենտրոն, Արաբկիր → Զվարթնոց» (գոտուց գոտի, 4 500 ֏) · այս +10 %-ը նրա տակ է և փոխարինվում է</span></div></div>` : ''
-    panel.innerHTML = `<div class="card-h"><h2 style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${R[2]}</h2><span class="end">${sw(true, 'Կանոն', 'Միացված')}</span></div>
+    const conflict = ST === 'pct' ? `<div style="padding:8px var(--inset) 0;flex:none"><div class="notice amber" role="alert"><i data-lucide="octagon-x"></i><span><b>Չի պահվի․ համընկնում է այլ կանոնի հետ։</b> «Նոյեմբեր՝ Կենտրոն, Արաբկիր → Զվարթնոց»-ը նույնպես գործում է «Կենտրոն» գոտում նստածների վրա, նույն սակագներով, 01.11–30.11։ Մեկ ուղևորությանը կարող է գործել միայն մեկ գնային կանոն։ <a href="${href('fixed')}" style="color:inherit">Բացել այդ կանոնը</a> · կամ սկսել 01.12-ից</span></div></div>` : ''
+    panel.innerHTML = `<div class="card-h"><h2 style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ST === 'pct' ? 'Նոր կանոն' : R[2]}</h2><span class="end">${sw(true, 'Կանոն', 'Միացված')}</span></div>
       <div class="scroll-y grow" data-truncate>
         <div class="bs" style="grid-template-columns:minmax(0,1fr)"><label class="label" for="rn">Անուն</label><span class="input" id="rn"><span class="val">${R[2]}</span></span></div>
         ${bs(1, 'Ինչ է անում', s1)}
-        ${bs(2, 'Երբ է կիրառվում', s2, kind === 0 ? 'սակագնի ցուցակը որոշվում է նստեցման կետով' : '')}
+        ${bs(2, 'Երբ է կիրառվում', s2, kind !== 1 ? 'միայն նստեցման կետով' : '')}
         ${bs(3, 'Գոտիներ', s3, cond === 4 ? 'Ա՝ նստեցում · Բ՝ իջեցում' : '')}
-        ${bs(4, kind === 0 ? 'Սակագներ' : 'Փոփոխություն', s4)}
+        ${bs(4, kind === 1 ? 'Փոփոխություն' : 'Սակագներ', s4)}
         ${bs(5, 'Ժամկետ', s5)}
-        ${conflict}
         <div style="height:12px"></div>
       </div>
+      ${conflict}
       <div class="say" aria-live="polite"><i data-lucide="message-square-text"></i><p>${say.replace(/^<p>|<\/p>$/g, '')}</p><span class="ex">${ex}</span></div>
-      <div class="edf"><button class="btn primary">Պահել կանոնը</button><a class="btn secondary" href="${href('rules')}">Չեղարկել</a><span style="flex:1"></span><button class="btn ghost s"><i data-lucide="copy"></i>Կրկնօրինակել</button><button class="btn danger s">Ջնջել</button></div>`
+      <div class="edf"><button class="btn primary"${ST === 'pct' ? ' aria-disabled="true" style="opacity:.5"' : ''}>Պահել կանոնը</button><a class="btn secondary" href="${href('rules')}">Չեղարկել</a><span style="flex:1"></span><button class="btn ghost s"><i data-lucide="copy"></i>Կրկնօրինակել</button><button class="btn danger s">Ջնջել</button></div>`
   } else if (LIST) {
-    panel.innerHTML = `<div class="card-h"><h2>Կանոններ</h2><span class="sub mono">${RULES.length}</span><span class="end"><span class="x">Սակագին → Գոտու կանոն → Գոտուց գոտի</span></span></div>
+    panel.innerHTML = `<div class="card-h"><h2>Կանոններ</h2><span class="sub mono">${RULES.length}</span><span class="end"><span class="x">Մեկ ուղևորություն՝ մեկ գնային կանոն</span></span></div>
       <div class="filt">${seg(['Բոլորը', 'Գործում են', 'Սպասվում են', 'Ավարտված'], 0, 'Ֆիլտր')}<span style="flex:1"></span><span class="select" style="width:150px" role="combobox" aria-expanded="false"><span class="val">Բոլոր գոտիները</span><i data-lucide="chevrons-up-down"></i></span></div>
-      <div class="scroll-y grow">${RULES.map(([id, ic, nm, A, B, c, v, w, st, t]) => `<a class="rl${st === 'done' ? '' : ''}" href="${href(['avail', 'fixed', 'structure', 'pct'].includes(id) ? id : 'fixed')}"><span class="ic"><i data-lucide="${ic}"></i></span><b>${nm}</b><span class="v">${v}</span>
+      <div class="scroll-y grow">${RULES.map(([id, ic, nm, A, B, c, v, w, st, t]) => `<a class="rl${st === 'done' ? '' : ''}" href="${href(['avail', 'fixed', 'structure', 'preoff'].includes(id) ? id : 'rules')}"><span class="ic"><i data-lucide="${ic}"></i></span><b>${nm}</b><span class="v">${v}</span>
         <span class="w">${A.map(zt).join('')}${B.length ? `<i data-lucide="${c === 'from_to2' ? 'arrow-left-right' : 'arrow-right'}"></i>${B.map(zt).join('')}` : ''}<span>· ${CONDTX[c]}</span></span>${pill(st)}
         <span class="t">${w} · ${t}</span></a>`).join('')}
-        <div style="padding:12px var(--inset)"><div class="notice neutral"><i data-lucide="git-merge"></i><span>Մի քանի կանոն միաժամանակ՝ յուրաքանչյուր շերտից գործում է մեկը. ժամկետովը հաղթում է մշտականին, հետո՝ ավելի նեղ գոտին։ «Զվարթնոց՝ սակագների գներ»-ը 19.10-ի գոտու գներից է, փոխադրված առանց փոփոխության։</span></div></div></div>`
+        <div style="padding:12px var(--inset)"><div class="notice neutral"><i data-lucide="git-merge"></i><span>Երկու գնային կանոն չի կարող գործել նույն ուղևորության վրա․ նույն սակագնով, գոտով, պայմանով և օրերով համընկնողը չի պահվում և ցույց է տալիս, թե որի հետ է համընկնում։ «Զվարթնոցից՝ սակագների գներ»-ը 19.10-ի աղյուսակից է․ «Նստեցում կամ իջեցում»-ից նեղացվեց նստեցման, որ նոյեմբերյան կանոնը պահվի։</span></div></div></div>`
   } else {
     const sel = zb('air')
     panel.innerHTML = `<div class="card-h"><h2>Գոտիներ</h2><span class="sub mono">${Z.length}</span></div><div class="scroll-y grow"><ul style="list-style:none">${Z.map((z) => { const k = RULES.filter((r) => r[3].includes(z.id) || r[4].includes(z.id)).length
       return `<li class="zone${z === sel ? ' on' : ''}" style="--zc:${COL[z.id]}"><span class="zs"></span><span class="nm">${z.name}</span><span class="cnt">${k ? k + ' կանոն' : 'կանոն չկա'}</span>
-        <span class="use">${z.id === 'air' ? 'Այստեղ երևում են 4 սակագին' : 'Բոլոր սակագները'}${z.id === 'city' ? ' · ներառում է Կենտրոն, Արաբկիր' : ''}</span></li>` }).join('')}</ul>
+        <span class="use">${z.id === 'air' ? 'Այստեղ երևում են միայն 4 սակագին' : z.id === 'ctr' ? 'Բոլոր սակագները · առանց նախնական պատվերի' : 'Բոլոր սակագները, բացի Eco Aero'}${z.id === 'city' ? ' · ներառում է Կենտրոն, Արաբկիր' : ''}</span></li>` }).join('')}</ul>
       <div class="rh"><h3>Զվարթնոց</h3><span class="end"><button class="btn ghost s">Սահմաններ</button><button class="btn danger s" aria-disabled="true" title="Կանոններն օգտագործում են" style="opacity:.5">Ջնջել</button></span></div>
       <div class="rh" style="padding-top:4px"><h3 style="font:var(--c-label);color:var(--ink-faint)">Այստեղ նստողը տեսնում է</h3></div>
       <div class="offer">${['Eco Business', 'Eco Van', 'Eco Vip', 'Eco Aero'].map((t) => `<span class="chip">${t}</span>`).join('')}</div>
